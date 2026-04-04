@@ -1,6 +1,6 @@
 @php
-    $softwareType = session('software_type', 'real_state');
-    $isLeadManagement = $softwareType === 'lead_management';
+$softwareType = session('software_type', 'real_state');
+$isLeadManagement = $softwareType === 'lead_management';
 @endphp
 <div class="modal fade" id="statusUpdateModal" tabindex="-1" aria-labelledby="statusUpdateModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -50,7 +50,7 @@
                         <select class="form-select select2" id="visitProjects" multiple required>
                             <option value="">--- Select {{ $isLeadManagement ? 'Product(s)' : 'Project(s)' }} ---</option>
                             @foreach ($projects as $project)
-                                <option value="{{ $project->id }}">{{ $project->project_name }}</option>
+                            <option value="{{ $project->id }}">{{ $project->project_name }}</option>
                             @endforeach
                         </select>
                         <div class="form-text">You can select multiple {{ $isLeadManagement ? 'products' : 'projects' }} for this visit</div>
@@ -67,7 +67,7 @@
                             <select class="form-select" name="prj_id" id="prj_id">
                                 <option value="">--- Select {{ $isLeadManagement ? 'Product' : 'Project' }} ---</option>
                                 @foreach ($projects as $project)
-                                    <option value="{{ $project->id }}">{{ $project->project_name }}</option>
+                                <option value="{{ $project->id }}">{{ $project->project_name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -92,7 +92,7 @@
                             <select class="form-select" name="app_city" id="app_city">
                                 <option value="">---- Select City ----</option>
                                 @foreach ($cities as $city)
-                                    <option value="{{ $city->District }}">{{ $city->District }}</option>
+                                <option value="{{ $city->District }}">{{ $city->District }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -106,7 +106,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div id="reminderFields">
                     <div class="mb-2">
                         <span class="bg-success badge text-light p-2"><i class="fa fa-info me-2"></i><span class="followUp">Follow Up Date</span></span>
@@ -114,7 +114,7 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="remindDate" class="form-label">Reminder Date</label>
-                            <input type="date" class="form-control" id="remindDate" min="{{ date('Y-m-d') }}">
+                            <input type="date" class="form-control" id="remindDate">
                         </div>
                         <div class="col-md-6">
                             <label for="remindTime" class="form-label">Reminder Time</label>
@@ -122,7 +122,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="mb-3">
                     <label for="statusComment" class="form-label">Remark</label>
                     <textarea class="form-control" id="comment" rows="3" placeholder="Add any additional comments..."></textarea>
@@ -136,8 +136,7 @@
     </div>
 </div>
 <style>
-    .selected-project-badge 
-    {
+    .selected-project-badge {
         background: linear-gradient(45deg, #0d6efd, #0dcaf0);
         color: white;
         padding: 4px 8px;
@@ -148,8 +147,7 @@
         gap: 4px;
     }
 
-    .selected-project-badge .remove-btn 
-    {
+    .selected-project-badge .remove-btn {
         background: none;
         border: none;
         color: white;
@@ -159,3 +157,30 @@
         font-size: 0.7rem;
     }
 </style>
+
+<script>
+    $(document).ready(function() {
+
+        $('#newStatus').on('change', function() {
+
+            let status = $(this).val();
+            let dateInput = document.getElementById("remindDate");
+
+            let today = new Date().toISOString().split("T")[0];
+
+            // reset date every time
+            dateInput.value = "";
+
+            if (status === "VISIT DONE") {
+                //  ONLY past + today allowed
+                dateInput.setAttribute("max", today);
+                dateInput.removeAttribute("min");
+            } else {
+                //  future allowed
+                dateInput.setAttribute("min", today);
+                dateInput.removeAttribute("max");
+            }
+        });
+
+    });
+</script>

@@ -1,61 +1,55 @@
-
 <style>
-    .modal-overlay 
-    {
+    .modal-overlay {
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0,0,0,0.5);
+        background: rgba(0, 0, 0, 0.5);
         z-index: 1000;
         overflow-y: auto;
-        padding: 20px;   
-        display: block; 
-        
+        padding: 20px;
+        display: block;
+
     }
 
-    .modal-content 
-    {
+    .modal-content {
         background: white;
         padding: 20px;
         border-radius: 10px;
         width: 100%;
         max-width: 400px;
-        max-height: 90vh;  
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        max-height: 90vh;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         overflow-y: auto;
     }
 
-    .modal-title 
-    {
+    .modal-title {
         margin-top: 0;
         margin-bottom: 20px;
         color: #333;
     }
-    .choices__inner 
-    {
+
+    .choices__inner {
         min-height: 45px;
         border-radius: 8px;
         padding: 6px 10px;
         font-size: 14px;
     }
 
-    .choices__list--multiple .choices__item 
-    {
+    .choices__list--multiple .choices__item {
         background-color: #0d6efd;
         border: none;
         border-radius: 6px;
         padding: 4px 8px;
     }
 
-    .choices__input 
-    {
+    .choices__input {
         font-size: 14px;
     }
 </style>
 @php
-    use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\DB;
 @endphp
 <div id="statusModal" class="modal-overlay" style="display: none;">
     <div class="modal-content">
@@ -80,23 +74,24 @@
                     <option value="CHANNEL PARTNER">Channel Partner</option>
                     <option value="CONVERTED">Converted</option>
                 </select>
-            </div>     
+            </div>
             <div class="form-group col-md-6 col-lg-6 mb-2 mobile-schedule-project">
                 <label for="">Project</label>
                 @php
-                    $projects = DB::table('projects')->select('id', 'project_name')->get();
+                $projects = DB::table('projects')->select('id', 'project_name')->get();
                 @endphp
 
                 <select class="form-control" name="prj_id[]" id="prj_id" multiple>
                     @foreach ($projects as $project)
-                        <option value="{{ $project->id }}">{{ $project->project_name }}</option>
+                    <option value="{{ $project->id }}">{{ $project->project_name }}</option>
                     @endforeach
                 </select>
-            </div>      
+            </div>
             <div id="reminderFields">
                 <div class="form-grsoup">
                     <label for="remindDate">Reminder Date:</label>
-                    <input type="date" name="remindDate" id="remindDate" class="form-control">
+                    <!-- <input type="date" name="remindDate" id="remindDate" class="form-control"> -->
+                    <input type="date" name="remindDate" id="remindDate" class="form-control" max="{{ date('Y-m-d') }}">
                 </div>
                 <div class="form-group">
                     <label for="remindTime">Reminder Time:</label>
@@ -119,13 +114,13 @@
                     <div class="form-group col-md-6 col-lg-6 mb-2">
                         <label for="">Project</label>
                         @php
-                            $projects = DB::table('projects')->select('id', 'project_name')->get();
+                        $projects = DB::table('projects')->select('id', 'project_name')->get();
                         @endphp
 
                         <select class="form-select" name="prj_id" id="prj_id">
                             <option value="">--- Select Project ---</option>
                             @foreach ($projects as $project)
-                                <option value="{{ $project->id }}">{{ $project->project_name }}</option>
+                            <option value="{{ $project->id }}">{{ $project->project_name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -148,13 +143,13 @@
                     <div class="form-group col-md-6 col-lg-6 mb-2">
                         <label for="">Applicant City</label>
                         @php
-                            $cities = DB::table('state_district')->select('District')->get();
+                        $cities = DB::table('state_district')->select('District')->get();
                         @endphp
 
                         <select class="form-select" name="app_city" id="app_city">
                             <option value="">---- Select City ----</option>
                             @foreach ($cities as $city)
-                                <option value="{{ $city->District }}">{{ $city->District }}</option>
+                            <option value="{{ $city->District }}">{{ $city->District }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -179,3 +174,54 @@
         </form>
     </div>
 </div>
+
+<script>
+    // $(document).ready(function() {
+
+    //     $('#statusSelect').on('change', function() {
+
+    //         let status = $(this).val();
+    //         let dateInput = document.getElementById("remindDate");
+
+    //         let today = new Date().toISOString().split("T")[0];
+
+    //         // reset old value
+    //         dateInput.value = "";
+
+    //         if (status === "VISIT DONE") {
+    //             // only past + today allowed
+    //             dateInput.setAttribute("max", today);
+    //             dateInput.removeAttribute("min");
+    //         } else {
+    //             // future allowed
+    //             dateInput.setAttribute("min", today);
+    //             dateInput.removeAttribute("max");
+    //         }
+    //     });
+
+    // });
+    $(document).ready(function() {
+
+        $('#statusSelect').on('change', function() {
+
+            let status = $(this).val();
+            let dateInput = document.getElementById("remindDate");
+
+            let today = new Date().toISOString().split("T")[0];
+
+            // reset value
+            dateInput.value = "";
+
+            if (status === "VISIT DONE") {
+                // HARD LOCK: no future
+                dateInput.max = today;
+                dateInput.min = "";
+            } else {
+                // allow future
+                dateInput.min = today;
+                dateInput.max = "";
+            }
+        });
+
+    });
+</script>

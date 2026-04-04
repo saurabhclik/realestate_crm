@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Flasher\Laravel\Facade\Flasher;
+use Illuminate\Support\Facades\Hash;
 
 class PostSaleController extends Controller
 {
@@ -19,8 +20,7 @@ class PostSaleController extends Controller
             abort(404);
         }
 
-        try 
-        {
+        try {
             $postSales = DB::table('post_sales')
                 ->leftJoin('leads', 'post_sales.lead_id', '=', 'leads.id')
                 ->leftJoin('users as sales_persons', 'post_sales.sales_person_id', '=', 'sales_persons.id')
@@ -46,9 +46,7 @@ class PostSaleController extends Controller
                 'projectCategories',
                 'projects'
             ));
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             Flasher::addError('Failed to load data: ' . $e->getMessage());
             return back();
         }
@@ -64,7 +62,7 @@ class PostSaleController extends Controller
             'project_name' => 'required|string|max:255',
             'unit_number' => 'required|string|max:50',
             'project_category' => 'required|string|max:255',
-            'project_sub_category' => 'nullable|string|max:255',
+            'project_sub_category' => 'required|string|max:255',
             'dob' => 'required|date',
             'doa' => 'nullable|date|after_or_equal:dob',
             'permanent_address' => 'required|string',
@@ -182,21 +180,81 @@ class PostSaleController extends Controller
         }
     }
 
-    public function destroy($id)
+    // public function destroy($id)
+    // {
+    //     DB::beginTransaction();
+    //     try {
+    //         $deleted = DB::table('post_sales')->where('id', $id)->delete();
+    //         if (!$deleted) {
+    //             return response()->json(['success' => 404, 'message' => 'Not found']);
+    //         }
+    //         DB::commit();
+    //         return response()->json(['success' => 200, 'message' => 'Deleted!']);
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         return response()->json(['success' => 500, 'message' => $e->getMessage()]);
+    //     }
+    // }
+
+    public function destroy(Request $request, $id)
     {
-        DB::beginTransaction();
         try {
-            $deleted = DB::table('post_sales')->where('id', $id)->delete();
-            if (!$deleted) {
-                return response()->json(['success' => 404, 'message' => 'Not found']);
+            $request->validate([
+                'password' => 'required|string',
+            ]);
+
+            $cookieName = "post_sale_attempt_{$id}";
+            $attempts = (int) $request->cookie($cookieName, 0);
+
+            //  BLOCK AFTER 3 ATTEMPTS
+            if ($attempts >= 3) {
+                return response()->json([
+                    'status' => 403,
+                    'message' => 'You have reached the maximum number of attempts. You cannot delete this record for 1 day.',
+                ]);
             }
-            DB::commit();
-            return response()->json(['success' => 200, 'message' => 'Deleted!']);
+
+            //  GET ADMIN
+            $admin = DB::table('users')->where('role', 'admin')->first();
+
+            //  WRONG PASSWORD
+            if (!$admin || $request->password !== $admin->password) {
+                $attempts++;
+
+                $cookie = cookie($cookieName, $attempts, 1440); // 1 day
+
+                return response()->json([
+                    'status' => 404,
+                    'message' => "Incorrect admin password. Attempt $attempts of 3.",
+                ])->withCookie($cookie);
+            }
+
+            //  CORRECT PASSWORD → DELETE
+            $deleted = DB::table('post_sales')->where('id', $id)->delete();
+
+            // RESET COOKIE
+            $cookie = cookie($cookieName, 0, 0);
+
+            if ($deleted) {
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Customer deleted successfully!',
+                    'id' => $id
+                ])->withCookie($cookie);
+            } else {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Delete failed',
+                ]);
+            }
         } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['success' => 500, 'message' => $e->getMessage()]);
+            return response()->json([
+                'status' => 500,
+                'message' => $e->getMessage(),
+            ]);
         }
     }
+
 
     public function getSubcategories($categoryName)
     {
@@ -238,19 +296,16 @@ class PostSaleController extends Controller
             'document_name' => 'required|string|max:255'
         ]);
 
-        if ($validator->fails()) 
-        {
+        if ($validator->fails()) {
             return response()->json(['success' => 422, 'message' => $validator->errors()->first()]);
         }
 
-        if (!DB::table('post_sales')->where('id', $postSaleId)->exists()) 
-        {
+        if (!DB::table('post_sales')->where('id', $postSaleId)->exists()) {
             return response()->json(['success' => 404, 'message' => 'Post sale not found']);
         }
 
         DB::beginTransaction();
-        try 
-        {
+        try {
             $file = $request->file('document');
             $ext = $file->getClientOriginalExtension();
             $fileName = time() . '_' . Str::slug($request->document_name) . '.' . $ext;
@@ -272,9 +327,7 @@ class PostSaleController extends Controller
                 'message' => 'Uploaded!',
                 'document_id' => $docId
             ]);
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['success' => 500, 'message' => 'Upload failed: ' . $e->getMessage()]);
         }
@@ -283,11 +336,9 @@ class PostSaleController extends Controller
     public function deleteDocument($documentId)
     {
         DB::beginTransaction();
-        try 
-        {
+        try {
             $doc = DB::table('post_sale_documents')->find($documentId);
-            if (!$doc) 
-            {
+            if (!$doc) {
                 return response()->json(['success' => 404, 'message' => 'Document not found']);
             }
 
@@ -296,9 +347,7 @@ class PostSaleController extends Controller
 
             DB::commit();
             return response()->json(['success' => 200, 'message' => 'Deleted!']);
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['success' => 500, 'message' => $e->getMessage()]);
         }
@@ -309,7 +358,7 @@ class PostSaleController extends Controller
         $request->validate([
             'id' => 'required|exists:post_sales,id'
         ]);
-        
+
         $id = $request->id;
         DB::table('shared_post_sale')
             ->where('post_sale_id', $id)
@@ -317,7 +366,7 @@ class PostSaleController extends Controller
 
         $token = Str::random(32);
         $expiresAt = now()->addDays(7);
-        
+
         DB::table('shared_post_sale')->insert([
             'post_sale_id' => $id,
             'token' => $token,
@@ -336,8 +385,7 @@ class PostSaleController extends Controller
             ->where('token', $token)
             ->first();
 
-        if (!$shared || now() > $shared->expires_at) 
-        {
+        if (!$shared || now() > $shared->expires_at) {
             return "<h2 style='text-align:center; margin:100px; color:red;'>Link expired or invalid</h2>";
         }
 
@@ -351,10 +399,8 @@ class PostSaleController extends Controller
             ->where('ip_address', $ip)
             ->exists();
 
-        if (request()->method() === 'POST') 
-        {
-            if ($rated) 
-            {
+        if (request()->method() === 'POST') {
+            if ($rated) {
                 return "<div style='text-align:center; margin:100px;'><h2 style='color:orange;'>You have already submitted a rating!</h2></div>";
             }
             $rating = request('rating');
@@ -362,7 +408,7 @@ class PostSaleController extends Controller
 
             DB::table('post_sale_ratings')->insert([
                 'post_sale_id' => $shared->post_sale_id,
-                'customer_name' => $ps->applicant_name ?? '', 
+                'customer_name' => $ps->applicant_name ?? '',
                 'customer_email' => $ps->email ?? '',
                 'rating' => $rating,
                 'comments' => $comment,

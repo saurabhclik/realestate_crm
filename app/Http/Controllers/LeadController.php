@@ -13,6 +13,7 @@ use App\Services\LeadService;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Schema;
+
 class LeadController extends Controller
 {
     protected $leadService;
@@ -60,32 +61,28 @@ class LeadController extends Controller
     public function create_lead(Request $request)
     {
         $result = $this->leadService->createLead($request);
-        
-        if (!$result['success']) 
-        {
+
+        if (!$result['success']) {
             return redirect()->back()->withInput();
         }
-        
+
         return redirect($result['redirect']);
     }
 
     public function importUpload(Request $request)
     {
-        try 
-        {
+        try {
             $request->validate([
                 'file' => 'required|mimes:csv,txt|max:2048',
             ]);
 
-            if (!$request->hasFile('file')) 
-            {
+            if (!$request->hasFile('file')) {
                 session()->flash('error', '❌ No file uploaded.');
                 return redirect()->back();
             }
 
             $file = $request->file('file');
-            if (!$file->isValid()) 
-            {
+            if (!$file->isValid()) {
                 session()->flash('error', '❌ Uploaded file is not valid.');
                 return redirect()->back();
             }
@@ -93,8 +90,7 @@ class LeadController extends Controller
             $path = $file->storeAs('temp', uniqid() . '_' . $file->getClientOriginalName());
             $fullPath = storage_path('app/' . $path);
 
-            if (!file_exists($fullPath)) 
-            {
+            if (!file_exists($fullPath)) {
                 session()->flash('error', '❌ File not found after upload.');
                 return redirect()->back();
             }
@@ -112,110 +108,90 @@ class LeadController extends Controller
             $user_id   = session()->get('user_id');
             $defaultStatus = in_array($user_type, ['admin', 'team_manager']) ? 'allocated_lead' : 'NEW LEAD';
             $headers = $csv->getHeader();
-            
-            foreach ($records as $index => $row) 
-            {
+
+            foreach ($records as $index => $row) {
                 $rowNumber = $index + 2;
-                try 
-                {
-                    if (empty(array_filter($row))) 
-                    {
+                try {
+                    if (empty(array_filter($row))) {
                         $validationErrors[] = "Row $rowNumber: Empty row skipped";
                         continue;
                     }
-                    
+
                     $phone = '';
-                    foreach ($row as $key => $value) 
-                    {
+                    foreach ($row as $key => $value) {
                         $keyLower = strtolower($key);
-                        if (in_array($keyLower, ['phone no.', 'phone', 'phone no', 'phone number'])) 
-                        {
+                        if (in_array($keyLower, ['phone no.', 'phone', 'phone no', 'phone number'])) {
                             $phone = trim($value);
                             break;
                         }
                     }
-                    
-                    if (empty($phone)) 
-                    {
+
+                    if (empty($phone)) {
                         $validationErrors[] = "Row $rowNumber: Phone number is missing or empty";
                         continue;
                     }
-                    
+
                     $originalPhone = $phone;
                     $phone = preg_replace('/\D/', '', $phone);
-                    
-                    if (strlen($phone) == 12 && substr($phone, 0, 2) == '91') 
-                    {
+
+                    if (strlen($phone) == 12 && substr($phone, 0, 2) == '91') {
                         $phone = substr($phone, 2);
                     }
-                    
-                    if (!$phone || !preg_match('/^[6-9]\d{9}$/', $phone)) 
-                    {
+
+                    if (!$phone || !preg_match('/^[6-9]\d{9}$/', $phone)) {
                         $validationErrors[] = "Row $rowNumber: Invalid phone number '$originalPhone'. Must be 10 digits starting with 6-9";
                         continue;
                     }
 
                     $email = '';
-                    foreach ($row as $key => $value) 
-                    {
+                    foreach ($row as $key => $value) {
                         $keyLower = strtolower($key);
-                        if (in_array($keyLower, ['e-mail', 'email', 'mail'])) 
-                        {
+                        if (in_array($keyLower, ['e-mail', 'email', 'mail'])) {
                             $email = trim($value);
                             break;
                         }
                     }
-                    
-                    if (!empty($email)) 
-                    {
+
+                    if (!empty($email)) {
                         $email = filter_var($email, FILTER_SANITIZE_EMAIL);
-                        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) 
-                        {
+                        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                             $validationErrors[] = "Row $rowNumber: Invalid email format '$email'";
                             continue;
                         }
                     }
 
                     $name = '';
-                    foreach ($row as $key => $value) 
-                    {
+                    foreach ($row as $key => $value) {
                         $keyLower = strtolower($key);
-                        if (in_array($keyLower, ['name', 'full name', 'customer name']))
-                        {
+                        if (in_array($keyLower, ['name', 'full name', 'customer name'])) {
                             $name = trim($value);
                             break;
                         }
                     }
-                    
-                    if (empty($name)) 
-                    {
+
+                    if (empty($name)) {
                         $validationErrors[] = "Row $rowNumber: Name is required";
                         continue;
                     }
-                    
+
                     $source = '';
                     $campaign = '';
                     $whatsapp = '';
-                    
-                    foreach ($row as $key => $value) 
-                    {
+
+                    foreach ($row as $key => $value) {
                         $keyLower = strtolower($key);
-                        if (in_array($keyLower, ['source', 'lead source'])) 
-                        {
+                        if (in_array($keyLower, ['source', 'lead source'])) {
                             $source = trim($value);
                         }
-                        if (in_array($keyLower, ['campaign', 'campaign name'])) 
-                        {
+                        if (in_array($keyLower, ['campaign', 'campaign name'])) {
                             $campaign = trim($value);
                         }
-                        if (in_array($keyLower, ['alternative no.', 'whatsapp', 'whatsapp no', 'alt phone'])) 
-                        {
+                        if (in_array($keyLower, ['alternative no.', 'whatsapp', 'whatsapp no', 'alt phone'])) {
                             $whatsapp = trim($value);
                         }
                     }
-                    if (!empty($campaign)) 
-                    {
-                        $campaign = preg_replace('/[\x80-\x9F]/', '', $campaign); 
+                    if (!empty($campaign)) {
+                        $campaign = preg_replace('/[\x80-\x9F]/', '', $campaign);
                         $campaign = preg_replace('/[^\x20-\x7E]/', '', $campaign);
                         $campaign = preg_replace('/�/', '-', $campaign);
                         $campaign = preg_replace('/[\x96]/', '-', $campaign);
@@ -226,7 +202,7 @@ class LeadController extends Controller
                     $name = mb_convert_encoding($name, 'UTF-8', 'auto');
                     $source = mb_convert_encoding($source, 'UTF-8', 'auto');
                     $whatsapp = mb_convert_encoding($whatsapp, 'UTF-8', 'auto');
-                    
+
                     $existingLead = DB::table('leads')
                         ->where('phone', $phone)
                         ->orWhere('phone', '91' . $phone)
@@ -234,8 +210,7 @@ class LeadController extends Controller
                         ->orWhere('phone', '+91' . $phone)
                         ->first();
 
-                    if ($existingLead) 
-                    {
+                    if ($existingLead) {
                         $duplicate++;
                         continue;
                     }
@@ -256,115 +231,83 @@ class LeadController extends Controller
                     ]);
 
                     $success++;
-
-                } 
-                catch (\Exception $e) 
-                {
+                } catch (\Exception $e) {
                     $errors[] = "Row $rowNumber: Database error - " . $e->getMessage();
                 }
             }
 
-            if (file_exists($fullPath)) 
-            {
+            if (file_exists($fullPath)) {
                 unlink($fullPath);
             }
             $allMessages = [];
             $summaryMessage = "";
-            
-            if ($success > 0) 
-            {
+
+            if ($success > 0) {
                 $summaryMessage .= "✅ $success lead(s) imported successfully. ";
             }
-            
-            if ($duplicate > 0) 
-            {
+
+            if ($duplicate > 0) {
                 $summaryMessage .= "⚠️ $duplicate duplicate(s) skipped. ";
             }
 
-            if ($success > 0) 
-            {
+            if ($success > 0) {
                 $allMessages[] = "success✅ $success new lead(s) imported successfully.";
             }
-            
-            if ($duplicate > 0) 
-            {
+
+            if ($duplicate > 0) {
                 $allMessages[] = "warning⚠️ $duplicate lead(s) already exist and were skipped.";
             }
-            
-            if (!empty($validationErrors)) 
-            {
+
+            if (!empty($validationErrors)) {
                 $displayErrors = array_slice($validationErrors, 0, 10);
-                foreach ($displayErrors as $err) 
-                {
+                foreach ($displayErrors as $err) {
                     $allMessages[] = "error❌ " . $err;
                 }
-                
-                if (count($validationErrors) > 10) 
-                {
+
+                if (count($validationErrors) > 10) {
                     $allMessages[] = "warning⚠️ And " . (count($validationErrors) - 10) . " more validation errors. Check logs for details.";
                 }
-                
-                if (empty($summaryMessage)) 
-                {
+
+                if (empty($summaryMessage)) {
                     $summaryMessage = "❌ Found " . count($validationErrors) . " validation error(s). ";
-                } 
-                else 
-                {
+                } else {
                     $summaryMessage .= "❌ Found " . count($validationErrors) . " validation error(s). ";
                 }
             }
-            
-            if (!empty($errors)) 
-            {
-                foreach ($errors as $err) 
-                {
+
+            if (!empty($errors)) {
+                foreach ($errors as $err) {
                     $allMessages[] = "error❌ " . $err;
                 }
-                
-                if (empty($summaryMessage)) 
-                {
+
+                if (empty($summaryMessage)) {
                     $summaryMessage = "❌ Found " . count($errors) . " database error(s). ";
-                } 
-                else 
-                {
+                } else {
                     $summaryMessage .= "❌ Found " . count($errors) . " database error(s). ";
                 }
             }
-            
-            if ($success == 0 && $duplicate == 0 && empty($validationErrors) && empty($errors))
-            {
+
+            if ($success == 0 && $duplicate == 0 && empty($validationErrors) && empty($errors)) {
                 $allMessages[] = "warning⚠️ No valid data found in CSV file. Headers found: " . implode(', ', $headers);
                 $summaryMessage = "⚠️ No valid data found in CSV file.";
             }
             session()->flash('import_messages', $allMessages);
-            if (!empty($summaryMessage)) 
-            {
-                if ($success > 0 && empty($validationErrors) && empty($errors)) 
-                {
+            if (!empty($summaryMessage)) {
+                if ($success > 0 && empty($validationErrors) && empty($errors)) {
                     Flasher::addSuccess(trim($summaryMessage));
-                } 
-                elseif ($success > 0 && (!empty($validationErrors) || !empty($errors))) 
-                {
+                } elseif ($success > 0 && (!empty($validationErrors) || !empty($errors))) {
                     Flasher::addWarning(trim($summaryMessage) . " Check details below.");
-                } 
-                elseif ($duplicate > 0 && $success == 0 && empty($validationErrors) && empty($errors)) 
-                {
+                } elseif ($duplicate > 0 && $success == 0 && empty($validationErrors) && empty($errors)) {
                     Flasher::addWarning(trim($summaryMessage));
-                } 
-                else 
-                {
+                } else {
                     Flasher::addError(trim($summaryMessage) . " Check details below.");
                 }
-            } 
-            else 
-            {
+            } else {
                 Flasher::addSuccess("✅ File processed successfully. No leads were imported.");
             }
-            
+
             return redirect()->back();
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             session()->flash('error', '❌ Unexpected error: ' . $e->getMessage());
             Flasher::addError('❌ Unexpected error: ' . $e->getMessage());
             return redirect()->back();
@@ -378,19 +321,17 @@ class LeadController extends Controller
         $current_user_id = Session::get('user_id');
         $child_ids = Session::get('child_ids', []);
 
-        if (is_string($child_ids)) 
-        {
+        if (is_string($child_ids)) {
             $child_ids = array_map('trim', explode(',', $child_ids));
         }
 
-        $user_ids = $child_ids; 
+        $user_ids = $child_ids;
 
         $query = DB::table('leads as a')
-            ->where(function ($q) 
-            {
+            ->where(function ($q) {
                 $q->where('a.status', 'allocated_lead')
-                ->orWhereNull('a.status')
-                ->orWhere('a.status', '');
+                    ->orWhereNull('a.status')
+                    ->orWhere('a.status', '');
             })
             ->whereIn('a.user_id', $user_ids)
             ->where('a.is_allocated', '!=', $current_user_id)
@@ -408,12 +349,11 @@ class LeadController extends Controller
         $query = $this->applyLeadFilters($query, $request);
         // dd($query);
         $leads = $query->paginate($length);
-        $leads->getCollection()->transform(function($lead) 
-        {
+        $leads->getCollection()->transform(function ($lead) {
             $duplicates = \DB::table('leads')
                 ->where('phone', $lead->phone)
-                ->where('id', '!=', $lead->id)  
-                ->get(['id','status','created_at']);
+                ->where('id', '!=', $lead->id)
+                ->get(['id', 'status', 'created_at']);
             $lead->duplicate_count = $duplicates->count();
             $lead->duplicate_details = $duplicates;
             return $lead;
@@ -430,13 +370,30 @@ class LeadController extends Controller
         $agents = DB::table('users')->where('role', 'agent')->pluck('name', 'id');
 
         $hasFilters = $request->anyFilled([
-            'source', 'status','user', 'classification', 'agent', 'lead_days','shared_filter',
-            'project', 'date_from', 'date_to'
+            'source',
+            'status',
+            'user',
+            'classification',
+            'agent',
+            'lead_days',
+            'shared_filter',
+            'project',
+            'date_from',
+            'date_to'
         ]);
 
         return view('lead.lead-data', compact(
-            'leads', 'lead_name', 'users', 'projects', 'cities', 'length',
-            'sources', 'statuses', 'classifications', 'agents', 'hasFilters'
+            'leads',
+            'lead_name',
+            'users',
+            'projects',
+            'cities',
+            'length',
+            'sources',
+            'statuses',
+            'classifications',
+            'agents',
+            'hasFilters'
         ));
     }
 
@@ -565,10 +522,8 @@ class LeadController extends Controller
             'send_to_new_lead' => 'nullable|in:0,1,on'
         ]);
 
-        if ($validator->fails()) 
-        {
-            foreach ($validator->errors()->all() as $error) 
-            {
+        if ($validator->fails()) {
+            foreach ($validator->errors()->all() as $error) {
                 Flasher::addError($error);
             }
             return redirect()->back();
@@ -579,74 +534,51 @@ class LeadController extends Controller
         $allocatedTo = DB::table('users')->where('id', $request->user)->first();
         $sendToNewLead = $request->has('send_to_new_lead') && ($request->send_to_new_lead === 'on' || $request->send_to_new_lead == '1');
 
-        if (!$allocatedTo) 
-        {
+        if (!$allocatedTo) {
             Flasher::addError('User not found');
             return redirect()->back();
         }
-        
+
         $status = null;
         $unAllocated = 0;
-        if ($sendToNewLead) 
-        {
+        if ($sendToNewLead) {
             $status = 'NEW LEAD';
             $unAllocated = 0;
-        } 
-        else 
-        {
-            if ($userType == 'admin') 
-            {
-                if ($request->user == $userId) 
-                {
+        } else {
+            if ($userType == 'admin') {
+                if ($request->user == $userId) {
                     $status = 'NEW LEAD';
-                    $unAllocated = 0; 
-                } 
-                elseif ($allocatedTo->role == 'team_manager') 
-                {
+                    $unAllocated = 0;
+                } elseif ($allocatedTo->role == 'team_manager') {
                     $status = 'allocated_lead';
                     $unAllocated = 1;
-                } 
-                elseif ($allocatedTo->role == 'salesman') 
-                {
+                } elseif ($allocatedTo->role == 'salesman') {
                     $status = 'NEW LEAD';
                     $unAllocated = 0;
                 }
-            } 
-            elseif ($userType == 'team_manager') 
-            {
-                if ($request->user == $userId) 
-                {
+            } elseif ($userType == 'team_manager') {
+                if ($request->user == $userId) {
                     $status = 'NEW LEAD';
                     $unAllocated = 0;
-                } 
-                elseif ($allocatedTo->role == 'salesman') 
-                {
+                } elseif ($allocatedTo->role == 'salesman') {
                     $status = 'NEW LEAD';
                     $unAllocated = 0;
                 }
-            }
-            elseif ($userType == 'salesman') 
-            {
-                if ($allocatedTo->role == 'salesman') 
-                {
+            } elseif ($userType == 'salesman') {
+                if ($allocatedTo->role == 'salesman') {
                     $status = 'NEW LEAD';
                     $unAllocated = 0;
-                } 
-                else 
-                {
+                } else {
                     Flasher::addError('Salesman can only allocate leads to other salesmen.');
                     return redirect()->back();
                 }
-            } 
-            else 
-            {
+            } else {
                 Flasher::addError('Invalid user role.');
                 return redirect()->back();
             }
         }
 
-        try 
-        {
+        try {
             DB::beginTransaction();
             DB::table('leads')
                 ->whereIn('id', $request->checked)
@@ -659,12 +591,11 @@ class LeadController extends Controller
                     'updated_date' => now()
                 ]);
 
-            foreach ($request->checked as $leadId) 
-            {
-                $commentText = $sendToNewLead 
+            foreach ($request->checked as $leadId) {
+                $commentText = $sendToNewLead
                     ? 'Lead allocated to ' . $allocatedTo->name . ' (Sent to NEW LEAD)'
                     : 'Lead allocated to ' . $allocatedTo->name;
-                    
+
                 DB::table('lead_comments')->insert([
                     'lead_id' => $leadId,
                     'user_id' => $userId,
@@ -675,16 +606,14 @@ class LeadController extends Controller
             }
 
             DB::commit();
-            
-            $successMessage = $sendToNewLead 
-                ? 'Leads allocated successfully as NEW LEAD!' 
+
+            $successMessage = $sendToNewLead
+                ? 'Leads allocated successfully as NEW LEAD!'
                 : 'Leads allocated successfully!';
-                
+
             Flasher::addSuccess($successMessage);
             return redirect()->route('lead.allocate');
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             DB::rollBack();
             Flasher::addError('Error allocating leads: ' . $e->getMessage());
             return redirect()->back();
@@ -699,8 +628,7 @@ class LeadController extends Controller
         $lead_name = 'unallocated';
         $user_role = Session::get('user_type');
         $child_ids = Session::get('child_ids', []);
-        if (is_string($child_ids)) 
-        {
+        if (is_string($child_ids)) {
             $child_ids = array_map('trim', explode(',', $child_ids));
         }
 
@@ -708,8 +636,7 @@ class LeadController extends Controller
             ? DB::table('users')->where('is_active', 1)->get()
             : DB::table('users')->whereIn('id', $child_ids)->get();
 
-        if (!in_array($user_type, ['admin', 'team_manager'])) 
-        {
+        if (!in_array($user_type, ['admin', 'team_manager'])) {
             abort(403, 'Unauthorized');
         }
 
@@ -725,18 +652,17 @@ class LeadController extends Controller
             ->where('a.unallocated_lead', 1)
             ->where('a.is_allocated', $user_id)
             ->orderBy('a.is_pinned', 'desc')
-            ->orderByDesc('a.id'); 
+            ->orderByDesc('a.id');
 
         $query = $this->applyLeadFilters($query, $request);
         $leads = $query->paginate($length);
-        $leads->getCollection()->transform(function($lead) 
-        {
+        $leads->getCollection()->transform(function ($lead) {
             $duplicates = \DB::table('leads')
                 ->where('phone', $lead->phone)
-                ->where('id', '!=', $lead->id) 
-                ->get(['id','status','created_at']);
+                ->where('id', '!=', $lead->id)
+                ->get(['id', 'status', 'created_at']);
             $lead->duplicate_count = $duplicates->count();
-            $lead->duplicate_details = $duplicates; 
+            $lead->duplicate_details = $duplicates;
             return $lead;
         });
         $projects = DB::table('projects')->select('id', 'project_name')->distinct()->get();
@@ -747,13 +673,31 @@ class LeadController extends Controller
         $agents = DB::table('users')->where('role', 'agent')->pluck('name', 'id');
 
         $hasFilters = $request->anyFilled([
-            'source', 'status','user', 'classification', 'agent', 'lead_days','shared_filter',
-            'project', 'date_from', 'date_to', 'users'
+            'source',
+            'status',
+            'user',
+            'classification',
+            'agent',
+            'lead_days',
+            'shared_filter',
+            'project',
+            'date_from',
+            'date_to',
+            'users'
         ]);
 
         return view('lead.lead-data', compact(
-            'leads', 'lead_name', 'projects', 'cities', 'length',
-            'sources', 'statuses', 'classifications', 'agents', 'hasFilters', 'users'
+            'leads',
+            'lead_name',
+            'projects',
+            'cities',
+            'length',
+            'sources',
+            'statuses',
+            'classifications',
+            'agents',
+            'hasFilters',
+            'users'
         ));
     }
 
@@ -761,31 +705,24 @@ class LeadController extends Controller
     {
         $length = $request->query('length', 10);
 
-        if (in_array(strtolower($lead_name), ['booked', 'completed', 'cancelled'])) 
-        {
+        if (in_array(strtolower($lead_name), ['booked', 'completed', 'cancelled'])) {
             $conversionType = ucfirst(strtolower($lead_name));
 
-            if ($conversionType === 'Booked') 
-            {
+            if ($conversionType === 'Booked') {
                 $query = $this->getLeadsByStatus('BOOKED', $lead_name);
-            }
-            else 
-            {
+            } else {
                 $query = $this->getLeadsByConversionType($conversionType);
             }
-        } 
-        else 
-        {
+        } else {
             $query = $this->getLeadsByStatus($status, $lead_name);
         }
         $query = $this->applyLeadFilters($query, $request);
         $leads = $query->paginate($length);
-        $leads->getCollection()->transform(function($lead) 
-        {
+        $leads->getCollection()->transform(function ($lead) {
             $duplicates = DB::table('leads')
                 ->where('phone', $lead->phone)
-                ->where('id', '!=', $lead->id)  
-                ->get(['id','status','created_at']);
+                ->where('id', '!=', $lead->id)
+                ->get(['id', 'status', 'created_at']);
             $lead->duplicate_count = $duplicates->count();
             $lead->duplicate_details = $duplicates;
             return $lead;
@@ -907,13 +844,12 @@ class LeadController extends Controller
     public function all_lead(Request $request)
     {
         $lead_name = 'all_lead';
-        $requestedLength = $request->query('length', 10); 
+        $requestedLength = $request->query('length', 10);
         $length = $request->query('length', 10);
         $current_user_id = Session::get('user_id');
         $child_ids = Session::get('child_ids', []);
 
-        if (is_string($child_ids)) 
-        {
+        if (is_string($child_ids)) {
             $child_ids = array_map('trim', explode(',', $child_ids));
         }
 
@@ -926,95 +862,74 @@ class LeadController extends Controller
             ->orderBy('a.is_pinned', 'desc')
             ->orderBy('a.id', 'desc');
 
-        if (!$request->filled('user')) 
-        {
+        if (!$request->filled('user')) {
             $query->whereIn('a.user_id', $user_ids);
         }
 
         $this->applyLeadFilters($query, $request);
-        if ($request->filled('shared_filter')) 
-        {
+        if ($request->filled('shared_filter')) {
             $sharedFilter = $request->shared_filter;
-            if ($sharedFilter == 'shared_by_me') 
-            {
+            if ($sharedFilter == 'shared_by_me') {
                 $query->where('a.user_id', $current_user_id)
                     ->whereNotNull('a.lead_shared_with')
                     ->where('a.lead_shared_with', '!=', '');
-            } 
-            elseif ($sharedFilter == 'shared_with_me') 
-            {
-                $query->where(function($q) use ($current_user_id) 
-                {
+            } elseif ($sharedFilter == 'shared_with_me') {
+                $query->where(function ($q) use ($current_user_id) {
                     $q->whereNotNull('a.lead_shared_with')
-                    ->where(function($q2) use ($current_user_id) 
-                    {
-                        $q2->where('a.lead_shared_with', 'LIKE', '%' . $current_user_id . '%')
-                            ->orWhereRaw("FIND_IN_SET(?, a.lead_shared_with)", [$current_user_id]);
-                    });
+                        ->where(function ($q2) use ($current_user_id) {
+                            $q2->where('a.lead_shared_with', 'LIKE', '%' . $current_user_id . '%')
+                                ->orWhereRaw("FIND_IN_SET(?, a.lead_shared_with)", [$current_user_id]);
+                        });
                 });
-            } 
-            elseif ($sharedFilter == 'not_shared') 
-            {
-                $query->where(function($q) 
-                {
+            } elseif ($sharedFilter == 'not_shared') {
+                $query->where(function ($q) {
                     $q->whereNull('a.lead_shared_with')
-                    ->orWhere('a.lead_shared_with', '');
+                        ->orWhere('a.lead_shared_with', '');
                 });
             }
         }
 
-        if ($request->filled('user')) 
-        {
+        if ($request->filled('user')) {
             $query->where('a.user_id', $request->user);
         }
 
-        if ($request->filled('source'))
-        {
+        if ($request->filled('source')) {
             $query->where('a.source', $request->source);
         }
 
-        if ($request->filled('classification')) 
-        {
+        if ($request->filled('classification')) {
             $query->where('a.classification', $request->classification);
         }
 
-        if ($request->filled('project')) 
-        {
+        if ($request->filled('project')) {
             $query->where('a.project_id', $request->project);
         }
 
-        if ($request->filled('date_from')) 
-        {
+        if ($request->filled('date_from')) {
             $query->whereDate('a.created_at', '>=', $request->date_from);
         }
 
-        if ($request->filled('date_to')) 
-        {
+        if ($request->filled('date_to')) {
             $query->whereDate('a.created_at', '<=', $request->date_to);
         }
 
-        if ($request->filled('lead_days')) 
-        {
+        if ($request->filled('lead_days')) {
             $days = (int)$request->lead_days;
             $query->whereDate('a.created_at', '>=', now()->subDays($days));
         }
 
-        if ($length === 'all') 
-        {
+        if ($length === 'all') {
             $length = DB::table('leads')->count();
-        } 
-        else 
-        {
+        } else {
             $length = (int)$length;
         }
 
         $leads = $query->paginate($length);
-        $leads->getCollection()->transform(function($lead) 
-        {
+        $leads->getCollection()->transform(function ($lead) {
             $duplicates = DB::table('leads')
                 ->where('phone', $lead->phone)
                 ->where('id', '!=', $lead->id)
-                ->get(['id','status','created_at']);
+                ->get(['id', 'status', 'created_at']);
             $lead->duplicate_count = $duplicates->count();
             $lead->duplicate_details = $duplicates;
             return $lead;
@@ -1027,10 +942,12 @@ class LeadController extends Controller
     {
         $lead = DB::table('leads')->where('id', $id)->first();
 
-        if (!$lead) 
-        {
+        if (!$lead) {
             Flasher::addError('Lead not found');
-            return redirect()->route('lead.index'); 
+            // return redirect()->route('lead.index'); 
+            return redirect()->route('lead.edit', [
+                'id' => $id
+            ] + request()->query());
         }
 
         $categorys = DB::table('inv_catg')->get();
@@ -1067,8 +984,7 @@ class LeadController extends Controller
     public function update_lead(Request $request, $id)
     {
         $result = $this->leadService->updateLead($request, $id);
-        if (!$result['success']) 
-        {
+        if (!$result['success']) {
             return redirect()->back()->withInput();
         }
         return redirect($result['redirect']);
@@ -1077,8 +993,7 @@ class LeadController extends Controller
     public function updateStatus(Request $request)
     {
         $result = $this->leadService->updateLeadStatus($request);
-        if (!$result['success']) 
-        {
+        if (!$result['success']) {
             return response()->json($result, $result['status'] ?? 500);
         }
         return response()->json($result);
@@ -1089,31 +1004,26 @@ class LeadController extends Controller
         $lead_name = 'transfer';
         $userId = Session::get('user_id');
         $user_role = Session::get('user_type');
-        $child_ids = Session::get('child_ids') ?? ''; 
+        $child_ids = Session::get('child_ids') ?? '';
         $users = [];
 
-        if ($user_role == 'admin') 
-        {
+        if ($user_role == 'admin') {
             $users = DB::table('users')
                 ->where('is_active', 1)
                 ->get();
-        } 
-        else 
-        {
+        } else {
             $childIdArray = array_filter(explode(',', $child_ids));
             $users = DB::table('users')
-            ->where(function ($query) use ($childIdArray, $user_role, $userId) 
-            {
-                $query->whereIn('id', $childIdArray)
-                    ->orWhere(function ($q) use ($user_role, $userId) 
-                    {
-                        $q->where('role', $user_role)
-                        ->where('id', '!=', $userId);
-                    });
-            })
-            ->where('is_active', 1)
-            ->where('id', '!=', $userId)
-            ->get();
+                ->where(function ($query) use ($childIdArray, $user_role, $userId) {
+                    $query->whereIn('id', $childIdArray)
+                        ->orWhere(function ($q) use ($user_role, $userId) {
+                            $q->where('role', $user_role)
+                                ->where('id', '!=', $userId);
+                        });
+                })
+                ->where('is_active', 1)
+                ->where('id', '!=', $userId)
+                ->get();
         }
 
         $status_counts = [
@@ -1143,18 +1053,38 @@ class LeadController extends Controller
         $to_date = null;
 
         $statuses = [
-            'ALL LEAD', 'NEW LEAD', 'ALLOCATED','TRANSFER LEAD', 'PENDING', 'PROCESSING', 'INTERESTED',
-            'CALL SCHEDULED', 'VISIT SCHEDULED', 'VISIT DONE','NOT PICKED','LOST',
-            'CONVERTED','MEETING SCHEDULED','WHATSAPP','BOOKED','COMPLETED','CANCELLED','CHANNEL PARTNER','WRONG NUMBER','NOT INTERESTED','FUTURE LEAD','NOT REACHABLE','BOOKED'
+            'ALL LEAD',
+            'NEW LEAD',
+            'ALLOCATED',
+            'TRANSFER LEAD',
+            'PENDING',
+            'PROCESSING',
+            'INTERESTED',
+            'CALL SCHEDULED',
+            'VISIT SCHEDULED',
+            'VISIT DONE',
+            'NOT PICKED',
+            'LOST',
+            'CONVERTED',
+            'MEETING SCHEDULED',
+            'WHATSAPP',
+            'BOOKED',
+            'COMPLETED',
+            'CANCELLED',
+            'CHANNEL PARTNER',
+            'WRONG NUMBER',
+            'NOT INTERESTED',
+            'FUTURE LEAD',
+            'NOT REACHABLE',
+            'BOOKED'
         ];
 
-        if ($request->has('user') && $request->has('status')) 
-        {
+        if ($request->has('user') && $request->has('status')) {
             $selected_user = $request->user;
             $selected_status = $request->status;
             $from_date = $request->from_date;
             $to_date = $request->to_date;
-            
+
             $selected_user_name = DB::table('users')
                 ->where('id', $selected_user)
                 ->value('name');
@@ -1181,30 +1111,26 @@ class LeadController extends Controller
                 ])
                 ->first();
 
-            if ($counts) 
-            {
+            if ($counts) {
                 $status_counts = (array)$counts;
             }
 
             $query = DB::table('leads')
                 ->where('user_id', $selected_user);
 
-            if ($selected_status !== 'ALL LEAD') 
-            {
+            if ($selected_status !== 'ALL LEAD') {
                 $query->where('status', $selected_status);
             }
 
-            if ($from_date) 
-            {
+            if ($from_date) {
                 $query->whereDate('lead_date', '>=', $from_date);
             }
 
-            if ($to_date) 
-            {
+            if ($to_date) {
                 $query->whereDate('lead_date', '<=', $to_date);
             }
 
-            $leads = $query->orderBy('is_pinned', 'desc') 
+            $leads = $query->orderBy('is_pinned', 'desc')
                 ->orderBy('lead_date', 'desc')
                 ->paginate(20);
         }
@@ -1212,9 +1138,18 @@ class LeadController extends Controller
         $projects = DB::table('projects')->get();
         $cities = DB::table('state_district')->orderBy('District', 'asc')->get();
         return view('lead.transfer-lead', compact(
-            'lead_name', 'leads', 'users', 'selected_user',
-            'selected_status', 'statuses', 'selected_user_name',
-            'from_date', 'to_date', 'status_counts','projects', 'cities'
+            'lead_name',
+            'leads',
+            'users',
+            'selected_user',
+            'selected_status',
+            'statuses',
+            'selected_user_name',
+            'from_date',
+            'to_date',
+            'status_counts',
+            'projects',
+            'cities'
         ));
     }
 
@@ -1230,8 +1165,8 @@ class LeadController extends Controller
             'all_lead_ids.*' => 'exists:leads,id',
         ]);
 
-        $leadIds = $request->filled('all_lead_ids') 
-            ? $request->all_lead_ids 
+        $leadIds = $request->filled('all_lead_ids')
+            ? $request->all_lead_ids
             : $request->checked;
 
         $fromUserId = $request->from_user;
@@ -1239,10 +1174,8 @@ class LeadController extends Controller
         $toUserId = $request->to_user;
 
         DB::beginTransaction();
-        try 
-        {
-            foreach ($leadIds as $leadId) 
-            {
+        try {
+            foreach ($leadIds as $leadId) {
                 $lead = DB::table('leads')->where('id', $leadId)->first();
                 $previousStatus = $lead->status;
                 DB::table('leads')->where('id', $leadId)->update([
@@ -1274,9 +1207,7 @@ class LeadController extends Controller
 
             DB::commit();
             return back()->with('success', count($leadIds) . ' lead(s) transferred successfully.');
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Transfer failed: ' . $e->getMessage());
         }
@@ -1291,15 +1222,15 @@ class LeadController extends Controller
 
         $userId = Session::get('user_id');
         $child_ids = Session::get('child_ids', '');
-    
+
         $accessibleUserIds = array_merge([$userId], explode(',', $child_ids));
         $accessibleUserIds = array_filter($accessibleUserIds);
-        
+
         $users = DB::table('users')
             ->whereIn('id', $accessibleUserIds)
             ->select('id', 'name')
             ->get();
-        
+
         $leads = DB::table('transfer_leads')
             ->join('leads', 'transfer_leads.lead_id', '=', 'leads.id')
             ->leftJoin('users as from_user', 'transfer_leads.from', '=', 'from_user.id')
@@ -1311,31 +1242,26 @@ class LeadController extends Controller
                 'from_user.name as from_user_name',
                 'to_user.name as to_user_name'
             )
-            ->where(function($query) use ($accessibleUserIds) 
-            {
+            ->where(function ($query) use ($accessibleUserIds) {
                 $query->whereIn('transfer_leads.from', $accessibleUserIds)
                     ->orWhereIn('transfer_leads.to', $accessibleUserIds);
             })
-            ->when($from_user, function($query) use ($from_user) 
-            {
+            ->when($from_user, function ($query) use ($from_user) {
                 return $query->where('transfer_leads.from', $from_user);
             })
-            ->when($to_user, function($query) use ($to_user) 
-            {
+            ->when($to_user, function ($query) use ($to_user) {
                 return $query->where('transfer_leads.to', $to_user);
             })
-            ->when($from_date, function($query) use ($from_date)
-            {
+            ->when($from_date, function ($query) use ($from_date) {
                 return $query->whereDate('transfer_leads.created_at', '>=', $from_date);
             })
-            ->when($to_date, function($query) use ($to_date) 
-            {
+            ->when($to_date, function ($query) use ($to_date) {
                 return $query->whereDate('transfer_leads.created_at', '<=', $to_date);
             })
             ->orderBy('transfer_leads.created_at', 'desc')
             ->paginate(15)
             ->withQueryString();
-        
+
         return view('lead.transfer-lead-history', compact('leads', 'users'));
     }
 
@@ -1343,7 +1269,7 @@ class LeadController extends Controller
     {
         $lead_name = 'transfer_lead';
         $users = DB::table('users')->select('id', 'name')->get();
-        
+
         $leads = DB::table('transfer_leads')
             ->join('leads', 'transfer_leads.lead_id', '=', 'leads.id')
             ->leftJoin('users as from_user', 'transfer_leads.from', '=', 'from_user.id')
@@ -1358,7 +1284,7 @@ class LeadController extends Controller
             )
             ->orderBy('transfer_leads.created_at', 'desc')
             ->paginate(10);
-        
+
         return view('lead.transfer-lead-history', compact('lead_name', 'leads', 'users'));
     }
 
@@ -1377,7 +1303,7 @@ class LeadController extends Controller
         $subCategories = DB::table('inv_subcatg')
             ->where('catg_id', $categoryId)
             ->get();
-            
+
         return response()->json($subCategories);
     }
 
@@ -1386,14 +1312,13 @@ class LeadController extends Controller
         $cities = DB::table('state_district')
             ->where('state', $state)
             ->get();
-            
+
         return response()->json($cities);
     }
 
     public function getComments($lead)
     {
-        try 
-        {
+        try {
             $comments = DB::table('lead_comments')
                 ->where('lead_id', $lead)
                 ->leftJoin('users', 'lead_comments.user_id', '=', 'users.id')
@@ -1403,14 +1328,12 @@ class LeadController extends Controller
                 )
                 ->orderBy('created_date', 'desc')
                 ->get();
-                
+
             return response()->json([
                 'success' => true,
                 'comments' => $comments
             ]);
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to fetch comments',
@@ -1424,9 +1347,8 @@ class LeadController extends Controller
         $user_type = Session::get('user_type');
         $user_id = Session::get('user_id');
         $child_ids = Session::get('child_ids');
-        
-        if (!is_array($child_ids)) 
-        {
+
+        if (!is_array($child_ids)) {
             $child_ids = $child_ids ? explode(',', $child_ids) : [];
         }
 
@@ -1440,57 +1362,43 @@ class LeadController extends Controller
                 'c.project_name as project_name',
             );
         $statusUpper = strtoupper($status);
-        
-        if ($statusUpper === 'BOOKED') 
-        {
-            $query->where(function ($q) 
-            {
+
+        if ($statusUpper === 'BOOKED') {
+            $query->where(function ($q) {
                 $q->where('a.status', 'BOOKED')
-                ->orWhere(function ($q2) 
-                {
-                    $q2->where('a.status', 'CONVERTED')
-                        ->where('a.conversion_type', 'Booked');
-                });
+                    ->orWhere(function ($q2) {
+                        $q2->where('a.status', 'CONVERTED')
+                            ->where('a.conversion_type', 'Booked');
+                    });
             });
-        }
-        elseif (in_array(strtolower($status), ['completed', 'cancelled'])) 
-        {
-            $query->where(function ($q) use ($status) 
-            {
+        } elseif (in_array(strtolower($status), ['completed', 'cancelled'])) {
+            $query->where(function ($q) use ($status) {
                 $q->where('a.conversion_type', ucfirst(strtolower($status)))
-                ->where('a.status', 'CONVERTED'); 
+                    ->where('a.status', 'CONVERTED');
             });
-        }
-        elseif ($statusUpper === 'CONVERTED') 
-        {
+        } elseif ($statusUpper === 'CONVERTED') {
             $query->where('a.status', 'CONVERTED');
-        }
-        else 
-        {
+        } else {
             $query->where('a.status', $statusUpper);
         }
-        if ($user_type != 'admin') 
-        {
-            $query->where(function ($q) use ($user_id, $child_ids) 
-            {
+        if ($user_type != 'admin') {
+            $query->where(function ($q) use ($user_id, $child_ids) {
                 $q->where('a.user_id', $user_id);
-                
-                if (!empty($child_ids)) 
-                {
+
+                if (!empty($child_ids)) {
                     $q->orWhereIn('a.user_id', $child_ids);
                 }
-                
-                $q->orWhere(function ($sharedQ) use ($user_id) 
-                {
+
+                $q->orWhere(function ($sharedQ) use ($user_id) {
                     $sharedQ->whereNotNull('a.lead_shared_with')
                         ->where('a.lead_shared_with', '!=', '')
                         ->whereRaw("FIND_IN_SET(?, a.lead_shared_with)", [$user_id]);
                 });
             });
         }
-        $query->orderBy('a.is_pinned', 'desc') 
-            ->orderBy('a.id', 'desc'); 
-            
+        $query->orderBy('a.is_pinned', 'desc')
+            ->orderBy('a.id', 'desc');
+
         return $query;
     }
 
@@ -1499,8 +1407,7 @@ class LeadController extends Controller
         $user_type = Session::get('user_type');
         $user_id = Session::get('user_id');
         $child_ids = Session::get('child_ids');
-        if (!is_array($child_ids)) 
-        {
+        if (!is_array($child_ids)) {
             $child_ids = $child_ids ? explode(',', $child_ids) : [];
         }
 
@@ -1516,21 +1423,18 @@ class LeadController extends Controller
             ->where('a.conversion_type', $conversionType)
             ->where('a.status', 'CONVERTED');
 
-        if ($user_type != 'admin') 
-        {
-            $query->where(function ($q) use ($user_id, $child_ids) 
-            {
+        if ($user_type != 'admin') {
+            $query->where(function ($q) use ($user_id, $child_ids) {
                 $q->where('a.user_id', $user_id);
-                if (!empty($child_ids)) 
-                {
+                if (!empty($child_ids)) {
                     $q->orWhereIn('a.user_id', $child_ids);
                 }
             });
         }
-        
-        $query->orderBy('a.is_pinned', 'desc') 
-              ->orderBy('a.id', 'desc');
-              
+
+        $query->orderBy('a.is_pinned', 'desc')
+            ->orderBy('a.id', 'desc');
+
         return $query;
     }
 
@@ -1538,12 +1442,9 @@ class LeadController extends Controller
     {
         $result = $this->leadService->quickLead($request);
 
-        if ($result['success']) 
-        {
+        if ($result['success']) {
             return redirect()->back()->with('success', $result['message']);
-        } 
-        else 
-        {
+        } else {
             return redirect()->back()
                 ->withInput()
                 ->with('error', $result['message']);
@@ -1552,25 +1453,21 @@ class LeadController extends Controller
 
     public function getProjectName($id)
     {
-        try 
-        {
+        try {
             $project = DB::table('projects')->where('id', $id)->first();
-            
-            if ($project) 
-            {
+
+            if ($project) {
                 return response()->json([
                     'success' => true,
                     'projectName' => $project->name
                 ]);
             }
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Project not found'
             ]);
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error fetching project'
@@ -1580,11 +1477,9 @@ class LeadController extends Controller
 
     public function generateShareLink(Request $request)
     {
-        try 
-        {
+        try {
             $userId = Session::get('user_id');
-            if (!$userId) 
-            {
+            if (!$userId) {
                 return response()->json([
                     'success' => false,
                     'message' => 'User not authenticated.'
@@ -1604,9 +1499,7 @@ class LeadController extends Controller
                 'success' => true,
                 'link' => $link
             ]);
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error generating share link: ' . $e->getMessage()
@@ -1619,15 +1512,13 @@ class LeadController extends Controller
         $logo = DB::table('settings')->where('id', 1)->value('logo');
         $sharedLead = DB::table('shared_leads')
             ->where('token', $token)
-            ->where(function ($query) 
-            {
+            ->where(function ($query) {
                 $query->whereNull('expires_at')
                     ->orWhere('expires_at', '>=', now());
             })
             ->first();
 
-        if (!$sharedLead) 
-        {
+        if (!$sharedLead) {
             abort(404, 'Invalid or expired share link.');
         }
 
@@ -1639,12 +1530,9 @@ class LeadController extends Controller
         $states = DB::table('state_district')->select('state')->distinct()->orderBy('state', 'asc')->get();
 
         $software_type = session::get('software_type');
-        if($software_type == 'lead_management')
-        {
+        if ($software_type == 'lead_management') {
             $isLeadManagement = true;
-        }
-        else
-        {
+        } else {
             $isLeadManagement = false;
         }
 
@@ -1655,15 +1543,13 @@ class LeadController extends Controller
     {
         $sharedLead = DB::table('shared_leads')
             ->where('token', $token)
-            ->where(function ($query) 
-            {
+            ->where(function ($query) {
                 $query->whereNull('expires_at')
                     ->orWhere('expires_at', '>=', now());
             })
             ->first();
 
-        if (!$sharedLead) 
-        {
+        if (!$sharedLead) {
             return redirect()->back()->with('error', 'Invalid or expired share link.');
         }
 
@@ -1681,22 +1567,18 @@ class LeadController extends Controller
             'budget' => 'nullable|string',
         ]);
 
-        if ($validator->fails()) 
-        {
+        if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        try 
-        {
+        try {
             $exists = DB::table('leads')->where('phone', $request->phone)->exists();
-            if ($exists) 
-            {
+            if ($exists) {
                 return redirect()->back()->with('error', 'A lead with this phone number already exists.')->withInput();
             }
             $user = DB::table('users')->where('id', $sharedLead->user_id)->first();
             $status = 'NEW LEAD';
-            if ($user && in_array($user->role, ['admin', 'team_manager'])) 
-            {
+            if ($user && in_array($user->role, ['admin', 'team_manager'])) {
                 $status = 'allocated_lead';
             }
             DB::table('leads')->insert([
@@ -1721,9 +1603,7 @@ class LeadController extends Controller
             ]);
 
             return redirect()->back()->with('success', 'Lead submitted successfully!');
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Error submitting lead: ' . $e->getMessage())->withInput();
         }
     }
@@ -1743,22 +1623,20 @@ class LeadController extends Controller
         ]);
         $duplicate = DB::table('leads')->where('phone', $request->phone)->first();
 
-        if ($duplicate) 
-        {
+        if ($duplicate) {
             Flasher::addError('A lead with this phone number already exists.');
             return redirect()->back()->withInput();
         }
 
-        try 
-        {
+        try {
             $now = now();
             $leadId = DB::table('leads')->insertGetId([
                 'name' => $request->name,
                 'email' => $request->email,
                 'phone' => $request->phone,
-                'field1' => $request->field1,             
-                'field2' => $request->field2,             
-                'field3' => $request->address,        
+                'field1' => $request->field1,
+                'field2' => $request->field2,
+                'field3' => $request->address,
                 'budget' => $request->budget,
                 'last_comment' => $request->description,
                 'inquiry_question_id' => $request->inquiry_question,
@@ -1770,9 +1648,7 @@ class LeadController extends Controller
             ]);
             Flasher::addSuccess('Inquiry submitted successfully!');
             return redirect()->back();
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             Flasher::addError('Failed to submit inquiry: ' . $e->getMessage());
             return redirect()->back()->withInput();
         }
@@ -1780,62 +1656,50 @@ class LeadController extends Controller
 
     protected function applyLeadFilters($query, Request $request)
     {
-        if ($request->filled('search')) 
-        {
+        if ($request->filled('search')) {
             $searchTerm = $request->search;
-            $query->where(function($q) use ($searchTerm) 
-            {
+            $query->where(function ($q) use ($searchTerm) {
                 $q->where('a.name', 'LIKE', '%' . $searchTerm . '%')
-                ->orWhere('a.email', 'LIKE', '%' . $searchTerm . '%')
-                ->orWhere('a.phone', 'LIKE', '%' . $searchTerm . '%');
-                if (is_numeric($searchTerm)) 
-                {
+                    ->orWhere('a.email', 'LIKE', '%' . $searchTerm . '%')
+                    ->orWhere('a.phone', 'LIKE', '%' . $searchTerm . '%');
+                if (is_numeric($searchTerm)) {
                     $q->orWhere('a.id', $searchTerm);
                 }
             });
         }
-        if ($request->filled('source')) 
-        {
+        if ($request->filled('source')) {
             $query->where('a.source', $request->source);
         }
 
-        if($request->filled('user'))
-        {
+        if ($request->filled('user')) {
             $query->where('a.user_id', $request->user);
         }
 
-        if ($request->filled('status')) 
-        {
+        if ($request->filled('status')) {
             $query->where('a.status', $request->status);
         }
 
-        if ($request->filled('classification')) 
-        {
+        if ($request->filled('classification')) {
             $query->where('a.classification', $request->classification);
         }
 
-        if ($request->filled('agent')) 
-        {
+        if ($request->filled('agent')) {
             $query->where('a.user_id', $request->agent);
         }
 
-        if ($request->filled('project')) 
-        {
+        if ($request->filled('project')) {
             $query->where('a.project_id', $request->project);
         }
-        
-        if ($request->filled('date_from')) 
-        {
+
+        if ($request->filled('date_from')) {
             $query->whereDate('a.lead_date', '>=', $request->date_from);
         }
 
-        if ($request->filled('date_to')) 
-        {
+        if ($request->filled('date_to')) {
             $query->whereDate('a.lead_date', '<=', $request->date_to);
         }
 
-        if ($request->filled('lead_days')) 
-        {
+        if ($request->filled('lead_days')) {
             $days = (int) $request->lead_days;
             $query->whereDate(
                 'a.lead_date',
@@ -1844,35 +1708,26 @@ class LeadController extends Controller
             );
         }
 
-        if ($request->filled('shared_filter')) 
-        {
+        if ($request->filled('shared_filter')) {
             $current_user_id = Session::get('user_id');
             $sharedFilter = $request->shared_filter;
-            
-            if ($sharedFilter == 'shared_by_me') 
-            {
+
+            if ($sharedFilter == 'shared_by_me') {
                 $query->where('a.user_id', $current_user_id)
                     ->whereNotNull('a.lead_shared_with')
                     ->where('a.lead_shared_with', '!=', '');
-            } 
-            elseif ($sharedFilter == 'shared_with_me') 
-            {
-                $query->where(function($q) use ($current_user_id) 
-                {
+            } elseif ($sharedFilter == 'shared_with_me') {
+                $query->where(function ($q) use ($current_user_id) {
                     $q->whereNotNull('a.lead_shared_with')
-                    ->where(function($q2) use ($current_user_id) 
-                    {
-                        $q2->where('a.lead_shared_with', 'LIKE', '%' . $current_user_id . '%')
-                            ->orWhereRaw("FIND_IN_SET(?, a.lead_shared_with)", [$current_user_id]);
-                    });
+                        ->where(function ($q2) use ($current_user_id) {
+                            $q2->where('a.lead_shared_with', 'LIKE', '%' . $current_user_id . '%')
+                                ->orWhereRaw("FIND_IN_SET(?, a.lead_shared_with)", [$current_user_id]);
+                        });
                 });
-            }
-            elseif ($sharedFilter == 'not_shared') 
-            {
-                $query->where(function($q) 
-                {
+            } elseif ($sharedFilter == 'not_shared') {
+                $query->where(function ($q) {
                     $q->whereNull('a.lead_shared_with')
-                    ->orWhere('a.lead_shared_with', '');
+                        ->orWhere('a.lead_shared_with', '');
                 });
             }
         }
@@ -1887,7 +1742,7 @@ class LeadController extends Controller
         $source = $request->query('source');
         $campaign = $request->query('campaign');
 
-        $lead_name = 'filtered'; 
+        $lead_name = 'filtered';
         $users = DB::table('users')->select('id', 'name')->get();
 
         $query = DB::table('leads as a')
@@ -1902,33 +1757,26 @@ class LeadController extends Controller
             ->orderBy('a.is_pinned', 'desc')
             ->orderBy('a.id', 'desc');
 
-        if ($classification) 
-        {
+        if ($classification) {
             $query->where('a.classification', $classification);
         }
-        if ($source) 
-        {
+        if ($source) {
             $query->where('a.source', $source);
         }
-        if ($campaign) 
-        { 
+        if ($campaign) {
             $query->where('a.campaign', $campaign);
         }
 
         $user_type = Session::get('user_type');
         $user_id = Session::get('user_id');
         $child_ids = Session::get('child_ids', []);
-        if (!is_array($child_ids)) 
-        {
+        if (!is_array($child_ids)) {
             $child_ids = explode(',', $child_ids);
         }
-        if ($user_type != 'admin') 
-        {
-            $query->where(function ($q) use ($user_id, $child_ids) 
-            {
+        if ($user_type != 'admin') {
+            $query->where(function ($q) use ($user_id, $child_ids) {
                 $q->where('a.user_id', $user_id);
-                if (!empty($child_ids)) 
-                {
+                if (!empty($child_ids)) {
                     $q->orWhereIn('a.user_id', $child_ids);
                 }
             });
@@ -1943,9 +1791,16 @@ class LeadController extends Controller
         $selected_source = $source;
         $selected_campaign = $campaign;
 
-        return view('partial.filter-leads', compact( 
-            'leads', 'lead_name', 'projects', 'cities', 'length',
-            'selected_classification', 'selected_source', 'selected_campaign', 'users'
+        return view('partial.filter-leads', compact(
+            'leads',
+            'lead_name',
+            'projects',
+            'cities',
+            'length',
+            'selected_classification',
+            'selected_source',
+            'selected_campaign',
+            'users'
         ));
     }
 
@@ -1962,18 +1817,15 @@ class LeadController extends Controller
 
         $statusRequireReminder = ['CALL SCHEDULED', 'VISIT SCHEDULED', 'INTERESTED', 'WHATSAPP'];
 
-        if (in_array(strtoupper($request->new_status), $statusRequireReminder)) 
-        {
+        if (in_array(strtoupper($request->new_status), $statusRequireReminder)) {
             $validator->addRules([
                 'remind_date' => 'required|date',
                 'remind_time' => 'required'
             ]);
         }
 
-        if ($validator->fails()) 
-        {
-            foreach ($validator->errors()->all() as $error) 
-            {
+        if ($validator->fails()) {
+            foreach ($validator->errors()->all() as $error) {
                 Flasher::addError($error);
             }
             return redirect()->back();
@@ -1983,11 +1835,9 @@ class LeadController extends Controller
 
         DB::beginTransaction();
 
-        try 
-        {
+        try {
             $originalLead = DB::table('leads')->where('id', $request->lead_id)->first();
-            if (!$originalLead) 
-            {
+            if (!$originalLead) {
                 throw new \Exception('Lead not found');
             }
 
@@ -2039,8 +1889,7 @@ class LeadController extends Controller
                 ->where('lead_id', $originalLead->id)
                 ->get();
 
-            foreach ($originalComments as $comment) 
-            {
+            foreach ($originalComments as $comment) {
                 DB::table('lead_comments')->insert([
                     'remind_date' => $comment->remind_date,
                     'remind_time' => $comment->remind_time,
@@ -2065,10 +1914,7 @@ class LeadController extends Controller
             DB::commit();
             Flasher::addSuccess("Lead duplicated successfully! New Lead ID: #{$newLeadId}");
             return redirect()->back();
-
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             DB::rollBack();
             Flasher::addError('Failed to duplicate lead: ' . $e->getMessage());
             return redirect()->back();
@@ -2084,22 +1930,18 @@ class LeadController extends Controller
             'message' => 'nullable|string|max:1000'
         ]);
 
-        if ($validator->fails()) 
-        {
-            foreach ($validator->errors()->all() as $error) 
-            {
+        if ($validator->fails()) {
+            foreach ($validator->errors()->all() as $error) {
                 Flasher::addError($error);
             }
             return redirect()->back();
         }
 
         DB::beginTransaction();
-        try 
-        {
+        try {
             $lead = DB::table('leads')->where('id', $request->lead_id)->first();
-            
-            if (!$lead) 
-            {
+
+            if (!$lead) {
                 throw new \Exception('Lead not found');
             }
 
@@ -2108,37 +1950,32 @@ class LeadController extends Controller
             $sharedUserIds = $request->users;
 
             $currentSharedUsers = [];
-            if (!empty($lead->lead_shared_with)) 
-            {
+            if (!empty($lead->lead_shared_with)) {
                 $currentSharedUsers = explode(',', $lead->lead_shared_with);
                 $currentSharedUsers = array_filter(array_map('trim', $currentSharedUsers));
             }
-            
+
             $newShares = [];
             $alreadySharedCount = 0;
-            
-            foreach ($sharedUserIds as $userId) 
-            {
+
+            foreach ($sharedUserIds as $userId) {
                 $userIdStr = (string)$userId;
-                
-                if (in_array($userIdStr, $currentSharedUsers)) 
-                {
+
+                if (in_array($userIdStr, $currentSharedUsers)) {
                     $alreadySharedCount++;
                     continue;
                 }
-                
+
                 $sharedWithUser = DB::table('users')->where('id', $userId)->first();
-                
-                if ($sharedWithUser) 
-                {
+
+                if ($sharedWithUser) {
                     $newShares[] = $userIdStr;
-                    
+
                     $commentMessage = "Lead shared with {$sharedWithUser->name}";
-                    if ($request->message) 
-                    {
+                    if ($request->message) {
                         $commentMessage .= ". Message: {$request->message}";
                     }
-                    
+
                     DB::table('lead_comments')->insert([
                         'lead_id' => $request->lead_id,
                         'user_id' => $currentUserId,
@@ -2154,9 +1991,8 @@ class LeadController extends Controller
                     $notificationMessage .= "📧 **Lead Email:** " . ($lead->email ?? 'N/A') . "\n";
                     $notificationMessage .= "🏢 **Project:** " . ($lead->project_name ?? 'N/A') . "\n";
                     $notificationMessage .= "💰 **Budget:** " . ($lead->budget ?? 'N/A');
-                    
-                    if ($request->message) 
-                    {
+
+                    if ($request->message) {
                         $notificationMessage .= "\n💬 **Note:** {$request->message}";
                     }
 
@@ -2177,10 +2013,10 @@ class LeadController extends Controller
                     ]);
                 }
             }
-            
+
             $allSharedUsers = array_merge($currentSharedUsers, $newShares);
             $allSharedUsers = array_unique(array_filter($allSharedUsers));
-            
+
             DB::table('leads')
                 ->where('id', $request->lead_id)
                 ->update([
@@ -2191,25 +2027,18 @@ class LeadController extends Controller
             DB::commit();
 
             $newSharesCount = count($newShares);
-            
-            if ($newSharesCount > 0) 
-            {
+
+            if ($newSharesCount > 0) {
                 Flasher::addSuccess("Lead shared with {$newSharesCount} user(s)! Notifications sent.");
-            } 
-            else 
-            {
+            } else {
                 Flasher::addInfo("Lead was already shared with all selected users.");
             }
-            
-            if ($alreadySharedCount > 0) 
-            {
+
+            if ($alreadySharedCount > 0) {
                 Flasher::addInfo("{$alreadySharedCount} user(s) were already shared with this lead.");
             }
             return redirect()->back();
-
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             DB::rollBack();
             Flasher::addError('Failed to share lead: ' . $e->getMessage());
             return redirect()->back();
@@ -2223,8 +2052,7 @@ class LeadController extends Controller
             'is_pinned' => 'required|boolean'
         ]);
 
-        if ($validator->fails()) 
-        {
+        if ($validator->fails()) {
             return response()->json([
                 'status' => 400,
                 'message' => 'Invalid request',
@@ -2232,8 +2060,7 @@ class LeadController extends Controller
             ]);
         }
 
-        try 
-        {
+        try {
             DB::table('leads')
                 ->where('id', $request->lead_id)
                 ->update([
@@ -2246,10 +2073,7 @@ class LeadController extends Controller
                 'message' => $request->is_pinned ? 'Lead pinned successfully' : 'Lead unpinned successfully',
                 'data' => $request->is_pinned
             ]);
-
-        } 
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => 500,
                 'message' => 'Failed to update pin status: ' . $e->getMessage(),
@@ -2267,16 +2091,34 @@ class LeadController extends Controller
         $classifications = DB::table('leads')->distinct()->pluck('classification');
         $agents = DB::table('users')->where('role', 'agent')->pluck('name', 'id');
         $users = DB::table('users')->get();
-        
+
         $hasFilters = $request->anyFilled([
-            'source', 'status','user', 'classification', 'agent','lead_days','shared_filter', 
-            'project', 'date_from', 'date_to', 'users'
+            'source',
+            'status',
+            'user',
+            'classification',
+            'agent',
+            'lead_days',
+            'shared_filter',
+            'project',
+            'date_from',
+            'date_to',
+            'users'
         ]);
 
         return view('lead.lead-data', compact(
-            'leads', 'lead_name', 'projects', 'cities', 'length',
-            'sources', 'statuses', 'classifications', 'agents', 
-            'hasFilters', 'users', 'requestedLength'
+            'leads',
+            'lead_name',
+            'projects',
+            'cities',
+            'length',
+            'sources',
+            'statuses',
+            'classifications',
+            'agents',
+            'hasFilters',
+            'users',
+            'requestedLength'
         ));
     }
 
@@ -2295,8 +2137,7 @@ class LeadController extends Controller
             'projects.*.exists' => 'One or more selected projects are invalid'
         ]);
 
-        if ($validator->fails()) 
-        {
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'message' => $validator->errors()->first(),
@@ -2305,11 +2146,9 @@ class LeadController extends Controller
         }
 
         DB::beginTransaction();
-        try 
-        {
+        try {
             $lead = DB::table('leads')->where('id', $request->lead_id)->first();
-            if (!$lead) 
-            {
+            if (!$lead) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Lead not found'
@@ -2325,18 +2164,15 @@ class LeadController extends Controller
                     'updated_at' => now()
                 ]);
             $newProjectNames = [];
-            foreach ($newProjects as $projectId) 
-            {
+            foreach ($newProjects as $projectId) {
                 $project = DB::table('projects')->where('id', $projectId)->first();
-                if ($project) 
-                {
+                if ($project) {
                     $newProjectNames[] = $project->project_name;
                 }
             }
 
             $comment = "Added projects: " . implode(', ', $newProjectNames);
-            if ($request->notes) 
-            {
+            if ($request->notes) {
                 $comment .= ". Notes: " . $request->notes;
             }
             // dd($comment);
@@ -2355,10 +2191,7 @@ class LeadController extends Controller
                 'message' => count($newProjects) . ' project(s) added successfully!',
                 'added_count' => count($newProjects)
             ]);
-
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'success' => false,
@@ -2373,22 +2206,18 @@ class LeadController extends Controller
             'project_ids' => 'required|array'
         ]);
 
-        if ($validator->fails()) 
-        {
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid project IDs'
             ]);
         }
 
-        try 
-        {
+        try {
             $projectNames = [];
-            foreach ($request->project_ids as $projectId) 
-            {
+            foreach ($request->project_ids as $projectId) {
                 $project = DB::table('projects')->where('id', trim($projectId))->first();
-                if ($project) 
-                {
+                if ($project) {
                     $projectNames[] = $project->project_name;
                 }
             }
@@ -2397,10 +2226,7 @@ class LeadController extends Controller
                 'success' => true,
                 'projectNames' => $projectNames
             ]);
-
-        }
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error fetching project names'
@@ -2414,20 +2240,17 @@ class LeadController extends Controller
             'lead_id' => 'required|exists:leads,id'
         ]);
 
-        if ($validator->fails()) 
-        {
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid lead ID'
             ]);
         }
 
-        try 
-        {
+        try {
             $lead = DB::table('leads')->where('id', $request->lead_id)->first();
-            
-            if (!$lead->project_id) 
-            {
+
+            if (!$lead->project_id) {
                 return response()->json([
                     'success' => true,
                     'projects' => []
@@ -2436,7 +2259,7 @@ class LeadController extends Controller
 
             $projectIds = explode(',', $lead->project_id);
             $projectIds = array_filter(array_map('trim', $projectIds));
-            
+
             $projects = DB::table('projects')
                 ->whereIn('id', $projectIds)
                 ->select('id', 'project_name')
@@ -2446,10 +2269,7 @@ class LeadController extends Controller
                 'success' => true,
                 'projects' => $projects
             ]);
-
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error fetching lead projects: ' . $e->getMessage()
@@ -2459,11 +2279,9 @@ class LeadController extends Controller
 
     public function getLeadProjectVisits(Request $request)
     {
-        try 
-        {
+        try {
             $leadId = $request->lead_id;
-            if (!$leadId) 
-            {
+            if (!$leadId) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Lead ID is required'
@@ -2471,15 +2289,14 @@ class LeadController extends Controller
             }
 
             $leadExists = DB::table('leads')->where('id', $leadId)->exists();
-            
-            if (!$leadExists) 
-            {
+
+            if (!$leadExists) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Lead not found'
                 ], 404);
             }
-            
+
             $projectVisits = DB::table('lead_projects')
                 ->leftJoin('projects', 'lead_projects.project_id', '=', 'projects.id')
                 ->where('lead_projects.lead_id', $leadId)
@@ -2496,10 +2313,7 @@ class LeadController extends Controller
                 'projectVisits' => $projectVisits,
                 'count' => $projectVisits->count()
             ]);
-
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
@@ -2509,8 +2323,7 @@ class LeadController extends Controller
 
     public function delete(Request $request)
     {
-        try 
-        {
+        try {
             $request->validate([
                 'lead_id' => 'required|exists:leads,id',
                 'password' => 'required|string',
@@ -2519,8 +2332,7 @@ class LeadController extends Controller
             $cookieName = "lead_attempt_{$leadId}";
             $attempts = (int) $request->cookie($cookieName, 0);
 
-            if ($attempts >= 3) 
-            {
+            if ($attempts >= 3) {
                 return response()->json([
                     'status' => 403,
                     'message' => 'You have reached the maximum number of attempts. You cannot delete this lead for 1 day.',
@@ -2529,8 +2341,7 @@ class LeadController extends Controller
             }
 
             $admin = DB::table('users')->where('role', 'admin')->first();
-            if (!$admin || $request->password !== $admin->password) 
-            {
+            if (!$admin || $request->password !== $admin->password) {
                 $attempts++;
                 $cookie = cookie($cookieName, $attempts, 1440);
 
@@ -2542,27 +2353,21 @@ class LeadController extends Controller
             }
 
             $deleted = DB::table('leads')->where('id', $leadId)->delete();
-            $cookie = cookie($cookieName, 0, 0); 
-            if ($deleted) 
-            {
+            $cookie = cookie($cookieName, 0, 0);
+            if ($deleted) {
                 return response()->json([
                     'status' => 200,
                     'message' => 'Lead deleted successfully!',
                     'lead_id' => $leadId
                 ])->withCookie($cookie);
-            } 
-            else 
-            {
+            } else {
                 return response()->json([
                     'status' => 404,
                     'message' => 'Failed to delete lead.',
                     'data' => '',
                 ]);
             }
-
-        } 
-        catch (\Exception $error) 
-        {
+        } catch (\Exception $error) {
             return response()->json([
                 'status' => 500,
                 'message' => $error->getMessage(),
@@ -2573,11 +2378,9 @@ class LeadController extends Controller
 
     public function getMatchingProperties($id)
     {
-        try 
-        {
+        try {
             $lead = DB::table('leads')->where('id', $id)->first();
-            if (!$lead) 
-            {
+            if (!$lead) {
                 return response()->json([
                     'status' => 404,
                     'message' => 'Lead not found',
@@ -2586,14 +2389,12 @@ class LeadController extends Controller
             }
             $category = null;
             $subCategory = null;
-            
-            if (!empty($lead->catg_id)) 
-            {
+
+            if (!empty($lead->catg_id)) {
                 $category = DB::table('inv_catg')->where('id', $lead->catg_id)->first();
             }
-            
-            if (!empty($lead->sub_catg_id)) 
-            {
+
+            if (!empty($lead->sub_catg_id)) {
                 $subCategory = DB::table('inv_subcatg')->where('id', $lead->sub_catg_id)->first();
             }
 
@@ -2602,26 +2403,22 @@ class LeadController extends Controller
                 ->where('property_status', '!=', 'Sold')
                 ->where('property_status', '!=', 'Hold');
             $properties = $query->get();
-            
+
             $matchedProperties = [];
-            
-            foreach ($properties as $property) 
-            {
+
+            foreach ($properties as $property) {
                 $score = $this->calculateMatchScore($lead, $property, $category, $subCategory);
-                if ($score > 0) 
-                {
+                if ($score > 0) {
                     $property->match_score = $score;
                     $property->match_reasons = $this->getMatchReasons($lead, $property, $category, $subCategory);
                     $matchedProperties[] = $property;
                 }
             }
-            usort($matchedProperties, function($a, $b) 
-            {
+            usort($matchedProperties, function ($a, $b) {
                 return $b->match_score <=> $a->match_score;
             });
 
-            if (empty($matchedProperties)) 
-            {
+            if (empty($matchedProperties)) {
                 return response()->json([
                     'status' => 200,
                     'data' => [],
@@ -2634,10 +2431,7 @@ class LeadController extends Controller
                 'data' => $matchedProperties,
                 'message' => 'Properties retrieved successfully'
             ]);
-
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => 500,
                 'message' => 'Error fetching matching properties: ' . $e->getMessage(),
@@ -2648,13 +2442,11 @@ class LeadController extends Controller
 
     private function parseBudgetRange($budgetString)
     {
-        if (empty($budgetString) || $budgetString === 'NULL') 
-        {
+        if (empty($budgetString) || $budgetString === 'NULL') {
             return null;
         }
         $budgetString = str_replace(['₹', ' ', ','], '', $budgetString);
-        if (strpos($budgetString, '-') !== false) 
-        {
+        if (strpos($budgetString, '-') !== false) {
             list($min, $max) = explode('-', $budgetString);
             $minValue = $this->convertToNumber($min);
             $maxValue = $this->convertToNumber($max);
@@ -2667,7 +2459,7 @@ class LeadController extends Controller
             ];
         }
         $value = $this->convertToNumber($budgetString);
-        $buffer = $value * 0.2; 
+        $buffer = $value * 0.2;
         return [
             'min' => max(0, $value - $buffer),
             'max' => $value + $buffer,
@@ -2680,16 +2472,13 @@ class LeadController extends Controller
     {
         $value = trim($value);
         $number = (float) filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
-        
-        if (stripos($value, 'Cr') !== false || stripos($value, 'cr') !== false) 
-        {
+
+        if (stripos($value, 'Cr') !== false || stripos($value, 'cr') !== false) {
             return $number * 100;
-        } 
-        elseif (stripos($value, 'L') !== false || stripos($value, 'l') !== false) 
-        {
+        } elseif (stripos($value, 'L') !== false || stripos($value, 'l') !== false) {
             return $number;
         }
-        
+
         return $number;
     }
 
@@ -2705,191 +2494,148 @@ class LeadController extends Controller
             'budget' => 15
         ];
 
-        if (!empty($lead->type) && $lead->type !== 'NULL' && !empty($property->property_type)) 
-        {
+        if (!empty($lead->type) && $lead->type !== 'NULL' && !empty($property->property_type)) {
             $totalWeight += $weights['type'];
-            if (strcasecmp(trim($lead->type), trim($property->property_type)) == 0) 
-            {
+            if (strcasecmp(trim($lead->type), trim($property->property_type)) == 0) {
                 $score += $weights['type'];
-            }
-            elseif (stripos($property->property_type, $lead->type) !== false || stripos($lead->type, $property->property_type) !== false) 
-            {
+            } elseif (stripos($property->property_type, $lead->type) !== false || stripos($lead->type, $property->property_type) !== false) {
                 $score += $weights['type'] * 0.5;
             }
         }
 
-        if ($category && !empty($category->name) && !empty($property->property_category)) 
-        {
+        if ($category && !empty($category->name) && !empty($property->property_category)) {
             $totalWeight += $weights['category'];
-            if (strcasecmp(trim($category->name), trim($property->property_category)) == 0) 
-            {
+            if (strcasecmp(trim($category->name), trim($property->property_category)) == 0) {
                 $score += $weights['category'];
-            }
-            elseif (stripos($property->property_category, $category->name) !== false || stripos($category->name, $property->property_category) !== false) 
-            {
+            } elseif (stripos($property->property_category, $category->name) !== false || stripos($category->name, $property->property_category) !== false) {
                 $score += $weights['category'] * 0.5;
             }
         }
 
-        if ($subCategory && !empty($subCategory->name) && !empty($property->property_sub_category)) 
-        {
+        if ($subCategory && !empty($subCategory->name) && !empty($property->property_sub_category)) {
             $totalWeight += $weights['sub_category'];
-            if (strcasecmp(trim($subCategory->name), trim($property->property_sub_category)) == 0) 
-            {
+            if (strcasecmp(trim($subCategory->name), trim($property->property_sub_category)) == 0) {
                 $score += $weights['sub_category'];
-            }
-            elseif (stripos($property->property_sub_category, $subCategory->name) !== false || 
-                    stripos($subCategory->name, $property->property_sub_category) !== false) 
-            {
+            } elseif (
+                stripos($property->property_sub_category, $subCategory->name) !== false ||
+                stripos($subCategory->name, $property->property_sub_category) !== false
+            ) {
                 $score += $weights['sub_category'] * 0.5;
             }
         }
 
-        if (!empty($lead->property_state) || !empty($lead->property_city) || !empty($lead->property_location)) 
-        {
+        if (!empty($lead->property_state) || !empty($lead->property_city) || !empty($lead->property_location)) {
             $totalWeight += $weights['location'];
             $locationMatch = false;
-            if (!empty($lead->property_state) && $lead->property_state !== 'NULL' && !empty($property->state)) 
-            {
-                if (stripos($property->state, $lead->property_state) !== false || stripos($lead->property_state, $property->state) !== false) 
-                {
+            if (!empty($lead->property_state) && $lead->property_state !== 'NULL' && !empty($property->state)) {
+                if (stripos($property->state, $lead->property_state) !== false || stripos($lead->property_state, $property->state) !== false) {
                     $locationMatch = true;
                 }
             }
 
-            if (!$locationMatch && !empty($lead->property_city) && $lead->property_city !== 'NULL' && !empty($property->city)) 
-            {
-                if (stripos($property->city, $lead->property_city) !== false || stripos($lead->property_city, $property->city) !== false) 
-                {
+            if (!$locationMatch && !empty($lead->property_city) && $lead->property_city !== 'NULL' && !empty($property->city)) {
+                if (stripos($property->city, $lead->property_city) !== false || stripos($lead->property_city, $property->city) !== false) {
                     $locationMatch = true;
                 }
             }
 
-            if (!$locationMatch && !empty($lead->property_location) && $lead->property_location !== 'NULL') 
-            {
+            if (!$locationMatch && !empty($lead->property_location) && $lead->property_location !== 'NULL') {
                 $locationTerms = explode(' ', strtolower($lead->property_location));
-                foreach ($locationTerms as $term) 
-                {
-                    if (strlen($term) < 3) continue; 
-                    
-                    if (!empty($property->state) && stripos($property->state, $term) !== false) 
-                    {
+                foreach ($locationTerms as $term) {
+                    if (strlen($term) < 3) continue;
+
+                    if (!empty($property->state) && stripos($property->state, $term) !== false) {
                         $locationMatch = true;
                         break;
                     }
-                    if (!empty($property->city) && stripos($property->city, $term) !== false) 
-                    {
+                    if (!empty($property->city) && stripos($property->city, $term) !== false) {
                         $locationMatch = true;
                         break;
                     }
-                    if (!empty($property->address) && stripos($property->address, $term) !== false) 
-                    {
+                    if (!empty($property->address) && stripos($property->address, $term) !== false) {
                         $locationMatch = true;
                         break;
                     }
                 }
             }
-            
-            if ($locationMatch) 
-            {
+
+            if ($locationMatch) {
                 $score += $weights['location'];
             }
         }
 
-        if (!empty($lead->budget) && $lead->budget !== 'NULL' && !empty($property->budget_price)) 
-        {
+        if (!empty($lead->budget) && $lead->budget !== 'NULL' && !empty($property->budget_price)) {
             $totalWeight += $weights['budget'];
-            if ($this->isBudgetMatch($lead->budget, $property->budget_price)) 
-            {
+            if ($this->isBudgetMatch($lead->budget, $property->budget_price)) {
                 $score += $weights['budget'];
             }
         }
-        
+
         return $totalWeight > 0 ? round(($score / $totalWeight) * 100) : 0;
     }
 
     private function getMatchReasons($lead, $property, $category = null, $subCategory = null)
     {
         $reasons = [];
-        if (!empty($lead->type) && $lead->type !== 'NULL' && !empty($property->property_type)) 
-        {
-            if (strcasecmp(trim($lead->type), trim($property->property_type)) == 0) 
-            {
+        if (!empty($lead->type) && $lead->type !== 'NULL' && !empty($property->property_type)) {
+            if (strcasecmp(trim($lead->type), trim($property->property_type)) == 0) {
                 $reasons[] = "Property type matches: {$property->property_type}";
-            }
-            elseif (stripos($property->property_type, $lead->type) !== false) 
-            {
+            } elseif (stripos($property->property_type, $lead->type) !== false) {
                 $reasons[] = "Property type matches: {$property->property_type}";
             }
         }
-        if ($category && !empty($category->name) && !empty($property->property_category)) 
-        {
-            if (strcasecmp(trim($category->name), trim($property->property_category)) == 0) 
-            {
+        if ($category && !empty($category->name) && !empty($property->property_category)) {
+            if (strcasecmp(trim($category->name), trim($property->property_category)) == 0) {
                 $reasons[] = "Category matches: {$property->property_category}";
-            }
-            elseif (stripos($property->property_category, $category->name) !== false) 
-            {
+            } elseif (stripos($property->property_category, $category->name) !== false) {
                 $reasons[] = "Category matches: {$property->property_category}";
             }
         }
-        if ($subCategory && !empty($subCategory->name) && !empty($property->property_sub_category)) 
-        {
-            if (strcasecmp(trim($subCategory->name), trim($property->property_sub_category)) == 0) 
-            {
+        if ($subCategory && !empty($subCategory->name) && !empty($property->property_sub_category)) {
+            if (strcasecmp(trim($subCategory->name), trim($property->property_sub_category)) == 0) {
                 $reasons[] = "Sub-category matches: {$property->property_sub_category}";
-            }
-            elseif (stripos($property->property_sub_category, $subCategory->name) !== false) 
-            {
+            } elseif (stripos($property->property_sub_category, $subCategory->name) !== false) {
                 $reasons[] = "Sub-category matches: {$property->property_sub_category}";
             }
         }
-        if (!empty($lead->property_state) && $lead->property_state !== 'NULL' && !empty($property->state)) 
-        {
-            if (stripos($property->state, $lead->property_state) !== false) 
-            {
+        if (!empty($lead->property_state) && $lead->property_state !== 'NULL' && !empty($property->state)) {
+            if (stripos($property->state, $lead->property_state) !== false) {
                 $reasons[] = "State matches: {$property->state}";
             }
         }
-        
-        if (!empty($lead->property_city) && $lead->property_city !== 'NULL' && !empty($property->property_city)) 
-        {
-            if (stripos($property->city, $lead->property_city) !== false) 
-            {
+
+        if (!empty($lead->property_city) && $lead->property_city !== 'NULL' && !empty($property->property_city)) {
+            if (stripos($property->city, $lead->property_city) !== false) {
                 $reasons[] = "City matches: {$property->property_city}";
             }
         }
-        
-        if (!empty($lead->property_location) && $lead->property_location !== 'NULL') 
-        {
+
+        if (!empty($lead->property_location) && $lead->property_location !== 'NULL') {
             $locationTerms = explode(' ', strtolower($lead->property_location));
-            foreach ($locationTerms as $term) 
-            {
+            foreach ($locationTerms as $term) {
                 if (strlen($term) < 3) continue;
-                
-                if (!empty($property->state) && stripos($property->state, $term) !== false) 
-                {
+
+                if (!empty($property->state) && stripos($property->state, $term) !== false) {
                     $reasons[] = "Location matches: {$property->state}";
                     break;
                 }
-                if (!empty($property->city) && stripos($property->city, $term) !== false) 
-                {
+                if (!empty($property->city) && stripos($property->city, $term) !== false) {
                     $reasons[] = "Location matches: {$property->city}";
                     break;
                 }
-                if (!empty($property->address) && stripos($property->address, $term) !== false) 
-                {
+                if (!empty($property->address) && stripos($property->address, $term) !== false) {
                     $reasons[] = "Location matches: {$property->address}";
                     break;
                 }
             }
         }
-        if (!empty($lead->budget) && $lead->budget !== 'NULL' && !empty($property->budget_price) && 
-            $this->isBudgetMatch($lead->budget, $property->budget_price)) 
-        {
+        if (
+            !empty($lead->budget) && $lead->budget !== 'NULL' && !empty($property->budget_price) &&
+            $this->isBudgetMatch($lead->budget, $property->budget_price)
+        ) {
             $reasons[] = "Budget range matches: {$property->budget_price}";
         }
-        
+
         return $reasons;
     }
 
@@ -2897,9 +2643,8 @@ class LeadController extends Controller
     {
         $leadRange = $this->parseBudgetRange($leadBudget);
         $propertyRange = $this->parseBudgetRange($propertyBudget);
-        
-        if (!$leadRange || !$propertyRange) 
-        {
+
+        if (!$leadRange || !$propertyRange) {
             return false;
         }
         return !($propertyRange['max'] < $leadRange['min'] || $propertyRange['min'] > $leadRange['max']);
@@ -2913,8 +2658,7 @@ class LeadController extends Controller
             'phone' => 'required'
         ]);
 
-        if ($validator->fails()) 
-        {
+        if ($validator->fails()) {
             return response()->json([
                 'status' => 400,
                 'message' => 'Invalid request: ' . implode(', ', $validator->errors()->all()),
@@ -2922,22 +2666,19 @@ class LeadController extends Controller
             ]);
         }
 
-        try 
-        {
+        try {
             $property = DB::table('properties')->where('id', $request->property_id)->first();
             $phone = $request->phone;
-            if (!$property) 
-            {
+            if (!$property) {
                 return response()->json([
                     'status' => 404,
                     'message' => 'Property not found',
                     'data' => null
                 ]);
             }
-            
+
             $lead = DB::table('leads')->where('id', $request->lead_id)->first();
-            if (!$lead) 
-            {
+            if (!$lead) {
                 return response()->json([
                     'status' => 404,
                     'message' => 'Lead not found',
@@ -2956,8 +2697,7 @@ class LeadController extends Controller
             $message .= "┌─────────────────────\n";
             $message .= "│ 🏙️ *City:* {$property->city}\n";
             $message .= "│ 🗺️ *State:* {$property->state}\n";
-            if (!empty($property->address)) 
-            {
+            if (!empty($property->address)) {
                 $message .= "│ 📍 *Address:* {$property->address}\n";
             }
             $message .= "└─────────────────────\n\n";
@@ -2965,47 +2705,38 @@ class LeadController extends Controller
             $message .= "┌─────────────────────\n";
             $message .= "│ 💵 *Budget:* {$property->budget_price}\n";
             $message .= "│ 📈 *Status:* {$property->property_status}\n";
-            if (!empty($property->size_sqft)) 
-            {
+            if (!empty($property->size_sqft)) {
                 $message .= "│ 📐 *Size:* {$property->size_sqft} sq.ft\n";
             }
             $message .= "└─────────────────────\n\n";
-            if (!empty($property->amenities)) 
-            {
+            if (!empty($property->amenities)) {
                 $amenities = is_string($property->amenities) ? json_decode($property->amenities, true) : $property->amenities;
-                if (!empty($amenities) && is_array($amenities)) 
-                {
+                if (!empty($amenities) && is_array($amenities)) {
                     $message .= "✨ *AMENITIES*\n";
                     $message .= "┌─────────────────────\n";
-                    foreach(array_slice($amenities, 0, 5) as $amenity) 
-                    {
+                    foreach (array_slice($amenities, 0, 5) as $amenity) {
                         $message .= "│ • {$amenity}\n";
                     }
-                    if (count($amenities) > 5) 
-                    {
+                    if (count($amenities) > 5) {
                         $message .= "│ • + " . (count($amenities) - 5) . " more amenities\n";
                     }
                     $message .= "└─────────────────────\n\n";
                 }
             }
-            if (!empty($lead->phone)) 
-            {
+            if (!empty($lead->phone)) {
                 $message .= "📞 *Phone:* {$lead->phone}\n";
             }
             $message .= "━━━━━━━━━━━━━━━━━━━\n\n";
-            
+
             $message .= "🕐 *Schedule a visit today!*\n";
             $message .= "Reply 'YES' to book a site visit.";
-            if (strlen($phone) == 10) 
-            {
+            if (strlen($phone) == 10) {
                 $phone = '91' . $phone;
             }
             $propertyLink = url("/property/{$property->id}");
             $whatsappUrl = "https://wa.me/{$phone}?text=" . urlencode($message);
-            try 
-            {
-                if (Schema::hasTable('property_shares')) 
-                {
+            try {
+                if (Schema::hasTable('property_shares')) {
                     DB::table('property_shares')->insert([
                         'property_id' => $property->id,
                         'lead_id' => $lead->id,
@@ -3014,9 +2745,7 @@ class LeadController extends Controller
                         'shared_at' => now()
                     ]);
                 }
-            } 
-            catch (\Exception $logError) 
-            {
+            } catch (\Exception $logError) {
             }
 
             return response()->json([
@@ -3024,10 +2753,7 @@ class LeadController extends Controller
                 'data' => $whatsappUrl,
                 'message' => 'Professional WhatsApp link generated successfully'
             ]);
-
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => 500,
                 'message' => 'Error generating WhatsApp link: ' . $e->getMessage(),
@@ -3038,19 +2764,17 @@ class LeadController extends Controller
 
     public function getPropertyDetails($id)
     {
-        try 
-        {
+        try {
             $property = DB::table('projects')->where('id', $id)->first();
-            if (!$property) 
-            {
+            if (!$property) {
                 return response()->json([
                     'status' => 404,
                     'message' => 'Property not found',
                     'data' => ''
                 ]);
             }
-            $property->gallery_images = !empty($property->gallery_images) 
-                ? json_decode($property->gallery_images) 
+            $property->gallery_images = !empty($property->gallery_images)
+                ? json_decode($property->gallery_images)
                 : [];
 
             return response()->json([
@@ -3058,10 +2782,7 @@ class LeadController extends Controller
                 'data' => $property,
                 'message' => 'Image Retreive Successfully'
             ]);
-
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => 500,
                 'message' => 'Error fetching property details: ' . $e->getMessage(),
@@ -3069,5 +2790,4 @@ class LeadController extends Controller
             ]);
         }
     }
- 
 }

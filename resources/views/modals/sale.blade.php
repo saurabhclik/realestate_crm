@@ -16,8 +16,14 @@
                         <select name="sales_person_id" id="sales_person_id" class="form-select" required>
                             <option value="">Select Salesperson</option>
                             @foreach ($salespeople as $person)
-                                <option value="{{ $person->id }}">{{ $person->name }}</option>
+                            <option value="{{ $person->id }}">{{ $person->name }}</option>
                             @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Leads</label>
+                        <select name="lead_id" id="lead_id" class="form-select" required>
+                            <option value="">Select Lead</option>
                         </select>
                     </div>
                     <div class="mb-3">
@@ -53,3 +59,55 @@
         </form>
     </div>
 </div>
+
+<script>
+    $(document).ready(function() {
+
+        $('#sales_person_id').on('change', function() {
+
+            let userId = $(this).val();
+
+            // clear fields
+            $('#lead_id').html('<option>Loading...</option>');
+            $('#name, #email, #number').val('');
+
+            if (userId) {
+                $.ajax({
+                    url: "{{ route('inventory.getLeads', ':id') }}".replace(':id', userId),
+                    type: 'GET',
+                    success: function(data) {
+
+                        let options = '<option value="">Select Lead</option>';
+
+                        data.forEach(function(lead) {
+                            options += `<option value="${lead.id}" 
+                            data-name="${lead.name}" 
+                            data-email="${lead.email}" 
+                            data-phone="${lead.phone}">
+                            ${lead.name}
+                        </option>`;
+                        });
+
+                        $('#lead_id').html(options);
+                    },
+                    error: function() {
+                        $('#lead_id').html('<option>Error loading leads</option>');
+                    }
+                });
+            } else {
+                $('#lead_id').html('<option value="">Select Lead</option>');
+            }
+        });
+
+        // ✅ AUTO FILL (UNCOMMENTED + FIXED)
+        $('#lead_id').on('change', function() {
+
+            let selected = this.options[this.selectedIndex];
+
+            $('#name').val(selected.getAttribute('data-name') || '');
+            $('#email').val(selected.getAttribute('data-email') || '');
+            $('#number').val(selected.getAttribute('data-phone') || '');
+        });
+
+    });
+</script>

@@ -48,15 +48,23 @@
                                 <button class="btn btn-sm btn-primary edit-btn" id="editPostSale" data-id="{{ $ps->id }}">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn btn-sm btn-info" onclick="showDocuments({{ $ps->id }})">
+                                <button class="btn btn-sm btn-info" onclick="showDocuments('{{ $ps->id }}')">
                                     <i class="fas fa-file-upload"></i>
                                 </button>
-                                <button class="btn btn-sm btn-success" onclick="showShareLinks({{ $ps->id }})" title="Manage Share Links">
+                                <button class="btn btn-sm btn-success" onclick="showShareLinks('{{ $ps->id }}')" title="Manage Share Links">
                                     <i class="fas fa-link"></i>
                                 </button>
-                                <button class="btn btn-sm btn-danger" onclick="deletePostSale({{ $ps->id }})">
+                                @if(session('user_type') == 'admin')
+                                <!-- <button class="btn btn-sm btn-danger" onclick="deletePostSale('{{ $ps->id }}')">
+                                    <i class="fas fa-trash"></i>
+                                </button> -->
+
+                                <button class="btn btn-sm btn-danger delete-postsale-btn"
+                                    data-id="{{ $ps->id }}"
+                                    data-name="{{ $ps->applicant_name }}">
                                     <i class="fas fa-trash"></i>
                                 </button>
+                                @endif
                             </td>
                         </tr>
                         @endforeach
@@ -66,61 +74,101 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="deletePostSaleModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Delete Customer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form id="deletePostSaleForm">
+                @csrf
+                <input type="hidden" id="deletePostSaleId">
+
+                <!-- <div class="modal-body">
+                    <div class="alert alert-warning">
+                        This action cannot be undone.
+                    </div>
+
+                    <p>Delete: <strong id="deletePostSaleName"></strong>?</p>
+
+                    <input type="password" id="deletePassword" class="form-control" placeholder="Enter password">
+                </div> -->
+
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Warning:</strong> This action cannot be undone. All lead data, comments, and history will be permanently deleted.
+                    </div>
+
+                    <div class="mb-3">
+                        <p>Are you sure you want to delete Customer: <strong id="deletePostSaleName"></strong>?</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="deletePassword" class="form-label">Admin Password</label>
+                        <input type="password" class="form-control" id="deletePassword" name="password" placeholder="Enter your password" required>
+                        <small class="text-muted">For security, admin password is required to delete leads.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger" id="deleteSubmitBtn">
+                        <span id="deleteSubmitText">Delete Customer</span>
+                        <span id="deleteSubmitSpinner" class="d-none">
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Deleting...
+                        </span>
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
 <script>
     let currentPostSaleId = null;
 
-    $('#project_category_id').change(function() 
-    {
+    $('#project_category_id').change(function() {
         var categoryName = $(this).val();
-        if (categoryName) 
-        {
+        if (categoryName) {
             $.ajax({
                 url: "{{ url('post-sale/subcategories') }}/" + encodeURIComponent(categoryName),
                 type: "GET",
-                success: function(response) 
-                {
+                success: function(response) {
                     $('#project_subcategory_id').empty().append('<option value="">Select Subcategory</option>');
-                    if (response.success && response.data.length > 0) 
-                    {
-                        $.each(response.data, function(key, value) 
-                        {
-                            $('#project_subcategory_id').append('<option value="'+value.name+'">'+value.name+'</option>');
+                    if (response.success && response.data.length > 0) {
+                        $.each(response.data, function(key, value) {
+                            $('#project_subcategory_id').append('<option value="' + value.name + '">' + value.name + '</option>');
                         });
-                    } 
-                    else 
-                    {
+                    } else {
                         $('#project_subcategory_id').append('<option value="">No subcategories found</option>');
                     }
                     const selectedSubcategory = $('#project_subcategory_id').attr('data-selected');
-                    if (selectedSubcategory) 
-                    {
+                    if (selectedSubcategory) {
                         $('#project_subcategory_id').val(selectedSubcategory);
                         $('#project_subcategory_id').removeAttr('data-selected');
                     }
                 },
-                error: function(xhr) 
-                {
+                error: function(xhr) {
                     console.error('Error fetching subcategories:', xhr.responseText);
                     $('#project_subcategory_id').empty().append('<option value="">Error loading subcategories</option>');
                 }
             });
-        } 
-        else 
-        {
+        } else {
             $('#project_subcategory_id').empty().append('<option value="">Select Subcategory</option>');
         }
     });
 
-    $(document).on('click', '#editPostSale', function() 
-    {
+    $(document).on('click', '#editPostSale', function() {
         var id = $(this).attr('data-id');
         $.ajax({
             url: "{{ url('post-sale') }}/" + id + "/edit",
             type: "GET",
-            success: function(response) 
-            {
-                if (response && response.success && response.data) 
-                {
+            success: function(response) {
+                if (response && response.success && response.data) {
                     const data = response.data;
                     $('#post-sale-id').val(data.id);
                     $('#lead_id').val(data.lead_id).trigger('change');
@@ -136,12 +184,10 @@
                     $('#permanent_address').val(data.permanent_address);
                     $('#current_address').val(data.current_address);
 
-                    if (data.checklist) 
-                    {
+                    if (data.checklist) {
                         $('.checklist-item').prop('checked', false);
                         var checklistItems = JSON.parse(data.checklist);
-                        checklistItems.forEach(function(item) 
-                        {
+                        checklistItems.forEach(function(item) {
                             $('#checklist_' + item).prop('checked', true);
                         });
                     }
@@ -154,8 +200,7 @@
                     $('#postSaleModal').modal('show');
                 }
             },
-            error: function(xhr) 
-            {
+            error: function(xhr) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error!',
@@ -166,18 +211,15 @@
         });
     });
 
-    $('#postSaleForm').on('submit', function(e) 
-    {
-        if (this.checkValidity() === false) 
-        {
+    $('#postSaleForm').on('submit', function(e) {
+        if (this.checkValidity() === false) {
             e.preventDefault();
             e.stopPropagation();
         }
         this.classList.add('was-validated');
     });
 
-    $('[data-bs-target="#postSaleModal"]').click(function() 
-    {
+    $('[data-bs-target="#postSaleModal"]').click(function() {
         $('#postSaleForm')[0].reset();
         $('#postSaleForm').find('input[name="_method"]').remove();
         $('#postSaleForm').attr('action', "{{ url('post-sale') }}");
@@ -188,24 +230,21 @@
         $('#post-sale-id').val('');
     });
 
-    function showDocuments(id) 
-    {
+    function showDocuments(id) {
         currentPostSaleId = id;
         $('#post_sale_id').val(id);
         $('#documentsModal').modal('show');
         loadDocuments();
     }
 
-    function showShareLinks(id) 
-    {
+    function showShareLinks(id) {
         currentPostSaleId = id;
         $('#shareLink').val('Generating link...');
         $('#shareLinksModal').modal('show');
         generateShareLink();
     }
 
-    function generateShareLink() 
-    {
+    function generateShareLink() {
         $.ajax({
             url: '{{ route("post-sale.rate-link") }}',
             type: 'POST',
@@ -213,33 +252,27 @@
                 _token: '{{ csrf_token() }}',
                 id: currentPostSaleId
             },
-            success: function(response) 
-            {
-                if (response.link) 
-                {
+            success: function(response) {
+                if (response.link) {
                     $('#shareLink').val(response.link);
                     updateShareButtons(response.link);
                     toastr.success('Share link generated! This link expires in 7 days.');
-                } 
-                else 
-                {
+                } else {
                     $('#shareLink').val('Failed to generate link');
                     toastr.error('Failed to generate share link');
                 }
             },
-            error: function(xhr) 
-            {
+            error: function(xhr) {
                 $('#shareLink').val('Error generating link');
                 toastr.error('Error generating share link: ' + (xhr.responseJSON?.message || 'Unknown error'));
             }
         });
     }
 
-    function updateShareButtons(link) 
-    {
+    function updateShareButtons(link) {
         const encodedLink = encodeURIComponent(link);
         const text = encodeURIComponent('Please rate our service using this link');
-        
+
         $('#shareWhatsApp').attr('href', `https://wa.me/?text=${text}%20${encodedLink}`);
         $('#shareEmail').attr('href', `mailto:?subject=Rate Our Service&body=${text}%20${encodedLink}`);
         $('#shareTelegram').attr('href', `https://t.me/share/url?url=${encodedLink}&text=${text}`);
@@ -248,28 +281,22 @@
         $('#shareTwitter').attr('href', `https://twitter.com/intent/tweet?url=${encodedLink}&text=${text}`);
     }
 
-    $('#copyLink').click(function() 
-    {
+    $('#copyLink').click(function() {
         const link = $('#shareLink').val();
-        navigator.clipboard.writeText(link).then(function() 
-        {
+        navigator.clipboard.writeText(link).then(function() {
             toastr.success('Link copied to clipboard!');
-        }).catch(function() 
-        {
+        }).catch(function() {
             $('#shareLink').select();
             document.execCommand('copy');
             toastr.success('Link copied to clipboard!');
         });
     });
 
-    function loadDocuments() 
-    {
-        $.get(`/post-sale/${currentPostSaleId}/documents`, function(res) 
-        {
+    function loadDocuments() {
+        $.get(`/post-sale/${currentPostSaleId}/documents`, function(res) {
             const list = $('#documentsList');
             list.empty();
-            if (res.data.length === 0) 
-            {
+            if (res.data.length === 0) {
                 list.append(`<tr><td colspan="4" class="text-center text-muted">No documents</td></tr>`);
                 return;
             }
@@ -294,8 +321,7 @@
         });
     }
 
-    $('#uploadForm').on('submit', function(e) 
-    {
+    $('#uploadForm').on('submit', function(e) {
         e.preventDefault();
         const formData = new FormData(this);
         $.ajax({
@@ -304,33 +330,31 @@
             data: formData,
             processData: false,
             contentType: false,
-            success: function(res) 
-            {
+            success: function(res) {
                 Swal.fire('Success', res.message, 'success');
                 $('#uploadForm')[0].reset();
                 loadDocuments();
             },
-            error: function(xhr) 
-            {
+            error: function(xhr) {
                 Swal.fire('Error', xhr.responseJSON?.message || 'Upload failed', 'error');
             }
         });
     });
 
-    function deleteDocument(id) 
-    {
+    function deleteDocument(id) {
         Swal.fire({
             title: 'Delete?',
             text: 'This cannot be undone!',
             icon: 'warning',
             showCancelButton: true,
         }).then(result => {
-            if (result.isConfirmed) 
-            {
+            if (result.isConfirmed) {
                 $.ajax({
                     url: `/post-sale/document/${id}`,
                     type: 'DELETE',
-                    data: { _token: '{{ csrf_token() }}' },
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
                     success: () => {
                         Swal.fire('Deleted!', '', 'success');
                         loadDocuments();
@@ -341,25 +365,87 @@
         });
     }
 
-    function deletePostSale(id) 
-    {
-        Swal.fire({
-            title: 'Delete Customer?',
-            icon: 'warning',
-            showCancelButton: true,
-        }).then(result => {
-            if (result.isConfirmed) 
-            {
-                $.ajax({
-                    url: `/post-sale/${id}`,
-                    type: 'DELETE',
-                    data: { _token: '{{ csrf_token() }}' },
-                    success: () => {
-                        Swal.fire('Deleted!', '', 'success').then(() => location.reload());
-                    }
-                });
-            }
+    // open modal
+    $(document).on('click', '.delete-postsale-btn', function() {
+        let id = $(this).data('id');
+        let name = $(this).data('name');
+
+        $('#deletePostSaleId').val(id);
+        $('#deletePostSaleName').text(name);
+        $('#deletePassword').val('');
+
+        $('#deletePostSaleModal').modal('show');
+    });
+
+    $('#deletePostSaleForm').on('submit', function(e) {
+        e.preventDefault();
+
+        let id = $('#deletePostSaleId').val();
+        let password = $('#deletePassword').val();
+
+        if (!password) {
+            toastr.error('Enter password');
+            return;
+        }
+
+        $.ajax({
+            url: `/post-sale/${id}`,
+            type: 'DELETE',
+            data: {
+                _token: '{{ csrf_token() }}',
+                password: password
+            },
+
+            success: function(res) {
+
+                if (res.status === 200) {
+                    toastr.success(res.message);
+                    $('#deletePostSaleModal').modal('hide');
+
+                    $(`button[data-id="${res.id}"]`).closest('tr').remove();
+                } else if (res.status === 403) {
+                   
+                    toastr.error(res.message);
+
+                    $('#deleteSubmitBtn').prop('disabled', true);
+                    $('#deleteSubmitText').text('Blocked for 1 day');
+                    $('#deleteSubmitSpinner').addClass('d-none');
+                } else {
+                    
+                    toastr.error(res.message);
+
+                    $('#deletePassword').val('');
+                }
+            },
         });
-    }
+    });
+
+    $('#deletePostSaleModal').on('hidden.bs.modal', function() {
+        $('#deletePassword').val('');
+
+        $('#deleteSubmitBtn').prop('disabled', false);
+        $('#deleteSubmitText').text('Delete Customer');
+        $('#deleteSubmitSpinner').addClass('d-none');
+    });
+    // function deletePostSale(id) {
+    //     Swal.fire({
+    //         title: 'Delete Customer?',
+    //         icon: 'warning',
+    //         showCancelButton: true,
+    //     }).then(result => {
+    //         if (result.isConfirmed) {
+    //             $.ajax({
+    //                 url: `/post-sale/${id}`,
+    //                 type: 'DELETE',
+    //                 data: {
+    //                     _token: '{{ csrf_token() }}'
+    //                 },
+    //                 success: () => {
+    //                     Swal.fire('Deleted!', '', 'success').then(() => location.reload());
+    //                 }
+    //             });
+    //         }
+    //     });
+    // }
 </script>
 @endsection

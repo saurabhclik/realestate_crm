@@ -12,14 +12,12 @@ class InventoryController extends Controller
     public function index(Request $request)
     {
         $activeFeatures = Session::get('active_features', []);
-        if(in_array('inventory_management', $activeFeatures))
-        {
+        if (in_array('inventory_management', $activeFeatures)) {
             $user_type = Session::get('user_type');
             $project_id = $request->query('id');
             $projects = DB::table('projects')->get();
             $selectedProject = $projects->firstWhere('id', $project_id);
-            if (!$selectedProject && $projects->count() > 0) 
-            {
+            if (!$selectedProject && $projects->count() > 0) {
                 $selectedProject = $projects->first();
                 $project_id = $selectedProject->id;
             }
@@ -32,10 +30,9 @@ class InventoryController extends Controller
                 'total_leads' => 0
             ];
 
-            if ($selectedProject) 
-            {
+            if ($selectedProject) {
                 $inventoryDetails = DB::table('inventory_det')
-                    ->where('inventory_id', $project_id) 
+                    ->where('inventory_id', $project_id)
                     ->get();
 
                 $statusCounts = DB::table('inventory_det')
@@ -61,9 +58,7 @@ class InventoryController extends Controller
                 'user_type',
                 'projects'
             ));
-        }
-        else
-        {
+        } else {
             abort(404);
         }
     }
@@ -76,23 +71,20 @@ class InventoryController extends Controller
             'size' => 'required|string|max:50',
         ]);
 
-        if ($validator->fails()) 
-        {
+        if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput()
                 ->with('error', $validator->errors()->first());
         }
 
-        try 
-        {
+        try {
             $exists = DB::table('inventory_det')
                 ->where('inventory_id', $request->inventory_id)
                 ->where('unit_no', $request->unit_no)
                 ->exists();
 
-            if ($exists) 
-            {
+            if ($exists) {
                 return redirect()->back()
                     ->withInput()
                     ->with('error', 'Unit number already exists for this project.');
@@ -108,9 +100,7 @@ class InventoryController extends Controller
             ]);
 
             return redirect()->back()->with('success', 'Inventory unit added successfully.');
-        } 
-        catch (\Exception $error) 
-        {
+        } catch (\Exception $error) {
             return redirect()->back()
                 ->withInput()
                 ->with('error', $error->getMessage());
@@ -122,6 +112,7 @@ class InventoryController extends Controller
         $validated = $request->validate([
             'id' => 'required|integer|exists:inventory_det,id',
             'sales_person_id' => 'required|integer|exists:users,id',
+            'lead_id' => 'required|integer|exists:leads,id',
             'name' => 'required|string|max:100',
             'email' => 'required|email|max:100',
             'number' => 'required|string|max:20',
@@ -129,12 +120,12 @@ class InventoryController extends Controller
         ]);
 
         DB::beginTransaction();
-        try 
-        {
+        try {
             DB::table('inventory_det')
                 ->where('id', $request->id)
                 ->update([
                     'sales_person_id' => $request->sales_person_id,
+                    'lead_id' => $request->lead_id,
                     'name' => $request->name,
                     'email' => $request->email,
                     'number' => $request->number,
@@ -145,6 +136,7 @@ class InventoryController extends Controller
             DB::table('inventory_history')->insert([
                 'inventory_det_id' => $request->id,
                 'sales_person_id' => $request->sales_person_id,
+                'lead_id' => $request->lead_id,
                 'name' => $request->name,
                 'email' => $request->email,
                 'number' => $request->number,
@@ -155,14 +147,22 @@ class InventoryController extends Controller
             DB::commit();
 
             return redirect()->back()->with('success', 'Inventory sale updated successfully.');
-        } 
-        catch (\Exception $error) 
-        {
+        } catch (\Exception $error) {
             DB::rollBack();
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Failed to update sale. Please try again. ' . $error->getMessage());
         }
+    }
+
+    public function getLeads($userId)
+    {
+        $leads = DB::table('leads')
+            ->where('user_id', $userId)
+            ->select('id', 'name', 'email', 'phone')
+            ->get();
+
+        return response()->json($leads);
     }
 
     public function getSaleHistory(Request $request)
@@ -186,16 +186,14 @@ class InventoryController extends Controller
             'inventory_file' => 'required|file|mimes:csv,txt'
         ]);
 
-        if ($validator->fails()) 
-        {
+        if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput()
                 ->with('error', $validator->errors()->first());
         }
 
-        try 
-        {
+        try {
             $file = $request->file('inventory_file');
             $projectId = $request->inventory_id;
             $imported = 0;
@@ -204,34 +202,48 @@ class InventoryController extends Controller
             if ($file->getClientOriginalExtension() == 'csv' || $file->getClientOriginalExtension() == 'txt') {
                 $handle = fopen($file->getPathname(), 'r');
                 $header = fgetcsv($handle);
-                while (($row = fgetcsv($handle)) !== FALSE) 
-                {
-                    if (count($row) >= 2) 
-                    {
-                        $unitNo = trim($row[0]);
-                        $size = trim($row[1]);
-                        
-                        if (!empty($unitNo) && !empty($size)) 
-                        {
+                while (($row = fgetcsv($handle)) !== FALSE) {
+
+                    if (count($row) >= 5) {
+                        $projectName   = trim($row[0]);
+                        $propertyType  = trim($row[1]);
+                        $location      = trim($row[2]);
+                        $unitNo        = trim($row[3]);
+                        $size          = trim($row[4]);
+
+
+                        if (!empty($projectName) && !empty($unitNo)) {
+
+                            // get project id by name
+                            $project = DB::table('projects')
+                                ->where('project_name', $projectName)
+                                ->first();
+
+                            if (!$project) {
+                                $errors[] = "Project {$projectName} not found";
+                                continue;
+                            }
+
                             $exists = DB::table('inventory_det')
-                                ->where('inventory_id', $projectId)
+                                ->where('inventory_id', $project->id)
                                 ->where('unit_no', $unitNo)
                                 ->exists();
-                                
-                            if (!$exists) 
-                            {
+
+                            if (!$exists) {
+
                                 DB::table('inventory_det')->insert([
-                                    'inventory_id' => $projectId,
+                                    'inventory_id' => $project->id,
+                                    'property_type' => $propertyType,
+                                    'location' => $location,
                                     'unit_no' => $unitNo,
                                     'size' => $size,
                                     'status' => 'pending',
                                     'created_at' => now(),
                                     'updated_at' => now(),
                                 ]);
+
                                 $imported++;
-                            }
-                            else
-                            {
+                            } else {
                                 $errors[] = "Unit {$unitNo} already exists";
                             }
                         }
@@ -241,37 +253,57 @@ class InventoryController extends Controller
             }
 
             $message = "Successfully imported {$imported} inventory units.";
-            if (!empty($errors)) 
-            {
+            if (!empty($errors)) {
                 $message .= " Errors: " . implode(', ', array_slice($errors, 0, 5));
-                if (count($errors) > 5) 
-                {
+                if (count($errors) > 5) {
                     $message .= " and " . (count($errors) - 5) . " more";
                 }
             }
             return redirect()->back()->with('success', $message);
-        } 
-        catch (\Exception $error) 
-        {
+        } catch (\Exception $error) {
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Import failed: ' . $error->getMessage());
         }
     }
 
+
     public function downloadTemplate()
     {
         $headers = [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="inventory_template.csv"',
+            'Content-Disposition' => 'attachment; filename="inventory_data.csv"',
         ];
 
-        $callback = function() 
-        {
+        $callback = function () {
+
             $file = fopen('php://output', 'w');
-            fputcsv($file, ['unit_no', 'size']);
-            fputcsv($file, ['UNIT-001', '1000 sqft']);
-            fputcsv($file, ['UNIT-002', '1500 sqft']);
+
+            //  HEADER
+            fputcsv($file, ['project_name', 'property_type', 'location', 'unit_no', 'size']);
+
+            //  FETCH REAL DATA
+            $data = DB::table('inventory_det as i')
+                ->join('projects as p', 'i.inventory_id', '=', 'p.id')
+                ->select(
+                    'p.project_name',
+                    'i.property_type',
+                    'i.location',
+                    'i.unit_no',
+                    'i.size'
+                )
+                ->get();
+
+            foreach ($data as $row) {
+                fputcsv($file, [
+                    $row->project_name,
+                    $row->property_type,
+                    $row->location,
+                    $row->unit_no,
+                    $row->size
+                ]);
+            }
+
             fclose($file);
         };
 

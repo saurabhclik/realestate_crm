@@ -15,20 +15,21 @@
                         <select class="form-control select2" id="import_inventory_id" name="inventory_id" required>
                             <option value="">Select Project</option>
                             @foreach($projects as $project)
-                                <option value="{{ $project->id }}" 
-                                    {{ ($selectedProject->id ?? '') == $project->id ? 'selected' : '' }}>
-                                    {{ $project->project_name }}
-                                </option>
+                            <option value="{{ $project->id }}"
+                                {{ ($selectedProject->id ?? '') == $project->id ? 'selected' : '' }}>
+                                {{ $project->project_name }}
+                            </option>
                             @endforeach
                         </select>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="inventory_file" class="form-label">CSV File</label>
-                        <input type="file" class="form-control" id="inventory_file" name="inventory_file" 
-                               accept=".csv,.txt" required>
+                        <input type="file" class="form-control" id="inventory_file" name="inventory_file"
+                            accept=".csv,.txt" required>
                         <div class="form-text">
-                            <strong>File format:</strong> CSV file with columns: unit_no, size<br>
+                            <strong>File format:</strong> CSV file with columns:<br>
+                            project_name, property_type, location, unit_no, size
                         </div>
                     </div>
                 </div>

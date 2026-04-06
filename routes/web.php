@@ -413,6 +413,7 @@ Route::middleware(['check.login', 'reception.only'])->group(function ()
             Route::get('/', [InventoryController::class, 'index'])->name('inventory.index');
             Route::post('/store', [InventoryController::class, 'store'])->name('inventory.store');
             Route::post('/update-sale', [InventoryController::class, 'updateSale'])->name('inventory.updateSale');
+            Route::get('/get-leads/{userId}', [InventoryController::class, 'getLeads'])->name('inventory.getLeads');
             Route::post('/sale-history', [InventoryController::class, 'getSaleHistory'])->name('inventory.saleHistory');
             Route::post('/import', [InventoryController::class, 'import'])->name('inventory.import');
             Route::get('/download-template', [InventoryController::class, 'downloadTemplate'])->name('inventory.downloadTemplate');

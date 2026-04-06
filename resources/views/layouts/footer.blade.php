@@ -2037,140 +2037,209 @@
                     }
                 });
 
-                $('#btnExportExcel').on('click', function() 
-                {
-                    var $btn = $(this);
-                    var originalHtml = $btn.html();
-                    $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Please wait...');
+                $('#btnExportExcel').on('click', function()
+               {
+                   var $btn = $(this);
+                   var originalHtml = $btn.html();
+                   $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Please wait...');
 
-                    setTimeout(function() 
-                    {
-                        var exportTable = document.createElement('table');
-                        var thead = document.createElement('thead');
-                        var tbody = document.createElement('tbody');
-                        var headerRow = document.createElement('tr');
+                   setTimeout(function()
+                   {
+                       var exportTable = document.createElement('table');
+                       var thead = document.createElement('thead');
+                       var tbody = document.createElement('tbody');
+                       var headerRow = document.createElement('tr');
 
-                        $('#table thead th').each(function(index) 
-                        {
-                            var thText = $(this).text().trim();
-                            if (!$(this).hasClass('no-sort')) 
-                            {
-                                var th = document.createElement('th');
-                                th.textContent = thText;
-                                headerRow.appendChild(th);
-                            }
-                        });
-                        thead.appendChild(headerRow);
-                        exportTable.appendChild(thead);
+                       $('#table thead th').each(function(index)
+                       {
+                           var thText = $(this).text().trim();
+                           if (!$(this).hasClass('no-sort'))
+                           {
+                               var th = document.createElement('th');
+                               th.textContent = thText;
+                               headerRow.appendChild(th);
+                           }
+                       });
+                       thead.appendChild(headerRow);
+                       exportTable.appendChild(thead);
 
-                        $('#table tbody tr').each(function() 
-                        {
-                            var tr = document.createElement('tr');
-                            $(this).find('td').each(function(index) 
-                            {
-                                if ((index > 0 || !$(this).find('input[type="checkbox"]').length)) 
-                                {
-                                    var td = document.createElement('td');
-                                    if ($(this).find('.comment-text').length) 
-                                    {
-                                        td.textContent = $(this).find('.comment-text').text().trim();
-                                    } 
-                                    else if ($(this).find('h6').length) 
-                                    {
-                                        td.textContent = $(this).find('h6').text().trim() + ' - ' + $(this).find('.text-muted').text().trim();
-                                    } 
-                                    else if ($(this).find('.cust-badge').length) 
-                                    {
-                                        td.textContent = $(this).find('.cust-badge').text().trim();
-                                    } 
-                                    else if ($(this).find('a').length && $(this).find('a').attr('href')?.startsWith('mailto:')) 
-                                    {
-                                        td.textContent = $(this).find('a').text().trim();
-                                    } 
-                                    else 
-                                    {
-                                        td.textContent = $(this).text().trim();
-                                    }
-                                    tr.appendChild(td);
-                                }
-                            });
-                            tbody.appendChild(tr);
-                        });
-                        exportTable.appendChild(tbody);
+                       $('#table tbody tr').each(function()
+                       {
+                           var tr = document.createElement('tr');
+                           $(this).find('td').each(function(index)
+                           {
+                               if ((index > 0 || !$(this).find('input[type="checkbox"]').length))
+                               {
+                                   var td = document.createElement('td');
+                                   if ($(this).find('.comment-text').length)
+                                   {
+                                       let text = $(this).find('.comment-text').text().trim();
+                                       text = text.replace(/View more/ig, '').trim();
+                                       td.textContent = text;
+                                   }
+                                   else if ($(this).find('h6').length)
+                                   {
+                                       let text = $(this).find('h6').text().trim() + ' - ' + $(this).find('.text-muted').text().trim();
+                                       text = text.replace(/View more/ig, '').trim();
+                                       td.textContent = text;
+                                   }
+                                   else if ($(this).find('.cust-badge').length)
+                                   {
+                                       let text = $(this).find('.cust-badge').text().trim();
+                                       text = text.replace(/View more/ig, '').trim();
+                                       td.textContent = text;
+                                   }
+                                   else if ($(this).find('a').length && $(this).find('a').attr('href')?.startsWith('mailto:'))
+                                   {
+                                       let text = $(this).find('a').text().trim();
+                                       text = text.replace(/View more/ig, '').trim();
+                                       td.textContent = text;
+                                   }
+                                   else
+                                   {
+                                       let cellText = $(this).text().trim();
+                                       cellText = cellText.replace(/View more/ig, '').trim();
 
-                        var wb = XLSX.utils.table_to_book(exportTable, { sheet: "Reports" });
-                        XLSX.writeFile(wb, "reports.xlsx");
+                                       // Fix Lead ID column (column index 1)
+                                       if (index === 1) {
+                                           let match = cellText.match(/\d+$/); // extract last number
+                                           td.textContent = match ? match[0] : cellText;
+                                       }
 
-                        $btn.prop('disabled', false).html(originalHtml);
-                    }, 100);
-                });
+                                       //  Fix Lead Details column (column index 2)
+                                       else if (index === 2) {
+                                           let parts = cellText.split('-');
+                                           if (parts.length === 2) {
+                                               let name = parts[0].trim();
+                                               let phone = parts[1].trim();
+                                               td.textContent = name + ' (' + phone + ')';
+                                           } else {
+                                               td.textContent = cellText;
+                                           }
+                                       }
 
-                $('#btnExportPDF').on('click', function() 
-                {
-                    var $btn = $(this);
-                    var originalHtml = $btn.html();
-                    $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Please wait...');
+                                       //  Default case
+                                       else {
+                                           td.textContent = cellText;
+                                       }
+                                   }
+                                   tr.appendChild(td);
+                               }
+                           });
+                           tbody.appendChild(tr);
+                       });
+                       exportTable.appendChild(tbody);
 
-                    setTimeout(function() 
-                    {
-                        var { jsPDF } = window.jspdf;
-                        var doc = new jsPDF('l', 'pt', 'a4');
-                        doc.setFontSize(16);
-                        doc.text("Leads Report", 40, 40);
-                        doc.setFontSize(10);
-                        doc.text("Generated on: " + new Date().toLocaleString(), 40, 60);
+                       var wb = XLSX.utils.table_to_book(exportTable, { sheet: "Reports" });
+                       XLSX.writeFile(wb, "reports.xlsx");
 
-                        var headers = [];
-                        $('#table thead th').each(function() 
-                        {
-                            var thText = $(this).text().trim();
-                            if (!$(this).hasClass('no-sort')) headers.push(thText);
-                        });
 
-                        var data = [];
-                        $('#table tbody tr').each(function() 
-                        {
-                            var row = [];
-                            $(this).find('td').each(function(index) 
-                            {
-                                if ((index > 0 || !$(this).find('input[type="checkbox"]').length)) 
-                                {
-                                    if ($(this).find('.comment-text').length) 
-                                    {
-                                        row.push($(this).find('.comment-text').text().trim());
-                                    } 
-                                    else if ($(this).find('h6').length) 
-                                    {
-                                        row.push($(this).find('h6').text().trim() + ' - ' + $(this).find('.text-muted').text().trim());
-                                    } 
-                                    else if ($(this).find('.cust-badge').length) 
-                                    {
-                                        row.push($(this).find('.cust-badge').text().trim());
-                                    } 
-                                    else if ($(this).find('a').length && $(this).find('a').attr('href')?.startsWith('mailto:')) 
-                                    {
-                                        row.push($(this).find('a').text().trim());
-                                    } 
-                                    else 
-                                    {
-                                        row.push($(this).text().trim());
-                                    }
-                                }
-                            });
-                            data.push(row);
-                        });
+                       $btn.prop('disabled', false).html(originalHtml);
+                   }, 100);
+               });
 
-                        doc.autoTable({
-                            head: [headers],
-                            body: data,
-                            startY: 80,
-                            styles: { fontSize: 8 },
-                            headStyles: { fillColor: [75, 108, 183] }
-                        });
-                        doc.save("reports.pdf");
-                        $btn.prop('disabled', false).html(originalHtml);
-                    }, 100);
-                });
+                $('#btnExportPDF').on('click', function()
+               {
+                   var $btn = $(this);
+                   var originalHtml = $btn.html();
+                   $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Please wait...');
+
+
+                   setTimeout(function()
+                   {
+                       var { jsPDF } = window.jspdf;
+                       var doc = new jsPDF('l', 'pt', 'a4');
+                       doc.setFontSize(16);
+                       doc.text("Leads Report", 40, 40);
+                       doc.setFontSize(10);
+                       doc.text("Generated on: " + new Date().toLocaleString(), 40, 60);
+
+
+                       var headers = [];
+                       $('#table thead th').each(function()
+                       {
+                           var thText = $(this).text().trim();
+                           if (!$(this).hasClass('no-sort')) headers.push(thText);
+                       });
+
+
+                       var data = [];
+                       $('#table tbody tr').each(function()
+                       {
+                           var row = [];
+                           $(this).find('td').each(function(index)
+                           {
+                               if ((index > 0 || !$(this).find('input[type="checkbox"]').length))
+                               {
+                                   let text = '';
+
+
+                                   if ($(this).find('.comment-text').length)
+                                   {
+                                       text = $(this).find('.comment-text').text().trim();
+                                   }
+                                   else if ($(this).find('h6').length)
+                                   {
+                                       text = $(this).find('h6').text().trim() + ' - ' + $(this).find('.text-muted').text().trim();
+                                   }
+                                   else if ($(this).find('.cust-badge').length)
+                                   {
+                                       text = $(this).find('.cust-badge').text().trim();
+                                   }
+                                   else if ($(this).find('a').length && $(this).find('a').attr('href')?.startsWith('mailto:'))
+                                   {
+                                       text = $(this).find('a').text().trim();
+                                   }
+                                   else
+                                   {
+                                       text = $(this).text().trim();
+                                   }
+
+
+                                   // ✅ Global clean (remove "View more")
+                                   text = cleanText(text);
+
+
+                                   // ✅ Fix Lead ID (index 1)
+                                   if (index === 1) {
+                                       let match = text.match(/\d+$/);
+                                       text = match ? match[0] : text;
+                                   }
+
+
+                                   // ✅ Fix Lead Details (index 2)
+                                   else if (index === 2) {
+                                       let parts = text.split('-');
+                                       if (parts.length === 2) {
+                                           let name = parts[0].trim();
+                                           let phone = parts[1].trim();
+                                           text = name + ' (' + phone + ')';
+                                       }
+                                   }
+
+
+                                   row.push(text);
+                               }
+                           });
+                           data.push(row);
+                       });
+
+
+                       doc.autoTable({
+                           head: [headers],
+                           body: data,
+                           startY: 80,
+                           styles: { fontSize: 8 },
+                           headStyles: { fillColor: [75, 108, 183] }
+                       });
+                       doc.save("reports.pdf");
+                       $btn.prop('disabled', false).html(originalHtml);
+                   }, 100);
+               });
+               function cleanText(text) {
+                   return text.replace(/view more/ig, '').trim();
+               }
+
             </script>
             <script>
                 $(document).ready(function()

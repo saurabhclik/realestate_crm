@@ -68,6 +68,7 @@
                                     <th>Lead Details</th>
                                     <th>Agent</th>
                                     <th>Source</th>
+                                    <th>Classification</th>
                                     <th>Campaign</th>
                                     <th>Status</th>
                                     <th>Budget</th>
@@ -112,6 +113,7 @@
                                     </td>
                                     <td class="align-middle">{{ $lead->agent }}</td>
                                     <td class="align-middle"><span class="cust-badge bg-soft-info text-info">{{ $lead->source }}</span></td>
+                                    <td class="align-middle">{{ $lead->classification }}</td>
                                     <td class="align-middle">{{ $lead->campaign }}</td>
                                     <td class="align-middle">{{ $lead->status }}</td>
                                     <td class="align-middle">{{ $lead->budget }}</td>

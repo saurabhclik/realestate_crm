@@ -32,8 +32,8 @@
                             <div>
                                 <h4 class="card-title">Exhibition Leads</h4>
                                 <p class="card-title-desc mb-0">
-                                    <strong>Exhibition:</strong> {{ $exhibition->name }} | 
-                                    <strong>Location:</strong> {{ $exhibition->location }} | 
+                                    <strong>Exhibition:</strong> {{ $exhibition->name }} |
+                                    <strong>Location:</strong> {{ $exhibition->location }} |
                                     <strong>Total Leads:</strong> {{ $leads->total() }}
                                 </p>
                             </div>
@@ -53,11 +53,11 @@
                                     <div class="row g-3">
                                         <div class="col-md-4">
                                             <label for="name" class="form-label">Name</label>
-                                            <input type="text" 
-                                                class="form-control" 
-                                                id="name" 
-                                                name="name" 
-                                                value="{{ request('name') }}" 
+                                            <input type="text"
+                                                class="form-control"
+                                                id="name"
+                                                name="name"
+                                                value="{{ request('name') }}"
                                                 placeholder="Search by name">
                                         </div>
                                         <div class="col-md-4">
@@ -65,11 +65,11 @@
                                             <select class="form-select select2" id="country" name="country">
                                                 <option value="">All Countries</option>
                                                 @forelse($countries ?? [] as $country)
-                                                    <option value="{{ $country->name }}" {{ request('country') == $country->name ? 'selected' : '' }}>
-                                                        {{ $country->name }}
-                                                    </option>
+                                                <option value="{{ $country->name }}" {{ request('country') == $country->name ? 'selected' : '' }}>
+                                                    {{ $country->name }}
+                                                </option>
                                                 @empty
-                                                    <option value="" disabled>No countries found</option>
+                                                <option value="" disabled>No countries found</option>
                                                 @endforelse
                                             </select>
                                         </div>
@@ -78,11 +78,11 @@
                                             <select class="form-select select2" id="type" name="type">
                                                 <option value="">All Types</option>
                                                 @forelse($types ?? [] as $typeItem)
-                                                    <option value="{{ $typeItem->name }}" {{ request('type') == $typeItem->name ? 'selected' : '' }}>
-                                                        {{ ucfirst($typeItem->name) }}
-                                                    </option>
+                                                <option value="{{ $typeItem->name }}" {{ request('type') == $typeItem->name ? 'selected' : '' }}>
+                                                    {{ ucfirst($typeItem->name) }}
+                                                </option>
                                                 @empty
-                                                    <option value="" disabled>No types found</option>
+                                                <option value="" disabled>No types found</option>
                                                 @endforelse
                                             </select>
                                         </div>
@@ -91,19 +91,19 @@
                                             <select class="form-select select2" id="operating_country" name="operating_country">
                                                 <option value="">All Operating Countries</option>
                                                 @forelse($operatingCountries ?? [] as $opCountry)
-                                                    @if(!empty($opCountry) && $opCountry !== 'null')
-                                                        <option value="{{ $opCountry }}" {{ request('operating_country') == $opCountry ? 'selected' : '' }}>
-                                                            {{ $opCountry }}
-                                                        </option>
-                                                    @endif
+                                                @if(!empty($opCountry) && $opCountry !== 'null')
+                                                <option value="{{ $opCountry }}" {{ request('operating_country') == $opCountry ? 'selected' : '' }}>
+                                                    {{ $opCountry }}
+                                                </option>
+                                                @endif
                                                 @empty
-                                                    <option value="" disabled>No operating countries found</option>
+                                                <option value="" disabled>No operating countries found</option>
                                                 @endforelse
                                             </select>
                                         </div>
                                         <div class="col-md-2 mt-4 pt-3">
                                             @foreach(request()->except('per_page', 'page') as $key => $value)
-                                                <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                                             @endforeach
                                             <label class="d-flex align-items-center gap-2">
                                                 Show
@@ -111,10 +111,10 @@
                                                     class="form-select form-select-sm"
                                                     onchange="this.form.submit()">
                                                     @foreach([10,20,50,100,500,1000] as $size)
-                                                        <option value="{{ $size }}"
-                                                            {{ request('per_page', 10) == $size ? 'selected' : '' }}>
-                                                            {{ $size }}
-                                                        </option>
+                                                    <option value="{{ $size }}"
+                                                        {{ request('per_page', 10) == $size ? 'selected' : '' }}>
+                                                        {{ $size }}
+                                                    </option>
                                                     @endforeach
                                                 </select>
                                                 entries
@@ -132,8 +132,8 @@
                                                     <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                                                     <span class="ms-1 d-none loader-text">Please wait...</span>
                                                 </a>
-                                            </div>                    
-                                        </div>                                    
+                                            </div>
+                                        </div>
                                     </div>
                                 </form>
                             </div>
@@ -178,11 +178,10 @@
                                     @foreach($leads as $lead)
                                     <tr>
                                         <td class="text-center">
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 class="row-checkbox"
-                                                value="{{ $lead->id }}"
-                                            >
+                                                value="{{ $lead->id }}">
                                         </td>
                                         <td>{{ $loop->iteration + ($leads->currentPage() - 1) * $leads->perPage() }}</td>
                                         <td>
@@ -193,15 +192,15 @@
                                         <td>{{ $lead->email ?? 'N/A' }}</td>
                                         <td>{{ $lead->company ?? 'N/A' }}</td>
                                         <td>{{ $lead->country ?? 'N/A' }}</td>
-                                        <td>                                      
+                                        <td>
                                             @if(!empty($lead->type))
-                                                <div class="d-flex flex-wrap gap-1">
-                                                    @foreach(json_decode($lead->type) as $type)
-                                                        <span class="badge bg-info">{{ ucfirst($type) }}</span>
-                                                    @endforeach
-                                                </div>
+                                            <div class="d-flex flex-wrap gap-1">
+                                                @foreach(json_decode($lead->type) as $type)
+                                                <span class="badge bg-info">{{ ucfirst($type) }}</span>
+                                                @endforeach
+                                            </div>
                                             @else
-                                                N/A
+                                            N/A
                                             @endif
                                         </td>
                                         <td>
@@ -230,45 +229,45 @@
                                         </td>
                                         <td>
                                             @if($lead->visit_card)
-                                                @php
-                                                    $cards = json_decode($lead->visit_card, true);
-                                                @endphp
+                                            @php
+                                            $cards = json_decode($lead->visit_card, true);
+                                            @endphp
 
-                                                @if(is_array($cards))
-                                                    <div class="d-flex flex-wrap gap-1">
-                                                        @foreach($cards as $card)
-                                                            <a href="{{ asset('storage/' . $card) }}" 
-                                                            target="_blank"
-                                                            class="btn btn-sm btn-outline-primary">
-                                                                <i class="fas fa-image"></i>
-                                                            </a>
-                                                        @endforeach
-                                                    </div>
-                                                @else
-                                                    <a href="{{ asset('storage/' . $lead->visit_card) }}" target="_blank">
-                                                        View
-                                                    </a>
-                                                @endif
+                                            @if(is_array($cards))
+                                            <div class="d-flex flex-wrap gap-1">
+                                                @foreach($cards as $card)
+                                                <a href="{{ asset('storage/' . $card) }}"
+                                                    target="_blank"
+                                                    class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-image"></i>
+                                                </a>
+                                                @endforeach
+                                            </div>
                                             @else
-                                                N/A
+                                            <a href="{{ asset('storage/' . $lead->visit_card) }}" target="_blank">
+                                                View
+                                            </a>
+                                            @endif
+                                            @else
+                                            N/A
                                             @endif
                                         </td>
 
                                         <td>
                                             @if($lead->operating_country)
-                                                @php
-                                                    $countries = json_decode($lead->operating_country, true);
-                                                    if (is_array($countries)) 
-                                                    {
-                                                        echo '<small>' . implode(', ', $countries) . '</small>';
-                                                    } 
-                                                    else 
-                                                    {
-                                                        echo $lead->operating_country;
-                                                    }
-                                                @endphp
+                                            @php
+                                            $countries = json_decode($lead->operating_country, true);
+                                            if (is_array($countries))
+                                            {
+                                            echo '<small>' . implode(', ', $countries) . '</small>';
+                                            }
+                                            else
+                                            {
+                                            echo $lead->operating_country;
+                                            }
+                                            @endphp
                                             @else
-                                                N/A
+                                            N/A
                                             @endif
                                         </td>
                                         <td>
@@ -295,17 +294,17 @@
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <button type="button" 
+                                                <button type="button"
                                                     class="btn btn-sm convert-lead-btn"
                                                     data-id="{{ $lead->id }}"
                                                     data-name="{{ $lead->name }}"
                                                     title="Convert to CRM Lead">
                                                     <i class="fas fa-exchange-alt text-success"></i>
                                                 </button>
-                                                
-                                                <button type="button" 
+
+                                                <button type="button"
                                                     class="btn btn-sm edit-lead-btn"
-                                                    data-bs-toggle="modal" 
+                                                    data-bs-toggle="modal"
                                                     data-bs-target="#editLeadModal"
                                                     data-id="{{ $lead->id }}"
                                                     data-name="{{ $lead->name }}"
@@ -326,8 +325,8 @@
                                                     title="Edit Lead">
                                                     <i class="fas fa-edit text-warning"></i>
                                                 </button>
-                                    
-                                                <button type="button" 
+
+                                                <button type="button"
                                                     class="btn btn-sm delete-lead-btn"
                                                     data-id="{{ $lead->id }}"
                                                     data-device-id="{{ $lead->device_id }}"
@@ -349,7 +348,7 @@
                             <div class="col-12">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
-                                        Showing {{ $leads->firstItem() }} to {{ $leads->lastItem() }} 
+                                        Showing {{ $leads->firstItem() }} to {{ $leads->lastItem() }}
                                         of {{ $leads->total() }} entries
                                     </div>
                                     <nav aria-label="Page navigation">
@@ -379,7 +378,7 @@
                 @method('PUT')
                 <div class="modal-body">
                     <input type="hidden" id="edit_lead_id" name="id">
-                    
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -561,15 +560,50 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="deleteLeadModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Delete Lead</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form id="deleteLeadForm">
+                @csrf
+                <input type="hidden" id="deleteLeadId">
+
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        This action cannot be undone.
+                    </div>
+
+                    <p>Delete: <strong id="deleteLeadName"></strong>?</p>
+
+                    <input type="password" id="deletePassword"
+                        class="form-control"
+                        placeholder="Enter admin password" required>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger" id="deleteSubmitBtn">
+                        Delete
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() 
-    {
+    document.addEventListener('DOMContentLoaded', function() {
         const filterForm = document.getElementById('filterForm');
 
         const applyBtn = document.getElementById('applyFilterBtn');
-        applyBtn.addEventListener('click', function(e) 
-        {
+        applyBtn.addEventListener('click', function(e) {
             e.preventDefault();
             showLoader(applyBtn);
             setTimeout(() => {
@@ -578,17 +612,15 @@
         });
 
         const clearBtn = document.getElementById('clearFilterBtn');
-        clearBtn.addEventListener('click', function(e) 
-        {
-            e.preventDefault(); 
+        clearBtn.addEventListener('click', function(e) {
+            e.preventDefault();
             showLoader(clearBtn);
             setTimeout(() => {
                 window.location.href = clearBtn.href;
             }, 800);
         });
 
-        function showLoader(button) 
-        {
+        function showLoader(button) {
             const text = button.querySelector('.btn-text');
             const spinner = button.querySelector('.spinner-border');
             const loaderText = button.querySelector('.loader-text');
@@ -599,80 +631,116 @@
             button.disabled = true;
         }
     });
-    document.addEventListener('DOMContentLoaded', function() 
-    {
+    document.addEventListener('DOMContentLoaded', function() {
         let selectedLeads = [];
-        function updateSelectedCount() 
-        {
+
+        function updateSelectedCount() {
             const selectedCount = selectedLeads.length;
             document.getElementById('selectedCount').textContent = `(${selectedCount})`;
         }
 
-        document.getElementById('selectAllLeads').addEventListener('change', function() 
-        {
+        document.getElementById('selectAllLeads').addEventListener('change', function() {
             const isChecked = this.checked;
             const checkboxes = document.querySelectorAll('.row-checkbox');
-            
+
             checkboxes.forEach(checkbox => {
                 checkbox.checked = isChecked;
                 const leadId = checkbox.value;
-                
-                if (isChecked && !selectedLeads.includes(leadId)) 
-                {
+
+                if (isChecked && !selectedLeads.includes(leadId)) {
                     selectedLeads.push(leadId);
-                }
-                else if (!isChecked && selectedLeads.includes(leadId)) 
-                {
+                } else if (!isChecked && selectedLeads.includes(leadId)) {
                     const index = selectedLeads.indexOf(leadId);
                     selectedLeads.splice(index, 1);
                 }
             });
-            
+
             updateSelectedCount();
         });
 
-        document.addEventListener('change', function(e) 
-        {
-            if (e.target.classList.contains('row-checkbox')) 
-            {
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('row-checkbox')) {
                 const leadId = e.target.value;
-                
-                if (e.target.checked && !selectedLeads.includes(leadId)) 
-                {
+
+                if (e.target.checked && !selectedLeads.includes(leadId)) {
                     selectedLeads.push(leadId);
-                } 
-                else if (!e.target.checked && selectedLeads.includes(leadId)) 
-                {
+                } else if (!e.target.checked && selectedLeads.includes(leadId)) {
                     const index = selectedLeads.indexOf(leadId);
                     selectedLeads.splice(index, 1);
                 }
-                
+
                 updateSelectedCount();
             }
         });
 
-        document.getElementById('sendToMessagingPage').addEventListener('click', function(e) 
-        {
+        document.getElementById('sendToMessagingPage').addEventListener('click', function(e) {
             e.preventDefault();
-            
-            if (selectedLeads.length === 0) 
-            {
+
+            if (selectedLeads.length === 0) {
                 toastr.error('Please select at least one lead');
                 return;
             }
 
-            const exhibitionId = {{ $exhibition->id }};
+            const exhibitionId = {
+                {
+                    $exhibition - > id
+                }
+            };
             const leadIds = selectedLeads.join(',');
             window.location.href = `/exhibition/${exhibitionId}/message?lead_ids=${leadIds}`;
         });
-        function resetSelection() 
-        {
+
+        function resetSelection() {
             selectedLeads = [];
             updateSelectedCount();
             document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
             document.getElementById('selectAllLeads').checked = false;
         }
         resetSelection();
+    });
+</script>
+<script>
+    $(document).on('click', '.delete-lead-btn', function() {
+        let id = $(this).data('id');
+        let exhibitionId = $(this).data('exhibition-id');
+        let name = $(this).data('name');
+
+        console.log(id, exhibitionId); //  DEBUG
+
+        $('#deleteLeadId').val(id);
+        $('#deleteExhibitionId').val(exhibitionId);
+        $('#deleteLeadName').text(name);
+
+        $('#deleteLeadModal').modal('show');
+    });
+</script>
+<script>
+    $('#deleteLeadForm').on('submit', function(e) {
+        e.preventDefault();
+
+        let id = $('#deleteLeadId').val();
+        let exhibitionId = $('#deleteExhibitionId').val();
+        let password = $('#deletePassword').val();
+
+        $.ajax({
+            url: `/exhibitions/${id}/${exhibitionId}`,
+            type: 'DELETE',
+            data: {
+                _token: '{{ csrf_token() }}',
+                password: password
+            },
+
+            success: function(res) {
+                if (res.status === 200) {
+                    toastr.success(res.message);
+                    $('#deleteLeadModal').modal('hide');
+
+                    $(`button[data-id="${id}"]`).closest('tr').remove();
+                } else {
+                    toastr.error(res.message);
+                }
+            }
+        });
     });
 </script>
 @endsection

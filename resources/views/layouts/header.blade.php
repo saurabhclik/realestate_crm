@@ -1,5 +1,6 @@
 @php
     $userId = session('user_id');
+    $userType = session('user_type');
     $notifications = DB::table('user_notification as a')
         ->select(
             'a.*',
@@ -118,7 +119,7 @@
             </div>
             @endif
 
-            @if(in_array('settings', $currentAccess))
+            @if(in_array('settings', $currentAccess) && $userType != 'salesman')
             <div class="dropdown d-none d-lg-inline-block ms-1">
                 <button type="button" 
                     class="btn header-item noti-icon waves-effect" 

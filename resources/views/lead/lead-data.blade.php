@@ -6,6 +6,12 @@ $softwareType = session('software_type', 'real_state');
 $isLeadManagement = $softwareType === 'lead_management';
 @endphp
 
+
+@php
+$userType = session('user_type');
+$isSalesman = ($userType == 'salesman');
+@endphp
+
 @include('modals.view-comments')
 @include('modals.status-update', ['projects' => $projects])
 @include('modals.duplicate-lead')
@@ -391,19 +397,19 @@ $isLeadManagement = $softwareType === 'lead_management';
                             <tbody>
                                 @foreach($leads as $row)
                                 @php
-                                    $createdDate = \Carbon\Carbon::parse($row->created_at);
-                                    $currentDate = \Carbon\Carbon::now();
-                                    $diff_date_count = $createdDate->diffInDays($currentDate);
-                                    $excludedLeadNames = [
-                                    'completed',
-                                    'cancelled',
-                                    'not_picked',
-                                    'not_interested',
-                                    'lost',
-                                    'wrong_number',
-                                    'transfer',
-                                    'not_reachable'
-                                    ];
+                                $createdDate = \Carbon\Carbon::parse($row->created_at);
+                                $currentDate = \Carbon\Carbon::now();
+                                $diff_date_count = $createdDate->diffInDays($currentDate);
+                                $excludedLeadNames = [
+                                'completed',
+                                'cancelled',
+                                'not_picked',
+                                'not_interested',
+                                'lost',
+                                'wrong_number',
+                                'transfer',
+                                'not_reachable'
+                                ];
                                 @endphp
                                 <tr>
                                     @if($lead_name == 'allocate' || $lead_name == 'transfer')
@@ -416,7 +422,6 @@ $isLeadManagement = $softwareType === 'lead_management';
                                     </td>
                                     <td>
                                         <div class="d-flex gap-3 align-items-center">
-                                            @if(session('user_type') == 'admin' || session('user_type') == 'team_manager')
                                             <div class="position-relative d-inline-block text-center">
                                                 @if($diff_date_count > 5 && !in_array($lead_name, $excludedLeadNames))
                                                 <span
@@ -428,10 +433,13 @@ $isLeadManagement = $softwareType === 'lead_management';
                                                     👋🏻 {{ $diff_date_count }} days
                                                 </span>
                                                 @endif
+                                                @if(session('user_type') == 'admin' || session('user_type') == 'team_manager')
                                                 <div class="action-item duplicate-item" onclick="showDuplicateModal('{{ $row->id }}')" data-bs-toggle="tooltip" title="Duplicate Lead" style="cursor:pointer;">
                                                     <i class="fas fa-copy"></i>
                                                 </div>
+                                                @endif
                                             </div>
+                                            @if(session('user_type') == 'admin' || session('user_type') == 'team_manager')
                                             <div class="action-item share-item" onclick="showShareModal('{{ $row->id }}')" data-bs-toggle="tooltip" title="Share Lead" style="cursor:pointer;">
                                                 <i class="fas fa-share-alt"></i>
                                             </div>
@@ -461,7 +469,7 @@ $isLeadManagement = $softwareType === 'lead_management';
                                             </span>
                                             @endif
                                             <span class="fw-semibold">{{ $row->id }}</span>
-                                        </div>
+                                        </div>   
                                     <td>
                                         <div class="d-flex flex-column">
                                             <div class="d-flex align-items-center mb-1">

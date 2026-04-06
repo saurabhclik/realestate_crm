@@ -1,17 +1,17 @@
 @php
-    $activeFeatures = session('active_features', []);
-    $softwareType = session('software_type', 'real_state');
-    $userType = session('user_type');
-    
-    $menuAccess = [
-        'real_state' => ['dashboard', 'staff_management', 'master', 'leads_management', 'transfer_leads', 'mis_management', 'task_management', 'inventory','post_sale', 'events', 'attendance', 'employee_track', 'expense_management', 'reports', 'settings'],
-        'lead_management' => ['dashboard', 'staff_management', 'master', 'leads_management', 'transfer_leads', 'mis_management', 'task_management','post_sale', 'events', 'attendance', 'employee_track', 'expense_management', 'reports', 'settings'],
-        'task_management' => ['dashboard', 'task_management', 'settings', 'reports'],
-        'mis_management' => ['dashboard', 'mis_management', 'settings'],
-        'exhibition' => ['dashboard', 'exhibition', 'settings']
-    ];
-    
-    $currentMenuAccess = $menuAccess[$softwareType] ?? $menuAccess['real_state'];
+$activeFeatures = session('active_features', []);
+$softwareType = session('software_type', 'real_state');
+$userType = session('user_type');
+
+$menuAccess = [
+'real_state' => ['dashboard', 'staff_management', 'master', 'leads_management', 'transfer_leads', 'mis_management', 'task_management', 'inventory','post_sale', 'events', 'attendance', 'employee_track', 'expense_management', 'reports', 'settings'],
+'lead_management' => ['dashboard', 'staff_management', 'master', 'leads_management', 'transfer_leads', 'mis_management', 'task_management','post_sale', 'events', 'attendance', 'employee_track', 'expense_management', 'reports', 'settings'],
+'task_management' => ['dashboard', 'task_management', 'settings', 'reports'],
+'mis_management' => ['dashboard', 'mis_management', 'settings'],
+'exhibition' => ['dashboard', 'exhibition', 'settings']
+];
+
+$currentMenuAccess = $menuAccess[$softwareType] ?? $menuAccess['real_state'];
 @endphp
 
 <div class="vertical-menu">
@@ -26,6 +26,7 @@
                 </li>
                 @endif
                 <li>
+                    @if($userType != 'salesman')
                     <a href="javascript: void(0);" class="has-arrow waves-effect">
                         <i class="bx bx-user"></i>
                         <span key="t-dashboards">Staff Management</span>
@@ -50,8 +51,9 @@
                         </li>
                     </ul>
                 </li>
-
+                @endif
                 <li>
+                    @if($userType != 'salesman')
                     <a href="javascript: void(0);" class="has-arrow waves-effect">
                         <i class="bx bx-store"></i>
                         <span key="t-ecommerce">Master</span>
@@ -80,15 +82,15 @@
                         </li>
                         <li>
                             <a href="{{route('property.name')}}" key="t-property">
-                               Property Details
+                                Property Details
                             </a>
                         </li>
-                        @if($userType == 'admin' && in_array('post_sale', $activeFeatures) && in_array('post_sale', $currentMenuAccess))  
+                        @if($userType == 'admin' && in_array('post_sale', $activeFeatures) && in_array('post_sale', $currentMenuAccess))
                         <li>
                             <a href="{{route('check.list')}}" key="t-check">Check List</a>
                         </li>
                         @endif
-                        
+
                         @if(in_array('attendance', $currentMenuAccess))
                         <li>
                             <a href="{{route('attendance')}}" key="t-shops">Attendance</a>
@@ -115,6 +117,7 @@
                         @endif
                     </ul>
                 </li>
+                @endif
 
                 @if(in_array('leads_management', $currentMenuAccess))
                 <li>
@@ -179,32 +182,32 @@
                                     <a href="{{route('lead.not_reachable')}}" class="">
                                         <span key="t-projects">Not Reachable</span>
                                     </a>
-                                </li> 
+                                </li>
                                 <li>
                                     <a href="{{route('lead.wrong_number')}}" class="">
                                         <span key="t-projects">Wrong Number</span>
                                     </a>
-                                </li> 
+                                </li>
                                 <li>
                                     <a href="{{route('lead.channel_partner')}}" class="">
                                         <span key="t-projects">Channel Partner</span>
                                     </a>
-                                </li> 
+                                </li>
                                 <li>
                                     <a href="{{route('lead.not_interested')}}" class="">
                                         <span key="t-projects">Not Interested</span>
                                     </a>
-                                </li> 
+                                </li>
                                 <li>
                                     <a href="{{route('lead.not_picked')}}" class="">
                                         <span key="t-projects">Not Picked</span>
                                     </a>
-                                </li> 
+                                </li>
                                 <li>
                                     <a href="{{route('lead.lost')}}" class="">
                                         <span key="t-projects">Lost</span>
                                     </a>
-                                </li> 
+                                </li>
                             </ul>
                         </li>
                         <li>
@@ -218,7 +221,7 @@
                             </a>
                         </li>
                     </ul>
-                </li>   
+                </li>
                 @endif
 
                 @if(in_array('transfer_leads', $currentMenuAccess) && ($userType == 'admin' || $userType == 'team_manager'))
@@ -239,7 +242,7 @@
                             </a>
                         </li>
                     </ul>
-                </li>    
+                </li>
                 @endif
 
                 @if(in_array('mis_management', $currentMenuAccess) && in_array('mis_management', $activeFeatures) && ($userType == 'admin' || $userType == 'team_manager'))
@@ -288,7 +291,7 @@
                 </li>
                 @endif
 
-                @if(in_array('post_sale', $currentMenuAccess) && in_array('post_sale', $activeFeatures))       
+                @if(in_array('post_sale', $currentMenuAccess) && in_array('post_sale', $activeFeatures))
                 <li>
                     <a href="{{route('post-sale.index')}}" class="">
                         <i class='bx bx-receipt'></i>
@@ -296,10 +299,10 @@
                     </a>
                 </li>
                 @endif
-                @if(in_array('post_sale', $currentMenuAccess) && in_array('exhibition', $activeFeatures))    
+                @if(in_array('post_sale', $currentMenuAccess) && in_array('exhibition', $activeFeatures))
                 <li>
                     <a href="{{ route('exhibition.index') }}">
-                        <i class="bx bx-group"></i> 
+                        <i class="bx bx-group"></i>
                         <span>Exhibition Management</span>
                     </a>
                 </li>

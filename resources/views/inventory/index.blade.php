@@ -18,25 +18,26 @@
 
         <div class="row mb-4">
             @php
-                $statuses = [
-                    'pending' => ['color' => 'info', 'icon' => 'fas fa-clock'],
-                    'cancel' => ['color' => 'danger', 'icon' => 'fas fa-times-circle'],
-                    'hold' => ['color' => 'warning', 'icon' => 'fas fa-pause-circle'],
-                    'sold' => ['color' => 'success', 'icon' => 'fas fa-check-circle']
-                ];
+            $statuses = [
+            'pending' => ['color' => 'info', 'icon' => 'fas fa-clock'],
+            'cancel' => ['color' => 'danger', 'icon' => 'fas fa-times-circle'],
+            'hold' => ['color' => 'warning', 'icon' => 'fas fa-pause-circle'],
+            'sold' => ['color' => 'success', 'icon' => 'fas fa-check-circle']
+            ];
             @endphp
 
-            @foreach ($statuses as $status => $data)
-                <div class="col-xl-3 col-md-6 mb-4">
+            @foreach ($statuses as $key => $data)
+            <div class="col-xl-3 col-md-6 mb-4">
+                <a href="{{ route('inventory.index', ['id' => $project_id, 'status' => $key]) }}" style="text-decoration: none;">
                     <div class="card border-left-{{ $data['color'] }} shadow h-100 py-2">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col me-2">
                                     <div class="text-xs font-weight-bold text-{{ $data['color'] }} text-uppercase mb-1">
-                                        {{ ucfirst($status) }}
+                                        {{ ucfirst($key) }}
                                     </div>
                                     <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                        {{ $statusCounts->$status ?? 0 }}
+                                        {{ $statusCounts->$key ?? 0 }}
                                     </div>
                                 </div>
                                 <div class="col-auto">
@@ -45,7 +46,8 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
+            </div>
             @endforeach
         </div>
 
@@ -56,11 +58,11 @@
                 </button>
                 <ul class="dropdown-menu">
                     @foreach ($projects as $project)
-                        <li>
-                            <a class="dropdown-item" href="{{ route('inventory.index', ['id' => $project->id]) }}">
-                                {{ $project->project_name }}
-                            </a>
-                        </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ route('inventory.index', ['id' => $project->id]) }}">
+                            {{ $project->project_name }}
+                        </a>
+                    </li>
                     @endforeach
                 </ul>
             </div>
@@ -81,57 +83,57 @@
 
         <div class="row g-3">
             @foreach ($inventoryDetails as $unit)
-                @php
-                    $color = match($unit->status) {
-                        'pending' => 'info',
-                        'sold' => 'success',
-                        'hold' => 'warning',
-                        'cancel' => 'danger',
-                        default => 'secondary'
-                    };
-                @endphp
-                
-                <div class="col-xxl-1 col-xl-2 col-lg-3 col-md-4 col-sm-6 col-xs-12">
-                    <div class="card bg-{{ $color }} text-white shadow-sm inventory-unit">
-                        <div class="card-header p-1 d-flex justify-content-between">
-                            <span class="badge bg-dark">{{ $unit->unit_no }}</span>
-                            
-                            <div class="dropdown">
-                                <button class="btn btn-sm text-white p-0" data-bs-toggle="dropdown">
-                                    <i class="fas fa-ellipsis-v text-dark"></i>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    @if($unit->status !== 'sold')
-                                    <li>
-                                        <button class="dropdown-item sale-btn" 
-                                            data-id="{{ $unit->id }}"
-                                            data-name="{{ $unit->name }}"
-                                            data-email="{{ $unit->email }}"
-                                            data-number="{{ $unit->number }}"
-                                            data-status="{{ $unit->status }}"
-                                            data-sales_person_id="{{ $unit->sales_person_id }}">
-                                            <i class="fas fa-shopping-cart me-1"></i> Sale
-                                        </button>
-                                    </li>
-                                    @endif
-                                    <li>
-                                        <button class="dropdown-item history-btn" data-id="{{ $unit->id }}">
-                                            <i class="fas fa-history me-1"></i> History
-                                        </button>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="card-body p-2 text-center">
-                            <div class="inventory-size">{{ $unit->size }}</div>
-                            @if($unit->status !== 'pending')
-                                <div class="inventory-customer mt-1 small text-truncate">
-                                    {{ $unit->name ?: 'No customer' }}
-                                </div>
-                            @endif
+            @php
+            $color = match($unit->status) {
+            'pending' => 'info',
+            'sold' => 'success',
+            'hold' => 'warning',
+            'cancel' => 'danger',
+            default => 'secondary'
+            };
+            @endphp
+
+            <div class="col-xxl-1 col-xl-2 col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                <div class="card bg-{{ $color }} text-white shadow-sm inventory-unit">
+                    <div class="card-header p-1 d-flex justify-content-between">
+                        <span class="badge bg-dark">{{ $unit->unit_no }}</span>
+
+                        <div class="dropdown">
+                            <button class="btn btn-sm text-white p-0" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v text-dark"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                @if($unit->status !== 'sold')
+                                <li>
+                                    <button class="dropdown-item sale-btn"
+                                        data-id="{{ $unit->id }}"
+                                        data-name="{{ $unit->name }}"
+                                        data-email="{{ $unit->email }}"
+                                        data-number="{{ $unit->number }}"
+                                        data-status="{{ $unit->status }}"
+                                        data-sales_person_id="{{ $unit->sales_person_id }}">
+                                        <i class="fas fa-shopping-cart me-1"></i> Sale
+                                    </button>
+                                </li>
+                                @endif
+                                <li>
+                                    <button class="dropdown-item history-btn" data-id="{{ $unit->id }}">
+                                        <i class="fas fa-history me-1"></i> History
+                                    </button>
+                                </li>
+                            </ul>
                         </div>
                     </div>
+                    <div class="card-body p-2 text-center">
+                        <div class="inventory-size">{{ $unit->size }}</div>
+                        @if($unit->status !== 'pending')
+                        <div class="inventory-customer mt-1 small text-truncate">
+                            {{ $unit->name ?: 'No customer' }}
+                        </div>
+                        @endif
+                    </div>
                 </div>
+            </div>
             @endforeach
         </div>
         @if($inventoryDetails->isEmpty())
@@ -149,23 +151,20 @@
 </div>
 
 <script>
-    $(document).ready(function() 
-    {
-        $('.sale-btn').on('click', function() 
-        {
+    $(document).ready(function() {
+        $('.sale-btn').on('click', function() {
             $('#sale_id').val($(this).data('id'));
             $('#name').val($(this).data('name'));
             $('#email').val($(this).data('email'));
             $('#number').val($(this).data('number'));
             $('#status').val($(this).data('status'));
             $('#sales_person_id').val($(this).data('sales_person_id'));
-            
+
             var saleModal = new bootstrap.Modal(document.getElementById('saleModal'));
             saleModal.show();
         });
 
-        $('.history-btn').on('click', function() 
-        {
+        $('.history-btn').on('click', function() {
             const id = $(this).data('id');
             $.ajax({
                 url: "{{ route('inventory.saleHistory') }}",
@@ -174,12 +173,10 @@
                     id: id,
                     _token: '{{ csrf_token() }}'
                 },
-                success: function(response) 
-                {
+                success: function(response) {
                     let html = '';
-                    
-                    if(response.length > 0) 
-                    {
+
+                    if (response.length > 0) {
                         response.forEach((row, index) => {
                             html += `
                                 <tr>
@@ -197,9 +194,7 @@
                                 </tr>
                             `;
                         });
-                    } 
-                    else 
-                    {
+                    } else {
                         html = `
                             <tr>
                                 <td colspan="7" class="text-center py-4 text-muted">
@@ -208,38 +203,38 @@
                             </tr>
                         `;
                     }
-                    
+
                     $('#saleHistoryBody').html(html);
                     var historyModal = new bootstrap.Modal(document.getElementById('saleHistoryModal'));
                     historyModal.show();
                 },
-                error: function(xhr) 
-                {
+                error: function(xhr) {
                     console.error(xhr);
                     alert('An error occurred while loading history.');
                 }
             });
         });
-        
-        function getStatusColor(status) 
-        {
-            switch(status) 
-            {
-                case 'pending': return 'info';
-                case 'sold': return 'success';
-                case 'hold': return 'warning';
-                case 'cancel': return 'danger';
-                default: return 'secondary';
+
+        function getStatusColor(status) {
+            switch (status) {
+                case 'pending':
+                    return 'info';
+                case 'sold':
+                    return 'success';
+                case 'hold':
+                    return 'warning';
+                case 'cancel':
+                    return 'danger';
+                default:
+                    return 'secondary';
             }
         }
-        $('#SubmitBtn').closest('form').on('submit', function () 
-        {
+        $('#SubmitBtn').closest('form').on('submit', function() {
             $('#SubmitBtn').prop('disabled', true);
             $('#SubmitText').addClass('d-none');
             $('#SubmitSpinner').removeClass('d-none');
         });
-        $('#SubmitBtnBulk').closest('form').on('submit', function () 
-        {
+        $('#SubmitBtnBulk').closest('form').on('submit', function() {
             $('#SubmitBtnBulk').prop('disabled', true);
             $('#SubmitTextBulk').addClass('d-none');
             $('#SubmitSpinnerBulk').removeClass('d-none');

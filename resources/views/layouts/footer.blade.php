@@ -13,34 +13,34 @@
                         <h6>Classification</h6>
                         <div class="d-flex flex-wrap gap-2">
                             @php
-                                $leadClassifications = \DB::table('leads')
-                                    ->whereNotNull('classification')
-                                    ->where('classification', '!=', '')
-                                    ->distinct()
-                                    ->pluck('classification');
+                            $leadClassifications = \DB::table('leads')
+                            ->whereNotNull('classification')
+                            ->where('classification', '!=', '')
+                            ->distinct()
+                            ->pluck('classification');
 
-                                $leadSources = \DB::table('leads')
-                                    ->whereNotNull('source')
-                                    ->where('source', '!=', '')
-                                    ->distinct()
-                                    ->pluck('source');
+                            $leadSources = \DB::table('leads')
+                            ->whereNotNull('source')
+                            ->where('source', '!=', '')
+                            ->distinct()
+                            ->pluck('source');
 
-                                $leadCampaigns = \DB::table('leads')
-                                    ->whereNotNull('campaign')
-                                    ->where('campaign', '!=', '')
-                                    ->distinct()
-                                    ->pluck('campaign');
+                            $leadCampaigns = \DB::table('leads')
+                            ->whereNotNull('campaign')
+                            ->where('campaign', '!=', '')
+                            ->distinct()
+                            ->pluck('campaign');
                             @endphp
 
                             @foreach($leadClassifications as $classification)
-                                @php
-                                    $queryParams = request()->query();
-                                    $queryParams['classification'] = $classification;
-                                    $url = route('leads.filter.leads') . '?' . http_build_query($queryParams);
-                                @endphp
-                                <a href="{{ $url }}" class="filter-option option-classification {{ request('classification') == $classification ? 'active' : '' }}">
-                                    {{ $classification }}
-                                </a>
+                            @php
+                            $queryParams = request()->query();
+                            $queryParams['classification'] = $classification;
+                            $url = route('leads.filter.leads') . '?' . http_build_query($queryParams);
+                            @endphp
+                            <a href="{{ $url }}" class="filter-option option-classification {{ request('classification') == $classification ? 'active' : '' }}">
+                                {{ $classification }}
+                            </a>
                             @endforeach
                         </div>
                     </div>
@@ -49,14 +49,14 @@
                         <h6>Source</h6>
                         <div class="d-flex flex-wrap gap-2">
                             @foreach($leadSources as $source)
-                                @php
-                                    $queryParams = request()->query();
-                                    $queryParams['source'] = $source;
-                                    $url = route('leads.filter.leads') . '?' . http_build_query($queryParams);
-                                @endphp
-                                <a href="{{ $url }}" class="filter-option option-source {{ request('source') == $source ? 'active' : '' }}">
-                                    {{ $source }}
-                                </a>
+                            @php
+                            $queryParams = request()->query();
+                            $queryParams['source'] = $source;
+                            $url = route('leads.filter.leads') . '?' . http_build_query($queryParams);
+                            @endphp
+                            <a href="{{ $url }}" class="filter-option option-source {{ request('source') == $source ? 'active' : '' }}">
+                                {{ $source }}
+                            </a>
                             @endforeach
                         </div>
                     </div>
@@ -66,9 +66,9 @@
                         <select id="campaignFilter" class="form-control select2">
                             <option value="">-- Select Campaign --</option>
                             @foreach($leadCampaigns as $campaign)
-                                <option value="{{ $campaign }}" {{ request('campaign') == $campaign ? 'selected' : '' }}>
-                                    {{ $campaign }}
-                                </option>
+                            <option value="{{ $campaign }}" {{ request('campaign') == $campaign ? 'selected' : '' }}>
+                                {{ $campaign }}
+                            </option>
                             @endforeach
                         </select>
                     </div>
@@ -114,10 +114,9 @@
             <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-            <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">   
+            <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
             <script>
-                $(document).ready(function() 
-                {
+                $(document).ready(function() {
                     let currentSelectedDate = null;
                     let isCalendarVisible = false;
                     $('#floatingCalendar').addClass('floating-calendar');
@@ -135,29 +134,28 @@
                         'box-shadow': '0 4px 12px rgba(55, 98, 184, 0.3)',
                         'transition': 'all 0.3s'
                     }).hover(
-                        function() { $(this).css('transform', 'scale(1.1)'); },
-                        function() { $(this).css('transform', 'scale(1)'); }
+                        function() {
+                            $(this).css('transform', 'scale(1.1)');
+                        },
+                        function() {
+                            $(this).css('transform', 'scale(1)');
+                        }
                     );
-                    $('#calendarToggle').off('click').on('click', function(e)
-                    {
+                    $('#calendarToggle').off('click').on('click', function(e) {
                         e.preventDefault();
                         e.stopPropagation();
-                        
-                        if ($('#floatingCalendar').is(':visible')) 
-                        {
+
+                        if ($('#floatingCalendar').is(':visible')) {
                             $('#floatingCalendar').fadeOut(200);
                             isCalendarVisible = false;
-                        } 
-                        else 
-                        {
+                        } else {
                             $('#floatingCalendar').fadeIn(200);
                             isCalendarVisible = true;
                             renderFullCalendar();
                         }
                     });
 
-                    $('#closeCalendar').off('click').on('click', function(e) 
-                    {
+                    $('#closeCalendar').off('click').on('click', function(e) {
                         e.preventDefault();
                         e.stopPropagation();
                         $('#floatingCalendar').fadeOut(200);
@@ -175,23 +173,22 @@
                     //     }
                     // });
 
-                    function renderFullCalendar() 
-                    {
+                    function renderFullCalendar() {
                         const now = new Date();
                         renderMonth(now.getFullYear(), now.getMonth());
                     }
 
-                    function renderMonth(year, month)
-                    {
+                    function renderMonth(year, month) {
                         const firstDay = new Date(year, month, 1);
                         const lastDay = new Date(year, month + 1, 0);
                         const startingDay = firstDay.getDay();
                         const totalDays = lastDay.getDate();
                         const today = new Date();
-                        
+
                         const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                            'July', 'August', 'September', 'October', 'November', 'December'];
-                        
+                            'July', 'August', 'September', 'October', 'November', 'December'
+                        ];
+
                         let html = `
                             <div class="calendar-header">
                                 <button class="prev-month">
@@ -209,26 +206,23 @@
                             </div>
                             <div class="calendar-days">
                         `;
-                        for (let i = 0; i < startingDay; i++) 
-                        {
+                        for (let i = 0; i < startingDay; i++) {
                             html += '<div class="calendar-day empty"></div>';
                         }
-                        for (let day = 1; day <= totalDays; day++) 
-                        {
+                        for (let day = 1; day <= totalDays; day++) {
                             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                             const eventsOnDate = window.calendarEvents[dateStr] || [];
                             const hasEvents = eventsOnDate.length > 0;
                             const hasMissed = eventsOnDate.some(e => e.is_missed === 1 || e.is_overdue === 1);
                             const isToday = isSameDay(today, new Date(year, month, day));
-                            
+
                             let dayClass = 'calendar-day';
                             if (isToday) dayClass += ' today';
                             if (hasEvents) dayClass += ' has-events';
                             if (hasMissed) dayClass += ' has-missed';
                             if (eventsOnDate.length >= 3) dayClass += ' has-many-events';
                             let tooltipContent = '';
-                            if (hasEvents)
-                            {
+                            if (hasEvents) {
                                 const displayEvents = eventsOnDate.slice(0, 3);
                                 displayEvents.forEach(event => {
                                     const isLead = event.event_type === 'lead';
@@ -237,7 +231,7 @@
                                     const missedClass = (event.is_missed === 1 || event.is_overdue === 1) ? 'missed' : '';
                                 });
                             }
-                            
+
                             html += `
                                 <div class="${dayClass}" data-date="${dateStr}" onclick="handleDateClick('${dateStr}')">
                                     ${day}
@@ -246,32 +240,28 @@
                                 </div>
                             `;
                         }
-                        
+
                         html += '</div>';
-                        
+
                         $('#floatingCalendar .floating-calendar-body').html(html);
-                        $('.prev-month').off('click').on('click', function(e) 
-                        {
+                        $('.prev-month').off('click').on('click', function(e) {
                             e.preventDefault();
                             e.stopPropagation();
                             let newMonth = month - 1;
                             let newYear = year;
-                            if (newMonth < 0) 
-                            {
+                            if (newMonth < 0) {
                                 newMonth = 11;
                                 newYear--;
                             }
                             renderMonth(newYear, newMonth);
                         });
-                        
-                        $('.next-month').off('click').on('click', function(e)
-                        {
+
+                        $('.next-month').off('click').on('click', function(e) {
                             e.preventDefault();
                             e.stopPropagation();
                             let newMonth = month + 1;
                             let newYear = year;
-                            if (newMonth > 11) 
-                            {
+                            if (newMonth > 11) {
                                 newMonth = 0;
                                 newYear++;
                             }
@@ -279,46 +269,39 @@
                         });
                     }
 
-                    function isSameDay(date1, date2) 
-                    {
+                    function isSameDay(date1, date2) {
                         return date1.getFullYear() === date2.getFullYear() &&
                             date1.getMonth() === date2.getMonth() &&
                             date1.getDate() === date2.getDate();
                     }
                 });
 
-                window.handleDateClick = function(dateStr) 
-                {
+                window.handleDateClick = function(dateStr) {
                     const events = window.calendarEvents[dateStr] || [];
-                    
-                    if (events.length === 0) 
-                    {
+
+                    if (events.length === 0) {
                         return;
                     }
                     showDayEvents(dateStr);
                 };
 
-                window.showDayEvents = function(dateStr) 
-                {
+                window.showDayEvents = function(dateStr) {
                     const events = window.calendarEvents[dateStr] || [];
                     const date = new Date(dateStr);
-                    const formattedDate = date.toLocaleDateString('en-US', { 
-                        weekday: 'long', 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
+                    const formattedDate = date.toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
                     });
-                    
+
                     $('#dayEventsDate').text(formattedDate);
-                    
+
                     let eventsHtml = '';
-                    
-                    if (events.length === 0) 
-                    {
+
+                    if (events.length === 0) {
                         eventsHtml = '<p class="text-center text-muted py-4">No events for this day</p>';
-                    } 
-                    else 
-                    {
+                    } else {
                         events.sort((a, b) => {
                             const aMissed = a.is_missed === 1 || a.is_overdue === 1;
                             const bMissed = b.is_missed === 1 || b.is_overdue === 1;
@@ -326,14 +309,14 @@
                             if (!aMissed && bMissed) return 1;
                             return 0;
                         });
-                        
+
                         events.forEach(event => {
                             const isLead = event.event_type === 'lead';
                             const icon = isLead ? 'fa-user' : 'fa-tasks';
                             const borderColor = (event.is_missed === 1 || event.is_overdue === 1) ? '#dc3545' : (isLead ? '#3762b8' : '#28a745');
                             const missedText = (event.is_missed === 1 || event.is_overdue === 1) ? 'Missed' : '';
                             const missedClass = (event.is_missed === 1 || event.is_overdue === 1) ? 'missed' : '';
-                            
+
                             eventsHtml += `
                                 <div class="day-event-item ${missedClass}" 
                                     onclick="showEventDetails(${event.id}, '${event.event_type}', '${event.status || event.lead_status || ''}')" 
@@ -355,32 +338,27 @@
                             `;
                         });
                     }
-                    
+
                     $('#dayEventsList').html(eventsHtml);
                     $('#dayEventsModal').modal('show');
                 };
 
-                window.showEventDetails = function(id, type, status) 
-                {
+                window.showEventDetails = function(id, type, status) {
                     $('#dayEventsModal').modal('hide');
-                    
-                    if (type === 'lead' && id && status) 
-                    {
+
+                    if (type === 'lead' && id && status) {
                         redirectToLeadStatusPage(status, id);
-                    } 
-                    else 
-                    {
+                    } else {
                         $('#calendarEventModal').modal('show');
-                        
+
                         $.ajax({
                             url: '/task/' + id + '/details?type=task',
                             type: 'GET',
-                            success: function(response) 
-                            {
+                            success: function(response) {
                                 let content = '<div class="container-fluid p-3">';
                                 content += '<h5>' + (response.title || response.name || 'Details') + '</h5>';
                                 content += '<hr>';
-                                
+
                                 const fields = {
                                     'description': 'Description',
                                     'priority': 'Priority',
@@ -390,28 +368,24 @@
                                     'assigned_by': 'Assigned By',
                                     'project_name': 'Project'
                                 };
-                                
-                                for (let key in fields) 
-                                {
-                                    if (response[key] && response[key] !== 'null' && response[key] !== '') 
-                                    {
+
+                                for (let key in fields) {
+                                    if (response[key] && response[key] !== 'null' && response[key] !== '') {
                                         content += `<p><strong>${fields[key]}:</strong> ${response[key]}</p>`;
                                     }
                                 }
-                                
+
                                 content += '</div>';
                                 $('#calendarEventModalBody').html(content);
                             },
-                            error: function() 
-                            {
+                            error: function() {
                                 $('#calendarEventModalBody').html('<div class="alert alert-danger">Error loading details</div>');
                             }
                         });
                     }
                 };
 
-                function redirectToLeadStatusPage(status, leadId) 
-                {
+                function redirectToLeadStatusPage(status, leadId) {
                     const statusRouteMap = {
                         'CALL SCHEDULED': 'lead.call-scheduled',
                         'VISIT SCHEDULED': 'lead.visit-scheduled',
@@ -440,34 +414,29 @@
                     };
                     const normalizedStatus = status.toUpperCase().trim();
                     const routeName = statusRouteMap[normalizedStatus];
-                    
-                    if (routeName) 
-                    {
+
+                    if (routeName) {
                         const baseUrl = '{{ url("") }}';
                         const urlPath = routeName.replace(/\./g, '/');
                         let url = baseUrl + '/' + urlPath;
                         url += '?search=' + leadId;
-                        
+
                         window.location.href = url;
-                    } 
-                    else 
-                    {
+                    } else {
                         showLeadInModal(leadId);
                     }
                 }
 
-                function showLeadInModal(leadId) 
-                {
+                function showLeadInModal(leadId) {
                     $('#calendarEventModal').modal('show');
                     $.ajax({
                         url: '/lead/' + leadId + '/details?type=lead',
                         type: 'GET',
-                        success: function(response) 
-                        {
+                        success: function(response) {
                             let content = '<div class="container-fluid p-3">';
                             content += '<h5>' + (response.name || 'Lead Details') + '</h5>';
                             content += '<hr>';
-                            
+
                             const fields = {
                                 'name': 'Name',
                                 'phone': 'Phone',
@@ -483,162 +452,151 @@
                                 'classification': 'Classification',
                                 'last_comment': 'Last Comment'
                             };
-                            
-                            for (let key in fields) 
-                            {
-                                if (response[key] && response[key] !== 'null' && response[key] !== '') 
-                                {
+
+                            for (let key in fields) {
+                                if (response[key] && response[key] !== 'null' && response[key] !== '') {
                                     content += `<p><strong>${fields[key]}:</strong> ${response[key]}</p>`;
                                 }
                             }
-                            
+
                             content += '</div>';
                             $('#calendarEventModalBody').html(content);
                         },
-                        error: function() 
-                        {
+                        error: function() {
                             $('#calendarEventModalBody').html('<div class="alert alert-danger">Error loading lead details</div>');
                         }
                     });
                 }
                 window.calendarEvents = @json($calendarEvents ?? []);
             </script>
+
             <script>
-               $(document).ready(function() 
-                {
+                $(document).ready(function() {
                     const $filterBtn = $('#toggleDashboardFilter');
                     const $filterBox = $('#filterDashboardBox');
                     const $closeBtn = $('#closeDashboardFilter');
-                    $filterBtn.on('click', function(e) 
-                    {
+                    $filterBtn.on('click', function(e) {
                         e.stopPropagation();
                         $filterBox.toggle();
                     });
-                    $closeBtn.on('click', function(e) 
-                    {
+                    $closeBtn.on('click', function(e) {
                         e.stopPropagation();
                         $filterBox.hide();
                     });
-                    $filterBox.on('click', function(e) 
-                    {
+                    $filterBox.on('click', function(e) {
                         e.stopPropagation();
                     });
-                    $(document).on('click', function() 
-                    {
+                    $(document).on('click', function() {
                         $filterBox.hide();
                     });
                 });
 
-                var options = 
-                {
-                    series: [67],
-                    chart: 
-                    {
-                        height: 350,
-                        type: 'radialBar',
-                        offsetY: -10
-                    },
-                    plotOptions: 
-                    {
-                        radialBar: 
-                        {
-                            startAngle: -135,
-                            endAngle: 135,
-                            dataLabels: 
-                            {
-                            name: 
-                            {
-                                fontSize: '16px',
-                                color: undefined,
-                                offsetY: 120
-                            },
-                            value: 
-                            {
-                                offsetY: 76,
-                                fontSize: '22px',
-                                color: undefined,
-                                formatter: function (val) 
-                                {
-                                    return val + "%";
+                var el = document.querySelector("#radialBar-chart");
+                if (el) {
+                    var options = {
+                        series: [67],
+                        chart: {
+                            height: 350,
+                            type: 'radialBar',
+                            offsetY: -10
+                        },
+                        plotOptions: {
+                            radialBar: {
+                                startAngle: -135,
+                                endAngle: 135,
+                                dataLabels: {
+                                    name: {
+                                        fontSize: '16px',
+                                        color: undefined,
+                                        offsetY: 120
+                                    },
+                                    value: {
+                                        offsetY: 76,
+                                        fontSize: '22px',
+                                        color: undefined,
+                                        formatter: function(val) {
+                                            return val + "%";
+                                        }
+                                    }
                                 }
                             }
-                            }
-                        }
-                    },
-                    fill: 
-                    {
-                        type: 'gradient',
-                        gradient: 
-                        {
-                            shade: 'dark',
-                            shadeIntensity: 0.15,
-                            inverseColors: false,
-                            opacityFrom: 1,
-                            opacityTo: 1,
-                            stops: [0, 50, 65, 91]
                         },
-                    },
-                    stroke: 
-                    {
-                        dashArray: 4
-                    },
+                        fill: {
+                            type: 'gradient',
+                            gradient: {
+                                shade: 'dark',
+                                shadeIntensity: 0.15,
+                                inverseColors: false,
+                                opacityFrom: 1,
+                                opacityTo: 1,
+                                stops: [0, 50, 65, 91]
+                            },
+                        },
+                        stroke: {
+                            dashArray: 4
+                        },
                         labels: ['Median Ratio'],
                     };
                     var chart = new ApexCharts(document.querySelector("#radialBar-chart"), options);
                     chart.render();
+                }
             </script>
+
             <script>
-                const monthsReport = @json(isset($monthsReport) ? $monthsReport : 0);
-                var options = {
-                    series: [{
-                        name: 'Leads',
-                        data: monthsReport
-                    }],
-                    chart: {
-                        type: 'bar',
-                        height: 350
-                    },
-                    plotOptions: {
-                        bar: {
-                            horizontal: false,
-                            columnWidth: '55%',
-                            borderRadius: 5,
-                            borderRadiusApplication: 'end'
+                var el = document.querySelector("#monthly-chart");
+                if (el) {
+                    const monthsReport = @json(isset($monthsReport) ? $monthsReport : 0);
+
+                    var options = {
+                        series: [{
+                            name: 'Leads',
+                            data: monthsReport
+                        }],
+                        chart: {
+                            type: 'bar',
+                            height: 350
                         },
-                    },
-                    dataLabels: {
-                        enabled: false
-                    },
-                    stroke: {
-                        show: true,
-                        width: 2,
-                        colors: ['transparent']
-                    },
-                    xaxis: {
-                        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-                    },
-                    yaxis: {
-                        title: {
-                            text: 'Total Leads'
-                        }
-                    },
-                    fill: {
-                        opacity: 1
-                    },
-                    tooltip: {
-                        y: {
-                            formatter: function (val) {
-                                return val + " leads";
+                        plotOptions: {
+                            bar: {
+                                horizontal: false,
+                                columnWidth: '55%',
+                                borderRadius: 5,
+                                borderRadiusApplication: 'end'
+                            },
+                        },
+                        dataLabels: {
+                            enabled: false
+                        },
+                        stroke: {
+                            show: true,
+                            width: 2,
+                            colors: ['transparent']
+                        },
+                        xaxis: {
+                            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+                        },
+                        yaxis: {
+                            title: {
+                                text: 'Total Leads'
+                            }
+                        },
+                        fill: {
+                            opacity: 1
+                        },
+                        tooltip: {
+                            y: {
+                                formatter: function(val) {
+                                    return val + " leads";
+                                }
                             }
                         }
-                    }
-                };
-                var chart = new ApexCharts(document.querySelector("#monthly-chart"), options);
-                chart.render();
+                    };
+                    var chart = new ApexCharts(document.querySelector("#monthly-chart"), options);
+                    chart.render();
+                }
             </script>
             <script>
-                $(document).ready(function () 
-                {
+                $(document).ready(function() {
                     $('.select2').select2({
                         placeholder: 'Select',
                         width: '100%'
@@ -665,8 +623,8 @@
                         }
                     });
                     const urlParams = new URLSearchParams(window.location.search);
-                    const length = parseInt(urlParams.get('length')) || 10;  
-                    const page = parseInt(urlParams.get('page')) || 1;    
+                    const length = parseInt(urlParams.get('length')) || 10;
+                    const page = parseInt(urlParams.get('page')) || 1;
                     const table = $('#table').DataTable({
                         scrollX: true,
                         scrollCollapse: true,
@@ -686,14 +644,18 @@
                         },
                         responsive: true,
                         autoWidth: false,
-                        dom: '<"top"lf>rt<"bottom"ip>', 
-                        columnDefs: [
-                            { width: "20%", targets: 0 }, 
-                            { width: "15%", targets: 1 }  
+                        dom: '<"top"lf>rt<"bottom"ip>',
+                        columnDefs: [{
+                                width: "20%",
+                                targets: 0
+                            },
+                            {
+                                width: "15%",
+                                targets: 1
+                            }
                         ]
-                    });               
-                    $('#togglePassword').on('click', function () 
-                    {
+                    });
+                    $('#togglePassword').on('click', function() {
                         const $password = $('#password');
                         const type = $password.attr('type') === 'password' ? 'text' : 'password';
                         $password.attr('type', type);
@@ -701,8 +663,7 @@
                         $icon.toggleClass('fa-eye fa-eye-slash');
                     });
 
-                    $('.delete-user-btn').click(function() 
-                    {
+                    $('.delete-user-btn').click(function() {
                         const userId = $(this).data('user-id');
 
                         Swal.fire({
@@ -714,23 +675,18 @@
                             cancelButtonColor: '#d33',
                             confirmButtonText: 'Yes, delete it!'
                         }).then((result) => {
-                            if (result.isConfirmed) 
-                            {
+                            if (result.isConfirmed) {
                                 $.ajax({
                                     url: "/users/" + userId + "/check-delete",
                                     method: 'DELETE',
                                     data: {
                                         _token: "{{ csrf_token() }}"
                                     },
-                                    success: function(response) 
-                                    {
-                                        if (response.success) 
-                                        {
+                                    success: function(response) {
+                                        if (response.success) {
                                             toastr.success('User deleted successfully');
                                             setTimeout(() => location.reload(), 1500);
-                                        } 
-                                        else if (response.hasLeads) 
-                                        {
+                                        } else if (response.hasLeads) {
                                             Swal.fire({
                                                 title: 'Cannot Delete User',
                                                 html: `This user has <b>${response.leadsCount}</b> lead(s).<br>
@@ -740,40 +696,32 @@
                                                 confirmButtonText: 'Transfer Leads',
                                                 cancelButtonText: 'Cancel'
                                             }).then((r) => {
-                                                if(r.isConfirmed)
-                                                {
+                                                if (r.isConfirmed) {
                                                     window.location.href = response.transferUrl;
                                                 }
                                             });
-                                        } 
-                                        else 
-                                        {
+                                        } else {
                                             toastr.error(response.message || 'Failed to delete user');
                                         }
                                     },
-                                    error: function(xhr) 
-                                    {
+                                    error: function(xhr) {
                                         toastr.error('Error deleting user');
                                     }
                                 });
                             }
                         });
                     });
-                    
-                    $('.edit-btn').on('click', function () 
-                    {
+
+                    $('.edit-btn').on('click', function() {
                         let id = $(this).data('id');
                         let name = $(this).data('name');
                         let type = $(this).data('type');
                         let action = $(this).data('action');
                         let modal = $(this).data('modal');
 
-                        if(modal == 'Checklist')
-                        {
+                        if (modal == 'Checklist') {
                             $('.type-field').addClass('d-none');
-                        }
-                        else if(modal == 'Category')
-                        {
+                        } else if (modal == 'Category') {
                             $('.cat-type').removeClass('d-none');
                         }
                         $('#id').val(id);
@@ -785,24 +733,19 @@
                         $('#ModalboxLabel').html(modal + ' ' + type);
                         $('#type').val(type);
                         $('#cat_type').val(type);
-                        if ($('#action').find('input[name="_method"]').length === 0) 
-                        {
+                        if ($('#action').find('input[name="_method"]').length === 0) {
                             $('#action').append('<input type="hidden" name="_method" value="PUT">');
                         }
                     });
 
-                    $('.add-project').on('click', function () 
-                    {
+                    $('.add-project').on('click', function() {
                         let action = $(this).data('action');
                         $("#action")[0].reset();
-                        let type = $(this).data('type'); 
+                        let type = $(this).data('type');
                         let modal = $(this).data('modal');
-                        if(modal == 'Checklist')
-                        {
+                        if (modal == 'Checklist') {
                             $('.type-field').addClass('d-none');
-                        }
-                        else if(modal == 'Category')
-                        {
+                        } else if (modal == 'Category') {
                             $('.cat-type').removeClass('d-none');
                         }
                         $('#id').val('');
@@ -817,8 +760,7 @@
                     let isProcessing = false;
                     let originalState = $('#attendanceToggle').prop('checked');
 
-                    $('#attendanceToggle').on('change', function () 
-                    {
+                    $('#attendanceToggle').on('change', function() {
                         if (isProcessing) return;
                         const newState = this.checked;
                         const action = newState ? 'start' : 'end';
@@ -859,30 +801,24 @@
                                 popup: 'animate__animated animate__fadeOut animate__faster'
                             }
                         }).then((result) => {
-                            if (result.isConfirmed) 
-                            {
+                            if (result.isConfirmed) {
                                 isProcessing = true;
                                 markAttendance(action, newState);
-                            } 
-                            else 
-                            {
+                            } else {
                                 updateToggleVisuals(originalState);
                             }
                         });
                     });
 
-                    function markAttendance(action, targetState) 
-                    {
+                    function markAttendance(action, targetState) {
                         const $toggle = $('#attendanceToggle');
                         $toggle.prop('disabled', true);
                         $toggle.next().find('.attendance-toggle-handle').css({
                             'box-shadow': '0 0 0 5px rgba(79, 172, 254, 0.3)',
                             'transition': 'all 0.5s ease'
                         });
-                        if (navigator.geolocation) 
-                        {
-                            navigator.geolocation.getCurrentPosition(function (position) 
-                            {
+                        if (navigator.geolocation) {
+                            navigator.geolocation.getCurrentPosition(function(position) {
                                 const latitude = position.coords.latitude;
                                 const longitude = position.coords.longitude;
                                 $.ajax({
@@ -901,8 +837,7 @@
                                     },
                                     error: (xhr) => {
                                         let errorMessage = 'Failed to update attendance.';
-                                        if (xhr.responseJSON?.message) 
-                                        {
+                                        if (xhr.responseJSON?.message) {
                                             errorMessage = xhr.responseJSON.message;
                                         }
                                         showErrorAlert(errorMessage);
@@ -918,8 +853,7 @@
                                     }
                                 });
 
-                            }, function (error) 
-                            {
+                            }, function(error) {
                                 showErrorAlert('Unable to access location. Please allow location access and try again.');
                                 updateToggleVisuals(originalState);
                                 $toggle.prop('disabled', false);
@@ -929,9 +863,7 @@
                                 });
                                 isProcessing = false;
                             });
-                        } 
-                        else 
-                        {
+                        } else {
                             showErrorAlert('Geolocation is not supported by this browser.');
                             updateToggleVisuals(originalState);
                             $toggle.prop('disabled', false);
@@ -943,13 +875,11 @@
                         }
                     }
 
-                    function updateToggleVisuals(state) 
-                    {
+                    function updateToggleVisuals(state) {
                         $('#attendanceToggle').prop('checked', state);
                     }
 
-                    function showSuccessAlert(message) 
-                    {
+                    function showSuccessAlert(message) {
                         Swal.fire({
                             title: 'Success',
                             text: message,
@@ -960,8 +890,7 @@
                         });
                     }
 
-                    function showErrorAlert(message) 
-                    {
+                    function showErrorAlert(message) {
                         Swal.fire({
                             title: 'Error',
                             text: message,
@@ -969,8 +898,7 @@
                             confirmButtonColor: '#ff7675'
                         });
                     }
-                    $(document).on('submit', '.lead-allocate-form', function () 
-                    {
+                    $(document).on('submit', '.lead-allocate-form', function() {
                         $('.submit-btn').prop('disabled', true);
                         $('.submit-text').addClass('d-none');
                         $('#SubmitSpinner').removeClass('d-none');
@@ -978,8 +906,7 @@
                 });
             </script>
             <script>
-                function showStatusUpdateModal(leadId, currentStatus) 
-                {
+                function showStatusUpdateModal(leadId, currentStatus) {
                     $('#leadId').val(leadId);
                     $('#currentStatus').text(currentStatus);
                     $('#newStatus').val(currentStatus);
@@ -991,77 +918,65 @@
                     $('#remindDate').attr('min', new Date().toISOString().split('T')[0]);
                     $('#projectSelectionField').hide();
                     $('#visitProjects').val(null).trigger('change');
-                    if ($.fn.select2) 
-                    {
+                    if ($.fn.select2) {
                         $('#visitProjects').select2({
                             placeholder: 'Select Project(s) for Visit',
                             allowClear: true,
                             width: '100%'
                         });
                     }
-                    
+
                     $('#selectedProjectsPreview').hide();
-                    
+
                     var modal = new bootstrap.Modal(document.getElementById('statusUpdateModal'));
                     modal.show();
-                    setTimeout(function() 
-                    {
-                        if ($.fn.select2) 
-                        {
+                    setTimeout(function() {
+                        if ($.fn.select2) {
                             $('.select2').select2({
                                 placeholder: 'Select',
                                 width: '100%'
                             });
                         }
                     }, 500);
-                    
+
                     $('#newStatus').trigger('change');
                 }
 
-                function toggleApplicantFields() 
-                {
+                function toggleApplicantFields() {
                     var status = $('#newStatus').val();
                     var conversionType = $('#conversionType').val();
 
-                    if (status === 'CONVERTED' && conversionType === 'Completed') 
-                    {
+                    if (status === 'CONVERTED' && conversionType === 'Completed') {
                         $('.applicant_div').show();
-                    } 
-                    else 
-                    {
+                    } else {
                         $('.applicant_div').hide();
                     }
                 }
 
-                function toggleProjectSelection() 
-                {
+                function toggleProjectSelection() {
                     var status = $('#newStatus').val();
                     const visitStatuses = ['VISIT SCHEDULED', 'VISIT DONE'];
-                    
-                    if (visitStatuses.includes(status)) 
-                    {
+
+                    if (visitStatuses.includes(status)) {
                         $('#projectSelectionField').show();
                         $('#visitProjects').prop('required', true);
                         loadLeadProjects();
-                    } 
-                    else 
-                    {
+                    } else {
                         $('#projectSelectionField').hide();
                         $('#visitProjects').prop('required', false);
                         $('#selectedProjectsPreview').hide();
                     }
                 }
 
-                function loadLeadProjects() 
-                {
+                function loadLeadProjects() {
                     var leadId = $('#leadId').val();
                     var $select = $('#visitProjects');
-                    
+
                     if (!leadId) return;
                     var currentOptions = $select.html();
-                    
+
                     $select.html('<option value="">Loading projects...</option>');
-                    
+
                     $.ajax({
                         url: '{{ route("lead.get-lead-projects") }}',
                         type: 'POST',
@@ -1069,50 +984,42 @@
                             lead_id: leadId,
                             _token: '{{ csrf_token() }}'
                         },
-                        success: function(response) 
-                        {
-                            if (response.success && response.projects.length > 0) 
-                            {
+                        success: function(response) {
+                            if (response.success && response.projects.length > 0) {
                                 var options = '<option value="">--- Select Project(s) for Visit ---</option>';
-                                response.projects.forEach(function(project)
-                                {
+                                response.projects.forEach(function(project) {
                                     options += '<option value="' + project.id + '">' + project.project_name + '</option>';
                                 });
-                                
-                                $select.html(options);s
-                                if ($.fn.select2) 
-                                {
+
+                                $select.html(options);
+                                s
+                                if ($.fn.select2) {
                                     $select.select2({
                                         placeholder: 'Select Project(s) for Visit',
                                         allowClear: true,
                                         width: '100%'
                                     });
                                 }
-                                
+
                                 updateSelectedProjectsPreview();
-                            } 
-                            else 
-                            {
+                            } else {
                                 $select.html(currentOptions);
                             }
                         },
-                        error: function() 
-                        {
+                        error: function() {
                             $select.html(currentOptions);
                         }
                     });
                 }
 
-                function updateSelectedProjectsPreview() 
-                {
+                function updateSelectedProjectsPreview() {
                     var selectedProjects = $('#visitProjects').val();
                     var previewContainer = $('#selectedProjectsPreview');
                     var projectsList = $('#selectedProjectsList');
-                    
+
                     projectsList.empty();
-                    
-                    if (selectedProjects && selectedProjects.length > 0) 
-                    {
+
+                    if (selectedProjects && selectedProjects.length > 0) {
                         previewContainer.show();
                         $.ajax({
                             url: '{{ route("lead.get-project-names") }}',
@@ -1121,72 +1028,54 @@
                                 project_ids: selectedProjects,
                                 _token: '{{ csrf_token() }}'
                             },
-                            success: function(response) 
-                            {
-                                if (response.success) 
-                                {
+                            success: function(response) {
+                                if (response.success) {
                                     projectsList.empty();
-                                    response.projectNames.forEach(function(projectName, index) 
-                                    {
+                                    response.projectNames.forEach(function(projectName, index) {
                                         var projectId = selectedProjects[index];
                                         var badge = $('<span class="selected-project-badge"></span>');
-                                        badge.html(projectName + 
+                                        badge.html(projectName +
                                             '<button type="button" class="remove-btn" onclick="removeProjectFromSelection(\'' + projectId + '\')">×</button>');
                                         projectsList.append(badge);
                                     });
                                 }
                             },
-                            error: function() 
-                            {
-                                selectedProjects.forEach(function(projectId) 
-                                {
+                            error: function() {
+                                selectedProjects.forEach(function(projectId) {
                                     var badge = $('<span class="selected-project-badge"></span>');
-                                    badge.html('Project ID: ' + projectId + 
+                                    badge.html('Project ID: ' + projectId +
                                         '<button type="button" class="remove-btn" onclick="removeProjectFromSelection(\'' + projectId + '\')">×</button>');
                                     projectsList.append(badge);
                                 });
                             }
                         });
-                    } 
-                    else 
-                    {
+                    } else {
                         previewContainer.hide();
                     }
                 }
 
-                function removeProjectFromSelection(projectId) 
-                {
+                function removeProjectFromSelection(projectId) {
                     var currentValues = $('#visitProjects').val();
-                    var updatedValues = currentValues.filter(function(id) 
-                    {
+                    var updatedValues = currentValues.filter(function(id) {
                         return id !== projectId;
                     });
                     $('#visitProjects').val(updatedValues).trigger('change');
                 }
 
-                $(document).ready(function() 
-                {
+                $(document).ready(function() {
                     $('.applicant_div').hide();
                     $('#conversionTypeField').hide();
                     $('#projectSelectionField').hide();
 
-                    $('#newStatus').on('change', function() 
-                    {
+                    $('#newStatus').on('change', function() {
                         var status = $(this).val();
-                        if (status === 'CONVERTED') 
-                        {
+                        if (status === 'CONVERTED') {
                             $('#conversionTypeField').show();
-                        } 
-                        else if(status === 'LOST')
-                        {
+                        } else if (status === 'LOST') {
                             $('#reminderFields').hide();
-                        }
-                        else if(status === 'VISIT DONE')
-                        {
+                        } else if (status === 'VISIT DONE') {
                             $('.followUp').html('Next Follow Up Date');
-                        }
-                        else
-                        {
+                        } else {
                             $('#conversionTypeField').hide();
                             $('#reminderFields').show();
                             $('.applicant_div').hide();
@@ -1196,19 +1085,16 @@
                         toggleApplicantFields();
                     });
 
-                    $('#conversionType').on('change', function() 
-                    {
+                    $('#conversionType').on('change', function() {
                         toggleApplicantFields();
                     });
 
-                    $('#visitProjects').on('change', function() 
-                    {
+                    $('#visitProjects').on('change', function() {
                         updateSelectedProjectsPreview();
                     });
                 });
 
-                function updateLeadStatus() 
-                {
+                function updateLeadStatus() {
                     const leadId = $('#leadId').val();
                     const newStatus = $('#newStatus').val();
                     const conversionType = $('#conversionType').val();
@@ -1224,51 +1110,43 @@
                     const app_dob = $('#app_dob').val();
                     const app_doa = $('#app_doa').val();
                     const visitProjects = $('#visitProjects').val();
-                
-                    if (!newStatus) 
-                    {
+
+                    if (!newStatus) {
                         flasher.error('Please select a new status');
                         return;
                     }
                     const visitStatuses = ['VISIT SCHEDULED', 'VISIT DONE'];
-                    if (visitStatuses.includes(newStatus)) 
-                    {
-                        if (!visitProjects || visitProjects.length === 0) 
-                        {
+                    if (visitStatuses.includes(newStatus)) {
+                        if (!visitProjects || visitProjects.length === 0) {
                             flasher.error('Please select at least one project for the visit');
                             return;
                         }
                     }
 
-                    if (newStatus === 'CONVERTED' && !conversionType) 
-                    {
+                    if (newStatus === 'CONVERTED' && !conversionType) {
                         flasher.error('Please select a conversion type');
                         return;
                     }
 
-                    if (['CALL SCHEDULED', 'VISIT SCHEDULED', 'INTERESTED'].includes(newStatus)) 
-                    {
-                        if (!remindDate) 
-                        {
+                    if (['CALL SCHEDULED', 'VISIT SCHEDULED', 'INTERESTED'].includes(newStatus)) {
+                        if (!remindDate) {
                             flasher.error('Please select a reminder date');
                             return;
                         }
-                        if (!remindTime) 
-                        {
+                        if (!remindTime) {
                             flasher.error('Please select a reminder time');
                             return;
                         }
 
                         const reminderDateTime = new Date(`${remindDate}T${remindTime}`);
-                        if (reminderDateTime < new Date()) 
-                        {
+                        if (reminderDateTime < new Date()) {
                             flasher.error('Reminder date/time cannot be in the past');
                             return;
                         }
                     }
                     const submitBtn = $('#statusUpdateModal').find('.btn-primary');
                     submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...');
-                    
+
                     const formData = {
                         _token: '{{ csrf_token() }}',
                         leadId: leadId,
@@ -1317,31 +1195,29 @@
                         }
                     });
                 }
-                function formatDateDMY(dateStr) 
-                {
+
+                function formatDateDMY(dateStr) {
                     const date = new Date(dateStr);
                     const day = String(date.getDate()).padStart(2, '0');
-                    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", 
-                                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+                    ];
                     const month = monthNames[date.getMonth()];
                     const year = date.getFullYear();
                     return `${day}-${month}-${year}`;
                 }
 
-                function showComment(leadId)
-                {
+                function showComment(leadId) {
                     var commentsModal = new bootstrap.Modal(document.getElementById('commentsModal'));
                     commentsModal.show();
-                    
+
                     $.ajax({
                         url: '/lead/' + leadId + '/comments',
                         type: 'GET',
                         dataType: 'json',
-                        success: function(response) 
-                        {
+                        success: function(response) {
                             var html = '';
-                            if (response.comments.length > 0) 
-                            {
+                            if (response.comments.length > 0) {
                                 html += `
                                     <div class="table-responsive">
                                     <table class="table table-borderless table-hover align-middle">
@@ -1404,19 +1280,16 @@
                 $(function() {
                     $('[data-bs-toggle="tooltip"]').tooltip();
                 });
-                document.addEventListener('DOMContentLoaded', function() 
-                {
+                document.addEventListener('DOMContentLoaded', function() {
                     let chart;
                     const currentYear = document.getElementById('year-filter').value;
                     initChart(currentYear);
-                    document.getElementById('year-filter').addEventListener('change', function() 
-                    {
+                    document.getElementById('year-filter').addEventListener('change', function() {
                         const selectedYear = this.value;
                         initChart(selectedYear);
                     });
                     document.querySelectorAll('.time-period-btn').forEach(btn => {
-                        btn.addEventListener('click', function() 
-                        {
+                        btn.addEventListener('click', function() {
                             document.querySelectorAll('.time-period-btn').forEach(b => {
                                 b.classList.remove('active', 'btn-primary');
                                 b.classList.add('btn-outline-light', 'text-dark');
@@ -1426,30 +1299,25 @@
                             const period = this.getAttribute('data-period');
                         });
                     });
-                    
+
                     document.querySelectorAll('.export-btn').forEach(btn => {
-                        btn.addEventListener('click', function(e) 
-                        {
+                        btn.addEventListener('click', function(e) {
                             e.preventDefault();
                             const type = this.getAttribute('data-type');
                             const year = document.getElementById('year-filter').value;
-                            
-                            if (type === 'print') 
-                            {
+
+                            if (type === 'print') {
                                 window.print();
-                            } 
-                            else
-                            {
+                            } else {
                                 exportChartData(year, type);
                             }
                         });
                     });
-                    function initChart(year)
-                    {
+
+                    function initChart(year) {
                         fetch(`/dashboard/get-chart-data?year=${year}`)
                             .then(response => {
-                                if (!response.ok) 
-                                {
+                                if (!response.ok) {
                                     throw new Error('Network response was not ok');
                                 }
                                 return response.json();
@@ -1461,23 +1329,23 @@
                                 console.error('Error fetching chart data:', error);
                             });
                     }
-                    
-                    function renderChart(year, chartData) 
-                    {
+
+                    function renderChart(year, chartData) {
                         const chartOptions = {
                             chart: {
-                            type: 'bar',
-                            height: 350,
-                            stacked: false,
-                            toolbar: { show: false },
-                            animations: {
-                                enabled: true,
-                                easing: 'easeinout',
-                                speed: 800
-                            },
-                            events: {
-                                    dataPointMouseEnter: function(event, chartContext, config) 
-                                    {
+                                type: 'bar',
+                                height: 350,
+                                stacked: false,
+                                toolbar: {
+                                    show: false
+                                },
+                                animations: {
+                                    enabled: true,
+                                    easing: 'easeinout',
+                                    speed: 800
+                                },
+                                events: {
+                                    dataPointMouseEnter: function(event, chartContext, config) {
                                         const tooltip = document.getElementById('chart-tooltip');
                                         const month = config.w.globals.labels[config.dataPointIndex];
                                         const value = config.w.config.series[config.seriesIndex].data[config.dataPointIndex];
@@ -1494,22 +1362,21 @@
                                         tooltip.style.left = (offsetX - tooltip.offsetWidth / 2) + 'px';
                                         tooltip.style.top = (offsetY - tooltip.offsetHeight - 10) + 'px';
                                     },
-                                    dataPointMouseLeave: function() 
-                                    {
+                                    dataPointMouseLeave: function() {
                                         document.getElementById('chart-tooltip').classList.add('d-none');
                                     }
                                 }
                             },
-                            series: [
-                                { 
-                                    name: year, data: chartData
-                                }
-                            ],
+                            series: [{
+                                name: year,
+                                data: chartData
+                            }],
                             colors: ['#4e54c8'],
-                            dataLabels: { enabled: false },
+                            dataLabels: {
+                                enabled: false
+                            },
                             plotOptions: {
-                                bar: 
-                                {
+                                bar: {
                                     horizontal: false,
                                     columnWidth: '55%',
                                     endingShape: 'rounded',
@@ -1523,22 +1390,25 @@
                             },
                             xaxis: {
                                 categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                                axisBorder: { show: false },
-                                axisTicks: { show: false },
-                                labels: { 
-                                    style: 
-                                    { 
+                                axisBorder: {
+                                    show: false
+                                },
+                                axisTicks: {
+                                    show: false
+                                },
+                                labels: {
+                                    style: {
                                         colors: '#6c757d',
                                         fontFamily: 'inherit'
-                                    } 
+                                    }
                                 }
                             },
                             yaxis: {
-                                labels: { 
-                                    style: { 
+                                labels: {
+                                    style: {
                                         colors: '#6c757d',
                                         fontFamily: 'inherit'
-                                    } 
+                                    }
                                 },
                                 min: 0,
                                 forceNiceScale: true
@@ -1546,10 +1416,19 @@
                             grid: {
                                 borderColor: '#f1f1f1',
                                 strokeDashArray: 3,
-                                padding: { top: 0, right: 10, bottom: 0, left: 10 }
+                                padding: {
+                                    top: 0,
+                                    right: 10,
+                                    bottom: 0,
+                                    left: 10
+                                }
                             },
-                            tooltip: { enabled: false },
-                            legend: { show: false },
+                            tooltip: {
+                                enabled: false
+                            },
+                            legend: {
+                                show: false
+                            },
                             fill: {
                                 opacity: 1
                             },
@@ -1565,12 +1444,9 @@
                             }]
                         };
 
-                        if (chart) 
-                        {
+                        if (chart) {
                             chart.updateOptions(chartOptions);
-                        } 
-                        else 
-                        {
+                        } else {
                             chart = new ApexCharts(
                                 document.querySelector("#lead-monthly-report"),
                                 chartOptions
@@ -1578,16 +1454,16 @@
                             chart.render();
                         }
                     }
-                    function exportChartData(year, type) 
-                    {
-                        if (type === 'csv') 
-                        {
+
+                    function exportChartData(year, type) {
+                        if (type === 'csv') {
                             window.location.href = `/dashboard/export-chart?year=${year}&type=csv`;
                             return;
                         }
-                        if (type === 'png' && chart) 
-                        {
-                            chart.dataURI().then(({ imgURI }) => {
+                        if (type === 'png' && chart) {
+                            chart.dataURI().then(({
+                                imgURI
+                            }) => {
                                 const link = document.createElement('a');
                                 link.href = imgURI;
                                 link.download = `lead-conversion-${year}.png`;
@@ -1600,87 +1476,71 @@
                         }
                     }
                 });
-                $(document).ready(function() 
-                {
-                    $('.no-editDelete-right').click(function()
-                    {
+                $(document).ready(function() {
+                    $('.no-editDelete-right').click(function() {
                         toastr.error("You don’t have permission to edit or delete this task");
                     });
-                    function updateFormProgress() 
-                    {
+
+                    function updateFormProgress() {
                         const requiredFields = $('#projectForm').find('[required]');
                         const totalRequired = requiredFields.length;
                         let completed = 0;
-                        
-                        requiredFields.each(function() 
-                        {
-                            if ($(this).val() && $(this).val().toString().trim() !== '') 
-                            {
+
+                        requiredFields.each(function() {
+                            if ($(this).val() && $(this).val().toString().trim() !== '') {
                                 completed++;
                             }
                         });
-                        
+
                         const progressPercentage = Math.round((completed / totalRequired) * 100);
                         $('#formProgressBar').css('width', progressPercentage + '%');
                         $('#completedFieldsBadge').text(progressPercentage + '% Complete');
                         $('#formProgressText').text(progressPercentage === 100 ? 'Ready to submit!' : `${completed} of ${totalRequired} required fields completed`);
-                        
+
                         const tabs = ['basic', 'location', 'media', 'specifications', 'amenities', 'contact'];
                         tabs.forEach(tab => {
                             const tabFields = $(`#${tab}-info`).find('[required]');
                             let tabCompleted = 0;
-                            
-                            tabFields.each(function() 
-                            {
-                                if ($(this).val() && $(this).val().toString().trim() !== '') 
-                                {
+
+                            tabFields.each(function() {
+                                if ($(this).val() && $(this).val().toString().trim() !== '') {
                                     tabCompleted++;
                                 }
                             });
-                            
+
                             const tabPercentage = tabFields.length > 0 ? Math.round((tabCompleted / tabFields.length) * 100) : 100;
-                            if (tabPercentage === 100) 
-                            {
+                            if (tabPercentage === 100) {
                                 $(`#${tab}-tab`).addClass('text-success');
-                            } 
-                            else 
-                            {
+                            } else {
                                 $(`#${tab}-tab`).removeClass('text-success');
                             }
                         });
                     }
-                    
-                    $('#projectForm').on('change keyup', 'input, select, textarea', function() 
-                    {
+
+                    $('#projectForm').on('change keyup', 'input, select, textarea', function() {
                         updateFormProgress();
                     });
-                    
-                    $('#projectModal').on('shown.bs.modal', function() 
-                    {
+
+                    $('#projectModal').on('shown.bs.modal', function() {
                         updateFormProgress();
                     });
-                    
-                    function setupFilePreview(inputId, previewId, isMultiple = false) 
-                    {
+
+                    function setupFilePreview(inputId, previewId, isMultiple = false) {
                         const input = document.getElementById(inputId);
                         const preview = document.getElementById(previewId);
-                        
-                        input.addEventListener('change', function(e) 
-                        {
+
+                        input.addEventListener('change', function(e) {
                             preview.innerHTML = '';
-                            
-                            if (isMultiple && input.files.length > 0) 
-                            {
+
+                            if (isMultiple && input.files.length > 0) {
                                 preview.innerHTML = '<div class="d-flex flex-wrap gap-2"></div>';
                                 const container = preview.querySelector('div');
-                                
-                                for (let i = 0; i < Math.min(input.files.length, 10); i++) 
-                                {
+
+                                for (let i = 0; i < Math.min(input.files.length, 10); i++) {
                                     const file = input.files[i];
                                     const reader = new FileReader();
-                                    
-                                    reader.onload = function(event) 
-                                    {
+
+                                    reader.onload = function(event) {
                                         const div = document.createElement('div');
                                         div.className = 'uploaded-image';
                                         div.innerHTML = `
@@ -1691,19 +1551,15 @@
                                         `;
                                         container.appendChild(div);
                                     };
-                                    
+
                                     reader.readAsDataURL(file);
                                 }
-                            } 
-                            else if (input.files && input.files[0]) 
-                            {
+                            } else if (input.files && input.files[0]) {
                                 const file = input.files[0];
                                 const reader = new FileReader();
-                                
-                                reader.onload = function(e) 
-                                {
-                                    if (file.type.match('image.*')) 
-                                    {
+
+                                reader.onload = function(e) {
+                                    if (file.type.match('image.*')) {
                                         preview.innerHTML = `
                                             <div class="position-relative">
                                                 <img src="${e.target.result}" class="img-fluid rounded" alt="${file.name}">
@@ -1713,9 +1569,7 @@
                                             </div>
                                             <div class="mt-2 small text-truncate">${file.name}</div>
                                         `;
-                                    } 
-                                    else if (file.type === 'application/pdf') 
-                                    {
+                                    } else if (file.type === 'application/pdf') {
                                         preview.innerHTML = `
                                             <div class="d-flex align-items-center justify-content-center p-3 bg-light rounded">
                                                 <i class="far fa-file-pdf fa-3x text-danger me-3"></i>
@@ -1728,9 +1582,7 @@
                                                 </button>
                                             </div>
                                         `;
-                                    } 
-                                    else 
-                                    {
+                                    } else {
                                         preview.innerHTML = `
                                             <div class="d-flex align-items-center justify-content-center p-3 bg-light rounded">
                                                 <i class="far fa-file fa-3x text-primary me-3"></i>
@@ -1745,15 +1597,13 @@
                                         `;
                                     }
                                 };
-                                
+
                                 reader.readAsDataURL(file);
                             }
                         });
 
-                        preview.addEventListener('click', function(e) 
-                        {
-                            if (e.target.closest('.remove-file') || e.target.closest('.remove-image')) 
-                            {
+                        preview.addEventListener('click', function(e) {
+                            if (e.target.closest('.remove-file') || e.target.closest('.remove-image')) {
                                 e.preventDefault();
                                 input.value = '';
                                 preview.innerHTML = `
@@ -1773,11 +1623,9 @@
                     setupFilePreview('price_list', 'priceListPreview');
                     setupFilePreview('brochure', 'brochurePreview');
                     setupFilePreview('gallery_images', 'galleryPreviews', true);
-                    $('#addCustomAmenity').click(function() 
-                    {
+                    $('#addCustomAmenity').click(function() {
                         const amenity = $('#customAmenityInput').val().trim();
-                        if (amenity)
-                        {
+                        if (amenity) {
                             const badge = $(`
                                 <div class="custom-amenity-badge">
                                     <input type="hidden" name="amenities[]" value="${amenity}">
@@ -1787,31 +1635,26 @@
                                     </span>
                                 </div>
                             `);
-                            
+
                             $('#customAmenitiesContainer').append(badge);
                             $('#customAmenityInput').val('');
-                            
-                            badge.find('.remove-amenity').click(function() 
-                            {
+
+                            badge.find('.remove-amenity').click(function() {
                                 badge.remove();
                             });
                         }
                     });
-                    
-                    $('#customAmenityInput').keypress(function(e) 
-                    {
-                        if (e.which === 13) 
-                        {
+
+                    $('#customAmenityInput').keypress(function(e) {
+                        if (e.which === 13) {
                             $('#addCustomAmenity').click();
                             return false;
                         }
                     });
                 });
 
-                function applyWebsiteStyles(styles) 
-                {
-                    function hexToRgb(hex) 
-                    {
+                function applyWebsiteStyles(styles) {
+                    function hexToRgb(hex) {
                         const r = parseInt(hex.slice(1, 3), 16);
                         const g = parseInt(hex.slice(3, 5), 16);
                         const b = parseInt(hex.slice(5, 7), 16);
@@ -1824,8 +1667,7 @@
                     document.documentElement.style.setProperty('--text-color', styles.text_color || '#333333');
                     document.documentElement.style.setProperty('--light-bg', styles.light_bg || '#f9f9f9');
                     document.documentElement.style.setProperty('--border-radius', `${styles.border_radius || 16}px`);
-                    if (styles.font_primary) 
-                    {
+                    if (styles.font_primary) {
                         const primaryFont = document.createElement('link');
                         primaryFont.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(styles.font_primary)}:wght@300;400;500;600;700&display=swap`;
                         primaryFont.rel = 'stylesheet';
@@ -1833,13 +1675,12 @@
                         document.body.style.fontFamily = `'${styles.font_primary}', sans-serif`;
                     }
 
-                    if (styles.font_secondary) 
-                    {
+                    if (styles.font_secondary) {
                         const secondaryFont = document.createElement('link');
                         secondaryFont.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(styles.font_secondary)}:wght@400;500;600;700&display=swap`;
                         secondaryFont.rel = 'stylesheet';
                         document.head.appendChild(secondaryFont);
-                        
+
                         document.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(el => {
                             el.style.fontFamily = `'${styles.font_secondary}', serif`;
                         });
@@ -1847,38 +1688,30 @@
 
                     const buttons = document.querySelectorAll('.btn-premium, .btn');
                     buttons.forEach(btn => {
-                        btn.style.borderRadius = 
-                            styles.button_style === 'pill' ? '50px' : 
-                            styles.button_style === 'square' ? '0' : 
+                        btn.style.borderRadius =
+                            styles.button_style === 'pill' ? '50px' :
+                            styles.button_style === 'square' ? '0' :
                             'var(--border-radius)';
                     });
                     const navbar = document.querySelector('.navbar');
-                    if (navbar) 
-                    {
-                        if (styles.nav_style === 'transparent') 
-                        {
+                    if (navbar) {
+                        if (styles.nav_style === 'transparent') {
                             navbar.style.background = 'transparent';
                             navbar.style.boxShadow = 'none';
-                        } 
-                        else if (styles.nav_style === 'glass') 
-                        {
+                        } else if (styles.nav_style === 'glass') {
                             navbar.style.background = 'rgba(var(--primary-rgb), 0.7)';
                             navbar.style.backdropFilter = 'blur(10px)';
-                        } 
-                        else 
-                        {
+                        } else {
                             navbar.style.background = 'rgba(var(--primary-rgb), 0.95)';
                         }
                     }
-                    if (styles.custom_css) 
-                    {
+                    if (styles.custom_css) {
                         const style = document.createElement('style');
                         style.innerHTML = styles.custom_css;
                         document.head.appendChild(style);
                     }
                 }
-                document.getElementById('projectForm').addEventListener('submit', function(e) 
-                {
+                document.getElementById('projectForm').addEventListener('submit', function(e) {
                     e.preventDefault();
                     const formData = {
                         primary_color: this.elements.primary_color.value,
@@ -1896,31 +1729,28 @@
                     saveStylesToBackend(formData);
                     applyWebsiteStyles(formData);
                 });
-                function loadSavedStyles() 
-                {
+
+                function loadSavedStyles() {
                     fetch('/api/project-styles')
                         .then(response => response.json())
                         .then(applyWebsiteStyles);
                 }
 
                 document.addEventListener('DOMContentLoaded', loadSavedStyles);
-                function applyBannerSettings(settings) 
-                {
+
+                function applyBannerSettings(settings) {
                     const hero = document.querySelector('.hero');
-                    if (hero) 
-                    {
+                    if (hero) {
                         hero.style.backgroundSize = settings.banner_size || 'cover';
                         hero.style.backgroundPosition = settings.banner_position || 'center';
                         hero.style.backgroundRepeat = settings.banner_repeat || 'no-repeat';
-                        if (settings.banner_size === 'custom' && settings.banner_width && settings.banner_height) 
-                        {
+                        if (settings.banner_size === 'custom' && settings.banner_width && settings.banner_height) {
                             hero.style.backgroundSize = `${settings.banner_width}px ${settings.banner_height}px`;
                         }
                     }
                 }
 
-                function generateImageSizes(settings) 
-                {
+                function generateImageSizes(settings) {
                     const style = document.createElement('style');
                     style.innerHTML = `
                         .card-img-container {
@@ -1945,10 +1775,9 @@
                     document.head.appendChild(style);
                 }
 
-                document.getElementById('projectForm').addEventListener('submit', function(e) 
-                {
+                document.getElementById('projectForm').addEventListener('submit', function(e) {
                     e.preventDefault();
-                    
+
                     const formData = {
                         banner_size: this.elements.banner_size.value,
                         banner_position: this.elements.banner_position.value,
@@ -1961,39 +1790,33 @@
                     applyBannerSettings(formData);
                     generateImageSizes(formData);
                     saveImageSettings(formData);
-                }); 
+                });
             </script>
             <script>
-                window.addEventListener('load', function () 
-                {
+                window.addEventListener('load', function() {
                     const loader = document.getElementById('page-loader');
-                    if (loader) 
-                    {
+                    if (loader) {
                         loader.style.opacity = '0';
-                        setTimeout(() => loader.style.display = 'none', 300); 
+                        setTimeout(() => loader.style.display = 'none', 300);
                     }
                 });
-                document.getElementById('lengthSelect').addEventListener('change', function() 
-                {
-                    const length = this.value;
-                    const url = new URL(window.location.href);
-                    url.searchParams.set('length', length);
-                    url.searchParams.set('page', 1);
-                    window.location.href = url.toString();
-                });
+                // document.getElementById('lengthSelect').addEventListener('change', function() 
+                // {
+                //     const length = this.value;
+                //     const url = new URL(window.location.href);
+                //     url.searchParams.set('length', length);
+                //     url.searchParams.set('page', 1);
+                //     window.location.href = url.toString();
+                // });
             </script>
             <script>
-                document.addEventListener("DOMContentLoaded", function () 
-                {
-                    $(document).on("select2:select select2:clear change", "#campaignFilter", function () {
+                document.addEventListener("DOMContentLoaded", function() {
+                    $(document).on("select2:select select2:clear change", "#campaignFilter", function() {
                         let campaign = $(this).val();
                         let queryParams = new URLSearchParams(window.location.search);
-                        if (campaign) 
-                        {
+                        if (campaign) {
                             queryParams.set("campaign", campaign);
-                        } 
-                        else 
-                        {
+                        } else {
                             queryParams.delete("campaign");
                         }
                         let url = "{{ route('leads.filter.leads') }}" + "?" + queryParams.toString();
@@ -2001,21 +1824,18 @@
                         window.location.href = url;
                     });
                 });
-                document.getElementById('lengthSelect').addEventListener('change', function() 
-                {
-                    const length = this.value;
-                    const url = new URL(window.location.href);
-                    url.searchParams.set('length', length);
-                    url.searchParams.set('page', 1);
-                    window.location.href = url.toString();
-                });
-                $(document).ready(function() 
-                {
+                // document.getElementById('lengthSelect').addEventListener('change', function() 
+                // {
+                //     const length = this.value;
+                //     const url = new URL(window.location.href);
+                //     url.searchParams.set('length', length);
+                //     url.searchParams.set('page', 1);
+                //     window.location.href = url.toString();
+                // });
+                $(document).ready(function() {
                     $('#table_filter input').attr('placeholder', 'Enter search term');
-                    $('#table_filter input').on('keypress', function(e) 
-                    {
-                        if (e.which === 13) 
-                        {
+                    $('#table_filter input').on('keypress', function(e) {
+                        if (e.which === 13) {
                             const searchValue = $(this).val();
                             const url = new URL(window.location.href);
                             url.searchParams.set('search', searchValue);
@@ -2023,10 +1843,8 @@
                             window.location.href = url.toString();
                         }
                     });
-                    $('#table_filter input').on('input', function() 
-                    {
-                        if ($(this).val() === '') 
-                        {
+                    $('#table_filter input').on('input', function() {
+                        if ($(this).val() === '') {
                             window.location.href = '/lead/all-lead';
                         }
                     });
@@ -2037,228 +1855,201 @@
                     }
                 });
 
-                $('#btnExportExcel').on('click', function()
-               {
-                   var $btn = $(this);
-                   var originalHtml = $btn.html();
-                   $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Please wait...');
+                $('#btnExportExcel').on('click', function() {
+                    var $btn = $(this);
+                    var originalHtml = $btn.html();
+                    $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Please wait...');
 
-                   setTimeout(function()
-                   {
-                       var exportTable = document.createElement('table');
-                       var thead = document.createElement('thead');
-                       var tbody = document.createElement('tbody');
-                       var headerRow = document.createElement('tr');
+                    setTimeout(function() {
+                        var exportTable = document.createElement('table');
+                        var thead = document.createElement('thead');
+                        var tbody = document.createElement('tbody');
+                        var headerRow = document.createElement('tr');
 
-                       $('#table thead th').each(function(index)
-                       {
-                           var thText = $(this).text().trim();
-                           if (!$(this).hasClass('no-sort'))
-                           {
-                               var th = document.createElement('th');
-                               th.textContent = thText;
-                               headerRow.appendChild(th);
-                           }
-                       });
-                       thead.appendChild(headerRow);
-                       exportTable.appendChild(thead);
+                        $('#table thead th').each(function(index) {
+                            var thText = $(this).text().trim();
+                            if (!$(this).hasClass('no-sort')) {
+                                var th = document.createElement('th');
+                                th.textContent = thText;
+                                headerRow.appendChild(th);
+                            }
+                        });
+                        thead.appendChild(headerRow);
+                        exportTable.appendChild(thead);
 
-                       $('#table tbody tr').each(function()
-                       {
-                           var tr = document.createElement('tr');
-                           $(this).find('td').each(function(index)
-                           {
-                               if ((index > 0 || !$(this).find('input[type="checkbox"]').length))
-                               {
-                                   var td = document.createElement('td');
-                                   if ($(this).find('.comment-text').length)
-                                   {
-                                       let text = $(this).find('.comment-text').text().trim();
-                                       text = text.replace(/View more/ig, '').trim();
-                                       td.textContent = text;
-                                   }
-                                   else if ($(this).find('h6').length)
-                                   {
-                                       let text = $(this).find('h6').text().trim() + ' - ' + $(this).find('.text-muted').text().trim();
-                                       text = text.replace(/View more/ig, '').trim();
-                                       td.textContent = text;
-                                   }
-                                   else if ($(this).find('.cust-badge').length)
-                                   {
-                                       let text = $(this).find('.cust-badge').text().trim();
-                                       text = text.replace(/View more/ig, '').trim();
-                                       td.textContent = text;
-                                   }
-                                   else if ($(this).find('a').length && $(this).find('a').attr('href')?.startsWith('mailto:'))
-                                   {
-                                       let text = $(this).find('a').text().trim();
-                                       text = text.replace(/View more/ig, '').trim();
-                                       td.textContent = text;
-                                   }
-                                   else
-                                   {
-                                       let cellText = $(this).text().trim();
-                                       cellText = cellText.replace(/View more/ig, '').trim();
+                        $('#table tbody tr').each(function() {
+                            var tr = document.createElement('tr');
+                            $(this).find('td').each(function(index) {
+                                if ((index > 0 || !$(this).find('input[type="checkbox"]').length)) {
+                                    var td = document.createElement('td');
+                                    if ($(this).find('.comment-text').length) {
+                                        let text = $(this).find('.comment-text').text().trim();
+                                        text = text.replace(/View more/ig, '').trim();
+                                        td.textContent = text;
+                                    } else if ($(this).find('h6').length) {
+                                        let text = $(this).find('h6').text().trim() + ' - ' + $(this).find('.text-muted').text().trim();
+                                        text = text.replace(/View more/ig, '').trim();
+                                        td.textContent = text;
+                                    } else if ($(this).find('.cust-badge').length) {
+                                        let text = $(this).find('.cust-badge').text().trim();
+                                        text = text.replace(/View more/ig, '').trim();
+                                        td.textContent = text;
+                                    } else if ($(this).find('a').length && $(this).find('a').attr('href')?.startsWith('mailto:')) {
+                                        let text = $(this).find('a').text().trim();
+                                        text = text.replace(/View more/ig, '').trim();
+                                        td.textContent = text;
+                                    } else {
+                                        let cellText = $(this).text().trim();
+                                        cellText = cellText.replace(/View more/ig, '').trim();
 
-                                       // Fix Lead ID column (column index 1)
-                                       if (index === 1) {
-                                           let match = cellText.match(/\d+$/); // extract last number
-                                           td.textContent = match ? match[0] : cellText;
-                                       }
+                                        // Fix Lead ID column (column index 1)
+                                        if (index === 1) {
+                                            let match = cellText.match(/\d+$/); // extract last number
+                                            td.textContent = match ? match[0] : cellText;
+                                        }
 
-                                       //  Fix Lead Details column (column index 2)
-                                       else if (index === 2) {
-                                           let parts = cellText.split('-');
-                                           if (parts.length === 2) {
-                                               let name = parts[0].trim();
-                                               let phone = parts[1].trim();
-                                               td.textContent = name + ' (' + phone + ')';
-                                           } else {
-                                               td.textContent = cellText;
-                                           }
-                                       }
+                                        //  Fix Lead Details column (column index 2)
+                                        else if (index === 2) {
+                                            let parts = cellText.split('-');
+                                            if (parts.length === 2) {
+                                                let name = parts[0].trim();
+                                                let phone = parts[1].trim();
+                                                td.textContent = name + ' (' + phone + ')';
+                                            } else {
+                                                td.textContent = cellText;
+                                            }
+                                        }
 
-                                       //  Default case
-                                       else {
-                                           td.textContent = cellText;
-                                       }
-                                   }
-                                   tr.appendChild(td);
-                               }
-                           });
-                           tbody.appendChild(tr);
-                       });
-                       exportTable.appendChild(tbody);
+                                        //  Default case
+                                        else {
+                                            td.textContent = cellText;
+                                        }
+                                    }
+                                    tr.appendChild(td);
+                                }
+                            });
+                            tbody.appendChild(tr);
+                        });
+                        exportTable.appendChild(tbody);
 
-                       var wb = XLSX.utils.table_to_book(exportTable, { sheet: "Reports" });
-                       XLSX.writeFile(wb, "reports.xlsx");
+                        var wb = XLSX.utils.table_to_book(exportTable, {
+                            sheet: "Reports"
+                        });
+                        XLSX.writeFile(wb, "reports.xlsx");
 
 
-                       $btn.prop('disabled', false).html(originalHtml);
-                   }, 100);
-               });
+                        $btn.prop('disabled', false).html(originalHtml);
+                    }, 100);
+                });
 
-                $('#btnExportPDF').on('click', function()
-               {
-                   var $btn = $(this);
-                   var originalHtml = $btn.html();
-                   $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Please wait...');
-
-
-                   setTimeout(function()
-                   {
-                       var { jsPDF } = window.jspdf;
-                       var doc = new jsPDF('l', 'pt', 'a4');
-                       doc.setFontSize(16);
-                       doc.text("Leads Report", 40, 40);
-                       doc.setFontSize(10);
-                       doc.text("Generated on: " + new Date().toLocaleString(), 40, 60);
+                $('#btnExportPDF').on('click', function() {
+                    var $btn = $(this);
+                    var originalHtml = $btn.html();
+                    $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Please wait...');
 
 
-                       var headers = [];
-                       $('#table thead th').each(function()
-                       {
-                           var thText = $(this).text().trim();
-                           if (!$(this).hasClass('no-sort')) headers.push(thText);
-                       });
+                    setTimeout(function() {
+                        var {
+                            jsPDF
+                        } = window.jspdf;
+                        var doc = new jsPDF('l', 'pt', 'a4');
+                        doc.setFontSize(16);
+                        doc.text("Leads Report", 40, 40);
+                        doc.setFontSize(10);
+                        doc.text("Generated on: " + new Date().toLocaleString(), 40, 60);
 
 
-                       var data = [];
-                       $('#table tbody tr').each(function()
-                       {
-                           var row = [];
-                           $(this).find('td').each(function(index)
-                           {
-                               if ((index > 0 || !$(this).find('input[type="checkbox"]').length))
-                               {
-                                   let text = '';
+                        var headers = [];
+                        $('#table thead th').each(function() {
+                            var thText = $(this).text().trim();
+                            if (!$(this).hasClass('no-sort')) headers.push(thText);
+                        });
 
 
-                                   if ($(this).find('.comment-text').length)
-                                   {
-                                       text = $(this).find('.comment-text').text().trim();
-                                   }
-                                   else if ($(this).find('h6').length)
-                                   {
-                                       text = $(this).find('h6').text().trim() + ' - ' + $(this).find('.text-muted').text().trim();
-                                   }
-                                   else if ($(this).find('.cust-badge').length)
-                                   {
-                                       text = $(this).find('.cust-badge').text().trim();
-                                   }
-                                   else if ($(this).find('a').length && $(this).find('a').attr('href')?.startsWith('mailto:'))
-                                   {
-                                       text = $(this).find('a').text().trim();
-                                   }
-                                   else
-                                   {
-                                       text = $(this).text().trim();
-                                   }
+                        var data = [];
+                        $('#table tbody tr').each(function() {
+                            var row = [];
+                            $(this).find('td').each(function(index) {
+                                if ((index > 0 || !$(this).find('input[type="checkbox"]').length)) {
+                                    let text = '';
 
 
-                                   // ✅ Global clean (remove "View more")
-                                   text = cleanText(text);
+                                    if ($(this).find('.comment-text').length) {
+                                        text = $(this).find('.comment-text').text().trim();
+                                    } else if ($(this).find('h6').length) {
+                                        text = $(this).find('h6').text().trim() + ' - ' + $(this).find('.text-muted').text().trim();
+                                    } else if ($(this).find('.cust-badge').length) {
+                                        text = $(this).find('.cust-badge').text().trim();
+                                    } else if ($(this).find('a').length && $(this).find('a').attr('href')?.startsWith('mailto:')) {
+                                        text = $(this).find('a').text().trim();
+                                    } else {
+                                        text = $(this).text().trim();
+                                    }
 
 
-                                   // ✅ Fix Lead ID (index 1)
-                                   if (index === 1) {
-                                       let match = text.match(/\d+$/);
-                                       text = match ? match[0] : text;
-                                   }
+                                    // ✅ Global clean (remove "View more")
+                                    text = cleanText(text);
 
 
-                                   // ✅ Fix Lead Details (index 2)
-                                   else if (index === 2) {
-                                       let parts = text.split('-');
-                                       if (parts.length === 2) {
-                                           let name = parts[0].trim();
-                                           let phone = parts[1].trim();
-                                           text = name + ' (' + phone + ')';
-                                       }
-                                   }
+                                    // ✅ Fix Lead ID (index 1)
+                                    if (index === 1) {
+                                        let match = text.match(/\d+$/);
+                                        text = match ? match[0] : text;
+                                    }
 
 
-                                   row.push(text);
-                               }
-                           });
-                           data.push(row);
-                       });
+                                    // ✅ Fix Lead Details (index 2)
+                                    else if (index === 2) {
+                                        let parts = text.split('-');
+                                        if (parts.length === 2) {
+                                            let name = parts[0].trim();
+                                            let phone = parts[1].trim();
+                                            text = name + ' (' + phone + ')';
+                                        }
+                                    }
 
 
-                       doc.autoTable({
-                           head: [headers],
-                           body: data,
-                           startY: 80,
-                           styles: { fontSize: 8 },
-                           headStyles: { fillColor: [75, 108, 183] }
-                       });
-                       doc.save("reports.pdf");
-                       $btn.prop('disabled', false).html(originalHtml);
-                   }, 100);
-               });
-               function cleanText(text) {
-                   return text.replace(/view more/ig, '').trim();
-               }
+                                    row.push(text);
+                                }
+                            });
+                            data.push(row);
+                        });
 
+
+                        doc.autoTable({
+                            head: [headers],
+                            body: data,
+                            startY: 80,
+                            styles: {
+                                fontSize: 8
+                            },
+                            headStyles: {
+                                fillColor: [75, 108, 183]
+                            }
+                        });
+                        doc.save("reports.pdf");
+                        $btn.prop('disabled', false).html(originalHtml);
+                    }, 100);
+                });
+
+                function cleanText(text) {
+                    return text.replace(/view more/ig, '').trim();
+                }
             </script>
             <script>
-                $(document).ready(function()
-                {
-                    $('.ReportbtnExportExcel').on('click', function() 
-                    {
+                $(document).ready(function() {
+                    $('.ReportbtnExportExcel').on('click', function() {
                         var $btn = $(this);
                         var originalHtml = $btn.html();
                         $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Please wait...');
 
-                        setTimeout(function() 
-                        {
+                        setTimeout(function() {
                             var exportTable = document.createElement('table');
                             var thead = document.createElement('thead');
                             var tbody = document.createElement('tbody');
                             var headerRow = document.createElement('tr');
 
-                            $('#table thead th').each(function(index) 
-                            {
+                            $('#table thead th').each(function(index) {
                                 var thText = $(this).text().trim();
                                 var th = document.createElement('th');
                                 th.textContent = thText;
@@ -2267,11 +2058,9 @@
                             thead.appendChild(headerRow);
                             exportTable.appendChild(thead);
 
-                            $('#table tbody tr').each(function() 
-                            {
+                            $('#table tbody tr').each(function() {
                                 var tr = document.createElement('tr');
-                                $(this).find('td').each(function(index) 
-                                {
+                                $(this).find('td').each(function(index) {
                                     var td = document.createElement('td');
                                     td.textContent = $(this).text().trim();
                                     tr.appendChild(td);
@@ -2280,22 +2069,24 @@
                             });
                             exportTable.appendChild(tbody);
 
-                            var wb = XLSX.utils.table_to_book(exportTable, { sheet: "Leads" });
+                            var wb = XLSX.utils.table_to_book(exportTable, {
+                                sheet: "Leads"
+                            });
                             XLSX.writeFile(wb, "leads.xlsx");
 
                             $btn.prop('disabled', false).html(originalHtml);
                         }, 100);
                     });
 
-                    $('.ReportbtnExportPDF').on('click', function() 
-                    {
+                    $('.ReportbtnExportPDF').on('click', function() {
                         var $btn = $(this);
                         var originalHtml = $btn.html();
                         $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Please wait...');
 
-                        setTimeout(function() 
-                        {
-                            var { jsPDF } = window.jspdf;
+                        setTimeout(function() {
+                            var {
+                                jsPDF
+                            } = window.jspdf;
                             var doc = new jsPDF('l', 'pt', 'a4');
                             doc.setFontSize(16);
                             doc.text("Leads Report", 40, 40);
@@ -2303,17 +2094,14 @@
                             doc.text("Generated on: " + new Date().toLocaleString(), 40, 60);
 
                             var headers = [];
-                            $('#table thead th').each(function() 
-                            {
+                            $('#table thead th').each(function() {
                                 headers.push($(this).text().trim());
                             });
 
                             var data = [];
-                            $('#table tbody tr').each(function() 
-                            {
+                            $('#table tbody tr').each(function() {
                                 var row = [];
-                                $(this).find('td').each(function(index) 
-                                {
+                                $(this).find('td').each(function(index) {
                                     row.push($(this).text().trim());
                                 });
                                 data.push(row);
@@ -2323,8 +2111,12 @@
                                 head: [headers],
                                 body: data,
                                 startY: 80,
-                                styles: { fontSize: 8 },
-                                headStyles: { fillColor: [75, 108, 183] }
+                                styles: {
+                                    fontSize: 8
+                                },
+                                headStyles: {
+                                    fillColor: [75, 108, 183]
+                                }
                             });
 
                             doc.save("leads.pdf");
@@ -2338,19 +2130,15 @@
                         closeOnSelect: false
                     });
                 });
-                $(document).ready(function() 
-                {
+                $(document).ready(function() {
                     let selectedTaskId = null;
                     let selectedStatus = null;
-                    function filterTasksByProject(projectId) 
-                    {
-                        if (!projectId || projectId === 'all') 
-                        {
+
+                    function filterTasksByProject(projectId) {
+                        if (!projectId || projectId === 'all') {
                             $('.task-row').show();
                             $('.filter-task-btn[data-filter="all"]').addClass('filter-btn-active');
-                        } 
-                        else 
-                        {
+                        } else {
                             $('.task-row').hide();
                             $('.task-row.project-task[data-project-id="' + projectId + '"]').show();
                             $('.filter-task-btn').removeClass('filter-btn-active');
@@ -2358,18 +2146,14 @@
                         }
                     }
 
-                    $(document).on('click', '.status-option', function () 
-                    {
+                    $(document).on('click', '.status-option', function() {
                         selectedStatus = $(this).data('status');
                         const dropdown = $(this).closest('.dropdown');
                         selectedTaskId = dropdown.find('.status-btn').data('task-id');
 
-                        if(selectedStatus === 'completed') 
-                        {
+                        if (selectedStatus === 'completed') {
                             $('.completed-file').removeClass('d-none');
-                        } 
-                        else 
-                        {
+                        } else {
                             $('.completed-file').addClass('d-none');
                         }
                         $('#selectedStatusText').text(selectedStatus.replace('_', ' ').toUpperCase());
@@ -2377,12 +2161,11 @@
                         $('#statusCommentModal').modal('show');
                     });
 
-                    $(document).on('click', '.update-project-status', function(e) 
-                    {
+                    $(document).on('click', '.update-project-status', function(e) {
                         e.preventDefault();
                         const projectId = $(this).data('project-id');
                         const status = $(this).data('status');
-                        
+
                         $.ajax({
                             url: `/task/project/update-status/${projectId}`,
                             method: 'POST',
@@ -2390,31 +2173,25 @@
                                 _token: '{{ csrf_token() }}',
                                 status: status
                             },
-                            success: function(response) 
-                            {
-                                if (response.status === 200) 
-                                {
+                            success: function(response) {
+                                if (response.status === 200) {
                                     flasher.success(response.message);
                                     setTimeout(() => location.reload(), 1000);
-                                } 
-                                else
-                                {
+                                } else {
                                     flasher.error('Error', response.message || 'Failed to update project status');
                                 }
                             },
-                            error: function() 
-                            {
+                            error: function() {
                                 flasher.error('Error', 'Failed to update project status');
                             }
                         });
                     });
 
-                    $(document).on('click', '.delete-project', function(e) 
-                    {
+                    $(document).on('click', '.delete-project', function(e) {
                         e.preventDefault();
                         const projectId = $(this).data('project-id');
                         const projectName = $(this).data('project-name');
-                        
+
                         Swal.fire({
                             title: 'Are you sure?',
                             html: `You are about to delete project: <strong>"${projectName}"</strong><br>This action cannot be undone!`,
@@ -2425,28 +2202,22 @@
                             confirmButtonText: 'Yes, delete it!',
                             backdrop: 'rgba(0,0,0,0.4)'
                         }).then((result) => {
-                            if (result.isConfirmed) 
-                            {
+                            if (result.isConfirmed) {
                                 $.ajax({
                                     url: `/task/project/delete/${projectId}`,
                                     type: 'DELETE',
                                     data: {
                                         _token: '{{ csrf_token() }}'
                                     },
-                                    success: function(response) 
-                                    {
-                                        if (response.status === 200) 
-                                        {
+                                    success: function(response) {
+                                        if (response.status === 200) {
                                             flasher.success(response.message);
                                             $(`.project-row[data-project-id="${projectId}"]`).remove();
-                                        } 
-                                        else 
-                                        {
+                                        } else {
                                             flasher.error('Error', response.message || 'Failed to delete project');
                                         }
                                     },
-                                    error: function(xhr) 
-                                    {
+                                    error: function(xhr) {
                                         flasher.error('Error', 'Failed to delete project');
                                     }
                                 });
@@ -2454,101 +2225,72 @@
                         });
                     });
 
-                    $('.filter-task-btn').click(function() 
-                    {
+                    $('.filter-task-btn').click(function() {
                         $('.filter-task-btn').removeClass('filter-btn-active');
                         $(this).addClass('filter-btn-active');
 
                         const filter = $(this).data('filter');
                         const currentProjectFilter = $('#projectTaskFilter').val();
-                        if (filter !== 'all' && filter !== 'project') 
-                        {
+                        if (filter !== 'all' && filter !== 'project') {
                             $('#projectTaskFilter').val('all');
                         }
-                        
+
                         $('.task-row').show();
 
-                        if (filter === 'project') 
-                        {
+                        if (filter === 'project') {
                             $('.individual-task').hide();
-                            if (currentProjectFilter !== 'all') 
-                            {
+                            if (currentProjectFilter !== 'all') {
                                 $('.project-task').hide();
                                 $('.project-task[data-project-id="' + currentProjectFilter + '"]').show();
                             }
-                        } 
-                        else if (filter === 'individual') 
-                        {
+                        } else if (filter === 'individual') {
                             $('.project-task').hide();
-                        } 
-                        else if (filter === 'today') 
-                        {
+                        } else if (filter === 'today') {
                             const today = new Date().toDateString();
-                            $('.task-row').each(function() 
-                            {
+                            $('.task-row').each(function() {
                                 const dueDate = new Date($(this).find('td:eq(4) span').text()).toDateString();
                                 if (dueDate !== today) $(this).hide();
                             });
-                        } 
-                        else if (filter === 'overdue') 
-                        {
+                        } else if (filter === 'overdue') {
                             const today = new Date();
-                            $('.task-row').each(function() 
-                            {
+                            $('.task-row').each(function() {
                                 const dueDate = new Date($(this).find('td:eq(4) span').text());
                                 const taskStatus = $(this).data('task-status');
-                                if (dueDate >= today || taskStatus === 'completed') 
-                                {
+                                if (dueDate >= today || taskStatus === 'completed') {
                                     $(this).hide();
                                 }
                             });
-                        } 
-                        else if (filter === 'pending') 
-                        {
-                            $('.task-row').each(function() 
-                            {
+                        } else if (filter === 'pending') {
+                            $('.task-row').each(function() {
                                 const taskStatus = $(this).data('task-status');
-                                if (taskStatus !== 'pending') 
-                                {
+                                if (taskStatus !== 'pending') {
                                     $(this).hide();
                                 }
                             });
-                        } 
-                        else if (filter === 'processing') 
-                        {
-                            $('.task-row').each(function() 
-                            {
+                        } else if (filter === 'processing') {
+                            $('.task-row').each(function() {
                                 const taskStatus = $(this).data('task-status');
-                                if (taskStatus !== 'in_progress') 
-                                {
+                                if (taskStatus !== 'in_progress') {
                                     $(this).hide();
                                 }
                             });
-                        }
-                        else if (filter === 'completed') 
-                        {
-                            $('.task-row').each(function() 
-                            {
+                        } else if (filter === 'completed') {
+                            $('.task-row').each(function() {
                                 const taskStatus = $(this).data('task-status');
-                                if (taskStatus !== 'completed') 
-                                {
+                                if (taskStatus !== 'completed') {
                                     $(this).hide();
                                 }
                             });
                         }
                     });
 
-                    $('#projectTaskFilter').change(function() 
-                    {
+                    $('#projectTaskFilter').change(function() {
                         const projectId = $(this).val();
-                        
-                        if (projectId === 'all') 
-                        {
+
+                        if (projectId === 'all') {
                             $('.task-row').show();
                             $('.filter-task-btn[data-filter="all"]').click();
-                        } 
-                        else 
-                        {
+                        } else {
                             $('.task-row').hide();
                             $('.task-row.project-task[data-project-id="' + projectId + '"]').show();
                             $('.filter-task-btn').removeClass('filter-btn-active');
@@ -2556,24 +2298,21 @@
                         }
                     });
 
-                    $('.task-search').on('keyup', function() 
-                    {
+                    $('.task-search').on('keyup', function() {
                         const value = $(this).val().toLowerCase();
                         $('.task-row').filter(function() {
                             $(this).toggle($(this).find('.task-name').text().toLowerCase().indexOf(value) > -1);
                         });
                     });
 
-                    $('.project-search').on('keyup', function()
-                    {
+                    $('.project-search').on('keyup', function() {
                         const value = $(this).val().toLowerCase();
                         $('.project-row').filter(function() {
                             $(this).toggle($(this).find('strong').text().toLowerCase().indexOf(value) > -1);
                         });
                     });
 
-                    $(document).on('click', '.view-project-tasks', function(e) 
-                    {
+                    $(document).on('click', '.view-project-tasks', function(e) {
                         e.preventDefault();
                         const projectId = $(this).data('project-id');
                         const projectName = $(this).closest('tr').find('strong').text().trim();
@@ -2582,26 +2321,24 @@
                         filterTasksByProject(projectId);
                     });
 
-                    $(document).on('click', '.edit-project', function(e) 
-                    {
+                    $(document).on('click', '.edit-project', function(e) {
                         e.preventDefault();
                         const projectId = $(this).data('project-id');
                         const projectName = $(this).data('project-name');
                         const projectDescription = $(this).data('project-description');
                         const projectStatus = $(this).data('project-status');
                         const projectPriority = $(this).data('project-priority');
-                        
+
                         $('#edit_project_id').val(projectId);
                         $('#edit_project_name').val(projectName);
                         $('#edit_project_description').val(projectDescription);
                         $('#edit_project_status').val(projectStatus);
                         $('#edit_project_priority').val(projectPriority);
-                        
+
                         $('#editProjectModal').modal('show');
                     });
 
-                    $('#editProjectForm').on('submit', function(e) 
-                    {
+                    $('#editProjectForm').on('submit', function(e) {
                         e.preventDefault();
                         const formData = $(this).serialize();
                         const projectId = $('#edit_project_id').val();
@@ -2609,24 +2346,18 @@
                             url: `/task/project/update/${projectId}`,
                             type: 'POST',
                             data: formData,
-                            beforeSend: function() 
-                            {
+                            beforeSend: function() {
                                 $('#editProjectModal').modal('hide');
                             },
-                            success: function(response) 
-                            {
-                                if (response.status === 200) 
-                                {
+                            success: function(response) {
+                                if (response.status === 200) {
                                     flasher.success(response.message);
                                     setTimeout(() => location.reload(), 1000);
-                                } 
-                                else 
-                                {
+                                } else {
                                     flasher.error('Error', response.message || 'Failed to update project');
                                 }
                             },
-                            error: function(xhr) 
-                            {
+                            error: function(xhr) {
                                 flasher.error('Error', 'Failed to update project');
                             }
                         });
@@ -2634,15 +2365,12 @@
                 });
             </script>
             <script>
-                function togglePin(leadId, pinStatus) 
-                {
-                    let button = $('.pin-item').filter(function() 
-                    {
+                function togglePin(leadId, pinStatus) {
+                    let button = $('.pin-item').filter(function() {
                         return $(this).closest('tr').find('td:eq(1)').text().trim() == leadId;
                     }).first();
 
-                    if (button.length === 0) 
-                    {
+                    if (button.length === 0) {
                         button = $(event.target).closest('.pin-item');
                     }
 
@@ -2660,23 +2388,17 @@
                             _token: '{{ csrf_token() }}'
                         },
                         dataType: 'json',
-                        success: function(data) 
-                        {
-                            if (data.status === 200) 
-                            { 
+                        success: function(data) {
+                            if (data.status === 200) {
                                 button.toggleClass('pinned', isPinning);
                                 button.attr('title', isPinning ? 'Unpin Lead' : 'Pin Lead');
                                 button.html('<i class="fas fa-thumbtack"></i>');
-                                if (isPinning) 
-                                {
-                                    if (!button.next('.pinned-badge').length) 
-                                    {
+                                if (isPinning) {
+                                    if (!button.next('.pinned-badge').length) {
                                         const badge = $('<span class="pinned-badge">Pinned</span>');
                                         button.after(badge);
                                     }
-                                } 
-                                else 
-                                {
+                                } else {
                                     button.next('.pinned-badge').remove();
                                 }
 
@@ -2684,29 +2406,23 @@
                                 setTimeout(() => {
                                     location.reload();
                                 }, 800);
-                            } 
-                            else 
-                            {
+                            } else {
                                 toastr.error(data.message);
                                 button.html(originalHTML);
                             }
                         },
-                        error: function(xhr, status, error) 
-                        {
+                        error: function(xhr, status, error) {
                             toastr.error('An error occurred while updating pin status');
                             button.html(originalHTML);
                         },
-                        complete: function() 
-                        {
+                        complete: function() {
                             button.css('pointer-events', 'auto');
                         }
                     });
                 }
 
-                function setupPinHandlers() 
-                {
-                    $(document).on('click', '.pin-item', function() 
-                    {
+                function setupPinHandlers() {
+                    $(document).on('click', '.pin-item', function() {
                         const button = $(this);
                         const leadId = button.closest('tr').find('td:eq(1)').text().trim();
                         const isCurrentlyPinned = button.hasClass('pinned');
@@ -2716,37 +2432,29 @@
                     });
                 }
 
-                $(document).ready(function() 
-                {
+                $(document).ready(function() {
                     setupPinHandlers();
                 });
             </script>
             <script>
-                $(document).ready(function() 
-                {
-                    $('#modalTeamSelect').on('change', function() 
-                    {
+                $(document).ready(function() {
+                    $('#modalTeamSelect').on('change', function() {
                         var teamId = $(this).val();
-                        if (teamId)
-                        {
+                        if (teamId) {
                             loadTeamPoints(teamId);
-                        } 
-                        else 
-                        {
+                        } else {
                             $('#pointsContainer').html('<div class="alert alert-warning">Please select a team first</div>');
                         }
                     });
 
-                    function loadTeamPoints(teamId) 
-                    {
+                    function loadTeamPoints(teamId) {
                         $.ajax({
                             url: "{{ route('mis.get.team.points') }}",
                             method: "GET",
                             data: {
                                 team_id: teamId
                             },
-                            beforeSend: function()
-                            {
+                            beforeSend: function() {
                                 $('#pointsContainer').html(`
                                     <div class="text-center py-4">
                                         <div class="spinner-border text-primary" role="status">
@@ -2756,10 +2464,8 @@
                                     </div>
                                 `);
                             },
-                            success: function(response) 
-                            {
-                                if (response.success && response.points.length > 0) 
-                                {
+                            success: function(response) {
+                                if (response.success && response.points.length > 0) {
                                     var html = `
                                         <div class="table-responsive">
                                             <table class="table table-bordered align-middle">
@@ -2804,9 +2510,7 @@
                                     `;
                                     $('#pointsContainer').html(html);
                                     initializeTargetRows();
-                                } 
-                                else 
-                                {
+                                } else {
                                     $('#pointsContainer').html(`
                                         <div class="alert alert-warning">
                                             <i class="fa fa-exclamation-triangle me-2"></i>
@@ -2815,8 +2519,7 @@
                                     `);
                                 }
                             },
-                            error: function() 
-                            {
+                            error: function() {
                                 $('#pointsContainer').html(`
                                     <div class="alert alert-danger">
                                         <i class="fa fa-times-circle me-2"></i>
@@ -2827,12 +2530,10 @@
                         });
                     }
 
-                    function initializeTargetRows() 
-                    {
+                    function initializeTargetRows() {
                         const container = document.querySelector('.target-rows');
-                        
-                        function updateTaskOptions() 
-                        {
+
+                        function updateTaskOptions() {
                             const selectedTasks = Array.from(container.querySelectorAll('select[name="tasks[]"]'))
                                 .map(s => s.value)
                                 .filter(v => v !== "");
@@ -2841,27 +2542,20 @@
                                 const currentValue = select.value;
                                 select.querySelectorAll('option').forEach(option => {
                                     if (option.value === "") return;
-                                    if (option.value === currentValue) 
-                                    {
+                                    if (option.value === currentValue) {
                                         option.disabled = false;
-                                    } 
-                                    else if (selectedTasks.includes(option.value)) 
-                                    {
+                                    } else if (selectedTasks.includes(option.value)) {
                                         option.disabled = true;
-                                    } 
-                                    else 
-                                    {
+                                    } else {
                                         option.disabled = false;
                                     }
                                 });
                             });
                         }
 
-                        container.addEventListener('click', function(e) 
-                        {
+                        container.addEventListener('click', function(e) {
                             const row = e.target.closest('.target-row');
-                            if (e.target.closest('.add-row')) 
-                            {
+                            if (e.target.closest('.add-row')) {
                                 const clone = row.cloneNode(true);
                                 clone.querySelectorAll('select[name="tasks[]"]').forEach(s => s.selectedIndex = 0);
                                 clone.querySelectorAll('input[name="targets[]"]').forEach(i => i.value = '');
@@ -2870,24 +2564,18 @@
                                 updateTaskOptions();
                             }
 
-                            if (e.target.closest('.remove-row')) 
-                            {
-                                if (container.querySelectorAll('.target-row').length > 1) 
-                                {
+                            if (e.target.closest('.remove-row')) {
+                                if (container.querySelectorAll('.target-row').length > 1) {
                                     row.remove();
                                     updateTaskOptions();
-                                } 
-                                else 
-                                {
+                                } else {
                                     toastr.error("At least one task is required.");
                                 }
                             }
                         });
 
-                        container.addEventListener('change', function(e) 
-                        {
-                            if (e.target.matches('select[name="tasks[]"]')) 
-                            {
+                        container.addEventListener('change', function(e) {
+                            if (e.target.matches('select[name="tasks[]"]')) {
                                 updateTaskOptions();
                             }
                         });
@@ -2895,33 +2583,29 @@
                         updateTaskOptions();
                     }
 
-                    $('#setTargetModal').on('shown.bs.modal', function() 
-                    {
+                    $('#setTargetModal').on('shown.bs.modal', function() {
                         var teamId = $('#modalTeamSelect').val();
-                        if (teamId) 
-                        {
+                        if (teamId) {
                             loadTeamPoints(teamId);
                         }
                     });
 
-                    $('#quickEntryBtn').click(function() 
-                    {
+                    $('#quickEntryBtn').click(function() {
                         $('#quickEntryModal').modal('show');
                     });
                 });
-                function openWABusiness(phone) 
-                {
+
+                function openWABusiness(phone) {
                     let business = "whatsapp-business://send?phone=91" + phone;
                     let normal = "https://wa.me/91" + phone;
                     window.location.href = business;
-                    setTimeout(function () {
-                    window.location.href = normal;
+                    setTimeout(function() {
+                        window.location.href = normal;
                     }, 1200);
                 }
             </script>
             <script>
-                $(document).ready(function() 
-                {
+                $(document).ready(function() {
                     const csrfToken = $('meta[name="csrf-token"]').attr('content');
                     toastr.options = {
                         "closeButton": true,
@@ -2940,38 +2624,35 @@
                         "showMethod": "fadeIn",
                         "hideMethod": "fadeOut"
                     };
-                    function setDefaultDates() 
-                    {
+
+                    function setDefaultDates() {
                         const now = new Date();
                         const tomorrow = new Date(now);
                         tomorrow.setDate(tomorrow.getDate() + 1);
-                        
+
                         $('#start_date').val(now.toISOString().slice(0, 16));
                         $('#end_date').val(tomorrow.toISOString().slice(0, 16));
                     }
 
-                    function resetForm() 
-                    {
+                    function resetForm() {
                         $('#exhibitionForm')[0].reset();
                         $('#exhibition_id').val('');
                         $('#_method').val('POST');
                         $('#exhibitionModalLabel').html('<i class="fas fa-plus-circle me-2"></i>Create New Exhibition');
                         $('#saveExhibitionBtn').html('<i class="fas fa-save me-1"></i> Save Exhibition');
-                        
+
                         $('.form-control').removeClass('is-invalid');
                         $('.invalid-feedback').text('');
-                        
+
                         setDefaultDates();
                     }
 
-                    $('#createExhibitionBtn').click(function() 
-                    {
+                    $('#createExhibitionBtn').click(function() {
                         resetForm();
                         $('#exhibitionModal').modal('show');
                     });
 
-                    $(document).on('click', '.edit-exhibition', function() 
-                    {
+                    $(document).on('click', '.edit-exhibition', function() {
                         const id = $(this).data('id');
                         const name = $(this).data('name');
                         const description = $(this).data('description');
@@ -2979,7 +2660,7 @@
                         const endDate = $(this).data('end-date');
                         const location = $(this).data('location');
                         const isActive = $(this).data('is-active');
-                        
+
                         $('#exhibition_id').val(id);
                         $('#name').val(name);
                         $('#description').val(description);
@@ -2988,33 +2669,30 @@
                         $('#location').val(location);
                         $('#is_active').prop('checked', isActive == 1);
                         $('#_method').val('PUT');
-                        
+
                         $('#exhibitionModalLabel').html('<i class="fas fa-edit me-2"></i>Edit Exhibition');
                         $('#saveExhibitionBtn').html('<i class="fas fa-sync-alt me-1"></i> Update Exhibition');
-                        
+
                         $('#exhibitionModal').modal('show');
                     });
 
-                    $('#exhibitionForm').submit(function(e) 
-                    {
+                    $('#exhibitionForm').submit(function(e) {
                         e.preventDefault();
-                        
+
                         const formData = $(this).serialize();
                         const id = $('#exhibition_id').val();
                         const method = $('#_method').val();
-                        
+
                         let url = '/exhibitions';
-                        if (method === 'PUT' && id) 
-                        {
+                        if (method === 'PUT' && id) {
                             url = '/exhibitions/' + id;
                         }
                         $('.form-control').removeClass('is-invalid');
                         $('.invalid-feedback').text('');
                         const startDate = new Date($('#start_date').val());
                         const endDate = new Date($('#end_date').val());
-                        
-                        if (endDate <= startDate) 
-                        {
+
+                        if (endDate <= startDate) {
                             $('#end_date').addClass('is-invalid');
                             $('#end_date-error').text('End date must be after start date.');
                             return;
@@ -3022,7 +2700,7 @@
                         const saveBtn = $('#saveExhibitionBtn');
                         const originalText = saveBtn.html();
                         saveBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> ' + (method === 'PUT' ? 'Updating...' : 'Saving...'));
-                        
+
                         $.ajax({
                             url: url,
                             type: 'POST',
@@ -3032,70 +2710,51 @@
                                 'X-CSRF-TOKEN': csrfToken,
                                 'X-Requested-With': 'XMLHttpRequest'
                             },
-                            success: function(response) 
-                            {
+                            success: function(response) {
                                 // console.log(response);
-                                if (response.success) 
-                                {
+                                if (response.success) {
                                     toastr.success(response.message || 'Operation completed successfully!');
                                     $('#exhibitionModal').modal('hide');
-                                    setTimeout(function() 
-                                    {
+                                    setTimeout(function() {
                                         location.reload();
                                     }, 1500);
-                                } 
-                                else 
-                                {
-                                    if (response.errors) 
-                                    {
-                                        $.each(response.errors, function(key, value) 
-                                        {
+                                } else {
+                                    if (response.errors) {
+                                        $.each(response.errors, function(key, value) {
                                             $('#' + key).addClass('is-invalid');
                                             $('#' + key + '-error').text(value[0]);
                                         });
-                                    } 
-                                    else 
-                                    {
+                                    } else {
                                         toastr.error(response.message || 'Operation failed!');
                                     }
                                 }
                             },
-                            error: function(xhr) 
-                            {
-                                if (xhr.status === 422) 
-                                {
+                            error: function(xhr) {
+                                if (xhr.status === 422) {
                                     const errors = xhr.responseJSON.errors;
-                                    $.each(errors, function(key, value) 
-                                    {
+                                    $.each(errors, function(key, value) {
                                         $('#' + key).addClass('is-invalid');
                                         $('#' + key + '-error').text(value[0]);
                                     });
-                                } 
-                                else if (xhr.status === 419) 
-                                {
+                                } else if (xhr.status === 419) {
                                     toastr.error('Session expired. Please refresh the page.');
-                                    setTimeout(function() 
-                                    {
+                                    setTimeout(function() {
                                         location.reload();
                                     }, 2000);
-                                } 
-                                else 
-                                {
+                                } else {
                                     toastr.error('An error occurred. Please try again.');
                                 }
                             },
-                            complete: function() 
-                            {
+                            complete: function() {
                                 saveBtn.prop('disabled', false).html(originalText);
                             }
                         });
                     });
 
-                    $(document).on('click', '.activate-exhibition', function() 
-                    {
+                    $(document).on('click', '.activate-exhibition', function() {
                         const id = $(this).data('id');
                         const name = $(this).data('name');
-                        
+
                         Swal.fire({
                             title: 'Activate Exhibition?',
                             html: `Are you sure you want to activate <strong>${name}</strong>?<br><small>This will deactivate any currently active exhibition.</small>`,
@@ -3106,8 +2765,7 @@
                             confirmButtonText: 'Yes, activate it!',
                             cancelButtonText: 'Cancel'
                         }).then((result) => {
-                            if (result.isConfirmed) 
-                            {
+                            if (result.isConfirmed) {
                                 $.ajax({
                                     url: '/exhibitions/' + id + '/activate',
                                     type: 'POST',
@@ -3119,38 +2777,28 @@
                                         'X-CSRF-TOKEN': csrfToken,
                                         'X-Requested-With': 'XMLHttpRequest'
                                     },
-                                    beforeSend: function() 
-                                    {
+                                    beforeSend: function() {
                                         $('.activate-exhibition[data-id="' + id + '"]')
                                             .prop('disabled', true)
                                             .html('<i class="fas fa-spinner fa-spin"></i>');
                                     },
-                                    success: function(response) 
-                                    {
-                                        if (response.success) 
-                                        {
+                                    success: function(response) {
+                                        if (response.success) {
                                             toastr.success(response.message || 'Exhibition activated successfully!');
                                             setTimeout(function() {
                                                 location.reload();
                                             }, 1500);
-                                        } 
-                                        else 
-                                        {
+                                        } else {
                                             toastr.error(response.message || 'Failed to activate exhibition.');
                                         }
                                     },
-                                    error: function(xhr) 
-                                    {
-                                        if (xhr.status === 419) 
-                                        {
+                                    error: function(xhr) {
+                                        if (xhr.status === 419) {
                                             toastr.error('Session expired. Please refresh the page.');
-                                            setTimeout(function() 
-                                            {
+                                            setTimeout(function() {
                                                 location.reload();
                                             }, 2000);
-                                        } 
-                                        else 
-                                        {
+                                        } else {
                                             toastr.error(xhr.responseJSON?.message || 'Failed to activate exhibition.');
                                         }
                                         $('.activate-exhibition[data-id="' + id + '"]')
@@ -3162,8 +2810,7 @@
                         });
                     });
 
-                    $(document).on('click', '.delete-exhibition', function()
-                    {
+                    $(document).on('click', '.delete-exhibition', function() {
                         const id = $(this).data('id');
                         const name = $(this).data('name');
                         const csrfToken = $('meta[name="csrf-token"]').attr('content');
@@ -3194,14 +2841,10 @@
                                         success: function(response) {
                                             resolve(response);
                                         },
-                                        error: function(xhr) 
-                                        {
-                                            if (xhr.status === 419) 
-                                            {
+                                        error: function(xhr) {
+                                            if (xhr.status === 419) {
                                                 reject('Session expired. Please refresh the page.');
-                                            } 
-                                            else 
-                                            {
+                                            } else {
                                                 reject(xhr.responseJSON?.message || 'Delete failed');
                                             }
                                         }
@@ -3210,30 +2853,25 @@
                             },
                             allowOutsideClick: () => !Swal.isLoading()
                         }).then((result) => {
-                            if (result.isConfirmed) 
-                            {
-                                $('#exhibition-row-' + id).fadeOut(300, function() 
-                                {
+                            if (result.isConfirmed) {
+                                $('#exhibition-row-' + id).fadeOut(300, function() {
                                     $(this).remove();
                                 });
-                                
+
                                 toastr.success('Exhibition deleted successfully!');
-                                
-                                setTimeout(function() 
-                                {
+
+                                setTimeout(function() {
                                     location.reload();
                                 }, 2000);
                             }
                         }).catch((error) => {
-                            if (error) 
-                            {
+                            if (error) {
                                 Swal.fire('Error!', error, 'error');
                             }
                         });
                     });
 
-                    $('#exhibitionModal').on('hidden.bs.modal', function() 
-                    {
+                    $('#exhibitionModal').on('hidden.bs.modal', function() {
                         resetForm();
                     });
 
@@ -3251,28 +2889,21 @@
                 });
             </script>
             <script>
-                $(document).ready(function() 
-                {
+                $(document).ready(function() {
                     $('[title]').tooltip();
-                    $('#selectAllLeads').on('change', function() 
-                    {
+                    $('#selectAllLeads').on('change', function() {
                         $('.lead-checkbox').prop('checked', this.checked);
                     });
 
-                    $('.lead-checkbox').on('change', function() 
-                    {
-                        if ($('.lead-checkbox:checked').length === $('.lead-checkbox').length) 
-                        {
+                    $('.lead-checkbox').on('change', function() {
+                        if ($('.lead-checkbox:checked').length === $('.lead-checkbox').length) {
                             $('#selectAllLeads').prop('checked', true);
-                        } 
-                        else 
-                        {
+                        } else {
                             $('#selectAllLeads').prop('checked', false);
                         }
                     });
 
-                    $(document).on('click', '.edit-lead-btn', function() 
-                    {
+                    $(document).on('click', '.edit-lead-btn', function() {
                         const leadId = $(this).data('id');
                         $('#editLeadForm').attr('action', `/exhibitions/leads/${leadId}`);
                         $('#edit_lead_id').val(leadId);
@@ -3290,44 +2921,33 @@
                         $('#edit_remarks').val($(this).data('remarks'));
                         const operatingCountry = $(this).data('operating-country');
                         const type = $(this).data('type');
-                        if (operatingCountry) 
-                        {
-                            try 
-                            {
+                        if (operatingCountry) {
+                            try {
                                 const parsed = JSON.parse(operatingCountry);
                                 $('#edit_operating_country').val(JSON.stringify(parsed, null, 2));
-                            } 
-                            catch (e) 
-                            {
+                            } catch (e) {
                                 $('#edit_operating_country').val(operatingCountry);
                             }
-                        }
-                        else 
-                        {
+                        } else {
                             $('#edit_operating_country').val('');
                         }
 
                         const reminderDate = $(this).data('reminder-date');
-                        if (reminderDate && reminderDate !== 'N/A') 
-                        {
+                        if (reminderDate && reminderDate !== 'N/A') {
                             const date = new Date(reminderDate);
                             const formattedDate = date.toISOString().slice(0, 16);
                             $('#edit_reminder_date').val(formattedDate);
-                        } 
-                        else 
-                        {
+                        } else {
                             $('#edit_reminder_date').val('');
                         }
-                        
+
                         const visitCard = $(this).data('visit-card');
                         const currentVisitCardDiv = $('#current_visit_card');
                         currentVisitCardDiv.empty();
-                        
-                        if (visitCard) 
-                        {
+
+                        if (visitCard) {
                             let imageUrl = visitCard;
-                            if (!visitCard.startsWith('http')) 
-                            {
+                            if (!visitCard.startsWith('http')) {
                                 imageUrl = `/storage/${visitCard}`;
                             }
                             currentVisitCardDiv.html(`
@@ -3339,11 +2959,10 @@
                         }
                     });
 
-                    $(document).on('click', '.convert-lead-btn', function() 
-                    {
+                    $(document).on('click', '.convert-lead-btn', function() {
                         const leadId = $(this).data('id');
                         const leadName = $(this).data('name');
-                        
+
                         Swal.fire({
                             title: 'Convert Lead to CRM?',
                             html: `Are you sure you want to convert <strong>"${leadName}"</strong> to CRM Lead?`,
@@ -3369,10 +2988,8 @@
                                 });
                             }
                         }).then((result) => {
-                            if (result.isConfirmed) 
-                            {
-                                if (result.value.success) 
-                                {
+                            if (result.isConfirmed) {
+                                if (result.value.success) {
                                     Swal.fire({
                                         title: 'Success!',
                                         text: result.value.message,
@@ -3381,9 +2998,7 @@
                                     }).then(() => {
                                         window.location.reload();
                                     });
-                                } 
-                                else 
-                                {
+                                } else {
                                     Swal.fire({
                                         title: 'Error!',
                                         text: result.value.message,
@@ -3395,16 +3010,13 @@
                         });
                     });
 
-                    $('#confirmConvertMultiple').on('click', function() 
-                    {
+                    $('#confirmConvertMultiple').on('click', function() {
                         const selectedLeads = [];
-                        $('.lead-checkbox:checked').each(function() 
-                        {
+                        $('.lead-checkbox:checked').each(function() {
                             selectedLeads.push($(this).val());
                         });
 
-                        if (selectedLeads.length === 0) 
-                        {
+                        if (selectedLeads.length === 0) {
                             Swal.fire({
                                 title: 'No Leads Selected',
                                 text: 'Please select at least one lead to convert.',
@@ -3440,10 +3052,8 @@
                                 });
                             }
                         }).then((result) => {
-                            if (result.isConfirmed) 
-                            {
-                                if (result.value.success) 
-                                {
+                            if (result.isConfirmed) {
+                                if (result.value.success) {
                                     Swal.fire({
                                         title: 'Success!',
                                         html: result.value.message + `<br>Converted: ${result.value.converted_count}<br>Failed: ${result.value.failed_count}`,
@@ -3452,9 +3062,7 @@
                                     }).then(() => {
                                         window.location.reload();
                                     });
-                                } 
-                                else 
-                                {
+                                } else {
                                     Swal.fire({
                                         title: 'Error!',
                                         text: result.value.message,
@@ -3538,16 +3146,12 @@
                                     confirmButtonText: 'OK'
                                 }).then(() => location.reload());
                             },
-                            error: function(xhr) 
-                            {
+                            error: function(xhr) {
                                 Swal.close();
                                 let errorMessage = 'Failed to update lead.';
-                                if (xhr.responseJSON && xhr.responseJSON.errors) 
-                                {
+                                if (xhr.responseJSON && xhr.responseJSON.errors) {
                                     errorMessage = Object.values(xhr.responseJSON.errors).flat().join('<br>');
-                                } 
-                                else if (xhr.responseJSON && xhr.responseJSON.message) 
-                                {
+                                } else if (xhr.responseJSON && xhr.responseJSON.message) {
                                     errorMessage = xhr.responseJSON.message;
                                 }
                                 Swal.fire({
@@ -3560,8 +3164,7 @@
                         });
                     });
 
-                    $(document).on('click', '.share-exhibition', function() 
-                    {
+                    $(document).on('click', '.share-exhibition', function() {
                         const exhibitionId = $(this).data('id');
                         const name = $(this).data('name');
 
@@ -3570,8 +3173,7 @@
                         $('#shareExhibitionModal').modal('show');
                     });
 
-                    $('#generateShareLinkBtn').on('click', function() 
-                    {
+                    $('#generateShareLinkBtn').on('click', function() {
                         const exhibitionId = $('#shareExhibitionId').val();
                         const csrfToken = $('meta[name="csrf-token"]').attr('content');
 
@@ -3584,63 +3186,55 @@
                                 _token: csrfToken,
                             },
                             dataType: 'json',
-                            success: function(response) 
-                            {
-                                if (response.success) 
-                                {
+                            success: function(response) {
+                                if (response.success) {
                                     $('#share_link_input').val(response.data.share_link);
                                     toastr.success(response.message);
-                                } 
-                                else 
-                                {
+                                } else {
                                     toastr.error(response.message || 'Failed to generate link');
                                 }
                             },
-                            error: function(xhr) 
-                            {
+                            error: function(xhr) {
                                 toastr.error(xhr.responseJSON?.message || 'Something went wrong');
                             },
-                            complete: function() 
-                            {
+                            complete: function() {
                                 $('#generateShareLinkBtn').prop('disabled', false).html('<i class="fas fa-link me-1"></i> Generate Share Link');
                             }
                         });
                     });
                 });
             </script>
-            
+
             <script>
-                $('#postSaleModal').on('shown.bs.modal', function () 
-                {
+                $('#postSaleModal').on('shown.bs.modal', function() {
                     $('.selectPostSale').select2({
                         placeholder: 'Select',
                         width: '100%',
                         dropdownParent: $('#postSaleModal')
                     });
                 });
-                $('#postSaleModal').on('shown.bs.modal', function (){
+                $('#postSaleModal').on('shown.bs.modal', function() {
                     $('.selectSalesPerson').select2({
                         placeholder: 'Select',
                         width: '100%',
                         dropdownParent: $('#postSaleModal')
                     });
                 });
-                $('#postSaleModal').on('shown.bs.modal', function (){
+                $('#postSaleModal').on('shown.bs.modal', function() {
                     $('.selectProjectCat').select2({
                         placeholder: 'Select',
                         width: '100%',
                         dropdownParent: $('#postSaleModal')
                     });
                 });
-                $('#postSaleModal').on('shown.bs.modal', function (){
+                $('#postSaleModal').on('shown.bs.modal', function() {
                     $('.selectPostSubCat').select2({
                         placeholder: 'Select',
                         width: '100%',
                         dropdownParent: $('#postSaleModal')
                     });
                 });
-                $('#postSaleModal').on('shown.bs.modal', function()
-                {
+                $('#postSaleModal').on('shown.bs.modal', function() {
                     $('.selectProject').select2({
                         placeholder: 'select',
                         width: '100%',
@@ -3648,6 +3242,7 @@
                     });
                 });
             </script>
-        </div>
-    </body>
-</html>
+            </div>
+            </body>
+
+            </html>

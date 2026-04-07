@@ -1,35 +1,35 @@
 @php
-    $userId = session('user_id');
-    $userType = session('user_type');
-    $notifications = DB::table('user_notification as a')
-        ->select(
-            'a.*',
-            DB::raw("
-                CASE
-                    WHEN TIMESTAMPDIFF(DAY, a.CreatedDate, NOW()) >= 1 
-                        THEN CONCAT(TIMESTAMPDIFF(DAY, a.CreatedDate, NOW()), ' Days')
-                    WHEN TIMESTAMPDIFF(MINUTE, a.CreatedDate, NOW()) >= 60 
-                        THEN CONCAT(ROUND(TIMESTAMPDIFF(MINUTE, a.CreatedDate, NOW()) / 60, 0), ' Hours')
-                    ELSE CONCAT(TIMESTAMPDIFF(MINUTE, a.CreatedDate, NOW()), ' MiN')
-                END as time_diff
-            ")
-        )
-        ->where('a.ack', 0)
-        ->where('a.UserId', $userId)
-        ->orderByDesc('a.CreatedDate')
-        ->get();
+$userId = session('user_id');
+$userType = session('user_type');
+$notifications = DB::table('user_notification as a')
+->select(
+'a.*',
+DB::raw("
+CASE
+WHEN TIMESTAMPDIFF(DAY, a.CreatedDate, NOW()) >= 1
+THEN CONCAT(TIMESTAMPDIFF(DAY, a.CreatedDate, NOW()), ' Days')
+WHEN TIMESTAMPDIFF(MINUTE, a.CreatedDate, NOW()) >= 60
+THEN CONCAT(ROUND(TIMESTAMPDIFF(MINUTE, a.CreatedDate, NOW()) / 60, 0), ' Hours')
+ELSE CONCAT(TIMESTAMPDIFF(MINUTE, a.CreatedDate, NOW()), ' MiN')
+END as time_diff
+")
+)
+->where('a.ack', 0)
+->where('a.UserId', $userId)
+->orderByDesc('a.CreatedDate')
+->get();
 
-    $activeFeatures = session('active_features', []);
-    $softwareType = session('software_type', 'real_state');
+$activeFeatures = session('active_features', []);
+$softwareType = session('software_type', 'real_state');
 
-    $softwareTypeAccess = [
-        'real_state' => ['project_detail_page', 'search', 'attendance', 'settings', 'premium_features', 'notifications', 'integrations'],
-        'lead_management' => ['project_detail_page', 'search', 'attendance', 'settings', 'notifications', 'integrations'],
-        'task_management' => ['settings', 'notifications'],
-        'mis_management' => ['settings', 'notifications']
-    ];
+$softwareTypeAccess = [
+'real_state' => ['project_detail_page', 'search', 'attendance', 'settings', 'premium_features', 'notifications', 'integrations'],
+'lead_management' => ['project_detail_page', 'search', 'attendance', 'settings', 'notifications', 'integrations'],
+'task_management' => ['settings', 'notifications'],
+'mis_management' => ['settings', 'notifications']
+];
 
-    $currentAccess = $softwareTypeAccess[$softwareType] ?? $softwareTypeAccess['real_state'];
+$currentAccess = $softwareTypeAccess[$softwareType] ?? $softwareTypeAccess['real_state'];
 @endphp
 
 <header id="page-topbar">
@@ -37,19 +37,63 @@
         <div class="d-flex">
             <div class="navbar-brand-box">
                 <a href="index.html" class="logo logo-dark">
-                    <span class="logo-sm">
+                    <!-- <span class="logo-sm">
                         <img src="{{ asset(Session::get('logo')) }}" alt="Logo" height="22">
+                    </span> -->
+                    @php
+                    $logo = Session::get('logo');
+                    @endphp
+
+                    <span class="logo-sm">
+                        <img
+                            src="{{ ($logo && file_exists(public_path($logo))) 
+                ? asset($logo) 
+                : asset('images/logo.png') }}"
+                            alt="Logo"
+                            height="22">
                     </span>
-                    <span class="logo-lg">
+                    <!-- <span class="logo-lg">
                         <img src="{{ asset(Session::get('logo')) }}" alt="Logo" height="17">
+                    </span> -->
+                    <span class="logo-lg">
+                        <img
+                            src="{{ ($logo && file_exists(public_path($logo))) 
+                ? asset($logo) 
+                : asset('images/logo.png') }}"
+                            alt="Logo"
+                            height="17">
                     </span>
                 </a>
                 <a href="{{ $softwareType === 'task_management' ? route('task.list') : ($softwareType === 'mis_management' ? route('mis.summary-report') : route('dashboard')) }}" class="logo logo-light">
-                    <span class="logo-sm">
+                    <!-- <span class="logo-sm">
                         <img src="{{ asset(Session::get('logo')) }}" alt="" height="22" width="45">
                     </span>
                     <span class="logo-lg">
                         <img src="{{ asset(Session::get('logo')) }}" alt="" height="50" width="150">
+                    </span> -->
+
+                    @php
+                    $logo = Session::get('logo');
+                    @endphp
+
+                    <span class="logo-sm">
+                        <img
+                            src="{{ ($logo && file_exists(public_path($logo))) 
+                ? asset($logo) 
+                : asset('images/logo.png') }}"
+                            alt="Logo"
+                            height="22"
+                            width="45">
+                    </span>
+
+                    <span class="logo-lg">
+                        <img
+                            src="{{ ($logo && file_exists(public_path($logo))) 
+                ? asset($logo) 
+                : asset('images/logo.png') }}"
+                            alt="Logo"
+                            height="50"
+                            width="150">
                     </span>
                 </a>
             </div>
@@ -80,8 +124,8 @@
             @if(in_array('attendance', $currentAccess))
             <div class="attendance-toggle-wrapper mt-3">
                 <div class="attendance-toggle-container">
-                    <input type="checkbox" id="attendanceToggle" class="attendance-toggle-checkbox" 
-                    {{ session('attendance_active') ? 'checked' : '' }}>
+                    <input type="checkbox" id="attendanceToggle" class="attendance-toggle-checkbox"
+                        {{ session('attendance_active') ? 'checked' : '' }}>
                     <label for="attendanceToggle" class="attendance-toggle-label">
                         <span class="attendance-toggle-track">
                             <span class="attendance-toggle-handle">
@@ -121,10 +165,10 @@
 
             @if(in_array('settings', $currentAccess) && $userType != 'salesman')
             <div class="dropdown d-none d-lg-inline-block ms-1">
-                <button type="button" 
-                    class="btn header-item noti-icon waves-effect" 
-                    data-bs-toggle="dropdown" 
-                    aria-haspopup="true" 
+                <button type="button"
+                    class="btn header-item noti-icon waves-effect"
+                    data-bs-toggle="dropdown"
+                    aria-haspopup="true"
                     aria-expanded="false"
                     data-bs-toggle="tooltip"
                     data-bs-placement="bottom"
@@ -176,7 +220,7 @@
             </div>
 
             @php
-                $allFeatures = DB::table('software_features')->pluck('feature_name')->toArray();
+            $allFeatures = DB::table('software_features')->pluck('feature_name')->toArray();
             @endphp
             <div class="dropdown d-inline-block">
                 <a href="{{route('premium.features')}}" class="btn header-item noti-icon waves-effect premium-btn d-flex align-items-center">
@@ -206,18 +250,18 @@
 
                     <div data-simplebar style="max-height: 230px;">
                         @forelse($notifications as $noti)
-                            <a href="{{ route('notifications.index') }}" class="dropdown-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <i class="fas fa-envelope me-2"></i>
-                                    <span class="text-wrap" style="max-width: 200px;">{{ $noti->message }}</span>
-                                </div>
-                                <small class="text-muted">{{ $noti->time_diff }}</small>
-                            </a>
-                            <div class="dropdown-divider"></div>
-                        @empty
-                            <div class="text-center p-3 text-muted">
-                                No notifications
+                        <a href="{{ route('notifications.index') }}" class="dropdown-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-envelope me-2"></i>
+                                <span class="text-wrap" style="max-width: 200px;">{{ $noti->message }}</span>
                             </div>
+                            <small class="text-muted">{{ $noti->time_diff }}</small>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        @empty
+                        <div class="text-center p-3 text-muted">
+                            No notifications
+                        </div>
                         @endforelse
                     </div>
 
@@ -229,7 +273,7 @@
                 </div>
             </div>
             @endif
-            
+
             <div class="dropdown d-inline-block">
                 <button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <img class="rounded-circle header-profile-user" src="{{asset('images/avatar-1.jpg')}}" alt="Header Avatar">
@@ -246,36 +290,36 @@
                     </a>
                     @endif
                     @php
-                        $softwareInfo = Session::get('software_info');
+                    $softwareInfo = Session::get('software_info');
                     @endphp
 
                     @if(!empty($softwareInfo?->apk))
-                        <div class="dropdown-item position-relative">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <a class="d-flex align-items-center text-decoration-none text-dark flex-grow-1"
+                    <div class="dropdown-item position-relative">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <a class="d-flex align-items-center text-decoration-none text-dark flex-grow-1"
                                 href="{{ asset($softwareInfo->apk) }}"
                                 download>
-                                    <i class="bx bxl-android font-size-18 text-success me-2"></i>
-                                    <div>
-                                        <small class="text-muted d-block">Download App</small>
-                                        <span class="fw-bold">(.apk)</span>
-                                    </div>
-                                </a>
+                                <i class="bx bxl-android font-size-18 text-success me-2"></i>
+                                <div>
+                                    <small class="text-muted d-block">Download App</small>
+                                    <span class="fw-bold">(.apk)</span>
+                                </div>
+                            </a>
 
-                                <button type="button"
-                                    class="btn btn-sm btn-link text-muted p-0 ms-2"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#installGuideModal"
-                                    title="Installation Instructions">
-                                    <i class="fas fa-info-circle"></i>
-                                </button>
-                            </div>
+                            <button type="button"
+                                class="btn btn-sm btn-link text-muted p-0 ms-2"
+                                data-bs-toggle="modal"
+                                data-bs-target="#installGuideModal"
+                                title="Installation Instructions">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
                         </div>
+                    </div>
                     @else
-                        <div class="dropdown-item text-muted small">
-                            <i class="bx bx-block me-2"></i>
-                            No APK available
-                        </div>
+                    <div class="dropdown-item text-muted small">
+                        <i class="bx bx-block me-2"></i>
+                        No APK available
+                    </div>
                     @endif
 
                     <div class="dropdown-divider"></div>

@@ -1385,12 +1385,10 @@ $isLeadManagement = $softwareType === 'lead_management';
 
         button.prop('disabled', true);
         button.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending...');
-
-        // Use a hardcoded URL as fallback if route helper fails
-        const shareUrl = '/property/share-whatsapp'; // Direct URL instead of route helper
+        const shareUrl = '/property/share-whatsapp';
 
         $.ajax({
-            url: shareUrl, // Use the direct URL
+            url: shareUrl,
             type: 'POST',
             data: {
                 _token: '{{ csrf_token() }}',
@@ -1400,7 +1398,6 @@ $isLeadManagement = $softwareType === 'lead_management';
             },
             success: function(response) {
                 if (response.status === 200 && response.data) {
-                    // Check if response.data is an object or string
                     if (typeof response.data === 'object' && response.data.whatsapp_url) {
                         window.open(response.data.whatsapp_url, '_blank');
                     } else if (typeof response.data === 'string') {
@@ -1410,36 +1407,33 @@ $isLeadManagement = $softwareType === 'lead_management';
                         toastr.error('Invalid response format');
                     }
                     toastr.success('WhatsApp link generated successfully!');
-                } else {
+                } 
+                else 
+                {
                     toastr.error(response.message || 'Failed to generate WhatsApp link');
                 }
             },
-            error: function(xhr) {
+            error: function(xhr) 
+            {
                 let errorMessage = 'Error generating WhatsApp link';
-                if (xhr.status === 419) {
+                if (xhr.status === 419) 
+                {
                     errorMessage = 'Session expired. Please refresh the page and try again.';
-                } else if (xhr.responseJSON?.message) {
+                } 
+                else if (xhr.responseJSON?.message) 
+                {
                     errorMessage = xhr.responseJSON.message;
                 }
 
                 toastr.error(errorMessage);
                 console.error('AJAX Error:', xhr.responseText);
             },
-            complete: function() {
+            complete: function() 
+            {
                 button.prop('disabled', false);
                 button.html('<i class="bi bi-whatsapp"></i> Share');
             }
         });
     });
-
-    // $('#btnExportExcel').click(function() {
-    //     let query = window.location.search;
-    //     window.location.href = "/export-excel" + query;
-    // });
-
-    // $('#btnExportPDF').click(function() {
-    //     let query = window.location.search;
-    //     window.location.href = "/export-pdf" + query;
-    // });
 </script>
 @endsection

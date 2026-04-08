@@ -655,6 +655,7 @@
                             }
                         ]
                     });
+
                     $('#togglePassword').on('click', function() {
                         const $password = $('#password');
                         const type = $password.attr('type') === 'password' ? 'text' : 'password';
@@ -1282,12 +1283,20 @@
                 });
                 document.addEventListener('DOMContentLoaded', function() {
                     let chart;
-                    const currentYear = document.getElementById('year-filter').value;
-                    initChart(currentYear);
-                    document.getElementById('year-filter').addEventListener('change', function() {
-                        const selectedYear = this.value;
-                        initChart(selectedYear);
-                    });
+                    // const currentYear = document.getElementById('year-filter').value;
+                    // initChart(currentYear);   
+                    // document.getElementById('year-filter').addEventListener('change', function() {
+                    //     const selectedYear = this.value;
+                    //     initChart(selectedYear);
+                    // });
+
+                    const yearFilter = document.getElementById('year-filter');
+
+                    if (yearFilter) {
+                        yearFilter.addEventListener('change', function() {
+                            initChart(this.value);
+                        });
+                    }
                     document.querySelectorAll('.time-period-btn').forEach(btn => {
                         btn.addEventListener('click', function() {
                             document.querySelectorAll('.time-period-btn').forEach(b => {
@@ -1314,146 +1323,153 @@
                         });
                     });
 
-                    function initChart(year) {
-                        fetch(`/dashboard/get-chart-data?year=${year}`)
-                            .then(response => {
-                                if (!response.ok) {
-                                    throw new Error('Network response was not ok');
-                                }
-                                return response.json();
-                            })
-                            .then(data => {
-                                renderChart(year, data);
-                            })
-                            .catch(error => {
-                                console.error('Error fetching chart data:', error);
-                            });
-                    }
+                    // function initChart(year) {
+                    //     fetch(`/dashboard/get-chart-data?year=${year}`)
+                    //         .then(response => {
+                    //             if (!response.ok) {
+                    //                 throw new Error('Network response was not ok');
+                    //             }
+                    //             return response.json();
+                    //         })
+                    //         .then(data => {
+                    //             renderChart(year, data);
+                    //         })
+                    //         .catch(error => {
+                    //             console.error('Error fetching chart data:', error);
+                    //         });
+                    // }
 
-                    function renderChart(year, chartData) {
-                        const chartOptions = {
-                            chart: {
-                                type: 'bar',
-                                height: 350,
-                                stacked: false,
-                                toolbar: {
-                                    show: false
-                                },
-                                animations: {
-                                    enabled: true,
-                                    easing: 'easeinout',
-                                    speed: 800
-                                },
-                                events: {
-                                    dataPointMouseEnter: function(event, chartContext, config) {
-                                        const tooltip = document.getElementById('chart-tooltip');
-                                        const month = config.w.globals.labels[config.dataPointIndex];
-                                        const value = config.w.config.series[config.seriesIndex].data[config.dataPointIndex];
 
-                                        document.getElementById('tooltip-title').textContent = month;
-                                        document.getElementById('tooltip-value').textContent = value;
-                                        document.getElementById('tooltip-bullet').style.backgroundColor = config.w.config.colors[config.seriesIndex];
+                    // function renderChart(year, chartData) {
+                    //     // const chartEl = document.querySelector("#lead-monthly-report");
 
-                                        const chartRect = document.querySelector("#lead-monthly-report").getBoundingClientRect();
-                                        const offsetX = event.clientX - chartRect.left;
-                                        const offsetY = event.clientY - chartRect.top;
+                    //     if (!chartEl) {
+                    //         console.error(" Chart container NOT FOUND");
+                    //         return;
+                    //     }
+                    //     const chartOptions = {
+                    //         chart: {
+                    //             type: 'bar',
+                    //             height: 350,
+                    //             stacked: false,
+                    //             toolbar: {
+                    //                 show: false
+                    //             },
+                    //             animations: {
+                    //                 enabled: true,
+                    //                 easing: 'easeinout',
+                    //                 speed: 800
+                    //             },
+                    //             events: {
+                    //                 dataPointMouseEnter: function(event, chartContext, config) {
+                    //                     const tooltip = document.getElementById('chart-tooltip');
+                    //                     const month = config.w.globals.labels[config.dataPointIndex];
+                    //                     const value = config.w.config.series[config.seriesIndex].data[config.dataPointIndex];
 
-                                        tooltip.classList.remove('d-none');
-                                        tooltip.style.left = (offsetX - tooltip.offsetWidth / 2) + 'px';
-                                        tooltip.style.top = (offsetY - tooltip.offsetHeight - 10) + 'px';
-                                    },
-                                    dataPointMouseLeave: function() {
-                                        document.getElementById('chart-tooltip').classList.add('d-none');
-                                    }
-                                }
-                            },
-                            series: [{
-                                name: year,
-                                data: chartData
-                            }],
-                            colors: ['#4e54c8'],
-                            dataLabels: {
-                                enabled: false
-                            },
-                            plotOptions: {
-                                bar: {
-                                    horizontal: false,
-                                    columnWidth: '55%',
-                                    endingShape: 'rounded',
-                                    borderRadius: 4,
-                                },
-                            },
-                            stroke: {
-                                show: true,
-                                width: 2,
-                                colors: ['transparent']
-                            },
-                            xaxis: {
-                                categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                                axisBorder: {
-                                    show: false
-                                },
-                                axisTicks: {
-                                    show: false
-                                },
-                                labels: {
-                                    style: {
-                                        colors: '#6c757d',
-                                        fontFamily: 'inherit'
-                                    }
-                                }
-                            },
-                            yaxis: {
-                                labels: {
-                                    style: {
-                                        colors: '#6c757d',
-                                        fontFamily: 'inherit'
-                                    }
-                                },
-                                min: 0,
-                                forceNiceScale: true
-                            },
-                            grid: {
-                                borderColor: '#f1f1f1',
-                                strokeDashArray: 3,
-                                padding: {
-                                    top: 0,
-                                    right: 10,
-                                    bottom: 0,
-                                    left: 10
-                                }
-                            },
-                            tooltip: {
-                                enabled: false
-                            },
-                            legend: {
-                                show: false
-                            },
-                            fill: {
-                                opacity: 1
-                            },
-                            responsive: [{
-                                breakpoint: 768,
-                                options: {
-                                    plotOptions: {
-                                        bar: {
-                                            columnWidth: '70%'
-                                        }
-                                    }
-                                }
-                            }]
-                        };
+                    //                     document.getElementById('tooltip-title').textContent = month;
+                    //                     document.getElementById('tooltip-value').textContent = value;
+                    //                     document.getElementById('tooltip-bullet').style.backgroundColor = config.w.config.colors[config.seriesIndex];
 
-                        if (chart) {
-                            chart.updateOptions(chartOptions);
-                        } else {
-                            chart = new ApexCharts(
-                                document.querySelector("#lead-monthly-report"),
-                                chartOptions
-                            );
-                            chart.render();
-                        }
-                    }
+                    //                     const chartRect = document.querySelector("#lead-monthly-report").getBoundingClientRect();
+                    //                     const offsetX = event.clientX - chartRect.left;
+                    //                     const offsetY = event.clientY - chartRect.top;
+
+                    //                     tooltip.classList.remove('d-none');
+                    //                     tooltip.style.left = (offsetX - tooltip.offsetWidth / 2) + 'px';
+                    //                     tooltip.style.top = (offsetY - tooltip.offsetHeight - 10) + 'px';
+                    //                 },
+                    //                 dataPointMouseLeave: function() {
+                    //                     document.getElementById('chart-tooltip').classList.add('d-none');
+                    //                 }
+                    //             }
+                    //         },
+                    //         series: [{
+                    //             name: year,
+                    //             data: chartData
+                    //         }],
+                    //         colors: ['#4e54c8'],
+                    //         dataLabels: {
+                    //             enabled: false
+                    //         },
+                    //         plotOptions: {
+                    //             bar: {
+                    //                 horizontal: false,
+                    //                 columnWidth: '55%',
+                    //                 endingShape: 'rounded',
+                    //                 borderRadius: 4,
+                    //             },
+                    //         },
+                    //         stroke: {
+                    //             show: true,
+                    //             width: 2,
+                    //             colors: ['transparent']
+                    //         },
+                    //         xaxis: {
+                    //             categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    //             axisBorder: {
+                    //                 show: false
+                    //             },
+                    //             axisTicks: {
+                    //                 show: false
+                    //             },
+                    //             labels: {
+                    //                 style: {
+                    //                     colors: '#6c757d',
+                    //                     fontFamily: 'inherit'
+                    //                 }
+                    //             }
+                    //         },
+                    //         yaxis: {
+                    //             labels: {
+                    //                 style: {
+                    //                     colors: '#6c757d',
+                    //                     fontFamily: 'inherit'
+                    //                 }
+                    //             },
+                    //             min: 0,
+                    //             forceNiceScale: true
+                    //         },
+                    //         grid: {
+                    //             borderColor: '#f1f1f1',
+                    //             strokeDashArray: 3,
+                    //             padding: {
+                    //                 top: 0,
+                    //                 right: 10,
+                    //                 bottom: 0,
+                    //                 left: 10
+                    //             }
+                    //         },
+                    //         tooltip: {
+                    //             enabled: false
+                    //         },
+                    //         legend: {
+                    //             show: false
+                    //         },
+                    //         fill: {
+                    //             opacity: 1
+                    //         },
+                    //         responsive: [{
+                    //             breakpoint: 768,
+                    //             options: {
+                    //                 plotOptions: {
+                    //                     bar: {
+                    //                         columnWidth: '70%'
+                    //                     }
+                    //                 }
+                    //             }
+                    //         }]
+                    //     };
+
+                    //     if (chart) {
+                    //         chart.updateOptions(chartOptions);
+                    //     } else {
+                    //         chart = new ApexCharts(
+                    //             document.querySelector("#lead-monthly-report"),
+                    //             chartOptions
+                    //         );
+                    //         chart.render();
+                    //     }
+                    // }
 
                     function exportChartData(year, type) {
                         if (type === 'csv') {
@@ -1529,7 +1545,12 @@
                         const input = document.getElementById(inputId);
                         const preview = document.getElementById(previewId);
 
+                        if (!input || !preview) {
+                            console.warn(" Element not found:", inputId, previewId);
+                            return;
+                        }
                         input.addEventListener('change', function(e) {
+
                             preview.innerHTML = '';
 
                             if (isMultiple && input.files.length > 0) {
@@ -1601,6 +1622,7 @@
                                 reader.readAsDataURL(file);
                             }
                         });
+
 
                         preview.addEventListener('click', function(e) {
                             if (e.target.closest('.remove-file') || e.target.closest('.remove-image')) {
@@ -1711,32 +1733,36 @@
                         document.head.appendChild(style);
                     }
                 }
-                document.getElementById('projectForm').addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    const formData = {
-                        primary_color: this.elements.primary_color.value,
-                        secondary_color: this.elements.secondary_color.value,
-                        accent_color: this.elements.accent_color.value,
-                        text_color: this.elements.text_color.value,
-                        light_bg: this.elements.light_bg.value,
-                        border_radius: this.elements.border_radius.value,
-                        font_primary: this.elements.font_primary.value,
-                        font_secondary: this.elements.font_secondary.value,
-                        button_style: this.elements.button_style.value,
-                        nav_style: this.elements.nav_style.value,
-                        custom_css: this.elements.custom_css.value
-                    };
-                    saveStylesToBackend(formData);
-                    applyWebsiteStyles(formData);
-                });
-
-                function loadSavedStyles() {
-                    fetch('/api/project-styles')
-                        .then(response => response.json())
-                        .then(applyWebsiteStyles);
+                var form = document.getElementById('projectForm');
+                // document.getElementById('projectForm').addEventListener('submit', function(e) {
+                if (form) {
+                    form.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        const formData = {
+                            primary_color: this.elements.primary_color.value,
+                            secondary_color: this.elements.secondary_color.value,
+                            accent_color: this.elements.accent_color.value,
+                            text_color: this.elements.text_color.value,
+                            light_bg: this.elements.light_bg.value,
+                            border_radius: this.elements.border_radius.value,
+                            font_primary: this.elements.font_primary.value,
+                            font_secondary: this.elements.font_secondary.value,
+                            button_style: this.elements.button_style.value,
+                            nav_style: this.elements.nav_style.value,
+                            custom_css: this.elements.custom_css.value
+                        };
+                        saveStylesToBackend(formData);
+                        applyWebsiteStyles(formData);
+                    });
                 }
 
-                document.addEventListener('DOMContentLoaded', loadSavedStyles);
+                // function loadSavedStyles() {
+                //     fetch('/api/project-styles')
+                //         .then(response => response.json())
+                //         .then(applyWebsiteStyles);
+                // }
+
+                //document.addEventListener('DOMContentLoaded', loadSavedStyles);
 
                 function applyBannerSettings(settings) {
                     const hero = document.querySelector('.hero');
@@ -1775,24 +1801,29 @@
                     document.head.appendChild(style);
                 }
 
-                document.getElementById('projectForm').addEventListener('submit', function(e) {
-                    e.preventDefault();
+                var form = document.getElementById('projectForm');
+                if (form) {
+                    // document.getElementById('projectForm').addEventListener('submit', function(e) {
+                    form.addEventListener('submit', function(e) {
+                        e.preventDefault();
 
-                    const formData = {
-                        banner_size: this.elements.banner_size.value,
-                        banner_position: this.elements.banner_position.value,
-                        banner_repeat: this.elements.banner_repeat.value,
-                        thumb_width: this.elements.thumb_width.value,
-                        thumb_height: this.elements.thumb_height.value,
-                        thumb_crop: this.elements.thumb_crop.value,
-                        thumb_quality: this.elements.thumb_quality.value
-                    };
-                    applyBannerSettings(formData);
-                    generateImageSizes(formData);
-                    saveImageSettings(formData);
-                });
+                        const formData = {
+                            banner_size: this.elements.banner_size.value,
+                            banner_position: this.elements.banner_position.value,
+                            banner_repeat: this.elements.banner_repeat.value,
+                            thumb_width: this.elements.thumb_width.value,
+                            thumb_height: this.elements.thumb_height.value,
+                            thumb_crop: this.elements.thumb_crop.value,
+                            thumb_quality: this.elements.thumb_quality.value
+                        };
+                        applyBannerSettings(formData);
+                        generateImageSizes(formData);
+                        saveImageSettings(formData);
+                    });
+                }
             </script>
-            <script>
+
+            <!-- <script>
                 window.addEventListener('load', function() {
                     const loader = document.getElementById('page-loader');
                     if (loader) {
@@ -1800,15 +1831,42 @@
                         setTimeout(() => loader.style.display = 'none', 300);
                     }
                 });
-                // document.getElementById('lengthSelect').addEventListener('change', function() 
-                // {
-                //     const length = this.value;
-                //     const url = new URL(window.location.href);
-                //     url.searchParams.set('length', length);
-                //     url.searchParams.set('page', 1);
-                //     window.location.href = url.toString();
-                // });
+                document.getElementById('lengthSelect').addEventListener('change', function() {
+                    const length = this.value;
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('length', length);
+                    url.searchParams.set('page', 1);
+                    window.location.href = url.toString();
+                });
+            </script> -->
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+
+                    const loader = document.getElementById('page-loader');
+
+                    if (loader) {
+                        loader.style.opacity = '0';
+
+                        setTimeout(() => {
+                            loader.style.display = 'none';
+                            loader.style.pointerEvents = 'none';
+                        }, 300);
+                    }
+                    const lengthSelect = document.getElementById('lengthSelect');
+
+                    if (lengthSelect) {
+                        lengthSelect.addEventListener('change', function() {
+                            const length = this.value;
+                            const url = new URL(window.location.href);
+                            url.searchParams.set('length', length);
+                            url.searchParams.set('page', 1);
+                            window.location.href = url.toString();
+                        });
+                    }
+                });
             </script>
+
             <script>
                 document.addEventListener("DOMContentLoaded", function() {
                     $(document).on("select2:select select2:clear change", "#campaignFilter", function() {

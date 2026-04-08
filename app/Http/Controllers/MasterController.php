@@ -479,7 +479,7 @@ class MasterController extends Controller
         }
     }
 
-    public function project_category()
+    public function project_category(Request $request)
     {
         $user_role = session()->get('user_type');
         if ($user_role !== 'admin' && $user_role !== 'team_manager' ) 
@@ -488,9 +488,25 @@ class MasterController extends Controller
         }
         try 
         {
-            $categories = DB::table("inv_catg")->paginate(10);
+            $length = $request->query('length', 10);
+            $sortColumn = $request->query('sort', 'id');
+            $sortDirection = $request->query('direction', 'asc');
+            $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'asc';
+            $allowedColumns = ['id', 'name', 'code', 'created_at'];
+            $sortColumn = in_array($sortColumn, $allowedColumns) ? $sortColumn : 'id';
+            
+            $categories = DB::table("inv_catg")
+                ->orderBy($sortColumn, $sortDirection)
+                ->paginate((int)$length)
+                ->appends([
+                    'sort' => $sortColumn,
+                    'direction' => $sortDirection,
+                    'length' => $length
+                ]);
+
             $categoryList = DB::table('category')->select('id', 'name')->get();
-            return view('master.project-category', compact('categories', 'categoryList'));
+
+            return view('master.project-category', compact('categories', 'categoryList', 'length', 'sortColumn', 'sortDirection'));
         } 
         catch (\Exception $e) 
         {

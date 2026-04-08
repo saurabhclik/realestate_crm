@@ -76,9 +76,7 @@
                     url: "{{ route('inventory.getLeads', ':id') }}".replace(':id', userId),
                     type: 'GET',
                     success: function(data) {
-
                         let options = '<option value="">Select Lead</option>';
-
                         data.forEach(function(lead) {
                             options += `<option value="${lead.id}" 
                             data-name="${lead.name}" 
@@ -98,8 +96,6 @@
                 $('#lead_id').html('<option value="">Select Lead</option>');
             }
         });
-
-        // ✅ AUTO FILL (UNCOMMENTED + FIXED)
         $('#lead_id').on('change', function() {
 
             let selected = this.options[this.selectedIndex];

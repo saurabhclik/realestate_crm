@@ -4,21 +4,20 @@
 
 @section('content')
 <style>
-    .toggle-auto-welcome .fa-toggle-on 
-    {
+    .toggle-auto-welcome .fa-toggle-on {
         color: #28a745;
     }
-    .toggle-auto-welcome .fa-toggle-off 
-    {
+
+    .toggle-auto-welcome .fa-toggle-off {
         color: #6c757d;
     }
-    .btn-xs 
-    {
+
+    .btn-xs {
         padding: 0.15rem 0.35rem;
         font-size: 0.75rem;
     }
-    .btn-group .btn 
-    {
+
+    .btn-group .btn {
         border-radius: 0.25rem !important;
         margin-right: 2px;
     }
@@ -54,7 +53,7 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="table-responsive">                        
+                        <div class="table-responsive">
                             <table id="table" class="table table-hover table-bordered dt-responsive nowrap w-100">
                                 <thead class="table-light">
                                     <tr>
@@ -70,13 +69,13 @@
                                 <tbody>
                                     @foreach($exhibitions as $exhibition)
                                     @php
-                                        $leadCount = DB::table('exhibition_leads')->where('exhibition_id', $exhibition->id)->count();
+                                    $leadCount = DB::table('exhibition_leads')->where('exhibition_id', $exhibition->id)->count();
                                     @endphp
                                     <tr id="exhibition-row-{{ $exhibition->id }}">
                                         <td>
                                             {{ $loop->iteration }}
-                                            <div class="btn-group" role="group">                                            
-                                                <button type="button" 
+                                            <div class="btn-group" role="group">
+                                                <button type="button"
                                                     class="btn btn-xs btn-soft-light edit-exhibition"
                                                     data-id="{{ $exhibition->id }}"
                                                     data-name="{{ $exhibition->name }}"
@@ -89,14 +88,14 @@
                                                     title="Edit">
                                                     <i class="fas fa-edit text-primary"></i>
                                                 </button>
-                                                
-                                                <a href="{{ route('exhibition.view', $exhibition->id) }}" 
-                                                class="btn btn-xs btn-soft-light" 
-                                                title="View Details">
+
+                                                <a href="{{ route('exhibition.view', $exhibition->id) }}"
+                                                    class="btn btn-xs btn-soft-light"
+                                                    title="View Details">
                                                     <i class="fas fa-eye text-info"></i>
                                                 </a>
-                                                
-                                                <button type="button" 
+
+                                                <button type="button"
                                                     class="btn btn-xs {{ $exhibition->auto_welcome_message ? 'btn-success' : 'btn-outline-secondary' }} toggle-auto-welcome"
                                                     data-id="{{ $exhibition->id }}"
                                                     data-name="{{ $exhibition->name }}"
@@ -104,9 +103,9 @@
                                                     title="Auto Welcome {{ $exhibition->auto_welcome_message ? 'ON' : 'OFF' }}">
                                                     <i class="fas fa-bolt"></i>
                                                 </button>
-                                                
+
                                                 @if(!$exhibition->is_active)
-                                                <button type="button" 
+                                                <button type="button"
                                                     class="btn btn-xs btn-soft-light activate-exhibition"
                                                     data-id="{{ $exhibition->id }}"
                                                     data-name="{{ $exhibition->name }}"
@@ -114,9 +113,9 @@
                                                     <i class="fas fa-toggle-on text-success"></i>
                                                 </button>
                                                 @endif
-                                                
-                                                <button type="button" 
-                                                    class="btn btn-xs btn-soft-light delete-exhibition"
+
+                                                <button type="button"
+                                                    class="btn btn-xs btn-soft-light delete-lead-btn"
                                                     data-id="{{ $exhibition->id }}"
                                                     data-name="{{ $exhibition->name }}"
                                                     title="Delete">
@@ -124,29 +123,29 @@
                                                 </button>
 
                                                 @if(isset($shareLinks[$exhibition->id]))
-                                                    @php
-                                                        $shareUrl = route('exhibition.share.access', $shareLinks[$exhibition->id]->share_code);
-                                                    @endphp
-                                                    <a href="{{ $shareUrl }}" 
-                                                    class="btn btn-xs btn-soft-light" 
-                                                    target="_blank" 
+                                                @php
+                                                $shareUrl = route('exhibition.share.access', $shareLinks[$exhibition->id]->share_code);
+                                                @endphp
+                                                <a href="{{ $shareUrl }}"
+                                                    class="btn btn-xs btn-soft-light"
+                                                    target="_blank"
                                                     title="View Share Link">
-                                                        <i class="fas fa-link text-success"></i>
-                                                    </a>
-                                                    <button type="button"
-                                                        class="btn btn-xs btn-soft-light copy-share-link"
-                                                        data-link="{{ $shareUrl }}"
-                                                        title="Copy Share Link">
-                                                        <i class="fas fa-copy text-primary"></i>
-                                                    </button>
+                                                    <i class="fas fa-link text-success"></i>
+                                                </a>
+                                                <button type="button"
+                                                    class="btn btn-xs btn-soft-light copy-share-link"
+                                                    data-link="{{ $shareUrl }}"
+                                                    title="Copy Share Link">
+                                                    <i class="fas fa-copy text-primary"></i>
+                                                </button>
                                                 @else
-                                                    <button type="button" 
-                                                        class="btn btn-xs btn-soft-light share-exhibition"
-                                                        data-id="{{ $exhibition->id }}"
-                                                        data-name="{{ $exhibition->name }}"
-                                                        title="Create Share Link">
-                                                        <i class="fas fa-share-alt text-success"></i>
-                                                    </button>
+                                                <button type="button"
+                                                    class="btn btn-xs btn-soft-light share-exhibition"
+                                                    data-id="{{ $exhibition->id }}"
+                                                    data-name="{{ $exhibition->name }}"
+                                                    title="Create Share Link">
+                                                    <i class="fas fa-share-alt text-success"></i>
+                                                </button>
                                                 @endif
                                             </div>
                                         </td>
@@ -215,7 +214,7 @@
                             <div class="col-12">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
-                                        Showing {{ $exhibitions->firstItem() }} to {{ $exhibitions->lastItem() }} 
+                                        Showing {{ $exhibitions->firstItem() }} to {{ $exhibitions->lastItem() }}
                                         of {{ $exhibitions->total() }} entries
                                     </div>
                                     <nav aria-label="Page navigation">
@@ -245,7 +244,7 @@
                 @csrf
                 <input type="hidden" id="_method" name="_method" value="POST">
                 <input type="hidden" id="exhibition_id" name="id">
-                
+
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-12 mb-3">
@@ -254,21 +253,21 @@
                             <div class="invalid-feedback" id="name-error"></div>
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
                             <input type="datetime-local" class="form-control" id="start_date" name="start_date" required>
                             <div class="invalid-feedback" id="start_date-error"></div>
                         </div>
-                        
+
                         <div class="col-md-6 mb-3">
                             <label for="end_date" class="form-label">End Date <span class="text-danger">*</span></label>
                             <input type="datetime-local" class="form-control" id="end_date" name="end_date" required>
                             <div class="invalid-feedback" id="end_date-error"></div>
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-12 mb-3">
                             <label for="location" class="form-label">Location <span class="text-danger">*</span></label>
@@ -276,7 +275,7 @@
                             <div class="invalid-feedback" id="location-error"></div>
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-12 mb-3">
                             <label for="description" class="form-label">Description</label>
@@ -284,7 +283,7 @@
                             <div class="invalid-feedback" id="description-error"></div>
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-12 mb-3">
                             <div class="form-check">
@@ -340,21 +339,53 @@
     </div>
 </div>
 
+<div class="modal fade" id="deleteLeadModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Delete Lead</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form id="deleteLeadForm">
+                @csrf
+                <input type="hidden" id="deleteLeadId">
+
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <strong>Warning:</strong> This cannot be undone.
+                    </div>
+
+                    <p>Delete: <strong id="deleteLeadName"></strong>?</p>
+
+                    <input type="password" id="deleteLeadPassword"
+                        class="form-control"
+                        placeholder="Enter admin password" required>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
 <script>
-    $(document).ready(function() 
-    {
-        $(document).on('click', '.toggle-auto-welcome', function() 
-        {
+    $(document).ready(function() {
+        $(document).on('click', '.toggle-auto-welcome', function() {
             const exhibitionId = $(this).data('id');
             const exhibitionName = $(this).data('name');
             const currentStatus = $(this).data('status');
             const newStatus = currentStatus ? 0 : 1;
-            
+
             const action = newStatus ? 'enable' : 'disable';
             const confirmMessage = `Are you sure you want to ${action} auto welcome messages for "${exhibitionName}"?`;
-            
-            if (confirm(confirmMessage)) 
-            {
+
+            if (confirm(confirmMessage)) {
                 $.ajax({
                     url: '/exhibitions/' + exhibitionId + '/toggle-auto-welcome',
                     method: 'POST',
@@ -362,66 +393,51 @@
                         _token: '{{ csrf_token() }}',
                         auto_welcome_message: newStatus
                     },
-                    success: function(response) 
-                    {
-                        if (response.success) 
-                        {
+                    success: function(response) {
+                        if (response.success) {
                             const $button = $(`.toggle-auto-welcome[data-id="${exhibitionId}"]`);
                             const $icon = $button.find('i');
-                            
-                            if (newStatus) 
-                            {
+
+                            if (newStatus) {
                                 $icon.removeClass('fa-toggle-off text-secondary')
                                     .addClass('fa-toggle-on text-success');
                                 $button.attr('title', 'Disable Auto Welcome');
-                            } 
-                            else 
-                            {
+                            } else {
                                 $icon.removeClass('fa-toggle-on text-success')
                                     .addClass('fa-toggle-off text-secondary');
                                 $button.attr('title', 'Enable Auto Welcome');
                             }
-                            
+
                             $button.data('status', newStatus);
                             const $row = $(`#exhibition-row-${exhibitionId}`);
                             let $statusCell = $row.find('td').eq(4);
-                            if (newStatus) 
-                            {
-                                if (!$statusCell.find('.badge.bg-info').length) 
-                                {
+                            if (newStatus) {
+                                if (!$statusCell.find('.badge.bg-info').length) {
                                     $statusCell.append('<br><span class="badge bg-info rounded-pill mt-1"><i class="fas fa-robot me-1"></i> Auto-Welcome</span>');
                                 }
-                            } 
-                            else 
-                            {
+                            } else {
                                 $statusCell.find('.badge.bg-info').remove();
                             }
-                            
+
                             toastr.success(response.message);
-                        } 
-                        else 
-                        {
+                        } else {
                             toastr.error(response.message);
                         }
                     },
-                    error: function(xhr) 
-                    {
+                    error: function(xhr) {
                         toastr.error('Failed to update auto welcome setting');
                     }
                 });
             }
         });
 
-        $(document).on('click', '.edit-exhibition', function() 
-        {
+        $(document).on('click', '.edit-exhibition', function() {
             const exhibitionId = $(this).data('id');
             $.ajax({
                 url: '/exhibitions/' + exhibitionId + '/get-details',
                 method: 'GET',
-                success: function(response) 
-                {
-                    if (response.success) 
-                    {
+                success: function(response) {
+                    if (response.success) {
                         $('#exhibitionModalLabel').html('<i class="fas fa-edit me-2"></i>Edit Exhibition');
                         $('#_method').val('PUT');
                         $('#exhibition_id').val(response.exhibition.id);
@@ -438,13 +454,63 @@
             });
         });
 
-        $(document).on('click', '.copy-share-link', function() 
-        {
+        $(document).on('click', '.copy-share-link', function() {
             const link = $(this).data('link');
-            navigator.clipboard.writeText(link).then(function() 
-            {
+            navigator.clipboard.writeText(link).then(function() {
                 toastr.success('Share link copied to clipboard!');
             });
+        });
+    });
+</script>
+
+<script>
+    $(document).on('click', '.delete-lead-btn', function() {
+        let id = $(this).data('id');
+        let name = $(this).data('name');
+
+        $('#deleteLeadId').val(id);
+        $('#deleteLeadName').text(name);
+        $('#deleteLeadPassword').val('');
+
+        $('#deleteLeadModal').modal('show');
+    });
+</script>
+
+<script>
+    $('#deleteLeadForm').on('submit', function(e) {
+        e.preventDefault();
+
+        let id = $('#deleteLeadId').val();
+        let password = $('#deleteLeadPassword').val();
+
+        if (!password) {
+            toastr.error('Enter password');
+            return;
+        }
+
+        $.ajax({
+           url: `/exhibitions/${id}`,
+            type: 'DELETE',
+            data: {
+                _token: '{{ csrf_token() }}',
+                password: password
+            },
+
+            success: function(res) {
+
+                if (res.status === 200) {
+                    toastr.success(res.message);
+                    $('#deleteLeadModal').modal('hide');
+
+                    $(`button[data-id="${res.id}"]`).closest('tr').remove();
+
+                } else if (res.status === 403) {
+                    toastr.error(res.message);
+                } else {
+                    toastr.error(res.message);
+                    $('#deleteLeadPassword').val('');
+                }
+            }
         });
     });
 </script>

@@ -15,6 +15,7 @@ class InventoryController extends Controller
         if (in_array('inventory_management', $activeFeatures)) {
             $user_type = Session::get('user_type');
             $project_id = $request->query('id');
+            $status = $request->query('status');
             $projects = DB::table('projects')->get();
             $selectedProject = $projects->firstWhere('id', $project_id);
             if (!$selectedProject && $projects->count() > 0) {
@@ -31,9 +32,20 @@ class InventoryController extends Controller
             ];
 
             if ($selectedProject) {
-                $inventoryDetails = DB::table('inventory_det')
-                    ->where('inventory_id', $project_id)
-                    ->get();
+                // $inventoryDetails = DB::table('inventory_det')
+                //     ->where('inventory_id', $project_id)
+                //     ->get();
+
+                $status = $request->query('status');
+
+                $query = DB::table('inventory_det')
+                    ->where('inventory_id', $project_id);
+
+                if (!empty($status)) {
+                    $query->where('status', $status);
+                }
+
+                $inventoryDetails = $query->get();
 
                 $statusCounts = DB::table('inventory_det')
                     ->where('inventory_id', $project_id)

@@ -697,6 +697,7 @@
             const categoryId = $(this).val();
             if (categoryId) {
                 $.get(`/project-details/get-subcategories/${categoryId}`, function(data) {
+                    console.log(data);
                     $('#sub_category_id').empty().append('<option value="" disabled selected>Select Sub Category</option>');
                     $.each(data, function(key, subcategory) {
                         $('#sub_category_id').append(`<option value="${subcategory.id}">${subcategory.name}</option>`);

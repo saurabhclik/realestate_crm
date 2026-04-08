@@ -449,7 +449,9 @@ class ProjectController extends Controller
 
     public function getSubcategories($categoryId)
     {
+        // var_dump($categoryId);
         $subcategories = DB::table('inv_subcatg')->where('catg_id', $categoryId)->get();
+        // echo '<pre>'; print_r($subcategories); exit;
         return response()->json($subcategories);
     }
 

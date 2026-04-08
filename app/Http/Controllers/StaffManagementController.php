@@ -10,6 +10,7 @@ use Flasher\Laravel\Facade\Flasher;
 use League\Csv\Reader;
 use App\Services\LeadService;
 use Carbon\Carbon;
+
 class StaffManagementController extends Controller
 {
     public function index()
@@ -17,16 +18,14 @@ class StaffManagementController extends Controller
         $user_role = session()->get('user_type');
         $user_id = session()->get('user_id');
         $roles = DB::table('role_mst')
-        ->where('role_name', '!=', 'admin')
-        ->get();
-        if ($user_role !== 'admin' && $user_role !== 'team_manager') 
-        {
-            abort(404); 
+            ->where('role_name', '!=', 'admin')
+            ->get();
+        if ($user_role !== 'admin' && $user_role !== 'team_manager') {
+            abort(404);
         }
-        
+
         $teamLeads = DB::table('users')
-            ->whereIn('role', function($query) 
-            {
+            ->whereIn('role', function ($query) {
                 $query->select('role_name')
                     ->from('role_mst')
                     ->where('manager_rights', 1);
@@ -43,52 +42,41 @@ class StaffManagementController extends Controller
                 'designation.designation as designation_name'
             );
 
-        if ($user_role == 'admin') 
-        {
+        if ($user_role == 'admin') {
             $query->where('users.role', '!=', 'admin');
-        } 
-        else 
-        {
+        } else {
             $query->where('users.tm_id', $user_id);
         }
 
-        if (request()->has('status') && request('status') !== '')  
-        {
+        if (request()->has('status') && request('status') !== '') {
             $query->where('users.is_active', request('status'));
         }
 
-        if (request()->has('role') && request('role') !== '') 
-        {
+        if (request()->has('role') && request('role') !== '') {
             $query->where('users.role', request('role'));
         }
 
-        if (request()->has('team_lead') && request('team_lead') !== '') 
-        {
+        if (request()->has('team_lead') && request('team_lead') !== '') {
             $query->where('users.tm_id', request('team_lead'));
         }
 
-        if (request()->has('name') && request('name') !== '') 
-        {
+        if (request()->has('name') && request('name') !== '') {
             $query->where('users.name', 'like', '%' . request('name') . '%');
         }
 
-        if (request()->has('date') && request('date') !== '') 
-        {
+        if (request()->has('date') && request('date') !== '') {
             $date = Carbon::createFromFormat('d-m-Y', request('date'))->format('Y-m-d');
             $query->whereDate('users.created_date', $date);
         }
 
         $sort = request('sort', 'id');
         $direction = request('direction', 'desc');
-        
+
         $validSortColumns = ['name', 'email', 'role', 'team_lead_name', 'created_date'];
-        
-        if (in_array($sort, $validSortColumns)) 
-        {
+
+        if (in_array($sort, $validSortColumns)) {
             $query->orderBy($sort, $direction);
-        } 
-        else 
-        {
+        } else {
             $query->orderBy('users.id', 'desc');
         }
 
@@ -99,18 +87,14 @@ class StaffManagementController extends Controller
     public function create()
     {
         $user_role = session()->get('user_type');
-        
-        if ($user_role !== 'admin' && $user_role !== 'team_manager' ) 
-        {
-            abort(404); 
+
+        if ($user_role !== 'admin' && $user_role !== 'team_manager') {
+            abort(404);
         }
-        
-        if($user_role === 'admin') 
-        {
+
+        if ($user_role === 'admin') {
             $roles = DB::select("SELECT * FROM `role_mst` WHERE `role_name` != 'admin'");
-        } 
-        else 
-        {
+        } else {
             $roles = DB::select("SELECT * FROM `role_mst` WHERE `role_name` != 'admin' AND `role_name` != 'postsale' AND `manager_rights` = 0");
         }
 
@@ -125,7 +109,7 @@ class StaffManagementController extends Controller
             'reporting_manager' => $reporting_manager,
             'designation' => $designation,
             'data' => $roles,
-            'userLimit' => $userLimit, 
+            'userLimit' => $userLimit,
             'users' => $users,
         ]);
     }
@@ -142,34 +126,28 @@ class StaffManagementController extends Controller
             'reporting_manager' => 'nullable',
         ]);
 
-        if ($validator->fails()) 
-        {
-            foreach ($validator->errors()->all() as $error) 
-            {
+        if ($validator->fails()) {
+            foreach ($validator->errors()->all() as $error) {
                 Flasher::addError($error);
             }
             return redirect()->route('users.create')->withInput();
         }
 
-        try 
-        {
+        try {
             $software = DB::table('software_details')
                 ->where('status', 'active')
                 ->first();
 
-            if (!$software || empty($software->user_limit)) 
-            {
+            if (!$software || empty($software->user_limit)) {
                 Flasher::addError('User limit not configured. Please contact admin.');
                 return redirect()->route('users.create')->withInput();
             }
 
-            if ($software->user_limit !== 'all') 
-            {
+            if ($software->user_limit !== 'all') {
                 $limit = (int) $software->user_limit;
                 $totalUsers = DB::table('users')->count();
 
-                if ($totalUsers >= $limit) 
-                {
+                if ($totalUsers >= $limit) {
                     Flasher::addError(
                         "User limit reached ({$limit}). Please contact Clikzop innovation."
                     );
@@ -190,10 +168,7 @@ class StaffManagementController extends Controller
 
             Flasher::addSuccess('User created successfully.');
             return redirect()->route('users.index');
-
-        } 
-        catch (Exception $e) 
-        {
+        } catch (Exception $e) {
             Flasher::addError('Something went wrong: ' . $e->getMessage());
             return redirect()->route('users.create')->withInput();
         }
@@ -201,35 +176,28 @@ class StaffManagementController extends Controller
 
     public function show($id)
     {
-        if (!$id) 
-        {
+        if (!$id) {
             Flasher::addError('Invalid Action!');
             return redirect()->route('users.index');
         }
 
         $user_role = session()->get('user_type');
-        if ($user_role !== 'admin' && $user_role !== 'team_manager' ) 
-        {
-            abort(404); 
+        if ($user_role !== 'admin' && $user_role !== 'team_manager') {
+            abort(404);
         }
-        try 
-        {
+        try {
             $user = DB::table('users')->where('id', $id)->first();
 
-            if (!$user) 
-            {
+            if (!$user) {
                 Flasher::addError('User Not Found!');
                 return redirect()->route('users.index');
             }
 
-            if ($user_role === 'admin') 
-            {
+            if ($user_role === 'admin') {
                 $roles = DB::table('role_mst')
                     ->where('role_name', '!=', 'admin')
                     ->get();
-            } 
-            else 
-            {
+            } else {
                 $roles = DB::table('role_mst')
                     ->where('role_name', '!=', 'admin')
                     ->where('role_name', '!=', 'postsale')
@@ -246,9 +214,7 @@ class StaffManagementController extends Controller
             $userLimit = DB::table('software_details')->select('user_limit')->first();
             $users = DB::table('users')->paginate(10);
             return view('staff-management.index', compact('user', 'roles', 'reporting_manager', 'designation', 'userLimit', 'users'));
-        } 
-        catch (Exception $error) 
-        {
+        } catch (Exception $error) {
             Flasher::addError($error->getMessage());
             return redirect()->route('users.index');
         }
@@ -256,32 +222,26 @@ class StaffManagementController extends Controller
 
     public function edit($id)
     {
-        if (!$id) 
-        {
+        if (!$id) {
             Flasher::addError('Invalid Action!');
             return redirect()->route('users.index');
         }
 
         $user_role = session()->get('user_type');
 
-        try 
-        {
+        try {
             $user = DB::table('users')->where('id', $id)->first();
 
-            if (!$user) 
-            {
+            if (!$user) {
                 Flasher::addError('User Not Found!');
                 return redirect()->route('users.index');
             }
 
-            if ($user_role === 'admin') 
-            {
+            if ($user_role === 'admin') {
                 $roles = DB::table('role_mst')
                     ->where('role_name', '!=', 'admin')
                     ->get();
-            } 
-            else 
-            {
+            } else {
                 $roles = DB::table('role_mst')
                     ->where('role_name', '!=', 'admin')
                     ->where('role_name', '!=', 'postsale')
@@ -297,9 +257,7 @@ class StaffManagementController extends Controller
             $designation = DB::table('designation')->get();
             $userLimit = DB::table('software_details')->select('user_limit')->first();
             return view('staff-management.edit', compact('user', 'roles', 'reporting_manager', 'designation', 'userLimit'));
-        } 
-        catch (Exception $error) 
-        {
+        } catch (Exception $error) {
             Flasher::addError($error->getMessage());
             return redirect()->route('users.index');
         }
@@ -309,28 +267,24 @@ class StaffManagementController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
-            'email' => 'required|email|unique:users,email,'.$id,
+            'email' => 'required|email|unique:users,email,' . $id,
             'mobile' => 'required|digits:10',
             'role' => 'required|string',
             'designation' => 'nullable',
             'reporting_manager' => 'nullable',
         ]);
 
-        if ($validator->fails()) 
-        {
-            foreach ($validator->errors()->all() as $error) 
-            {
+        if ($validator->fails()) {
+            foreach ($validator->errors()->all() as $error) {
                 Flasher::addError($error);
             }
             return redirect()->back()->withInput();
         }
 
-        try 
-        {
+        try {
             $existingUser = DB::table('users')->where('id', $id)->first();
 
-            if (!$existingUser) 
-            {
+            if (!$existingUser) {
                 Flasher::addError('User not found.');
                 return redirect()->back();
             }
@@ -338,18 +292,15 @@ class StaffManagementController extends Controller
                 ->where('status', 'active')
                 ->first();
 
-            if (!$software || empty($software->user_limit)) 
-            {
+            if (!$software || empty($software->user_limit)) {
                 Flasher::addError('User limit not configured. Please contact admin.');
                 return redirect()->back()->withInput();
             }
 
-            if ($software->user_limit !== 'all') 
-            {
+            if ($software->user_limit !== 'all') {
                 $limit = (int) $software->user_limit;
                 $totalUsers = DB::table('users')->count();
-                if ($totalUsers > $limit) 
-                {
+                if ($totalUsers > $limit) {
                     Flasher::addError(
                         "User limit reached ({$limit}). Please contact Clikzop innovation."
                     );
@@ -359,8 +310,7 @@ class StaffManagementController extends Controller
             $newRole = $request->role;
             $oldRole = $existingUser->role;
 
-            if ($newRole !== $oldRole) 
-            {
+            if ($newRole !== $oldRole) {
                 DB::table('user_promotion')->insert([
                     'user_id' => $id,
                     'old_role' => $oldRole,
@@ -382,8 +332,7 @@ class StaffManagementController extends Controller
                 'updated_date' => now(),
             ];
 
-            if ($request->filled('password')) 
-            {
+            if ($request->filled('password')) {
                 $updateData['password'] = $request->password;
             }
 
@@ -391,10 +340,7 @@ class StaffManagementController extends Controller
 
             Flasher::addSuccess('User updated successfully.');
             return redirect()->route('users.index');
-
-        } 
-        catch (Exception $e) 
-        {
+        } catch (Exception $e) {
             Flasher::addError('Something went wrong: ' . $e->getMessage());
             return redirect()->back()->withInput();
         }
@@ -402,8 +348,7 @@ class StaffManagementController extends Controller
 
     public function checkDelete($id)
     {
-        if (!$id) 
-        {
+        if (!$id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid action'
@@ -412,8 +357,7 @@ class StaffManagementController extends Controller
 
         $leadsCount = DB::table('leads')->where('user_id', $id)->count();
 
-        if ($leadsCount > 0) 
-        {
+        if ($leadsCount > 0) {
             return response()->json([
                 'success' => false,
                 'hasLeads' => true,
@@ -421,15 +365,12 @@ class StaffManagementController extends Controller
                 'transferUrl' => route('lead.transfer', ['user' => $id, 'status' => 'ALL LEAD'])
             ]);
         }
-        try 
-        {
+        try {
             DB::table('users')->where('id', $id)->delete();
             return response()->json([
                 'success' => true,
             ]);
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
@@ -440,9 +381,8 @@ class StaffManagementController extends Controller
     public function promote_list()
     {
         $user_role = session()->get('user_type');
-        if ($user_role !== 'admin' && $user_role !== 'team_manager' ) 
-        {
-            abort(404); 
+        if ($user_role !== 'admin' && $user_role !== 'team_manager') {
+            abort(404);
         }
         $users = DB::table('user_promotion as a')
             ->join('users as b', 'a.user_id', '=', 'b.id')
@@ -460,13 +400,11 @@ class StaffManagementController extends Controller
         $action = $request->input('action');
         $promotion = DB::table('user_promotion')->where('id', $id)->first();
 
-        if (!$promotion) 
-        {
+        if (!$promotion) {
             return redirect()->back()->with('error', 'Promotion request not found.');
         }
 
-        if ($action === 'approve') 
-        {
+        if ($action === 'approve') {
             DB::table('users')
                 ->where('id', $promotion->user_id)
                 ->update([
@@ -479,9 +417,7 @@ class StaffManagementController extends Controller
                 ->update(['is_approved' => 1]);
 
             return redirect()->back()->with('success', 'User promotion approved successfully.');
-        } 
-        elseif ($action === 'reject') 
-        {
+        } elseif ($action === 'reject') {
             DB::table('user_promotion')
                 ->where('id', $id)
                 ->update(['is_approved' => 2]);
@@ -494,9 +430,8 @@ class StaffManagementController extends Controller
     public function designation_list()
     {
         $user_role = session()->get('user_type');
-        if ($user_role !== 'admin') 
-        {
-            abort(404); 
+        if ($user_role !== 'admin') {
+            abort(404);
         }
         $designations = DB::table('designation')->paginate(10);
         return view('staff-management.designation-list', compact('designations'));
@@ -508,9 +443,8 @@ class StaffManagementController extends Controller
             'designation' => 'required|string|max:255',
         ]);
 
-        if ($validator->fails()) 
-        {
-            Flasher::addError($error);  
+        if ($validator->fails()) {
+            Flasher::addError($error);
             return redirect()->back()->withInput();
         }
 
@@ -527,8 +461,7 @@ class StaffManagementController extends Controller
             'designation' => 'required|string|max:255|unique:designation,designation',
         ]);
 
-        if ($validator->fails()) 
-        {
+        if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
@@ -546,9 +479,8 @@ class StaffManagementController extends Controller
     {
 
         $user_role = session()->get('user_type');
-        if ($user_role !== 'admin' && $user_role !== 'team_manager' ) 
-        {
-            abort(404); 
+        if ($user_role !== 'admin' && $user_role !== 'team_manager') {
+            abort(404);
         }
         $users = DB::table('users as a')
             ->leftJoin('designation as b', 'a.designation_id', '=', 'b.id')
@@ -557,8 +489,7 @@ class StaffManagementController extends Controller
 
         $data = [];
 
-        foreach ($users as $user) 
-        {
+        foreach ($users as $user) {
             $formattedName = $user->name .
                 '<div style="color:green;font-weight:bold">' . $user->role . '</div>' .
                 '<div>' . $user->designation . '</div>';
@@ -576,10 +507,8 @@ class StaffManagementController extends Controller
 
     private function findUserName($users, $id)
     {
-        foreach ($users as $user) 
-        {
-            if ($user->id == $id) 
-            {
+        foreach ($users as $user) {
+            if ($user->id == $id) {
                 return $user->name;
             }
         }
@@ -592,29 +521,25 @@ class StaffManagementController extends Controller
             'csv_file' => 'required|file|mimes:csv,txt'
         ]);
 
-        if ($validator->fails()) 
-        {
-            foreach ($validator->errors()->all() as $error) 
-            {
+        if ($validator->fails()) {
+            foreach ($validator->errors()->all() as $error) {
                 Flasher::addError($error);
             }
             return redirect()->back();
         }
 
-        try 
-        {
+        try {
             $file = $request->file('csv_file');
             $filePath = $file->getRealPath();
-            
+
             $csvData = array_map('str_getcsv', file($filePath));
             $header = array_shift($csvData);
             $header = array_map('strtolower', $header);
-            
+
             $requiredHeaders = ['name', 'email', 'phone', 'password', 'role'];
             $missingHeaders = array_diff($requiredHeaders, $header);
-            
-            if (!empty($missingHeaders)) 
-            {
+
+            if (!empty($missingHeaders)) {
                 Flasher::addError("CSV file is missing required columns: " . implode(', ', $missingHeaders));
                 return redirect()->back();
             }
@@ -623,50 +548,43 @@ class StaffManagementController extends Controller
                 ->where('role_name', '!=', 'admin')
                 ->pluck('role_name')
                 ->toArray();
-                
+
             $results = [
                 'imported' => 0,
                 'skipped' => 0,
                 'errors' => []
             ];
-            
+
             $existingData = DB::table('users')
                 ->select('email', 'mobile')
                 ->get()
-                ->mapWithKeys(function ($item) 
-                {
+                ->mapWithKeys(function ($item) {
                     return [$item->email => true, $item->mobile => true];
                 })
                 ->toArray();
-            
-            foreach ($csvData as $index => $row) 
-            {
+
+            foreach ($csvData as $index => $row) {
                 $rowNumber = $index + 2;
-                try 
-                {
+                try {
                     $row = array_combine($header, $row);
                     $row = array_change_key_case($row, CASE_LOWER);
-                    
-                    if (strtolower($row['role']) === 'admin') 
-                    {
+
+                    if (strtolower($row['role']) === 'admin') {
                         throw new \Exception("Admin role cannot be imported");
                     }
-                    
-                    if (!in_array($row['role'], $validRoles)) 
-                    {
+
+                    if (!in_array($row['role'], $validRoles)) {
                         throw new \Exception("Invalid role '{$row['role']}'");
                     }
-                    
-                    if (isset($existingData[$row['email']])) 
-                    {
+
+                    if (isset($existingData[$row['email']])) {
                         throw new \Exception("Email '{$row['email']}' already exists");
                     }
-                    
-                    if (isset($existingData[$row['phone']])) 
-                    {
+
+                    if (isset($existingData[$row['phone']])) {
                         throw new \Exception("Phone number '{$row['phone']}' already exists");
                     }
-                    
+
                     $validator = Validator::make($row, [
                         'name' => 'required|string|max:255',
                         'email' => 'required|email|max:255|unique:users,email',
@@ -674,9 +592,8 @@ class StaffManagementController extends Controller
                         'password' => 'required|string|min:5',
                         'role' => 'required|string|max:255',
                     ]);
-                    
-                    if ($validator->fails()) 
-                    {
+
+                    if ($validator->fails()) {
                         throw new \Exception(implode(' ', $validator->errors()->all()));
                     }
 
@@ -690,45 +607,34 @@ class StaffManagementController extends Controller
                         'updated_date' => now(),
                         'is_active' => 1,
                     ]);
-                    
+
                     $existingData[$row['email']] = true;
                     $existingData[$row['phone']] = true;
                     $results['imported']++;
-                    
-                } 
-                catch (\Exception $e) 
-                {
+                } catch (\Exception $e) {
                     $results['skipped']++;
                     $results['errors'][] = "Row $rowNumber: " . $e->getMessage();
                 }
             }
-            
-            if ($results['imported'] > 0) 
-            {
+
+            if ($results['imported'] > 0) {
                 Flasher::addSuccess("Successfully imported {$results['imported']} users.");
             }
-            
-            if ($results['skipped'] > 0) 
-            {
+
+            if ($results['skipped'] > 0) {
                 session()->flash('import_errors', array_slice($results['errors'], 0, 20));
-                
-                if (count($results['errors']) > 20) 
-                {
+
+                if (count($results['errors']) > 20) {
                     Flasher::addWarning("Skipped {$results['skipped']} rows. Showing first 20 errors.");
-                } 
-                else 
-                {
+                } else {
                     Flasher::addWarning("Skipped {$results['skipped']} rows. See details below.");
                 }
-                
+
                 return redirect()->back();
             }
-            
+
             return redirect()->route('users.index');
-            
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             Flasher::addError('Error importing users: ' . $e->getMessage());
             return redirect()->back();
         }
@@ -741,16 +647,14 @@ class StaffManagementController extends Controller
             'is_active' => 'required|boolean'
         ]);
 
-        if ($validator->fails()) 
-        {
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid request'
             ], 400);
         }
 
-        try 
-        {
+        try {
             DB::table('users')
                 ->where('id', $request->user_id)
                 ->update(['is_active' => $request->is_active]);
@@ -759,9 +663,7 @@ class StaffManagementController extends Controller
                 'success' => true,
                 'message' => 'Status updated successfully'
             ]);
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update status'
@@ -769,10 +671,22 @@ class StaffManagementController extends Controller
         }
     }
 
-    public function category_list()
+    // public function category_list()
+    // {
+    //     $categories = DB::table('category')->paginate(10);
+    //     return view('master.category', compact('categories'));
+    // }
+    public function category_list(Request $request)
     {
-        $categories = DB::table('category')->paginate(10);
-        return view('master.category', compact('categories'));
+        $length = $request->query('length', 10);
+
+        $categories = DB::table('category')
+            ->paginate((int)$length)
+            ->appends([
+                'length' => $length
+            ]);
+
+        return view('master.category', compact('categories', 'length'));
     }
 
     public function store_category(Request $request)
@@ -802,34 +716,27 @@ class StaffManagementController extends Controller
         return redirect()->route('category.list')->with('success', 'Category updated successfully.');
     }
 
-     
+
     public function property_name()
     {
-        try 
-        {
+        try {
             $properties = DB::table("property")->paginate(10);
-            foreach($properties as $property) 
-            {
-                if($property->property_category) 
-                {
+            foreach ($properties as $property) {
+                if ($property->property_category) {
                     $category = DB::table('inv_catg')
                         ->where('name', $property->property_category)
                         ->first();
                     $property->category_id = $category->id ?? null;
-                } 
-                else 
-                {
+                } else {
                     $property->category_id = null;
                 }
             }
-            
+
             $categoryList = DB::table('category')->select('id', 'name')->get();
             $invCatg = DB::table('inv_catg')->select('id', 'type', 'name')->get();
-            
+
             return view('master.property', compact('projects', 'categoryList', 'invCatg'));
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             Flasher::addError('Failed to load projects: ' . $e->getMessage());
             return back();
         }
@@ -838,8 +745,7 @@ class StaffManagementController extends Controller
     public function store_property(Request $request)
     {
         DB::beginTransaction();
-        try 
-        {
+        try {
             $rules = [
                 'name' => [
                     'required',
@@ -848,9 +754,8 @@ class StaffManagementController extends Controller
                     Rule::unique('projects', 'project_name')
                 ]
             ];
-            
-            if (session('software_type') !== 'lead_management') 
-            {
+
+            if (session('software_type') !== 'lead_management') {
                 $rules['property_type'] = 'nullable|string|max:100';
                 $rules['property_category'] = 'nullable|exists:inv_catg,id';
                 $rules['property_sub_category'] = 'nullable|string|max:255';
@@ -864,36 +769,30 @@ class StaffManagementController extends Controller
 
             $validator = Validator::make($request->all(), $rules);
 
-            if ($validator->fails()) 
-            {
-                foreach ($validator->errors()->all() as $error) 
-                {
+            if ($validator->fails()) {
+                foreach ($validator->errors()->all() as $error) {
                     Flasher::addError($error);
                 }
                 return redirect()->back()->withInput();
             }
-            
+
             $data = [
                 'project_name' => $request->name,
                 'created_date' => now()
             ];
-            
-            if (session('software_type') !== 'lead_management') 
-            {
-                if ($request->hasFile('gallery_images')) 
-                {
+
+            if (session('software_type') !== 'lead_management') {
+                if ($request->hasFile('gallery_images')) {
                     $images = [];
-                    foreach ($request->file('gallery_images') as $image) 
-                    {
+                    foreach ($request->file('gallery_images') as $image) {
                         $path = $image->store('property-gallery', 'public');
                         $images[] = '/storage/' . $path;
                     }
                     $data['gallery_images'] = json_encode($images);
                 }
-                
+
                 $categoryName = null;
-                if ($request->property_category) 
-                {
+                if ($request->property_category) {
                     $category = DB::table('inv_catg')->find($request->property_category);
                     $categoryName = $category->name ?? null;
                 }
@@ -913,9 +812,7 @@ class StaffManagementController extends Controller
             DB::commit();
             Flasher::addSuccess('Project created successfully.');
             return redirect()->route('project.name');
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             DB::rollBack();
             Flasher::addError('Failed to create: ' . $e->getMessage());
             return redirect()->back()->withInput();
@@ -925,8 +822,7 @@ class StaffManagementController extends Controller
     public function update_property(Request $request, $id)
     {
         DB::beginTransaction();
-        try 
-        {
+        try {
             $rules = [
                 'name' => [
                     'required',
@@ -935,9 +831,8 @@ class StaffManagementController extends Controller
                     Rule::unique('projects', 'project_name')->ignore($id)
                 ]
             ];
-            
-            if (session('software_type') !== 'lead_management') 
-            {
+
+            if (session('software_type') !== 'lead_management') {
                 $rules['property_type'] = 'nullable|string|max:100';
                 $rules['property_category'] = 'nullable|exists:inv_catg,id';
                 $rules['property_sub_category'] = 'nullable|string|max:255';
@@ -951,45 +846,37 @@ class StaffManagementController extends Controller
 
             $validator = Validator::make($request->all(), $rules);
 
-            if ($validator->fails())
-            {
-                foreach ($validator->errors()->all() as $error) 
-                {
+            if ($validator->fails()) {
+                foreach ($validator->errors()->all() as $error) {
                     Flasher::addError($error);
                 }
                 return redirect()->back()->withInput();
             }
-            
+
             $data = [
                 'project_name' => $request->name
             ];
-            
-            if (session('software_type') !== 'lead_management') 
-            {
-                if ($request->hasFile('gallery_images')) 
-                {
+
+            if (session('software_type') !== 'lead_management') {
+                if ($request->hasFile('gallery_images')) {
                     $oldProject = DB::table('projects')->where('id', $id)->first();
-                    if ($oldProject && $oldProject->gallery_images) 
-                    {
+                    if ($oldProject && $oldProject->gallery_images) {
                         $oldImages = json_decode($oldProject->gallery_images);
-                        foreach ($oldImages as $oldImage) 
-                        {
+                        foreach ($oldImages as $oldImage) {
                             $path = str_replace('/storage/', '', $oldImage);
                             Storage::disk('public')->delete($path);
                         }
                     }
                     $images = [];
-                    foreach ($request->file('gallery_images') as $image) 
-                    {
+                    foreach ($request->file('gallery_images') as $image) {
                         $path = $image->store('property-gallery', 'public');
                         $images[] = '/storage/' . $path;
                     }
                     $data['gallery_images'] = json_encode($images);
                 }
-                
+
                 $categoryName = null;
-                if ($request->property_category) 
-                {
+                if ($request->property_category) {
                     $category = DB::table('inv_catg')->find($request->property_category);
                     $categoryName = $category->name ?? null;
                 }
@@ -1012,9 +899,7 @@ class StaffManagementController extends Controller
             DB::commit();
             Flasher::addSuccess('Project updated successfully.');
             return redirect()->route('project.name');
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             DB::rollBack();
             Flasher::addError('Failed to update: ' . $e->getMessage());
             return redirect()->back()->withInput();

@@ -9,82 +9,72 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use App\Models\ExhibitionShareLink;
 use Illuminate\Support\Str;
+
 class WebExhibitionController extends Controller
 {
 
     public function toggleAutoWelcome(Request $request, $id)
     {
-        try 
-        {
+        try {
             $validator = Validator::make($request->all(), [
                 'auto_welcome_message' => 'required|boolean'
             ]);
-            
-            if ($validator->fails()) 
-            {
+
+            if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Invalid request'
                 ], 422);
             }
-            
+
             $exhibition = DB::table('exhibitions')->where('id', $id)->first();
-            
-            if (!$exhibition) 
-            {
+
+            if (!$exhibition) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Exhibition not found!'
                 ], 404);
             }
-            
+
             DB::table('exhibitions')->where('id', $id)->update([
                 'auto_welcome_message' => $request->auto_welcome_message,
                 'updated_at' => now()
             ]);
-            
+
             $status = $request->auto_welcome_message ? 'enabled' : 'disabled';
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Auto welcome messages ' . $status . ' successfully!'
             ]);
-            
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update: ' . $e->getMessage()
             ], 500);
         }
     }
-    
+
     public function getExhibitionDetails($id)
     {
-        try 
-        {
+        try {
             $exhibition = DB::table('exhibitions')->where('id', $id)->first();
-            
-            if (!$exhibition) 
-            {
+
+            if (!$exhibition) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Exhibition not found'
                 ], 404);
             }
-            
+
             $exhibition->start_date = Carbon::parse($exhibition->start_date)->format('Y-m-d\TH:i');
             $exhibition->end_date = Carbon::parse($exhibition->end_date)->format('Y-m-d\TH:i');
-            
+
             return response()->json([
                 'success' => true,
                 'exhibition' => $exhibition
             ]);
-            
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error fetching exhibition details'
@@ -103,25 +93,22 @@ class WebExhibitionController extends Controller
             'is_active' => 'sometimes|boolean',
             'auto_welcome_message' => 'sometimes|boolean'
         ]);
-        
-        if ($validator->fails()) 
-        {
+
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors()
             ], 422);
         }
-        
-        try 
-        {
+
+        try {
             DB::beginTransaction();
             $isActive = $request->has('is_active') ? 1 : 0;
             $autoWelcome = $request->has('auto_welcome_message') ? 1 : 0;
-            if ($isActive) 
-            {
+            if ($isActive) {
                 DB::table('exhibitions')->update(['is_active' => 0]);
             }
-            
+
             DB::table('exhibitions')->insert([
                 'name' => $request->name,
                 'description' => $request->description,
@@ -133,17 +120,14 @@ class WebExhibitionController extends Controller
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-            
+
             DB::commit();
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Exhibition created successfully!'
             ]);
-            
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'success' => false,
@@ -155,15 +139,14 @@ class WebExhibitionController extends Controller
     public function update(Request $request, $id)
     {
         $exhibition = DB::table('exhibitions')->where('id', $id)->first();
-        
-        if (!$exhibition) 
-        {
+
+        if (!$exhibition) {
             return response()->json([
                 'success' => false,
                 'message' => 'Exhibition not found!'
             ], 404);
         }
-        
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -173,29 +156,26 @@ class WebExhibitionController extends Controller
             'is_active' => 'sometimes|boolean',
             'auto_welcome_message' => 'sometimes|boolean'
         ]);
-        
-        if ($validator->fails()) 
-        {
+
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors()
             ], 422);
         }
-        
-        try 
-        {
+
+        try {
             DB::beginTransaction();
-            
+
             $isActive = $request->has('is_active') ? 1 : 0;
             $autoWelcome = $request->has('auto_welcome_message') ? 1 : 0;
-            
-            if ($isActive) 
-            {
+
+            if ($isActive) {
                 DB::table('exhibitions')
                     ->where('id', '!=', $id)
                     ->update(['is_active' => 0]);
             }
-            
+
             DB::table('exhibitions')->where('id', $id)->update([
                 'name' => $request->name,
                 'description' => $request->description,
@@ -206,17 +186,14 @@ class WebExhibitionController extends Controller
                 'auto_welcome_message' => $autoWelcome,
                 'updated_at' => now(),
             ]);
-            
+
             DB::commit();
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Exhibition updated successfully!'
             ]);
-            
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'success' => false,
@@ -236,14 +213,13 @@ class WebExhibitionController extends Controller
             ->orderBy('start_date', 'desc')
             ->paginate(10);
 
-    
+
         $exhibitionsWithLeads = [];
-        foreach ($exhibitions as $exhibition) 
-        {
+        foreach ($exhibitions as $exhibition) {
             $leadCount = DB::table('exhibition_leads')
                 ->where('exhibition_id', $exhibition->id)
                 ->count();
-            
+
             $exhibition->lead_count = $leadCount;
             $exhibitionsWithLeads[] = $exhibition;
         }
@@ -264,16 +240,14 @@ class WebExhibitionController extends Controller
 
     public function view($id)
     {
-        try 
-        {
+        try {
             $exhibition = DB::table('exhibitions')->where('id', $id)->first();
-            
-            if (!$exhibition) 
-            {
+
+            if (!$exhibition) {
                 return redirect()->route('exhibition.index')
                     ->with('error', 'Exhibition not found!');
             }
-            
+
             $leadCount = DB::table('exhibition_leads')->where('exhibition_id', $id)->count();
             $todayLeads = DB::table('exhibition_leads')
                 ->where('exhibition_id', $id)
@@ -284,37 +258,31 @@ class WebExhibitionController extends Controller
             $query = DB::table('exhibition_leads')
                 ->where('exhibition_id', $id);
 
-            if (request()->has('name') && !empty(request('name'))) 
-            {
+            if (request()->has('name') && !empty(request('name'))) {
                 $query->where('name', 'like', '%' . request('name') . '%');
             }
 
-            if (request()->has('country') && !empty(request('country'))) 
-            {
+            if (request()->has('country') && !empty(request('country'))) {
                 $query->where('country', 'like', '%' . request('country') . '%');
             }
 
-            if (request()->has('type') && !empty(request('type'))) 
-            {
+            if (request()->has('type') && !empty(request('type'))) {
                 $typeFilter = request('type');
-                $query->where(function ($q) use ($typeFilter) 
-                {
+                $query->where(function ($q) use ($typeFilter) {
                     $q->where('type', 'like', '%"' . $typeFilter . '"%')
-                    ->orWhere('type', 'like', "%'$typeFilter'%")
-                    ->orWhere('type', 'like', '%' . $typeFilter . '%')
-                    ->orWhere('type', 'like', '%"' . strtolower($typeFilter) . '"%')
-                    ->orWhere('type', 'like', '%"' . ucfirst($typeFilter) . '"%');
+                        ->orWhere('type', 'like', "%'$typeFilter'%")
+                        ->orWhere('type', 'like', '%' . $typeFilter . '%')
+                        ->orWhere('type', 'like', '%"' . strtolower($typeFilter) . '"%')
+                        ->orWhere('type', 'like', '%"' . ucfirst($typeFilter) . '"%');
                 });
             }
 
-            if (request()->has('operating_country') && !empty(request('operating_country'))) 
-            {
+            if (request()->has('operating_country') && !empty(request('operating_country'))) {
                 $operatingCountry = request('operating_country');
-                $query->where(function ($q) use ($operatingCountry) 
-                {
+                $query->where(function ($q) use ($operatingCountry) {
                     $q->where('operating_country', 'like', '%"' . $operatingCountry . '"%')
-                    ->orWhere('operating_country', 'like', "%'$operatingCountry'%")
-                    ->orWhere('operating_country', 'like', '%' . $operatingCountry . '%');
+                        ->orWhere('operating_country', 'like', "%'$operatingCountry'%")
+                        ->orWhere('operating_country', 'like', '%' . $operatingCountry . '%');
                 });
             }
 
@@ -326,7 +294,7 @@ class WebExhibitionController extends Controller
 
             $leads->appends(request()->query());
             $leads->appends(request()->query());
-            
+
             $countries = DB::table('countries')
                 ->select('id', 'name')
                 ->orderBy('name')
@@ -343,49 +311,36 @@ class WebExhibitionController extends Controller
 
             $tempTypes = [];
 
-            foreach ($allTypes as $lead) 
-            {
-                if (!empty($lead->type)) 
-                {
+            foreach ($allTypes as $lead) {
+                if (!empty($lead->type)) {
                     $typeData = trim($lead->type);
                     $decoded = json_decode($typeData, true);
-                    
-                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) 
-                    {
-                        foreach ($decoded as $type) 
-                        {
-                            if (is_string($type) && trim($type) !== '') 
-                            {
+
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                        foreach ($decoded as $type) {
+                            if (is_string($type) && trim($type) !== '') {
                                 $tempTypes[] = trim($type);
                             }
                         }
-                    } 
-                    else 
-                    {
-                        if (strpos($typeData, ',') !== false) 
-                        {
+                    } else {
+                        if (strpos($typeData, ',') !== false) {
                             $splitTypes = array_map('trim', explode(',', $typeData));
-                            foreach ($splitTypes as $type) 
-                            {
-                                if ($type !== '') 
-                                {
+                            foreach ($splitTypes as $type) {
+                                if ($type !== '') {
                                     $tempTypes[] = $type;
                                 }
                             }
-                        } 
-                        else
-                        {
+                        } else {
                             $tempTypes[] = $typeData;
                         }
                     }
                 }
             }
-            
+
             $uniqueTypes = collect($tempTypes)
-                ->filter(function ($type) 
-                {
-                    return !empty(trim($type)) && 
-                        $type !== 'null' && 
+                ->filter(function ($type) {
+                    return !empty(trim($type)) &&
+                        $type !== 'null' &&
                         $type !== 'NULL';
                 })
                 ->unique()
@@ -393,7 +348,7 @@ class WebExhibitionController extends Controller
                 ->values()
                 ->toArray();
             $operatingCountries = collect();
-            
+
             $allOperatingCountries = DB::table('exhibition_leads')
                 ->where('exhibition_id', $id)
                 ->whereNotNull('operating_country')
@@ -405,49 +360,36 @@ class WebExhibitionController extends Controller
 
             $tempCountries = [];
 
-            foreach ($allOperatingCountries as $lead) 
-            {
-                if (!empty($lead->operating_country)) 
-                {
+            foreach ($allOperatingCountries as $lead) {
+                if (!empty($lead->operating_country)) {
                     $opCountry = trim($lead->operating_country);
                     $decoded = json_decode($opCountry, true);
-                    
-                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) 
-                    {
-                        foreach ($decoded as $country) 
-                        {
-                            if (is_string($country) && trim($country) !== '') 
-                            {
+
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                        foreach ($decoded as $country) {
+                            if (is_string($country) && trim($country) !== '') {
                                 $tempCountries[] = trim($country);
                             }
                         }
-                    } 
-                    else 
-                    {
-                        if (strpos($opCountry, ',') !== false) 
-                        {
+                    } else {
+                        if (strpos($opCountry, ',') !== false) {
                             $splitCountries = array_map('trim', explode(',', $opCountry));
-                            foreach ($splitCountries as $country) 
-                            {
-                                if ($country !== '') 
-                                {
+                            foreach ($splitCountries as $country) {
+                                if ($country !== '') {
                                     $tempCountries[] = $country;
                                 }
                             }
-                        } 
-                        else
-                        {
+                        } else {
                             $tempCountries[] = $opCountry;
                         }
                     }
                 }
             }
-            
+
             $operatingCountries = collect($tempCountries)
-                ->filter(function ($country) 
-                {
-                    return !empty(trim($country)) && 
-                        $country !== 'null' && 
+                ->filter(function ($country) {
+                    return !empty(trim($country)) &&
+                        $country !== 'null' &&
                         $country !== 'NULL';
                 })
                 ->unique()
@@ -469,10 +411,7 @@ class WebExhibitionController extends Controller
                 'countries' => $countries,
                 'operatingCountries' => $operatingCountries
             ]);
-
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
         }
     }
@@ -480,9 +419,8 @@ class WebExhibitionController extends Controller
     public function leadsPage($id)
     {
         $exhibition = DB::table('exhibitions')->where('id', $id)->first();
-        
-        if (!$exhibition) 
-        {
+
+        if (!$exhibition) {
             return redirect()->route('exhibition.index')
                 ->with('error', 'Exhibition not found!');
         }
@@ -490,34 +428,28 @@ class WebExhibitionController extends Controller
         $query = DB::table('exhibition_leads')
             ->where('exhibition_id', $id);
 
-        if (request()->has('name') && request('name') != '')
-        {
+        if (request()->has('name') && request('name') != '') {
             $query->where('name', 'like', '%' . request('name') . '%');
         }
 
-        if (request()->has('phone') && request('phone') != '') 
-        {
+        if (request()->has('phone') && request('phone') != '') {
             $query->where('phone', 'like', '%' . request('phone') . '%');
         }
 
-        if (request()->has('type') && request('type') != '') 
-        {
+        if (request()->has('type') && request('type') != '') {
             $query->where('type', request('type'));
         }
 
-        if (request()->has('country') && request('country') != '') 
-        {
+        if (request()->has('country') && request('country') != '') {
             $query->where('country', 'like', '%' . request('country') . '%');
         }
 
-        if (request()->has('operating_country') && request('operating_country') != '') 
-        {
+        if (request()->has('operating_country') && request('operating_country') != '') {
             $operatingCountry = request('operating_country');
-            $query->where(function ($q) use ($operatingCountry) 
-            {
+            $query->where(function ($q) use ($operatingCountry) {
                 $q->where('operating_country', 'like', '%' . $operatingCountry . '%')
-                ->orWhere('operating_country', 'like', '%"' . $operatingCountry . '"%')
-                ->orWhere('operating_country', 'like', "%'$operatingCountry'%");
+                    ->orWhere('operating_country', 'like', '%"' . $operatingCountry . '"%')
+                    ->orWhere('operating_country', 'like', "%'$operatingCountry'%");
             });
         }
         $leads = $query->orderBy('created_at', 'desc')->paginate(20);
@@ -544,15 +476,13 @@ class WebExhibitionController extends Controller
             'visit_card' => 'nullable|string|max:50',
         ]);
 
-        if ($validator->fails())
-        {
+        if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
 
-        try 
-        {
+        try {
             DB::table('exhibition_leads')->insert([
                 'exhibition_id' => $exhibitionId,
                 'name' => $request->name,
@@ -577,10 +507,7 @@ class WebExhibitionController extends Controller
 
             return redirect()->back()
                 ->with('success', 'Lead added successfully!');
-
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', 'Failed to add lead: ' . $e->getMessage())
                 ->withInput();
@@ -590,9 +517,8 @@ class WebExhibitionController extends Controller
     public function updateLead(Request $request, $leadId)
     {
         $lead = DB::table('exhibition_leads')->where('id', $leadId)->first();
-        
-        if (!$lead) 
-        {
+
+        if (!$lead) {
             return response()->json([
                 'success' => false,
                 'message' => 'Lead not found!'
@@ -617,27 +543,22 @@ class WebExhibitionController extends Controller
             'visit_card' => 'nullable|file|image|max:2048',
         ]);
 
-        if ($validator->fails()) 
-        {
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors()
             ], 422);
         }
 
-        try 
-        {
+        try {
             $data = $validator->validated();
-            
-            if (!empty($data['operating_country'])) 
-            {
+
+            if (!empty($data['operating_country'])) {
                 $data['operating_country'] = json_encode(array_map('trim', explode(',', $data['operating_country'])));
             }
 
-            if ($request->hasFile('visit_card')) 
-            {
-                if ($lead->visit_card && Storage::disk('public')->exists($lead->visit_card)) 
-                {
+            if ($request->hasFile('visit_card')) {
+                if ($lead->visit_card && Storage::disk('public')->exists($lead->visit_card)) {
                     Storage::disk('public')->delete($lead->visit_card);
                 }
                 $file = $request->file('visit_card');
@@ -657,10 +578,7 @@ class WebExhibitionController extends Controller
                 'message' => 'Lead updated successfully!',
                 'data' => $updatedLead
             ]);
-
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update lead: ' . $e->getMessage()
@@ -668,103 +586,168 @@ class WebExhibitionController extends Controller
         }
     }
 
-    public function destroyLead($id, $exhibition_id)
+    public function destroyLead(Request $request, $id, $exhibition_id)
     {
-        try 
-        {
-            $lead = DB::table('exhibition_leads')
-                ->where('id', $id)
-                ->where('exhibition_id', $exhibition_id)
-                ->first();
+        try {
+            $request->validate([
+                'password' => 'required|string',
+            ]);
 
-            if (!$lead) 
-            {
+            $cookieName = "lead_delete_attempt_{$id}";
+            $attempts = (int) $request->cookie($cookieName, 0);
+
+            if ($attempts >= 3) {
+                return response()->json([
+                    'status' => 403,
+                    'message' => 'Max attempts reached. Try after 1 day.',
+                ]);
+            }
+
+            $admin = DB::table('users')->where('role', 'admin')->first();
+
+            if (!$admin || $request->password !== $admin->password) {
+                $attempts++;
+
                 return response()->json([
                     'status' => 404,
-                    'message' => 'Exhibition lead not found!',
-                    'data' => ''
-                ], 404);
+                    'message' => "Incorrect password. Attempt $attempts of 3.",
+                ])->withCookie(cookie($cookieName, $attempts, 1440));
             }
 
-            if (isset($lead->visit_card) && $lead->visit_card && Storage::disk('public')->exists($lead->visit_card)) 
-            {
-                Storage::disk('public')->delete($lead->visit_card);
+            $lead = DB::table('exhibition_leads')
+                ->where('id', $id)
+                ->first();
+
+            if (!$lead) {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Lead not found!',
+                ]);
             }
 
+            // FIX HERE
             DB::table('exhibition_leads')
                 ->where('id', $id)
-                ->where('exhibition_id', $exhibition_id)
                 ->delete();
 
             return response()->json([
                 'status' => 200,
-                'message' => 'Exhibition lead deleted successfully!',
-                'data' => ''
-            ]);
-
-        } 
-        catch (\Exception $e) 
-        {
+                'message' => 'Lead deleted successfully!',
+                'id' => $id
+            ])->withCookie(cookie($cookieName, 0, 0));
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => 500,
-                'message' => 'Server error: ' . $e->getMessage(),
-                'data' => ''
-            ], 500);
+                'message' => $e->getMessage(),
+            ]);
         }
     }
 
-    public function destroy($id)
+    // public function destroyLead($id, $exhibition_id)
+    // {
+    //     try {
+    //         $lead = DB::table('exhibition_leads')
+    //             ->where('id', $id)
+    //             ->where('exhibition_id', $exhibition_id)
+    //             ->first();
+
+    //         if (!$lead) {
+    //             return response()->json([
+    //                 'status' => 404,
+    //                 'message' => 'Exhibition lead not found!',
+    //                 'data' => ''
+    //             ], 404);
+    //         }
+
+    //         if (isset($lead->visit_card) && $lead->visit_card && Storage::disk('public')->exists($lead->visit_card)) {
+    //             Storage::disk('public')->delete($lead->visit_card);
+    //         }
+
+    //         DB::table('exhibition_leads')
+    //             ->where('id', $id)
+    //             ->where('exhibition_id', $exhibition_id)
+    //             ->delete();
+
+    //         return response()->json([
+    //             'status' => 200,
+    //             'message' => 'Exhibition lead deleted successfully!',
+    //             'data' => ''
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'status' => 500,
+    //             'message' => 'Server error: ' . $e->getMessage(),
+    //             'data' => ''
+    //         ], 500);
+    //     }
+    // }
+
+
+
+    public function destroy(Request $request, $id)
     {
-        try 
-        {
-            DB::beginTransaction();
-
-            $exhibition = DB::table('exhibitions')->where('id', $id)->first();
-            
-            if (!$exhibition) 
-            {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Exhibition not found!'
-                ], 404);
-            }
-
-            if ($exhibition->is_active) 
-            {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Cannot delete active exhibition. Deactivate it first.'
-                ], 400);
-            }
-
-            DB::table('exhibitions')->where('id', $id)->delete();
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Exhibition deleted successfully!'
+        try {
+            $request->validate([
+                'password' => 'required|string',
             ]);
 
-        } 
-        catch (\Exception $e) 
-        {
-            DB::rollBack();
+            $cookieName = "exhibition_delete_attempt_{$id}";
+            $attempts = (int) $request->cookie($cookieName, 0);
+
+            // BLOCK AFTER 3 ATTEMPTS
+            if ($attempts >= 3) {
+                return response()->json([
+                    'status' => 403,
+                    'message' => 'Max attempts reached. Try after 1 day.',
+                ]);
+            }
+
+            // GET ADMIN
+            $admin = DB::table('users')->where('role', 'admin')->first();
+
+            // WRONG PASSWORD
+            if (!$admin || $request->password !== $admin->password) {
+                $attempts++;
+
+                $cookie = cookie($cookieName, $attempts, 1440);
+
+                return response()->json([
+                    'status' => 404,
+                    'message' => "Incorrect password. Attempt $attempts of 3.",
+                ])->withCookie($cookie);
+            }
+
+            // DELETE
+            $deleted = DB::table('exhibitions')->where('id', $id)->delete();
+
+            $cookie = cookie($cookieName, 0, 0);
+
+            if ($deleted) {
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Lead deleted successfully!',
+                    'id' => $id
+                ])->withCookie($cookie);
+            }
+
             return response()->json([
-                'success' => false,
-                'message' => 'Failed to delete exhibition: ' . $e->getMessage()
-            ], 500);
+                'status' => 404,
+                'message' => 'Delete failed',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => $e->getMessage(),
+            ]);
         }
     }
 
     public function getLeads($id)
     {
-        try 
-        {
+        try {
             $exhibition = DB::table('exhibitions')->where('id', $id)->first();
-            
-            if (!$exhibition) 
-            {
+
+            if (!$exhibition) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Exhibition not found!'
@@ -782,10 +765,7 @@ class WebExhibitionController extends Controller
                 'count' => $leads->count(),
                 'exhibition' => $exhibition
             ]);
-
-        } 
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to load leads: ' . $e->getMessage()
@@ -795,12 +775,10 @@ class WebExhibitionController extends Controller
 
     public function getLeadDetails($id)
     {
-        try 
-        {
+        try {
             $lead = DB::table('exhibition_leads')->where('id', $id)->first();
-            
-            if (!$lead) 
-            {
+
+            if (!$lead) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Lead not found!'
@@ -811,10 +789,7 @@ class WebExhibitionController extends Controller
                 'success' => true,
                 'lead' => $lead
             ]);
-
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to load lead details: ' . $e->getMessage()
@@ -824,20 +799,17 @@ class WebExhibitionController extends Controller
 
     public function convertLeadToCRM(Request $request, $leadId)
     {
-        try 
-        {
+        try {
             DB::beginTransaction();
             $exhibitionLead = DB::table('exhibition_leads')->where('id', $leadId)->first();
-            if (!$exhibitionLead) 
-            {
+            if (!$exhibitionLead) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Exhibition lead not found!'
                 ], 404);
             }
 
-            if ($exhibitionLead->is_converted == 1) 
-            {
+            if ($exhibitionLead->is_converted == 1) {
                 return response()->json([
                     'success' => false,
                     'message' => 'This lead is already converted to CRM!'
@@ -845,31 +817,22 @@ class WebExhibitionController extends Controller
             }
 
             $existingLeadQuery = DB::table('leads');
-            if (!empty($exhibitionLead->email) && !empty($exhibitionLead->phone)) 
-            {
-                $existingLeadQuery->where(function ($q) use ($exhibitionLead) 
-                {
+            if (!empty($exhibitionLead->email) && !empty($exhibitionLead->phone)) {
+                $existingLeadQuery->where(function ($q) use ($exhibitionLead) {
                     $q->where('email', $exhibitionLead->email)
-                    ->orWhere('phone', $exhibitionLead->phone);
+                        ->orWhere('phone', $exhibitionLead->phone);
                 });
-            } 
-            elseif (!empty($exhibitionLead->email)) 
-            {
+            } elseif (!empty($exhibitionLead->email)) {
                 $existingLeadQuery->where('email', $exhibitionLead->email);
-            } 
-            elseif (!empty($exhibitionLead->phone)) 
-            {
+            } elseif (!empty($exhibitionLead->phone)) {
                 $existingLeadQuery->where('phone', $exhibitionLead->phone);
-            } 
-            else 
-            {
+            } else {
                 $existingLeadQuery = null;
             }
 
             $existingLead = $existingLeadQuery ? $existingLeadQuery->first() : null;
 
-            if ($existingLead)
-            {
+            if ($existingLead) {
                 return response()->json([
                     'success' => false,
                     'message' => 'This lead already exists in CRM!',
@@ -882,22 +845,18 @@ class WebExhibitionController extends Controller
                 : 'Exhibition';
 
             $typeIds = [];
-            if (!empty($exhibitionLead->type)) 
-            {
+            if (!empty($exhibitionLead->type)) {
                 $typeNames = json_decode($exhibitionLead->type, true);
-                if (!is_array($typeNames)) 
-                {
+                if (!is_array($typeNames)) {
                     $typeNames = explode(',', $exhibitionLead->type);
                 }
 
-                foreach ($typeNames as $typeName) 
-                {
+                foreach ($typeNames as $typeName) {
                     $id = DB::table('category')
                         ->whereRaw('LOWER(name) = ?', [strtolower(trim($typeName))])
                         ->value('id');
 
-                    if ($id) 
-                    {
+                    if ($id) {
                         $typeIds[] = $id;
                     }
                 }
@@ -951,10 +910,7 @@ class WebExhibitionController extends Controller
                 'crm_lead_id' => $crmLeadId,
                 'exhibition_name' => $exhibitionName
             ]);
-
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'success' => false,
@@ -970,8 +926,7 @@ class WebExhibitionController extends Controller
             'lead_ids.*' => 'integer|exists:exhibition_leads,id',
         ]);
 
-        if ($validator->fails()) 
-        {
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors()
@@ -980,60 +935,46 @@ class WebExhibitionController extends Controller
 
         $leadIds = $request->lead_ids;
 
-        try 
-        {
+        try {
             DB::beginTransaction();
 
             $convertedCount = 0;
             $failedCount = 0;
             $results = [];
 
-            foreach ($leadIds as $leadId) 
-            {
-                try 
-                {
+            foreach ($leadIds as $leadId) {
+                try {
                     $exhibitionLead = DB::table('exhibition_leads')->where('id', $leadId)->first();
 
-                    if (!$exhibitionLead) 
-                    {
+                    if (!$exhibitionLead) {
                         $failedCount++;
                         $results[] = ['lead_id' => $leadId, 'status' => 'not_found'];
                         continue;
                     }
 
-                    if ($exhibitionLead->is_converted == 1) 
-                    {
+                    if ($exhibitionLead->is_converted == 1) {
                         $failedCount++;
                         $results[] = ['lead_id' => $leadId, 'status' => 'already_converted'];
                         continue;
                     }
 
                     $existingLeadQuery = DB::table('leads');
-                    if (!empty($exhibitionLead->email) && !empty($exhibitionLead->phone)) 
-                    {
-                        $existingLeadQuery->where(function ($q) use ($exhibitionLead) 
-                        {
+                    if (!empty($exhibitionLead->email) && !empty($exhibitionLead->phone)) {
+                        $existingLeadQuery->where(function ($q) use ($exhibitionLead) {
                             $q->where('email', $exhibitionLead->email)
-                            ->orWhere('phone', $exhibitionLead->phone);
+                                ->orWhere('phone', $exhibitionLead->phone);
                         });
-                    } 
-                    elseif (!empty($exhibitionLead->email)) 
-                    {
+                    } elseif (!empty($exhibitionLead->email)) {
                         $existingLeadQuery->where('email', $exhibitionLead->email);
-                    } 
-                    elseif (!empty($exhibitionLead->phone)) 
-                    {
+                    } elseif (!empty($exhibitionLead->phone)) {
                         $existingLeadQuery->where('phone', $exhibitionLead->phone);
-                    } 
-                    else 
-                    {
+                    } else {
                         $existingLeadQuery = null;
                     }
 
                     $existingLead = $existingLeadQuery ? $existingLeadQuery->first() : null;
 
-                    if ($existingLead) 
-                    {
+                    if ($existingLead) {
                         DB::table('exhibition_leads')->where('id', $leadId)->update([
                             'is_converted' => 1,
                             'updated_at' => now(),
@@ -1053,20 +994,16 @@ class WebExhibitionController extends Controller
                         : 'Exhibition';
 
                     $typeIds = [];
-                    if (!empty($exhibitionLead->type)) 
-                    {
+                    if (!empty($exhibitionLead->type)) {
                         $typeNames = json_decode($exhibitionLead->type, true);
-                        if (!is_array($typeNames)) 
-                        {
+                        if (!is_array($typeNames)) {
                             $typeNames = explode(',', $exhibitionLead->type);
                         }
-                        foreach ($typeNames as $typeName) 
-                        {
+                        foreach ($typeNames as $typeName) {
                             $id = DB::table('category')
                                 ->whereRaw('LOWER(name) = ?', [strtolower(trim($typeName))])
                                 ->value('id');
-                            if ($id) 
-                            {
+                            if ($id) {
                                 $typeIds[] = $id;
                             }
                         }
@@ -1116,10 +1053,7 @@ class WebExhibitionController extends Controller
                         'status' => 'converted',
                         'exhibition_name' => $exhibitionName
                     ];
-
-                } 
-                catch (\Exception $e) 
-                {
+                } catch (\Exception $e) {
                     $failedCount++;
                     $results[] = [
                         'lead_id' => $leadId,
@@ -1138,10 +1072,7 @@ class WebExhibitionController extends Controller
                 'failed_count' => $failedCount,
                 'results' => $results
             ]);
-
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'success' => false,
@@ -1152,11 +1083,9 @@ class WebExhibitionController extends Controller
 
     public function createShareLink(Request $request, $exhibitionId)
     {
-        try 
-        {
+        try {
             $exhibition = DB::table('exhibitions')->where('id', $exhibitionId)->first();
-            if (!$exhibition)
-            {
+            if (!$exhibition) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Exhibition not found'
@@ -1180,14 +1109,11 @@ class WebExhibitionController extends Controller
                     'share_link' => $shareUrl,
                     'share_code' => $shareCode,
                     'expires_at' => '',
-                    'max_uses' =>'',
+                    'max_uses' => '',
                     'created_at' => $shareLink->created_at->format('Y-m-d H:i:s'),
                 ]
             ]);
-
-        }
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to create share link: ' . $e->getMessage()
@@ -1197,11 +1123,9 @@ class WebExhibitionController extends Controller
 
     public function getShareLinks($exhibitionId)
     {
-        try 
-        {
+        try {
             $exhibition = DB::table('exhibitions')->where('id', $exhibitionId)->first();
-            if (!$exhibition) 
-            {
+            if (!$exhibition) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Exhibition not found'
@@ -1211,8 +1135,7 @@ class WebExhibitionController extends Controller
             $shareLinks = ExhibitionShareLink::where('exhibition_id', $exhibitionId)
                 ->orderBy('created_at', 'desc')
                 ->get()
-                ->map(function ($link) 
-                {
+                ->map(function ($link) {
                     return [
                         'id' => $link->id,
                         'share_code' => $link->share_code,
@@ -1231,10 +1154,7 @@ class WebExhibitionController extends Controller
                 'success' => true,
                 'data' => $shareLinks
             ]);
-
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to fetch share links: ' . $e->getMessage()
@@ -1251,7 +1171,7 @@ class WebExhibitionController extends Controller
             ->select(
                 'esl.id as share_link_id',
                 'esl.share_code',
-                'e.id as id',            
+                'e.id as id',
                 'e.name',
                 'e.description',
                 'e.start_date',
@@ -1259,8 +1179,7 @@ class WebExhibitionController extends Controller
             )
             ->first();
 
-        if (!$data) 
-        {
+        if (!$data) {
             abort(404, 'Share link not found or expired.');
         }
         return view('exhibition.share-form', [
@@ -1271,11 +1190,10 @@ class WebExhibitionController extends Controller
 
     public function submitShareForm(Request $request, $shareCode)
     {
-        try 
-        {
+        try {
             $shareLink = ExhibitionShareLink::where('share_code', $shareCode)
                 ->firstOrFail();
-                
+
             $validator = Validator::make($request->all(), [
                 'name'               => 'required|string|max:255',
                 'phone'              => 'required|string|max:20',
@@ -1288,7 +1206,7 @@ class WebExhibitionController extends Controller
                 'fax'                => 'nullable|string|max:50',
                 'country_id'         => 'nullable|exists:countries,id',
                 'operating_country'  => 'nullable|array',
-                'operating_country.*'=> 'string|max:100',
+                'operating_country.*' => 'string|max:100',
                 'address'            => 'nullable|string',
                 'description'        => 'nullable|string',
                 'date'               => 'nullable|date',
@@ -1297,8 +1215,7 @@ class WebExhibitionController extends Controller
                 'visit_card.*' => 'file|mimes:jpg,jpeg,png,pdf|max:50000',
             ]);
 
-            if ($validator->fails()) 
-            {
+            if ($validator->fails()) {
                 return redirect()->back()
                     ->withErrors($validator)
                     ->withInput();
@@ -1307,14 +1224,12 @@ class WebExhibitionController extends Controller
             $validated = $validator->validated();
             $fullPhone = $validated['phone_code'] . preg_replace('/\D/', '', $validated['phone']);
             $fullWhatsapp = null;
-            
-            if (!empty($validated['whatsapp'])) 
-            {
+
+            if (!empty($validated['whatsapp'])) {
                 $fullWhatsapp = $validated['whatsapp_code'] . preg_replace('/\D/', '', $validated['whatsapp']);
             }
             $countryName = null;
-            if (!empty($validated['country_id'])) 
-            {
+            if (!empty($validated['country_id'])) {
                 $country = DB::table('countries')->where('id', $validated['country_id'])->first();
                 $countryName = $country ? $country->name : null;
             }
@@ -1336,27 +1251,22 @@ class WebExhibitionController extends Controller
                 'updated_at'    => now(),
             ];
 
-            if (isset($validated['operating_country'])) 
-            {
+            if (isset($validated['operating_country'])) {
                 $leadData['operating_country'] = json_encode($validated['operating_country']);
             }
 
-            if (!empty($validated['date'])) 
-            {
+            if (!empty($validated['date'])) {
                 $leadData['date'] = date('Y-m-d H:i:s', strtotime($validated['date']));
             }
 
-            if (!empty($validated['reminder_date'])) 
-            {
+            if (!empty($validated['reminder_date'])) {
                 $leadData['reminder_date'] = date('Y-m-d H:i:s', strtotime($validated['reminder_date']));
             }
 
             $visitCards = [];
             $deviceId = $validated['device_id'] ?? Str::uuid()->toString();
-            if ($request->hasFile('visit_card')) 
-            {
-                foreach ($request->file('visit_card') as $file) 
-                {
+            if ($request->hasFile('visit_card')) {
+                foreach ($request->file('visit_card') as $file) {
                     $filename = 'visit_card_' . $deviceId . '_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                     $path = $file->storeAs('visit_cards', $filename, 'public');
                     $visitCards[] = $path;
@@ -1364,15 +1274,12 @@ class WebExhibitionController extends Controller
 
                 $leadData['visit_card'] = json_encode($visitCards);
             }
-            
+
             $leadId = DB::table('exhibition_leads')->insertGetId($leadData);
             $shareLink->increment('used_count');
 
             return redirect()->back()->with('success', 'Form submitted successfully');
-
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', 'Error submitting form: ' . $e->getMessage())
                 ->withInput();
@@ -1381,14 +1288,12 @@ class WebExhibitionController extends Controller
 
     public function activate($id)
     {
-        try 
-        {
+        try {
             DB::beginTransaction();
 
             $exhibition = DB::table('exhibitions')->where('id', $id)->first();
-            
-            if (!$exhibition) 
-            {
+
+            if (!$exhibition) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Exhibition not found!'
@@ -1406,10 +1311,7 @@ class WebExhibitionController extends Controller
                 'success' => true,
                 'message' => 'Exhibition activated successfully!'
             ]);
-
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'success' => false,
@@ -1420,41 +1322,36 @@ class WebExhibitionController extends Controller
 
     public function import(Request $request, $exhibitionId)
     {
-        try 
-        {
+        try {
             $request->validate([
                 'file' => 'required|mimes:csv,txt|max:2048'
             ]);
 
             $file = $request->file('file');
-            
-            if (!$file->isValid()) 
-            {
+
+            if (!$file->isValid()) {
                 return redirect()
                     ->back()
                     ->with('error', 'Invalid file upload.');
             }
 
             $filePath = $file->getRealPath();
-            
-            if (!file_exists($filePath)) 
-            {
+
+            if (!file_exists($filePath)) {
                 return redirect()
                     ->back()
                     ->with('error', 'File not found.');
             }
 
             $file = fopen($filePath, 'r');
-            
-            if (!$file) 
-            {
+
+            if (!$file) {
                 return redirect()
                     ->back()
                     ->with('error', 'Unable to open file.');
             }
             $header = fgetcsv($file);
-            if (!$header) 
-            {
+            if (!$header) {
                 fclose($file);
                 return redirect()
                     ->back()
@@ -1465,36 +1362,28 @@ class WebExhibitionController extends Controller
             $rowCount = 0;
             $importedCount = 0;
 
-            while (($row = fgetcsv($file)) !== false) 
-            {
+            while (($row = fgetcsv($file)) !== false) {
                 $rowCount++;
-                if (empty(array_filter($row)))
-                {
+                if (empty(array_filter($row))) {
                     continue;
                 }
                 $data = [];
-                foreach ($header as $index => $columnName) 
-                {
+                foreach ($header as $index => $columnName) {
                     $cleanColumnName = trim($columnName);
-                    if (isset($row[$index])) 
-                    {
+                    if (isset($row[$index])) {
                         $data[$cleanColumnName] = trim($row[$index]);
-                    } 
-                    else 
-                    {
+                    } else {
                         $data[$cleanColumnName] = null;
                     }
                 }
-                if ($rowCount <= 3) 
-                {
+                if ($rowCount <= 3) {
                     \Log::info('Row ' . $rowCount . ' data:', $data);
                 }
                 $phonesRaw = $data['Phone'] ?? '';
                 $phonesRaw = preg_replace('/^\.\+/', '+', $phonesRaw);
                 $phonesRaw = str_replace(['.', ','], ' ', $phonesRaw);
                 $phoneNumbers = preg_split('/\s+/', trim($phonesRaw));
-                $phoneNumbers = array_filter($phoneNumbers, function($phone) 
-                {
+                $phoneNumbers = array_filter($phoneNumbers, function ($phone) {
                     return !empty(trim($phone));
                 });
                 $phoneNumbers = array_values($phoneNumbers);
@@ -1521,15 +1410,11 @@ class WebExhibitionController extends Controller
 
                 $leads[] = $leadData;
                 $importedCount++;
-                if (count($leads) >= 50) 
-                {
-                    try 
-                    {
+                if (count($leads) >= 50) {
+                    try {
                         DB::table('exhibition_leads')->insert($leads);
                         $leads = [];
-                    } 
-                    catch (\Exception $e) 
-                    {
+                    } catch (\Exception $e) {
                         fclose($file);
                         return redirect()
                             ->back()
@@ -1537,14 +1422,10 @@ class WebExhibitionController extends Controller
                     }
                 }
             }
-            if (!empty($leads)) 
-            {
-                try 
-                {
+            if (!empty($leads)) {
+                try {
                     DB::table('exhibition_leads')->insert($leads);
-                } 
-                catch (\Exception $e) 
-                {
+                } catch (\Exception $e) {
                     fclose($file);
                     return redirect()
                         ->back()
@@ -1556,10 +1437,7 @@ class WebExhibitionController extends Controller
             return redirect()
                 ->back()
                 ->with('success', $importedCount . ' leads imported successfully!');
-
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return redirect()
                 ->back()
                 ->with('error', 'Import failed: ' . $e->getMessage());

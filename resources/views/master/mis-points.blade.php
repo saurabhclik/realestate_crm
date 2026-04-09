@@ -35,6 +35,20 @@
                                 <i class="fa fa-plus"></i> Add Point
                             </button>
                         </div>
+
+                        <!-- Length Dropdown -->
+                        <div class="mb-0">
+                            <label>
+                                Show
+                                <select id="lengthSelect" class="form-select form-select-sm" style="width:auto; display:inline-block;">
+                                    @foreach([10,25,50,100,500] as $len)
+                                    <option value="{{ $len }}" {{ $length == $len ? 'selected' : '' }}>{{ $len }}</option>
+                                    @endforeach
+                                </select>
+                                entries
+                            </label>
+                        </div>
+
                         <div class="table-responsive">
                             <table id="table" class="table table-hover table-bordered dt-responsive nowrap w-100">
                                 <thead class="table-light">
@@ -48,42 +62,43 @@
                                 </thead>
                                 <tbody>
                                     @foreach($points as $point)
-                                        <tr>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td>{{ implode(', ', $point->associated_users) }}</td>
-                                            <td>{{ $point->point_name }}</td>
-                                            <td>{{ $point->description }}</td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-primary edit-btn"
-                                                        data-id="{{ $point->id }}"
-                                                        data-name="{{ $point->point_name }}"
-                                                        data-description="{{ $point->description }}"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#misModal"
-                                                        data-action="{{ route('mis.points.update', $point->id) }}"
-                                                        data-type="Update"
-                                                        data-modal="MIS Point">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-sm btn-outline-danger delete-btn"
-                                                        data-id="{{ $point->id }}"
-                                                        data-name="{{ $point->point_name }}"
-                                                        data-url="{{ route('mis.points.destroy', $point->id) }}"
-                                                        data-type="MIS Point">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                                <form id="delete-form-{{ $point->id }}" 
-                                                      action="{{ route('mis.points.destroy', $point->id) }}" 
-                                                      method="POST" class="d-none">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                </form>
-                                            </td>
-                                        </tr>
+                                    <tr>
+                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ implode(', ', $point->associated_users) }}</td>
+                                        <td>{{ $point->point_name }}</td>
+                                        <td>{{ $point->description }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary edit-btn"
+                                                data-id="{{ $point->id }}"
+                                                data-name="{{ $point->point_name }}"
+                                                data-description="{{ $point->description }}"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#misModal"
+                                                data-action="{{ route('mis.points.update', $point->id) }}"
+                                                data-type="Update"
+                                                data-modal="MIS Point">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger delete-btn"
+                                                data-id="{{ $point->id }}"
+                                                data-name="{{ $point->point_name }}"
+                                                data-url="{{ route('mis.points.destroy', $point->id) }}"
+                                                data-type="MIS Point">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                            <form id="delete-form-{{ $point->id }}"
+                                                action="{{ route('mis.points.destroy', $point->id) }}"
+                                                method="POST" class="d-none">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
+                                        </td>
+                                    </tr>
                                     @endforeach
                                 </tbody>
                             </table>
                         </div>
+
                         <div class="d-flex justify-content-end mt-3">
                             {!! $points->links('pagination::bootstrap-5') !!}
                         </div>
@@ -111,9 +126,9 @@
                         <select name="associated_user[]" id="associated-user" class="form-select select2" required multiple>
                             <option value="">Select User</option>
                             @foreach($users as $user)
-                                @if($user->role != 'admin')
-                                <option value="{{$user->id}}">{{$user->name}}</option>
-                                @endif
+                            @if($user->role != 'admin')
+                            <option value="{{$user->id}}">{{$user->name}}</option>
+                            @endif
                             @endforeach
                         </select>
                     </div>
@@ -141,10 +156,8 @@
 </div>
 
 <script>
-    $(document).ready(function() 
-    {
-        $('.add-mis, .edit-btn').click(function() 
-        {
+    $(document).ready(function() {
+        $('.add-mis, .edit-btn').click(function() {
             const modal = $('#misModal');
             modal.find('form').attr('action', $(this).data('action'));
             modal.find('#modalType').text($(this).data('type'));
@@ -154,13 +167,12 @@
             modal.find('#description').val($(this).data('description') || '');
         });
 
-        $('.delete-btn').click(function() 
-        {
+        $('.delete-btn').click(function() {
             const id = $(this).data('id');
             const name = $(this).data('name');
             const url = $(this).data('url');
             const type = $(this).data('type');
-            
+
             Swal.fire({
                 title: 'Are you sure?',
                 text: `You are about to delete "${name}". This action cannot be undone!`,
@@ -177,32 +189,30 @@
                 },
                 buttonsStyling: false
             }).then((result) => {
-                if (result.isConfirmed) 
-                {
+                if (result.isConfirmed) {
                     const form = $('<form>', {
                         'method': 'POST',
                         'action': url
                     });
-                    
+
                     form.append($('<input>', {
                         'type': 'hidden',
                         'name': '_token',
                         'value': '{{ csrf_token() }}'
                     }));
-                    
+
                     form.append($('<input>', {
                         'type': 'hidden',
                         'name': '_method',
                         'value': 'DELETE'
                     }));
-                    
+
                     $('body').append(form);
                     form.submit();
                 }
             });
         });
-        $('#misForm').on('submit', function() 
-        {
+        $('#misForm').on('submit', function() {
             $('#SubmitBtn').prop('disabled', true);
             $('#SubmitText').addClass('d-none');
             $('#SubmitSpinner').removeClass('d-none');

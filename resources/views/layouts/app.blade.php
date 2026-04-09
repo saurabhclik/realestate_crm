@@ -1382,6 +1382,11 @@
         .dataTables_info {
             display: none !important;
         }
+        .dataTables_length
+        {
+            display: none !important;
+        }
+        
     </style>
 </head>
 

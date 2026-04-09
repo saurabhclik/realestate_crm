@@ -13,16 +13,21 @@ use Carbon\Carbon;
 
 class StaffManagementController extends Controller
 {
-    public function index()
+
+    public function index(Request $request)
     {
         $user_role = session()->get('user_type');
         $user_id = session()->get('user_id');
-        $roles = DB::table('role_mst')
-            ->where('role_name', '!=', 'admin')
-            ->get();
+
         if ($user_role !== 'admin' && $user_role !== 'team_manager') {
             abort(404);
         }
+
+        $length = $request->query('length', 10);
+
+        $roles = DB::table('role_mst')
+            ->where('role_name', '!=', 'admin')
+            ->get();
 
         $teamLeads = DB::table('users')
             ->whereIn('role', function ($query) {
@@ -48,29 +53,29 @@ class StaffManagementController extends Controller
             $query->where('users.tm_id', $user_id);
         }
 
-        if (request()->has('status') && request('status') !== '') {
-            $query->where('users.is_active', request('status'));
+        if ($request->filled('status')) {
+            $query->where('users.is_active', $request->status);
         }
 
-        if (request()->has('role') && request('role') !== '') {
-            $query->where('users.role', request('role'));
+        if ($request->filled('role')) {
+            $query->where('users.role', $request->role);
         }
 
-        if (request()->has('team_lead') && request('team_lead') !== '') {
-            $query->where('users.tm_id', request('team_lead'));
+        if ($request->filled('team_lead')) {
+            $query->where('users.tm_id', $request->team_lead);
         }
 
-        if (request()->has('name') && request('name') !== '') {
-            $query->where('users.name', 'like', '%' . request('name') . '%');
+        if ($request->filled('name')) {
+            $query->where('users.name', 'like', '%' . $request->name . '%');
         }
 
-        if (request()->has('date') && request('date') !== '') {
-            $date = Carbon::createFromFormat('d-m-Y', request('date'))->format('Y-m-d');
+        if ($request->filled('date')) {
+            $date = Carbon::createFromFormat('d-m-Y', $request->date)->format('Y-m-d');
             $query->whereDate('users.created_date', $date);
         }
 
-        $sort = request('sort', 'id');
-        $direction = request('direction', 'desc');
+        $sort = $request->query('sort', 'id');
+        $direction = $request->query('direction', 'desc');
 
         $validSortColumns = ['name', 'email', 'role', 'team_lead_name', 'created_date'];
 
@@ -80,8 +85,16 @@ class StaffManagementController extends Controller
             $query->orderBy('users.id', 'desc');
         }
 
-        $users = $query->paginate(10)->appends(request()->query());
-        return view('staff-management.view', compact('users', 'roles', 'teamLeads'));
+        //USE $length HERE
+        $users = $query->paginate($length)
+            ->appends($request->query());
+
+        return view('staff-management.view', compact(
+            'users',
+            'roles',
+            'teamLeads',
+            'length'
+        ));
     }
 
     public function create()
@@ -378,17 +391,39 @@ class StaffManagementController extends Controller
         }
     }
 
-    public function promote_list()
+    // public function promote_list()
+    // {
+    //     $user_role = session()->get('user_type');
+    //     if ($user_role !== 'admin' && $user_role !== 'team_manager') {
+    //         abort(404);
+    //     }
+    //     $users = DB::table('user_promotion as a')
+    //         ->join('users as b', 'a.user_id', '=', 'b.id')
+    //         ->select('a.*', 'b.name as name')
+    //         ->paginate(10);
+    //     return view('staff-management.promote-list', compact('user_role', 'users'));
+    // }
+    public function promote_list(Request $request)
     {
         $user_role = session()->get('user_type');
+
         if ($user_role !== 'admin' && $user_role !== 'team_manager') {
             abort(404);
         }
+
+        $length = $request->query('length', 10);
+
         $users = DB::table('user_promotion as a')
             ->join('users as b', 'a.user_id', '=', 'b.id')
             ->select('a.*', 'b.name as name')
-            ->paginate(10);
-        return view('staff-management.promote-list', compact('user_role', 'users'));
+            ->paginate($length)
+            ->appends(['length' => $length]);
+
+        return view('staff-management.promote-list', compact(
+            'user_role',
+            'users',
+            'length'
+        ));
     }
 
     public function approved(Request $request, $id)
@@ -427,14 +462,23 @@ class StaffManagementController extends Controller
         return redirect()->back()->with('error', 'Invalid action.');
     }
 
-    public function designation_list()
+    public function designation_list(Request $request)
     {
         $user_role = session()->get('user_type');
+
         if ($user_role !== 'admin') {
             abort(404);
         }
-        $designations = DB::table('designation')->paginate(10);
-        return view('staff-management.designation-list', compact('designations'));
+    
+        $length = $request->query('length', 10);
+        $designations = DB::table('designation')
+            ->paginate($length)
+            ->appends(['length' => $length]);
+
+        return view('staff-management.designation-list', compact(
+            'designations',
+            'length' 
+        ));
     }
 
     public function update_designation(Request $request, $id)
@@ -640,6 +684,7 @@ class StaffManagementController extends Controller
         }
     }
 
+
     public function updateStatus(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -671,11 +716,6 @@ class StaffManagementController extends Controller
         }
     }
 
-    // public function category_list()
-    // {
-    //     $categories = DB::table('category')->paginate(10);
-    //     return view('master.category', compact('categories'));
-    // }
     public function category_list(Request $request)
     {
         $length = $request->query('length', 10);

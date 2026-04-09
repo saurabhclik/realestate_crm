@@ -35,8 +35,21 @@
                             </button> -->
                         </div>
 
+                        <!-- Length Dropdown -->
+                        <div class="mb-0">
+                            <label>
+                                Show
+                                <select id="lengthSelect" class="form-select form-select-sm" style="width:auto; display:inline-block;">
+                                    @foreach([10,25,50,100,500] as $len)
+                                    <option value="{{ $len }}" {{ $length == $len ? 'selected' : '' }}>{{ $len }}</option>
+                                    @endforeach
+                                </select>
+                                entries
+                            </label>
+                        </div>
+
                         <div class="table-responsive">
-                            <table class="table table-hover table-bordered dt-responsive nowrap w-100 data-table">
+                            <table id="table" class="table table-hover table-bordered dt-responsive nowrap w-100">
                                 <thead class="table-light">
                                     <tr>
                                         <th>S.No</th>
@@ -47,24 +60,24 @@
                                 </thead>
                                 <tbody>
                                     @foreach($attendanceTypes as $type)
-                                        <tr>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $type->type }}</td>
-                                            <td>{{ $type->hours }}</td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-primary edit-btn"
-                                                    data-id="{{ $type->id }}"
-                                                    data-name="{{ $type->type }}"
-                                                    data-hours="{{ $type->hours }}"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#attendanceModal"
-                                                    data-action="{{ route('attendance.update', $type->id) }}"
-                                                    data-type="Update"
-                                                    data-modal="Attendance">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
+                                    <tr>
+                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $type->type }}</td>
+                                        <td>{{ $type->hours }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary edit-btn"
+                                                data-id="{{ $type->id }}"
+                                                data-name="{{ $type->type }}"
+                                                data-hours="{{ $type->hours }}"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#attendanceModal"
+                                                data-action="{{ route('attendance.update', $type->id) }}"
+                                                data-type="Update"
+                                                data-modal="Attendance">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
                                     @endforeach
                                 </tbody>
                             </table>
@@ -78,17 +91,13 @@
                 </div>
             </div>
         </div>
-
     </div>
+    @include('modals.attendance')
 </div>
 
-@include('modals.attendance')
-
 <script>
-    $(document).ready(function () 
-    {
-        $('.edit-btn').on('click', function () 
-        {
+    $(document).ready(function() {
+        $('.edit-btn').on('click', function() {
             let modal = $('#attendanceModal');
             modal.find('form').attr('action', $(this).data('action'));
             modal.find('input[name=type]').val($(this).data('name'));
@@ -96,8 +105,7 @@
             modal.find('input[name=_method]').val('PUT');
         });
 
-        $('#attendanceModal').on('hidden.bs.modal', function () 
-        {
+        $('#attendanceModal').on('hidden.bs.modal', function() {
             $(this).find('form')[0].reset();
             $(this).find('input[name=_method]').val('');
         });

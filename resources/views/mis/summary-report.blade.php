@@ -76,6 +76,7 @@
                         @if($userType == 'admin' || $userType == 'team_manager')
                         <form method="GET" action="{{ route('mis.summary-report') }}" class="mb-4">
                             <div class="row">
+
                                 <div class="col-md-3">
                                     <label for="team_id">Team</label>
                                     <select name="team_id" id="team_id" class="form-control select2">
@@ -87,6 +88,7 @@
                                         @endforeach
                                     </select>
                                 </div>
+                                
                                 <div class="col-md-2">
                                     <label for="year">Year</label>
                                     <select name="year" id="year" class="form-control select2">
@@ -95,6 +97,7 @@
                                         @endfor
                                     </select>
                                 </div>
+
                                 <div class="col-md-2">
                                     <label for="month">Month</label>
                                     <select name="month" id="month" class="form-control select2">
@@ -106,6 +109,7 @@
                                         @endfor
                                     </select>
                                 </div>
+
                                 <div class="col-md-2">
                                     <label for="week">Date Range</label>
                                     <select name="week" id="week" class="form-control select2">
@@ -118,6 +122,7 @@
                                         @endforeach
                                     </select>
                                 </div>
+
                                 <div class="col-md-3 d-flex align-items-end gap-2">
                                     <button type="submit" class="btn btn-primary" id="SubmitBtn">
                                         <span id="SubmitText">Apply Filters</span>
@@ -159,6 +164,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="table-responsive">
                             <table id="table" class="table table-bordered table-striped">
                                 <thead class="thead-dark">
@@ -211,6 +217,8 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        
                         @if($userType == 'admin' || $userType == 'team_manager')
                         <div class="mt-3">
                             <button id="btnExport" class="btn btn-success">

@@ -22,8 +22,22 @@
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h4 class="card-title mb-0">Designation List</h4>
                         </div>
+
+                        <!-- Length Dropdown -->
+                        <div class="mb-0">
+                            <label>
+                                Show
+                                <select id="lengthSelect" class="form-select form-select-sm" style="width:auto; display:inline-block;">
+                                    @foreach([10,25,50,100,500] as $len)
+                                    <option value="{{ $len }}" {{ $length == $len ? 'selected' : '' }}>{{ $len }}</option>
+                                    @endforeach
+                                </select>
+                                entries
+                            </label>
+                        </div>
+
                         <div class="table-responsive">
-                            <table class="table table-hover table-bordered dt-responsive nowrap w-100 data-table">
+                            <table id="table" class="table table-hover table-bordered dt-responsive nowrap w-100">
                                 <thead class="table-light">
                                     <tr>
                                         <th>S.No</th>
@@ -56,6 +70,7 @@
                                 </tbody>
                             </table>
                         </div>
+
                         <div class="d-flex justify-content-end mt-3">
                             {!! $designations->links('pagination::bootstrap-5') !!}
                         </div>
@@ -63,7 +78,7 @@
                 </div>
             </div>
         </div>
-    </div> 
+    </div>
 </div>
 
 <div class="modal fade" id="designationModal" tabindex="-1" aria-labelledby="designationModalLabel" aria-hidden="true">
@@ -91,28 +106,23 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () 
-    {
+    document.addEventListener('DOMContentLoaded', function() {
         var modal = document.getElementById('designationModal');
         var form = document.getElementById('designationForm');
         var modalTitle = document.getElementById('designationModalLabel');
         var designationInput = document.getElementById('designationInput');
         var submitBtn = document.getElementById('submitBtn');
 
-        modal.addEventListener('show.bs.modal', function (event) 
-        {
+        modal.addEventListener('show.bs.modal', function(event) {
             var button = event.relatedTarget;
             var mode = button.getAttribute('data-mode');
 
-            if (mode === 'create') 
-            {
+            if (mode === 'create') {
                 modalTitle.textContent = 'Add Designation';
                 form.action = '{{ route("designation.store") }}';
                 designationInput.value = '';
                 submitBtn.textContent = 'Create Designation';
-            } 
-            else if (mode === 'edit') 
-            {
+            } else if (mode === 'edit') {
                 var id = button.getAttribute('data-id');
                 var designation = button.getAttribute('data-designation');
 

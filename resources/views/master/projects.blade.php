@@ -45,8 +45,21 @@
                             </button>
                         </div>
 
+                        <!-- Length Dropdown -->
+                        <div class="mb-0">
+                            <label>
+                                Show
+                                <select id="lengthSelect" class="form-select form-select-sm" style="width:auto; display:inline-block;">
+                                    @foreach([10,25,50,100,500] as $len)
+                                    <option value="{{ $len }}" {{ $length == $len ? 'selected' : '' }}>{{ $len }}</option>
+                                    @endforeach
+                                </select>
+                                entries
+                            </label>
+                        </div>
+
                         <div class="table-responsive">
-                            <table class="table table-hover table-bordered dt-responsive nowrap w-100 data-table">
+                            <table id="table" class="table table-hover table-bordered dt-responsive nowrap w-100">
                                 <thead class="table-light">
                                     <tr>
                                         <th>S.No</th>
@@ -62,15 +75,14 @@
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $project->project_name }}</td>
                                         <td>
-                                            <button 
+                                            <button
                                                 class="btn btn-sm btn-outline-primary edit-btn"
                                                 data-id="{{ $project->id }}"
                                                 data-name="{{ $project->project_name }}"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#Modalbox"
                                                 data-action="{{ url('project/update') }}"
-                                                data-type="Update"
-                                 >
+                                                data-type="Update">
                                                 <i class="fas fa-edit"></i>
                                             </button>
                                         </td>
@@ -87,22 +99,7 @@
                 </div>
             </div>
         </div>
-
         @include('modals.master')
     </div>
 </div>
-
-<script>
-$(document).ready(function() 
-{
-    $('#table').DataTable({
-        scrollX: true,
-        scrollCollapse: true,
-        fixedColumns: {
-            leftColumns: 2,
-            rightColumns: 2
-        }
-    });
-});
-</script>
 @endsection

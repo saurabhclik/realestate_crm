@@ -35,8 +35,22 @@
                                 <i class="fa fa-plus"></i> Add Question
                             </button>
                         </div>
+
+                        <!-- Length Dropdown -->
+                        <div class="mb-0">
+                            <label>
+                                Show
+                                <select id="lengthSelect" class="form-select form-select-sm" style="width:auto; display:inline-block;">
+                                    @foreach([10,25,50,100,500] as $len)
+                                    <option value="{{ $len }}" {{ $length == $len ? 'selected' : '' }}>{{ $len }}</option>
+                                    @endforeach
+                                </select>
+                                entries
+                            </label>
+                        </div>
+
                         <div class="table-responsive">
-                            <table class="table table-hover table-bordered dt-responsive nowrap w-100 data-table">
+                            <table id="table" class="table table-hover table-bordered dt-responsive nowrap w-100">
                                 <thead class="table-light">
                                     <tr>
                                         <th>S.No</th>
@@ -56,7 +70,7 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <button 
+                                            <button
                                                 class="btn btn-sm btn-outline-primary edit-btn"
                                                 data-id="{{ $question->id }}"
                                                 data-question="{{ $question->question_text }}"
@@ -74,6 +88,7 @@
                                 </tbody>
                             </table>
                         </div>
+
                         <div class="d-flex justify-content-end mt-3">
                             {!! $questions->links('pagination::bootstrap-5') !!}
                         </div>
@@ -133,15 +148,12 @@
         const modalName = button.getAttribute('data-modal');
         modalTitle.textContent = `${type} ${modalName}`;
         form.action = action;
-        if(type === 'Create') 
-        {
+        if (type === 'Create') {
             hiddenIdInput.value = '';
             questionInput.value = '';
             isActiveCheckbox.checked = true;
             submitText.textContent = 'Add Question';
-        } 
-        else if(type === 'Update') 
-        {
+        } else if (type === 'Update') {
             hiddenIdInput.value = button.getAttribute('data-id');
             questionInput.value = button.getAttribute('data-question');
             isActiveCheckbox.checked = button.getAttribute('data-is_active') == 1 ? true : false;
@@ -151,9 +163,8 @@
         submitText.classList.remove('d-none');
         submitSpinner.classList.add('d-none');
     });
-    $('#SubmitBtn').closest('form').on('submit', function (e) 
-    {
-        e.preventDefault(); 
+    $('#SubmitBtn').closest('form').on('submit', function(e) {
+        e.preventDefault();
         submitBtn.disabled = true;
         submitText.classList.add('d-none');
         submitSpinner.classList.remove('d-none');

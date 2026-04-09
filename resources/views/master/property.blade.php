@@ -43,12 +43,27 @@
                                 Add {{ session('software_type') === 'lead_management' ? 'Product' : 'Property' }}
                             </button>
                         </div>
+
+                        <!-- Length Dropdown -->
+                        <div class="mb-0">
+                            <label>
+                                Show
+                                <select id="lengthSelect" class="form-select form-select-sm" style="width:auto; display:inline-block;">
+                                    @foreach([10,25,50,100,500] as $len)
+                                    <option value="{{ $len }}" {{ $length == $len ? 'selected' : '' }}>{{ $len }}</option>
+                                    @endforeach
+                                </select>
+                                entries
+                            </label>
+                        </div>
+
+                        <!-- Table -->
                         <div class="table-responsive">
-                            <table id="table" class="table-hover table-bordered dt-responsive nowrap w-100">
+                            <table id="table" class="table table-hover table-bordered dt-responsive nowrap w-100">
                                 <thead class="table-light">
                                     <tr>
                                         <th>S.No</th>
-                                        <th>{{ session('software_type') === 'lead_management' ? 'Product Name' : 'Property Name' }}</th>                                       
+                                        <th>{{ session('software_type') === 'lead_management' ? 'Product Name' : 'Property Name' }}</th>
                                         @if(session('software_type') !== 'lead_management')
                                         <th>Type</th>
                                         <th>Category</th>
@@ -57,7 +72,7 @@
                                         <th>Budget</th>
                                         <th>Status</th>
                                         <th>Images</th>
-                                        @endif                                   
+                                        @endif
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -65,11 +80,11 @@
                                     <tr>
                                         <td>
                                             {{ $loop->iteration }}
-                                            <button 
+                                            <button
                                                 class="btn btn-xs btn-soft-light edit-btn"
                                                 data-id="{{ $property->id }}"
                                                 data-name="{{ $property->property_name }}"
-                                                @if(session('software_type') !== 'lead_management')
+                                                @if(session('software_type') !=='lead_management' )
                                                 data-property_type="{{ $property->property_type }}"
                                                 data-property_category_id="{{ $property->category_id ?? '' }}"
                                                 data-property_category="{{ $property->property_category ?? '' }}"
@@ -79,7 +94,7 @@
                                                 data-address="{{ $property->address ?? '' }}"
                                                 data-budget_price="{{ $property->budget_price ?? '' }}"
                                                 data-property_status="{{ $property->property_status ?? '' }}"
-                                                @endif                         
+                                                @endif
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#Modalbox"
                                                 data-action="/properties"
@@ -88,53 +103,53 @@
                                                 <i class="fas fa-edit text-warning"></i>
                                             </button>
                                         </td>
-                                        <td>{{ $property->property_name }}</td>                            
+                                        <td>{{ $property->property_name }}</td>
                                         @if(session('software_type') !== 'lead_management')
                                         <td>{{ $property->property_type ?? '-' }}</td>
                                         <td>{{ $property->property_category ?? '-' }}</td>
                                         <td>{{ $property->property_sub_category ?? '-' }}</td>
                                         <td>
                                             @if($property->city || $property->state)
-                                                {{ $property->city ?? '' }} {{ $property->state ? ', '.$property->state : '' }}
+                                            {{ $property->city ?? '' }} {{ $property->state ? ', '.$property->state : '' }}
                                             @else
-                                                -
+                                            -
                                             @endif
                                         </td>
                                         <td>
                                             @if($property->budget_price)
-                                                {{$property->budget_price }}
+                                            {{$property->budget_price }}
                                             @else
-                                                -
+                                            -
                                             @endif
                                         </td>
                                         <td>
                                             @if($property->property_status)
-                                                @php
-                                                    $statusColors = [
-                                                        'Available' => 'success',
-                                                        'Hold' => 'warning',
-                                                        'Procession' => 'info',
-                                                        'Sold' => 'danger'
-                                                    ];
-                                                    $color = $statusColors[$property->property_status] ?? 'secondary';
-                                                @endphp
-                                                <span class="badge bg-{{ $color }}">{{ $property->property_status }}</span>
+                                            @php
+                                            $statusColors = [
+                                            'Available' => 'success',
+                                            'Hold' => 'warning',
+                                            'Procession' => 'info',
+                                            'Sold' => 'danger'
+                                            ];
+                                            $color = $statusColors[$property->property_status] ?? 'secondary';
+                                            @endphp
+                                            <span class="badge bg-{{ $color }}">{{ $property->property_status }}</span>
                                             @else
-                                                -
+                                            -
                                             @endif
                                         </td>
                                         <td>
                                             @if($property->gallery_images)
-                                                @php
-                                                    $images = json_decode($property->gallery_images, true); 
-                                                @endphp
-                                                <div class="d-flex flex-wrap gap-1">
-                                                    @foreach($images as $image)
-                                                        <img src="{{ url($image) }}" alt="Gallery Image" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
-                                                    @endforeach
-                                                </div>
+                                            @php
+                                            $images = json_decode($property->gallery_images, true);
+                                            @endphp
+                                            <div class="d-flex flex-wrap gap-1">
+                                                @foreach($images as $image)
+                                                <img src="{{ url($image) }}" alt="Gallery Image" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                                @endforeach
+                                            </div>
                                             @else
-                                                -
+                                            -
                                             @endif
                                         </td>
                                         @endif
@@ -162,18 +177,18 @@
                         </h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    
+
                     <form method="POST" id="action" action="" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="id" id="id">
                         <input type="hidden" name="_method" id="method_field" value="POST">
-                        
+
                         <div class="modal-body p-4">
                             <div class="mb-4">
                                 <label for="name" class="form-label fw-semibold" id="modal-name">
                                     {{ session('software_type') === 'lead_management' ? 'Product Name' : 'Property Name' }} <span class="text-danger">*</span>
                                 </label>
-                                <input type="text" class="form-control form-control-lg" name="name" id="name" 
+                                <input type="text" class="form-control form-control-lg" name="name" id="name"
                                     placeholder="{{ session('software_type') === 'lead_management' ? 'Enter product name' : 'Enter property name' }}" required>
                             </div>
                             @if(session('software_type') !== 'lead_management')
@@ -207,10 +222,10 @@
                                     <select class="form-select" name="state" id="state">
                                         <option value="">Select State</option>
                                         @php
-                                            $states = DB::table('state_district')->select('state')->distinct()->orderBy('state', 'asc')->get();
+                                        $states = DB::table('state_district')->select('state')->distinct()->orderBy('state', 'asc')->get();
                                         @endphp
                                         @foreach($states as $state)
-                                            <option value="{{ $state->state }}">{{ $state->state }}</option>
+                                        <option value="{{ $state->state }}">{{ $state->state }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -255,7 +270,7 @@
                             </div>
                             @endif
                         </div>
-                        
+
                         <div class="modal-footer bg-light py-3">
                             <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
                                 <i class="fas fa-times me-2"></i>Cancel
@@ -272,27 +287,24 @@
 </div>
 
 <script>
-    $(document).ready(function()
-    {
+    $(document).ready(function() {
         @foreach($properties as $property)
         @endforeach
-        $('.add-property').click(function() 
-        {
+        $('.add-property').click(function() {
             resetForm();
             var actionUrl = '/properties/store';
             $('#method_field').val('POST');
             $('#action').attr('action', actionUrl);
             $('#modalTitleText').text('Add ' + $(this).data('modal'));
             $('#modal-type span').text('Save ' + $(this).data('modal'));
-            
+
             @if(session('software_type') !== 'lead_management')
             $('#property_status').val('Available');
             @endif
         });
 
         @if(session('software_type') !== 'lead_management')
-        $('.edit-btn').click(function() 
-        {
+        $('.edit-btn').click(function() {
             resetForm();
             var button = $(this);
             var propertyId = button.data('id');
@@ -306,17 +318,15 @@
             $('#property_type').val(button.data('property_type'));
             var categoryId = button.data('property_category_id');
             var subCategoryName = button.data('property_sub_category');
-            
-            if (categoryId) 
-            {
+
+            if (categoryId) {
                 $('#property_category').val(categoryId);
                 loadSubCategories(categoryId, subCategoryName);
             }
             var selectedState = button.data('state');
             var selectedCity = button.data('city');
-            
-            if (selectedState) 
-            {
+
+            if (selectedState) {
                 $('#state').val(selectedState);
                 loadCities(selectedState, selectedCity);
             }
@@ -325,32 +335,25 @@
             $('#property_status').val(button.data('property_status'));
         });
 
-        $('#property_category').change(function() 
-        {
+        $('#property_category').change(function() {
             var categoryId = $(this).val();
             loadSubCategories(categoryId, null);
         });
-        $('#state').change(function() 
-        {
+        $('#state').change(function() {
             var state = $(this).val();
-            if (state) 
-            {
+            if (state) {
                 loadCities(state, null);
-            } 
-            else 
-            {
+            } else {
                 $('#city').html('<option value="">Select City</option>');
             }
         });
-        $('#gallery_images').change(function() 
-        {
+        $('#gallery_images').change(function() {
             previewImages(this);
         });
         @endif
     });
 
-    function resetForm() 
-    {
+    function resetForm() {
         $('#action')[0].reset();
         $('#id').val('');
         $('#method_field').val('POST');
@@ -361,93 +364,81 @@
     }
 
     @if(session('software_type') !== 'lead_management')
-        function loadCities(state, selectedCity = null)
-        {
-            $.ajax({
-                url: '/lead/get-cities/' + encodeURIComponent(state),
-                type: 'GET',
-                dataType: 'json',
-                success: function(data) 
-                {
-                    var options = '<option value="">Select City</option>';
-                    $.each(data, function(key, value) {
-                        var selected = (value.District == selectedCity) ? 'selected' : '';
-                        options += '<option value="' + value.District + '" ' + selected + '>' + value.District + '</option>';
-                    });
-                    $('#city').html(options);
-                },
-                error: function(xhr, status, error) 
-                {
-                    $('#city').html('<option value="">Error loading cities</option>');
-                }
-            });
-        }
 
-        function loadSubCategories(categoryId, selectedValue) 
-        {
-            if (!categoryId) 
-            {
-                $('#property_sub_category').html('<option value="">Select Sub Category</option>');
-                return;
+    function loadCities(state, selectedCity = null) {
+        $.ajax({
+            url: '/lead/get-cities/' + encodeURIComponent(state),
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                var options = '<option value="">Select City</option>';
+                $.each(data, function(key, value) {
+                    var selected = (value.District == selectedCity) ? 'selected' : '';
+                    options += '<option value="' + value.District + '" ' + selected + '>' + value.District + '</option>';
+                });
+                $('#city').html(options);
+            },
+            error: function(xhr, status, error) {
+                $('#city').html('<option value="">Error loading cities</option>');
             }
+        });
+    }
 
-            $.ajax({
-                url: '/lead/get-subcategories/' + categoryId,
-                type: 'GET',
-                dataType: 'json',
-                success: function(data) 
-                {
-                    var options = '<option value="">Select Sub Category</option>';
-                    $.each(data, function(key, value) {
-                        var selected = (value.name == selectedValue) ? 'selected' : '';
-                        options += '<option value="' + value.name + '" ' + selected + '>' + value.name + '</option>';
-                    });
-                    $('#property_sub_category').html(options);
-                },
-                error: function(xhr, status, error)
-                {
-                    $('#property_sub_category').html('<option value="">Error loading sub categories</option>');
-                }
-            });
+    function loadSubCategories(categoryId, selectedValue) {
+        if (!categoryId) {
+            $('#property_sub_category').html('<option value="">Select Sub Category</option>');
+            return;
         }
 
-        function previewImages(input) 
-        {
-            var preview = $('#imagePreview');
-            preview.empty();
-            if (input.files && input.files.length > 0) 
-            {
-                $('#imagePreviewContainer').show();
-                for (var i = 0; i < input.files.length; i++) 
-                {
-                    var reader = new FileReader();
-                    reader.onload = function(e) 
-                    {
-                        preview.append(
-                            '<div class="col-md-3 mb-2">' +
-                                '<div class="position-relative">' +
-                                    '<img src="' + e.target.result + '" class="img-fluid rounded" style="height: 100px; width: 100%; object-fit: cover; border: 1px solid #dee2e6;">' +
-                                    '<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="cursor: pointer;" onclick="removeImage(this)">×</span>' +
-                                '</div>' +
-                            '</div>'
-                        );
-                    }
-                    
-                    reader.readAsDataURL(input.files[i]);
-                }
-            } else {
-                $('#imagePreviewContainer').hide();
+        $.ajax({
+            url: '/lead/get-subcategories/' + categoryId,
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                var options = '<option value="">Select Sub Category</option>';
+                $.each(data, function(key, value) {
+                    var selected = (value.name == selectedValue) ? 'selected' : '';
+                    options += '<option value="' + value.name + '" ' + selected + '>' + value.name + '</option>';
+                });
+                $('#property_sub_category').html(options);
+            },
+            error: function(xhr, status, error) {
+                $('#property_sub_category').html('<option value="">Error loading sub categories</option>');
             }
-        }
+        });
+    }
 
-        function removeImage(element) 
-        {
-            $(element).closest('.col-md-3').remove();
-            if ($('#imagePreview').children().length === 0) 
-            {
-                $('#imagePreviewContainer').hide();
+    function previewImages(input) {
+        var preview = $('#imagePreview');
+        preview.empty();
+        if (input.files && input.files.length > 0) {
+            $('#imagePreviewContainer').show();
+            for (var i = 0; i < input.files.length; i++) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.append(
+                        '<div class="col-md-3 mb-2">' +
+                        '<div class="position-relative">' +
+                        '<img src="' + e.target.result + '" class="img-fluid rounded" style="height: 100px; width: 100%; object-fit: cover; border: 1px solid #dee2e6;">' +
+                        '<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="cursor: pointer;" onclick="removeImage(this)">×</span>' +
+                        '</div>' +
+                        '</div>'
+                    );
+                }
+
+                reader.readAsDataURL(input.files[i]);
             }
+        } else {
+            $('#imagePreviewContainer').hide();
         }
+    }
+
+    function removeImage(element) {
+        $(element).closest('.col-md-3').remove();
+        if ($('#imagePreview').children().length === 0) {
+            $('#imagePreviewContainer').hide();
+        }
+    }
     @endif
 </script>
 @endsection

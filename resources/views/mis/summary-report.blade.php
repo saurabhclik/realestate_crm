@@ -3,13 +3,12 @@
 @section('title', 'MIS Summary Report')
 @section('content')
 <style>
-    #table
-    {
-        width:100% important;
+    #table {
+        width: 100% important;
     }
-    .info-box 
-    {
-        box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
+
+    .info-box {
+        box-shadow: 0 0 1px rgba(0, 0, 0, .125), 0 1px 3px rgba(0, 0, 0, .2);
         border-radius: 0.25rem;
         background: #fff;
         display: flex;
@@ -18,8 +17,8 @@
         padding: 0.5rem;
         position: relative;
     }
-    .info-box .info-box-icon 
-    {
+
+    .info-box .info-box-icon {
         border-radius: 0.25rem;
         align-items: center;
         display: flex;
@@ -28,8 +27,8 @@
         text-align: center;
         width: 70px;
     }
-    .info-box .info-box-content 
-    {
+
+    .info-box .info-box-content {
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -37,31 +36,35 @@
         flex: 1;
         padding: 0 10px;
     }
-    .info-box-text 
-    {
+
+    .info-box-text {
         text-transform: uppercase;
         font-size: 0.875rem;
     }
-    .info-box-number 
-    {
+
+    .info-box-number {
         font-weight: 700;
         font-size: 1.5rem;
     }
-    .bg-info 
-    { 
-        background-color: #17a2b8 !important; color: white; 
+
+    .bg-info {
+        background-color: #17a2b8 !important;
+        color: white;
     }
-    .bg-success 
-    { 
-        background-color: #28a745 !important; color: white; 
+
+    .bg-success {
+        background-color: #28a745 !important;
+        color: white;
     }
-    .bg-warning 
-    { 
-        background-color: #ffc107 !important; color: black; 
+
+    .bg-warning {
+        background-color: #ffc107 !important;
+        color: black;
     }
-    .bg-danger 
-    { 
-        background-color: #dc3545 !important; color: white; 
+
+    .bg-danger {
+        background-color: #dc3545 !important;
+        color: white;
     }
 </style>
 <div class="page-content">
@@ -76,48 +79,53 @@
                         @if($userType == 'admin' || $userType == 'team_manager')
                         <form method="GET" action="{{ route('mis.summary-report') }}" class="mb-4">
                             <div class="row">
+
                                 <div class="col-md-3">
                                     <label for="team_id">Team</label>
                                     <select name="team_id" id="team_id" class="form-control select2">
                                         <option value="">All Teams</option>
                                         @foreach($teams as $team)
-                                            <option value="{{ $team->id }}" {{ $teamFilter == $team->id ? 'selected' : '' }}>
-                                                {{ $team->name }}
-                                            </option>
+                                        <option value="{{ $team->id }}" {{ $teamFilter == $team->id ? 'selected' : '' }}>
+                                            {{ $team->name }}
+                                        </option>
                                         @endforeach
                                     </select>
                                 </div>
+
                                 <div class="col-md-2">
                                     <label for="year">Year</label>
                                     <select name="year" id="year" class="form-control select2">
                                         @for($y = date('Y'); $y >= 2020; $y--)
-                                            <option value="{{ $y }}" {{ $yearFilter == $y ? 'selected' : '' }}>{{ $y }}</option>
+                                        <option value="{{ $y }}" {{ $yearFilter == $y ? 'selected' : '' }}>{{ $y }}</option>
                                         @endfor
                                     </select>
                                 </div>
+
                                 <div class="col-md-2">
                                     <label for="month">Month</label>
                                     <select name="month" id="month" class="form-control select2">
                                         <option value="">All Months</option>
                                         @for($m = 1; $m <= 12; $m++)
                                             <option value="{{ $m }}" {{ $monthFilter == $m ? 'selected' : '' }}>
-                                                {{ date('F', mktime(0, 0, 0, $m, 1)) }}
+                                            {{ date('F', mktime(0, 0, 0, $m, 1)) }}
                                             </option>
-                                        @endfor
+                                            @endfor
                                     </select>
                                 </div>
+
                                 <div class="col-md-2">
                                     <label for="week">Date Range</label>
                                     <select name="week" id="week" class="form-control select2">
                                         <option value="">Select Date Range</option>
                                         @foreach ($weeks as $week)
-                                            <option value="{{ $week['number'] }}" 
-                                                {{ $weekFilter == $week['number'] ? 'selected' : '' }}>
-                                                {{ $week['label'] }}
-                                            </option>
+                                        <option value="{{ $week['number'] }}"
+                                            {{ $weekFilter == $week['number'] ? 'selected' : '' }}>
+                                            {{ $week['label'] }}
+                                        </option>
                                         @endforeach
                                     </select>
                                 </div>
+
                                 <div class="col-md-3 d-flex align-items-end gap-2">
                                     <button type="submit" class="btn btn-primary" id="SubmitBtn">
                                         <span id="SubmitText">Apply Filters</span>
@@ -159,9 +167,12 @@
                                 </div>
                             </div>
                         </div>
+
+
+
                         <div class="table-responsive">
-                            <table id="table" class="table table-bordered table-striped">
-                                <thead class="thead-dark">
+                            <table id="table" class="table table-hover table-bordered dt-responsive nowrap w-100">
+                                <thead class="table-light">
                                     <tr>
                                         <th>MIS Point</th>
                                         <th>Target</th>
@@ -173,44 +184,45 @@
                                 </thead>
                                 <tbody>
                                     @foreach($points as $point)
-                                        @php
-                                            $data = $summaryData[$point] ?? ['target' => 0, 'achieved' => 0, 'percentage' => 0, 'variance' => 0];
-                                            $statusClass = $data['percentage'] >= 100 ? 'success' : 
-                                            ($data['percentage'] >= 80 ? 'warning' : 'danger');
-                                        @endphp
-                                        <tr>
-                                            <td><strong>{{ $point }}</strong></td>
-                                            <td>{{ number_format($data['target']) }}</td>
-                                            <td>{{ number_format($data['achieved']) }}</td>
-                                            <td>
-                                                <div class="progress progress-sm">
-                                                    <div class="progress-bar bg-{{ $statusClass }}" 
-                                                        style="width: {{ min($data['percentage'], 100) }}%">
-                                                    </div>
+                                    @php
+                                    $data = $summaryData[$point] ?? ['target' => 0, 'achieved' => 0, 'percentage' => 0, 'variance' => 0];
+                                    $statusClass = $data['percentage'] >= 100 ? 'success' :
+                                    ($data['percentage'] >= 80 ? 'warning' : 'danger');
+                                    @endphp
+                                    <tr>
+                                        <td><strong>{{ $point }}</strong></td>
+                                        <td>{{ number_format($data['target']) }}</td>
+                                        <td>{{ number_format($data['achieved']) }}</td>
+                                        <td>
+                                            <div class="progress progress-sm">
+                                                <div class="progress-bar bg-{{ $statusClass }}"
+                                                    style="width: {{ min($data['percentage'], 100) }}%">
                                                 </div>
-                                                <span class="badge bg-{{ $statusClass }}">
-                                                    {{ $data['percentage'] }}%
-                                                </span>
-                                            </td>
-                                            <td class="{{ $data['variance'] >= 0 ? 'text-success' : 'text-danger' }}">
-                                                {{ $data['variance'] >= 0 ? '+' : '' }}{{ number_format($data['variance']) }}
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-{{ $statusClass }}">
-                                                    @if($data['percentage'] >= 100)
-                                                        Exceeded
-                                                    @elseif($data['percentage'] >= 80)
-                                                        On Track
-                                                    @else
-                                                        Behind
-                                                    @endif
-                                                </span>
-                                            </td>
-                                        </tr>
+                                            </div>
+                                            <span class="badge bg-{{ $statusClass }}">
+                                                {{ $data['percentage'] }}%
+                                            </span>
+                                        </td>
+                                        <td class="{{ $data['variance'] >= 0 ? 'text-success' : 'text-danger' }}">
+                                            {{ $data['variance'] >= 0 ? '+' : '' }}{{ number_format($data['variance']) }}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ $statusClass }}">
+                                                @if($data['percentage'] >= 100)
+                                                Exceeded
+                                                @elseif($data['percentage'] >= 80)
+                                                On Track
+                                                @else
+                                                Behind
+                                                @endif
+                                            </span>
+                                        </td>
+                                    </tr>
                                     @endforeach
                                 </tbody>
                             </table>
                         </div>
+
                         @if($userType == 'admin' || $userType == 'team_manager')
                         <div class="mt-3">
                             <button id="btnExport" class="btn btn-success">
@@ -224,8 +236,8 @@
                         @endif
                     </div>
                     @if($userType != 'admin' && $userType != 'team_manager')
-                        @include('partial.schedule')
-                        @include('partial.task-details')
+                    @include('partial.schedule')
+                    @include('partial.task-details')
                     @endif
                 </div>
             </div>
@@ -234,8 +246,7 @@
 </div>
 
 <script>
-    document.getElementById('btnExport').addEventListener('click', function() 
-    {
+    document.getElementById('btnExport').addEventListener('click', function() {
         const btn = this;
         const text = document.getElementById('ExportText');
         const spinner = document.getElementById('ExportSpinner');
@@ -245,8 +256,7 @@
 
         setTimeout(() => {
             const table = document.querySelector('#table');
-            if (!table) 
-            {
+            if (!table) {
                 toastr.error('Table not found!');
                 btn.disabled = false;
                 text.classList.remove('d-none');
@@ -268,7 +278,9 @@
             });
 
             const csvString = csv.join('\n');
-            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            const blob = new Blob([csvString], {
+                type: 'text/csv;charset=utf-8;'
+            });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -284,8 +296,7 @@
         }, 200);
     });
 
-    $('#SubmitBtn').closest('form').on('submit', function() 
-    {
+    $('#SubmitBtn').closest('form').on('submit', function() {
         $('#SubmitBtn').prop('disabled', true);
         $('#SubmitText').addClass('d-none');
         $('#SubmitSpinner').removeClass('d-none');

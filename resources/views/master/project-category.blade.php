@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
-@section('title', session('software_type') === 'lead_management' ? 'Product Category | Pro-leadexpertz' : 'Project Category | Pro-leadexpertz')
+@section('title', session('software_type') === 'lead_management' 
+? 'Product Category | Pro-leadexpertz' : 'Project Category | Pro-leadexpertz')
 
 @section('content')
 <div class="page-content">
@@ -31,7 +32,6 @@
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h4 class="card-title mb-0">Category</h4>
                         </div>
-
 
                         <!-- Length Dropdown -->
                         <div class="mb-0">

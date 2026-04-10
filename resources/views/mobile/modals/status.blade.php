@@ -90,8 +90,8 @@ use Illuminate\Support\Facades\DB;
             <div id="reminderFields">
                 <div class="form-grsoup">
                     <label for="remindDate">Reminder Date:</label>
-                    <!-- <input type="date" name="remindDate" id="remindDate" class="form-control"> -->
-                    <input type="date" name="remindDate" id="remindDate" class="form-control" max="{{ date('Y-m-d') }}">
+                    <input type="date" name="remindDate" id="remindDate" class="form-control">
+                    <!-- <input type="date" name="remindDate" id="remindDate" class="form-control" max="{{ date('Y-m-d') }}"> -->
                 </div>
                 <div class="form-group">
                     <label for="remindTime">Reminder Time:</label>
@@ -175,6 +175,7 @@ use Illuminate\Support\Facades\DB;
     </div>
 </div>
 
+
 <script>
     // $(document).ready(function() {
 
@@ -200,27 +201,32 @@ use Illuminate\Support\Facades\DB;
     //     });
 
     // });
+
     $(document).ready(function() {
 
         $('#statusSelect').on('change', function() {
 
-            let status = $(this).val();
-            let dateInput = document.getElementById("remindDate");
-
+            let status = $('#statusSelect').val();
+            let dateInput = $('#remindDate');
             let today = new Date().toISOString().split("T")[0];
 
-            // reset value
-            dateInput.value = "";
+            // clear old value
+            dateInput.val('');
 
             if (status === "VISIT DONE") {
-                // HARD LOCK: no future
-                dateInput.max = today;
-                dateInput.min = "";
+
+                // ✅ restrict future
+                dateInput.attr('max', today);
+                dateInput.removeAttr('min');
+
             } else {
-                // allow future
-                dateInput.min = today;
-                dateInput.max = "";
+
+                // ✅ allow everything
+                dateInput.removeAttr('max');
+                dateInput.removeAttr('min');
+
             }
+
         });
 
     });

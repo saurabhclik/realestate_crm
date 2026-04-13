@@ -544,6 +544,15 @@
       font-size: 0.95rem;
       line-height: 1.4;
     }
+    .lead-summary-cards {
+      margin: 20px 0 10px;
+    }
+    .lead-summary-cards {
+      display: grid;
+      margin: 1rem 0.5rem 3rem;
+      padding: 0 0.5rem;
+    }
+    
   </style>
   <body>
     <div id="page-loader" style="

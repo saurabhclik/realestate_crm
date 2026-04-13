@@ -109,10 +109,6 @@
                                         </td>
                                     </tr>
                                     @endforeach
-                                    @else
-                                    <tr>
-                                        <td colspan="4" class="text-center">No categories found.</td>
-                                    </tr>
                                     @endif
                                 </tbody>
                             </table>

@@ -71,6 +71,7 @@
                                         <th>Location</th>
                                         <th>Budget</th>
                                         <th>Status</th>
+                                        <th>Matching Leads</th>
                                         <th>Images</th>
                                         @endif
                                     </tr>
@@ -137,6 +138,13 @@
                                             @else
                                             -
                                             @endif
+                                        </td>
+                                        <td>
+                                            <a href="{{ url('lead/all-lead?type='.$property->property_type) }}">
+                                                <span class="badge bg-info" style="cursor:pointer;">
+                                                    {{ $property->leads_count ?? 0 }}
+                                                </span>
+                                            </a>
                                         </td>
                                         <td>
                                             @if($property->gallery_images)

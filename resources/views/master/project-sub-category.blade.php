@@ -80,10 +80,6 @@
                                         </td>
                                     </tr>
                                     @endforeach
-                                    @else
-                                    <tr>
-                                        <td colspan="4" class="text-center">No project-sub-categories found.</td>
-                                    </tr>
                                     @endif
                                 </tbody>
                             </table>

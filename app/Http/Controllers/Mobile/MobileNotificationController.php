@@ -14,7 +14,7 @@ class MobileNotificationController extends Controller
     {
         $childIds = Session::get('child_ids', '');
         $childIdsArray = $childIds ? array_map('trim', explode(',', $childIds)) : [];
-
+        $selectedStatus = $request->get('status', 'today');
         if (empty($childIdsArray)) 
         {
             if ($request->ajax()) 
@@ -31,44 +31,51 @@ class MobileNotificationController extends Controller
                 'initialNotifications' => [],
                 'hasMoreInitial' => false,
                 'totalCount' => 0,
-                'selectedStatus' => $request->get('status', 'all')
+                'selectedStatus' => 'today'
             ]);
         }
 
-        $allowedStatuses = ['CALL SCHEDULED', 'VISIT SCHEDULED', 'INTERESTED', 'MEETING SCHEDULED'];
-        $selectedStatus = $request->get('status', 'all');
-
-        $query = DB::table('leads')
-            ->select('id', 'name', 'phone', 'status', 'last_comment', 'lead_date', 'created_at')
-            ->whereIn('user_id', $childIdsArray)
-            ->orderBy('created_at', 'desc');
         $today = Carbon::today()->toDateString();
         $tomorrow = Carbon::tomorrow()->toDateString();
 
+        $query = DB::table('leads')
+            ->select(
+                'id',
+                'name',
+                'phone',
+                'status',
+                'last_comment',
+                'remind_date',
+                'remind_time',
+                'created_at'
+            )
+            ->whereIn('user_id', $childIdsArray)
+            ->orderBy('remind_date', 'asc')
+            ->orderBy('remind_time', 'asc');
         if ($selectedStatus === 'today') 
         {
-            $query->whereDate('lead_date', $today);
+            $query->whereDate('remind_date', $today);
         } 
-        elseif ($selectedStatus === 'tomorrow') {
-            $query->whereDate('lead_date', $tomorrow);
+        elseif ($selectedStatus === 'tomorrow') 
+        {
+            $query->whereDate('remind_date', $tomorrow);
         } 
         elseif ($selectedStatus === 'missed') 
         {
-            $query->whereDate('lead_date', '<', $today)
-                ->whereIn('status', $allowedStatuses);
+            $query->whereDate('remind_date', '<', $today)
+                  ->whereIn('status', [
+                      'CALL SCHEDULED',
+                      'VISIT SCHEDULED',
+                      'INTERESTED',
+                      'MEETING SCHEDULED'
+                  ]);
         } 
         elseif ($selectedStatus !== 'all') 
         {
             $query->where('status', $selectedStatus);
-        } 
-        else 
-        {
-            $query->whereIn('status', $allowedStatuses);
         }
-
         $perPage = $request->get('per_page', 10);
         $notifications = $query->paginate($perPage);
-
         if ($request->ajax()) 
         {
             return response()->json([
@@ -78,7 +85,6 @@ class MobileNotificationController extends Controller
                 'totalCount' => $notifications->total(),
             ]);
         }
-        
         return view('mobile.notification', [
             'initialNotifications' => $notifications->items(),
             'hasMoreInitial' => $notifications->hasMorePages(),

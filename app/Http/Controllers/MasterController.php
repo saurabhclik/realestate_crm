@@ -1223,6 +1223,54 @@ class MasterController extends Controller
         }
     }
 
+    // public function property_name(Request $request)
+    // {
+    //     try {
+    //         $length = $request->query('length', 10);
+    //         $sortColumn = $request->query('sort', 'id');
+    //         $sortDirection = $request->query('direction', 'desc');
+    //         $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'desc';
+    //         $allowedColumns = ['id', 'property_category', 'created_at'];
+    //         $sortColumn = in_array($sortColumn, $allowedColumns) ? $sortColumn : 'id';
+
+
+    //         $properties = DB::table("properties")
+    //             ->orderBy($sortColumn, $sortDirection)
+    //             ->paginate((int)$length)
+    //             ->appends([
+    //                 'sort' => $sortColumn,
+    //                 'direction' => $sortDirection,
+    //                 'length' => $length
+    //             ]);
+
+    //         foreach ($properties as $property) {
+    //             if ($property->property_category) {
+    //                 $category = DB::table('inv_catg')
+    //                     ->where('name', $property->property_category)
+    //                     ->first();
+    //                 $property->category_id = $category->id ?? null;
+    //             } else {
+    //                 $property->category_id = null;
+    //             }
+    //         }
+
+    //         $categoryList = DB::table('category')->select('id', 'name')->get();
+    //         $invCatg = DB::table('inv_catg')->select('id', 'type', 'name')->get();
+
+    //         return view('master.property', compact(
+    //             'properties',
+    //             'categoryList',
+    //             'invCatg',
+    //             'length',
+    //             'sortColumn',
+    //             'sortDirection'
+    //         ));
+    //     } catch (\Exception $e) {
+    //         Flasher::addError('Failed to load properties: ' . $e->getMessage());
+    //         return back();
+    //     }
+    // }
+
     public function property_name(Request $request)
     {
         try {
@@ -1230,11 +1278,18 @@ class MasterController extends Controller
             $sortColumn = $request->query('sort', 'id');
             $sortDirection = $request->query('direction', 'desc');
             $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'desc';
+
             $allowedColumns = ['id', 'property_category', 'created_at'];
             $sortColumn = in_array($sortColumn, $allowedColumns) ? $sortColumn : 'id';
 
-
-            $properties = DB::table("properties")
+            // ✅ ONLY TYPE MATCH (FAST + SAFE)
+            $properties = DB::table("properties as p")
+                ->select('p.*')
+                ->selectSub(function ($query) {
+                    $query->from('leads as l')
+                        ->selectRaw('COUNT(*)')
+                        ->whereColumn('l.type', 'p.property_type');
+                }, 'leads_count')
                 ->orderBy($sortColumn, $sortDirection)
                 ->paginate((int)$length)
                 ->appends([
@@ -1243,15 +1298,12 @@ class MasterController extends Controller
                     'length' => $length
                 ]);
 
+            // ✅ CATEGORY MAP (optimized)
+            $categoryMap = DB::table('inv_catg')
+                ->pluck('id', 'name');
+
             foreach ($properties as $property) {
-                if ($property->property_category) {
-                    $category = DB::table('inv_catg')
-                        ->where('name', $property->property_category)
-                        ->first();
-                    $property->category_id = $category->id ?? null;
-                } else {
-                    $property->category_id = null;
-                }
+                $property->category_id = $categoryMap[$property->property_category] ?? null;
             }
 
             $categoryList = DB::table('category')->select('id', 'name')->get();
@@ -1266,11 +1318,9 @@ class MasterController extends Controller
                 'sortDirection'
             ));
         } catch (\Exception $e) {
-            Flasher::addError('Failed to load properties: ' . $e->getMessage());
-            return back();
+           // dd($e->getMessage());
         }
     }
-
 
     public function store_property(Request $request)
     {

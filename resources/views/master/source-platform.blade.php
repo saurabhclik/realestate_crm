@@ -68,10 +68,6 @@
                                         </td>
                                     </tr>
                                     @endforeach
-                                    @else
-                                    <tr>
-                                        <td colspan="4" class="text-center">No sources found.</td>
-                                    </tr>
                                     @endif
                                 </tbody>
                             </table>

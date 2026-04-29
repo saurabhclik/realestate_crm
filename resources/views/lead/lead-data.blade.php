@@ -396,24 +396,24 @@ $isSalesman = ($userType == 'salesman');
                             <tbody>
                                 @foreach($leads as $row)
                                 @php
-                                    $createdDate = \Carbon\Carbon::parse($row->created_at);
-                                    $currentDate = \Carbon\Carbon::now();
-                                    $diff_date_count = $createdDate->diffInDays($currentDate);
-                                    $excludedLeadNames = [
-                                        'completed',
-                                        'cancelled',
-                                        'not_picked',
-                                        'not_interested',
-                                        'lost',
-                                        'wrong_number',
-                                        'transfer',
-                                        'not_reachable'
-                                    ];
-                                    $phone = preg_replace('/\D/', '', $row->phone);
-                                    if (substr($phone, 0, 2) == '91') 
-                                    {
-                                        $phone = substr($phone, 2);
-                                    }
+                                $createdDate = \Carbon\Carbon::parse($row->created_at);
+                                $currentDate = \Carbon\Carbon::now();
+                                $diff_date_count = $createdDate->diffInDays($currentDate);
+                                $excludedLeadNames = [
+                                'completed',
+                                'cancelled',
+                                'not_picked',
+                                'not_interested',
+                                'lost',
+                                'wrong_number',
+                                'transfer',
+                                'not_reachable'
+                                ];
+                                $phone = preg_replace('/\D/', '', $row->phone);
+                                if (substr($phone, 0, 2) == '91')
+                                {
+                                $phone = substr($phone, 2);
+                                }
                                 @endphp
                                 <tr>
                                     @if($lead_name == 'allocate' || $lead_name == 'transfer')
@@ -473,7 +473,7 @@ $isSalesman = ($userType == 'salesman');
                                             </span>
                                             @endif
                                             <span class="fw-semibold">{{ $row->id }}</span>
-                                        </div>   
+                                        </div>
                                     <td>
                                         <div class="d-flex flex-column">
                                             <div class="d-flex align-items-center mb-1">
@@ -652,7 +652,17 @@ $isSalesman = ($userType == 'salesman');
                                             </div>
                                             <div class="flex-grow-1">
                                                 @php
-                                                $comment = strip_tags($row->last_comment ?? '');
+                                                $userType = session('user_type');
+
+                                                $comment = strtolower(trim(strip_tags($row->last_comment ?? '')));
+
+                                             
+                                                if ($userType === 'salesman') {
+                                                if (str_contains($comment, 'transfer') || str_contains($comment, 'allocated')) {
+                                                $comment = '';
+                                                }
+                                                }
+
                                                 $short = \Illuminate\Support\Str::limit($comment, 30);
                                                 @endphp
                                                 <span class="d-block" data-bs-toggle="tooltip" title="{{ $comment }}">
@@ -1420,29 +1430,22 @@ $isSalesman = ($userType == 'salesman');
                         toastr.error('Invalid response format');
                     }
                     toastr.success('WhatsApp link generated successfully!');
-                } 
-                else 
-                {
+                } else {
                     toastr.error(response.message || 'Failed to generate WhatsApp link');
                 }
             },
-            error: function(xhr) 
-            {
+            error: function(xhr) {
                 let errorMessage = 'Error generating WhatsApp link';
-                if (xhr.status === 419) 
-                {
+                if (xhr.status === 419) {
                     errorMessage = 'Session expired. Please refresh the page and try again.';
-                } 
-                else if (xhr.responseJSON?.message) 
-                {
+                } else if (xhr.responseJSON?.message) {
                     errorMessage = xhr.responseJSON.message;
                 }
 
                 toastr.error(errorMessage);
                 console.error('AJAX Error:', xhr.responseText);
             },
-            complete: function() 
-            {
+            complete: function() {
                 button.prop('disabled', false);
                 button.html('<i class="bi bi-whatsapp"></i> Share');
             }

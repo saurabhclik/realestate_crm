@@ -325,7 +325,7 @@
                     type: "GET",
                     success: function(res) 
                     {
-                        $('#attendanceToggle').prop('checked', res.action === 'start');
+                        $('#attendanceToggle').prop('checked', res.has_active || res.active || res.action === 'start');
                         hideLoader();
                     },
                     error: function() 

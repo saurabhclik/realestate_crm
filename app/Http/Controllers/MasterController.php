@@ -55,7 +55,6 @@ class MasterController extends Controller
     public function project_name(Request $request)
     {
         try {
-            // Add these (same as campaign)
             $length = $request->query('length', 10);
             $sortColumn = $request->query('sort', 'id');
             $sortDirection = $request->query('direction', 'desc');
@@ -935,6 +934,7 @@ class MasterController extends Controller
                 'magicbricks' => 'MagicBricks',
                 '99acres' => '99acres',
                 'firebase' => 'Firebase Cloud Messaging',
+                'whatsapp' => 'Whatsapp',
                 'other' => 'Other'
             ];
 
@@ -1273,7 +1273,8 @@ class MasterController extends Controller
 
     public function property_name(Request $request)
     {
-        try {
+        try 
+        {
             $length = $request->query('length', 10);
             $sortColumn = $request->query('sort', 'id');
             $sortDirection = $request->query('direction', 'desc');
@@ -1281,11 +1282,10 @@ class MasterController extends Controller
 
             $allowedColumns = ['id', 'property_category', 'created_at'];
             $sortColumn = in_array($sortColumn, $allowedColumns) ? $sortColumn : 'id';
-
-            // ✅ ONLY TYPE MATCH (FAST + SAFE)
             $properties = DB::table("properties as p")
                 ->select('p.*')
-                ->selectSub(function ($query) {
+                ->selectSub(function ($query) 
+                {
                     $query->from('leads as l')
                         ->selectRaw('COUNT(*)')
                         ->whereColumn('l.type', 'p.property_type');
@@ -1297,18 +1297,16 @@ class MasterController extends Controller
                     'direction' => $sortDirection,
                     'length' => $length
                 ]);
-
-            // ✅ CATEGORY MAP (optimized)
             $categoryMap = DB::table('inv_catg')
                 ->pluck('id', 'name');
 
-            foreach ($properties as $property) {
+            foreach ($properties as $property) 
+            {
                 $property->category_id = $categoryMap[$property->property_category] ?? null;
             }
 
             $categoryList = DB::table('category')->select('id', 'name')->get();
             $invCatg = DB::table('inv_catg')->select('id', 'type', 'name')->get();
-
             return view('master.property', compact(
                 'properties',
                 'categoryList',
@@ -1317,8 +1315,10 @@ class MasterController extends Controller
                 'sortColumn',
                 'sortDirection'
             ));
-        } catch (\Exception $e) {
-           // dd($e->getMessage());
+        } 
+        catch (\Exception $e) 
+        {
+        //    dd($e->getMessage(), $e->getFile(), $e->getLine());
         }
     }
 

@@ -19,81 +19,59 @@ class EmailService
 
     public function __construct()
     {
-        $this->smtpConfig = [
-            'host'       => 'smtp.gmail.com',
-            'port'       => 587,
-            'encryption' => 'tls',
-            'username'   => '',
-            'password'   => '',
-            'from' => [
-                'address' => '',
-                'name'    => ''
-            ]
-        ];
+        $settings = DB::table('integration_settings')
+            ->where('integration_type', 'gmail')
+            ->where('status', 'active')
+            ->first();
+
+        if ($settings && !empty($settings->settings)) 
+        {
+            $config = json_decode($settings->settings, true);
+
+            $this->smtpConfig = [
+                'host'       => $config['mail_host'] ?? 'smtp.gmail.com',
+                'port'       => $config['mail_port'] ?? 587,
+                'encryption' => $config['mail_encryption'] ?? 'tls',
+                'username'   => $config['mail_username'] ?? null,
+                'password'   => $config['mail_password'] ?? null,
+                'from' => [
+                    'address' => $config['mail_from_address'] ?? null,
+                    'name'    => $config['mail_from_name'] ?? null
+                ]
+            ];
+        } 
+        else 
+        {
+            $this->smtpConfig = [
+                'host'       => 'smtp.gmail.com',
+                'port'       => 587,
+                'encryption' => 'tls',
+                'username'   => null,
+                'password'   => null,
+                'from' => [
+                    'address' => null,
+                    'name'    => null
+                ]
+            ];
+        }
 
         $this->fromEmail = $this->smtpConfig['from']['address'];
-        $this->fromName = $this->smtpConfig['from']['name'];
+        $this->fromName  = $this->smtpConfig['from']['name'];
         $this->configureSmtp();
     }
 
+
     private function configureSmtp()
     {
-        try 
-        {
-            Config::set('mail.default', 'smtp');
-            $config = [
-                'transport' => 'smtp',
-                'host' => $this->smtpConfig['host'],
-                'port' => $this->smtpConfig['port'],
-                'encryption' => $this->smtpConfig['encryption'],
-                'username' => $this->smtpConfig['username'],
-                'password' => $this->smtpConfig['password'],
-                'timeout' => 30,
-                'auth_mode' => null,
-                'stream' => [
-                    'ssl' => [
-                        'allow_self_signed' => true,
-                        'verify_peer' => false,
-                        'verify_peer_name' => false,
-                    ],
-                ],
-            ];
-
-            if ($this->smtpConfig['port'] == 465 && $this->smtpConfig['encryption'] == 'ssl') 
-            {
-                $config['encryption'] = 'ssl';
-            } 
-            elseif ($this->smtpConfig['port'] == 587) 
-            {
-                $config['encryption'] = 'tls';
-            }
-
-            Config::set('mail.mailers.smtp', $config);
-
-            Config::set('mail.from', [
-                'address' => $this->fromEmail,
-                'name' => $this->fromName,
-            ]);
-
-            Log::info('SMTP Configuration Applied', [
-                'host' => $this->smtpConfig['host'],
-                'port' => $this->smtpConfig['port'],
-                'username' => $this->smtpConfig['username'],
-                'encryption' => $config['encryption']
-            ]);
-
-        } 
-        catch (\Exception $e) 
-        {
-            Log::error('SMTP Configuration Failed', [
-                'error' => $e->getMessage(),
-                'config' => [
-                    'host' => $this->smtpConfig['host'],
-                    'port' => $this->smtpConfig['port'],
-                    'username' => $this->smtpConfig['username']
-                ]
-            ]);
-        }
+        config([
+            'mail.mailers.smtp.host' => $this->smtpConfig['host'],
+            'mail.mailers.smtp.port' => $this->smtpConfig['port'],
+            'mail.mailers.smtp.encryption' => $this->smtpConfig['encryption'],
+            'mail.mailers.smtp.username' => $this->smtpConfig['username'],
+            'mail.mailers.smtp.password' => $this->smtpConfig['password'],
+            'mail.from.address' => $this->fromEmail,
+            'mail.from.name' => $this->fromName,
+        ]);
     }
 
     private function validateEmail($email)
@@ -308,10 +286,10 @@ class EmailService
         $defaultVariables = [
             'current_date' => now()->format('d F Y'),
             'current_time' => now()->format('h:i A'),
-            'company_name' => 'Shree Krishna Rice Mill',
-            'support_phone' => '9105665302',
-            'support_email' => 'accounts@shreekrishnarice.com',
-            'website' => 'https://shreekrishnarice.com',
+            'company_name' => '',
+            'support_phone' => '',
+            'support_email' => '',
+            'website' => '',
             'year' => now()->format('Y'),
         ];
 

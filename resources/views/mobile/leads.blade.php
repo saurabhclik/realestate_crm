@@ -511,6 +511,8 @@
         function renderLeads(leads) 
         {
             leads.forEach(lead => {
+
+                const phone = normalizePhone(lead.phone);
                 const leadHtml = `
                     <div class="lead-card mobile-card mt-3">
                         <div class="select-checkbox">
@@ -524,10 +526,10 @@
                                 <span class="lead-time">${lead.lead_date ? formatDate(lead.lead_date) : '---'}</span>
                             </div>
                             <div class="lead-actions">
-                                <a href="tel:${lead.phone || ''}" class="action-btn phone" target="_blank" rel="noopener noreferrer">
+                                <a href="tel:${phone || ''}" class="action-btn phone" target="_blank" rel="noopener noreferrer">
                                     <i class="fas fa-phone text-light cust-size pt-2"></i>
                                 </a>
-                                <a href="https://wa.me/${lead.phone || ''}" class="action-btn whatsapp" target="_blank" rel="noopener noreferrer">
+                                <a href="https://wa.me/${phone || ''}" class="action-btn whatsapp" target="_blank" rel="noopener noreferrer">
                                     <i class="fa-brands fa-whatsapp text-light cust-size pt-2"></i>
                                 </a>
                                 <a class="action-btn edit-btn" data-lead-id="${lead.id}">
@@ -601,6 +603,17 @@
             });
 
             addEventListeners();
+        }
+
+        function normalizePhone(phone) 
+        {
+            if (!phone) return '';
+            phone = phone.toString().replace(/\D/g, '');
+            if (phone.startsWith('91') && phone.length > 10) 
+            {
+                phone = phone.substring(2);
+            }
+            return phone;
         }
 
         function addEventListeners() 

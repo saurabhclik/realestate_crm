@@ -58,7 +58,7 @@
                 <div class="filter-section">
                     <form action="{{ route('lead.transfer') }}" method="GET">
                         <div class="row">
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <label for="user">Select User</label>
                                 <select name="user" id="user" class="form-select select2" required>
                                     <option value="">Select User</option>
@@ -70,7 +70,7 @@
                                 </select>
                             </div>
                             
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <label for="status">Select Status</label>
                                <select name="status" id="status" class="form-select select2" required>
                                     <option value="">Select Status</option>
@@ -93,10 +93,22 @@
                                 <input type="date" name="to_date" id="to_date" 
                                     value="{{ $to_date }}" class="form-control">
                             </div>
+
+                            <div class="col-md-2">
+                                <label for="length">Show</label>
+                                <select name="length" id="length" class="form-select">
+                                    <option value="20" {{ request('length', 20) == '20' ? 'selected' : '' }}>20</option>
+                                    <option value="50" {{ request('length') == '50' ? 'selected' : '' }}>50</option>
+                                    <option value="100" {{ request('length') == '100' ? 'selected' : '' }}>100</option>
+                                    <option value="500" {{ request('length') == '500' ? 'selected' : '' }}>500</option>
+                                    <option value="all" {{ request('length') == 'all' ? 'selected' : '' }}>All</option>
+                                </select>
+                            </div>
+    
                             
                             <div class="col-md-1 d-flex align-items-end">
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-filter me-1"></i> Filter
+                                    <i class="fas fa-filter me-1"></i>
                                 </button>
                             </div>
                             
@@ -129,6 +141,19 @@
                                         <option value="{{ $user->id }}">{{ $user->name }}</option>
                                     @endforeach
                                 </select>
+                            </div>
+
+                            <div class="col-md-2 d-flex align-items-end">
+                                <div class="form-check mt-4">
+                                    <input type="checkbox" class="form-check-input" 
+                                        name="not_picked" 
+                                        id="not-picked"
+                                        value="NOT PICKED"
+                                        {{ request('NOT PICKED') ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="include_not_picked">
+                                        Not Picked
+                                    </label>
+                                </div>
                             </div>
 
                             <div class="col-md-2 d-flex align-items-end">

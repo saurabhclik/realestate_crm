@@ -289,7 +289,6 @@ $isSalesman = ($userType == 'salesman');
                         </h4>
                         <span class="cust-badge text-dark bg-soft-primary ms-2">{{ $leads->total() }} Leads</span>
                     </div>
-                    @if($lead_name == 'all_lead')
                     <div class="d-flex gap-2">
                         <button id="btnExportExcel" class="shadow btn btn-success btn-sm d-flex align-items-center" data-bs-toggle="tooltip" data-bs-placement="top" title="Export table data to Excel">
                             <i class="fas fa-file-excel me-2"></i> Excel
@@ -302,7 +301,6 @@ $isSalesman = ($userType == 'salesman');
                             <i class="fas fa-sliders-h"></i>
                         </button>
                     </div>
-                    @endif
                 </div>
             </div>
             @include('partial.lead-filter')
@@ -367,7 +365,8 @@ $isSalesman = ($userType == 'salesman');
                                     @endif
                                     <th>#</th>
                                     <th>Lead ID</th>
-                                    <th>Lead Details</th>
+                                    <th>Name</th>
+                                    <th>Phone</th>
                                     @if($lead_name != 'allocate')
                                     <th>Agent</th>
                                     @endif
@@ -397,19 +396,24 @@ $isSalesman = ($userType == 'salesman');
                             <tbody>
                                 @foreach($leads as $row)
                                 @php
-                                $createdDate = \Carbon\Carbon::parse($row->created_at);
-                                $currentDate = \Carbon\Carbon::now();
-                                $diff_date_count = $createdDate->diffInDays($currentDate);
-                                $excludedLeadNames = [
-                                'completed',
-                                'cancelled',
-                                'not_picked',
-                                'not_interested',
-                                'lost',
-                                'wrong_number',
-                                'transfer',
-                                'not_reachable'
-                                ];
+                                    $createdDate = \Carbon\Carbon::parse($row->created_at);
+                                    $currentDate = \Carbon\Carbon::now();
+                                    $diff_date_count = $createdDate->diffInDays($currentDate);
+                                    $excludedLeadNames = [
+                                        'completed',
+                                        'cancelled',
+                                        'not_picked',
+                                        'not_interested',
+                                        'lost',
+                                        'wrong_number',
+                                        'transfer',
+                                        'not_reachable'
+                                    ];
+                                    $phone = preg_replace('/\D/', '', $row->phone);
+                                    if (substr($phone, 0, 2) == '91') 
+                                    {
+                                        $phone = substr($phone, 2);
+                                    }
                                 @endphp
                                 <tr>
                                     @if($lead_name == 'allocate' || $lead_name == 'transfer')
@@ -461,9 +465,9 @@ $isSalesman = ($userType == 'salesman');
                                                 data-bs-toggle="tooltip"
                                                 data-bs-html="true"
                                                 title="
-                                                            @foreach($row->duplicate_details as $dup)
-                                                                Status: {{ $dup->status }}, Created: {{ \Carbon\Carbon::parse($dup->created_at)->format('d M Y H:i') }}<br>
-                                                            @endforeach
+                                                    @foreach($row->duplicate_details as $dup)
+                                                        Status: {{ $dup->status }}, Created: {{ \Carbon\Carbon::parse($dup->created_at)->format('d M Y H:i') }}<br>
+                                                    @endforeach
                                                         ">
                                                 👬🏼 {{ $row->duplicate_count }}
                                             </span>
@@ -478,12 +482,12 @@ $isSalesman = ($userType == 'salesman');
                                                 </div>
                                             </div>
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <span class="text-muted small">{{ $row->phone }}</span>
+                                                <!-- <span class="text-muted small">{{ $phone }}</span> -->
                                                 <div class="d-flex">
-                                                    <a href="tel:{{ $row->phone }}" class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip" title="Call">
+                                                    <a href="tel:{{ $phone }}" class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip" title="Call">
                                                         <i class="fas fa-phone text-primary"></i>
                                                     </a>
-                                                    <a href="https://wa.me/91{{ $row->phone }}" target="_blank" class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip" title="WhatsApp">
+                                                    <a href="https://wa.me/91{{ $phone }}" target="_blank" class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip" title="WhatsApp">
                                                         <i class="fab fa-whatsapp text-success"></i>
                                                     </a>
                                                     <!-- <a href="{{ route('lead.edit', $row->id) }}" class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip" title="Edit">
@@ -527,7 +531,7 @@ $isSalesman = ($userType == 'salesman');
                                                     @endif
                                                     <button class="btn btn-xs btn-soft-light matching-projects-btn"
                                                         data-lead-id="{{ $row->id }}"
-                                                        data-lead-phone="{{ $row->phone }}"
+                                                        data-lead-phone="{{ $phone }}"
                                                         title="Matching Projects">
                                                         <i class="fas fa-building text-info"></i>
                                                     </button>
@@ -542,6 +546,7 @@ $isSalesman = ($userType == 'salesman');
                                             </div>
                                         </div>
                                     </td>
+                                    <td>{{$row->phone}}</td>
                                     @if($lead_name != 'allocate')
                                     <td>
                                         <div class="d-flex align-items-center">

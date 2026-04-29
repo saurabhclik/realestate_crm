@@ -469,15 +469,22 @@ class StaffManagementController extends Controller
         if ($user_role !== 'admin') {
             abort(404);
         }
-    
+
         $length = $request->query('length', 10);
+        $search = $request->query('search');
         $designations = DB::table('designation')
+            ->when($search, function ($query, $search) {
+                $query->where('designation', 'LIKE', '%' . $search . '%');
+            })
             ->paginate($length)
-            ->appends(['length' => $length]);
+            ->appends([
+                'search' => $search,
+                'length' => $length
+            ]);
 
         return view('staff-management.designation-list', compact(
             'designations',
-            'length' 
+            'length'
         ));
     }
 
@@ -716,13 +723,32 @@ class StaffManagementController extends Controller
         }
     }
 
+    // public function category_list(Request $request)
+    // {
+
+    //     $length = $request->query('length', 10);
+
+    //     $categories = DB::table('category')
+    //         ->paginate((int)$length)
+    //         ->appends([
+    //             'length' => $length
+    //         ]);
+
+    //     return view('master.category', compact('categories', 'length'));
+    // }
+
     public function category_list(Request $request)
     {
         $length = $request->query('length', 10);
+        $search = $request->query('search');
 
         $categories = DB::table('category')
+            ->when($search, function ($query, $search) {
+                $query->where('name', 'LIKE', '%' . $search . '%');
+            })
             ->paginate((int)$length)
             ->appends([
+                'search' => $search,
                 'length' => $length
             ]);
 

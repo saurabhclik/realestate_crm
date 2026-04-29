@@ -56,6 +56,7 @@ class MasterController extends Controller
     {
         try {
             $length = $request->query('length', 10);
+            $search = $request->query('search');
             $sortColumn = $request->query('sort', 'id');
             $sortDirection = $request->query('direction', 'desc');
             $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'desc';
@@ -63,9 +64,13 @@ class MasterController extends Controller
             $sortColumn = in_array($sortColumn, $allowedColumns) ? $sortColumn : 'id';
 
             $projects = DB::table("projects")
+                ->when($search, function ($query, $search) {
+                    $query->where('project_name', 'LIKE', '%' . $search . '%');
+                })
                 ->orderBy($sortColumn, $sortDirection)
                 ->paginate((int)$length)
                 ->appends([
+                    'search' => $search,
                     'sort' => $sortColumn,
                     'direction' => $sortDirection,
                     'length' => $length
@@ -167,6 +172,7 @@ class MasterController extends Controller
         try {
 
             $length = $request->query('length', 10);
+            $search = $request->query('search');
             $sortColumn = $request->query('sort', 'id');
             $sortDirection = $request->query('direction', 'desc');
             $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'desc';
@@ -174,12 +180,16 @@ class MasterController extends Controller
             $sortColumn = in_array($sortColumn, $allowedColumns) ? $sortColumn : 'id';
 
             $campaigns = DB::table('campaigns')
+                ->when($search, function ($query, $search) {
+                    $query->where('name', 'LIKE', '%' . $search . '%');
+                })
                 ->orderBy($sortColumn, $sortDirection)
                 ->paginate((int)$length)
                 ->appends([
                     'sort' => $sortColumn,
                     'direction' => $sortDirection,
-                    'length' => $length
+                    'length' => $length,
+                    'search' => $search
                 ]);
 
             $categoryList = DB::table('category')->select('id', 'name')->get();
@@ -278,6 +288,7 @@ class MasterController extends Controller
         try {
             //  Pagination + Sorting params
             $length = $request->query('length', 10);
+            $search = $request->query('search');
             $sortColumn = $request->query('sort', 'id');
             $sortDirection = $request->query('direction', 'asc');
             $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'asc';
@@ -287,12 +298,16 @@ class MasterController extends Controller
 
             //  Main query
             $sources = DB::table('sources')
+                ->when($search, function ($query, $search) {
+                    $query->where('name', 'LIKE', '%' . $search . '%');
+                })
                 ->orderBy($sortColumn, $sortDirection)
                 ->paginate((int)$length)
                 ->appends([
                     'sort' => $sortColumn,
                     'direction' => $sortDirection,
-                    'length' => $length
+                    'length' => $length,
+                    'search' => $search
                 ]);
 
             $categoryList = DB::table('category')->select('id', 'name')->get();
@@ -434,6 +449,7 @@ class MasterController extends Controller
             try {
                 // Params
                 $length = $request->query('length', 10);
+                $search = $request->query('search');
                 $sortColumn = $request->query('sort', 'id');
                 $sortDirection = $request->query('direction', 'desc');
                 $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'desc';
@@ -442,12 +458,16 @@ class MasterController extends Controller
 
                 // Query
                 $checklists = DB::table('checklist')
+                    ->when($search, function ($query, $search) {
+                        $query->where('name', 'LIKE', '%' . $search . '%');
+                    })
                     ->orderBy($sortColumn, $sortDirection)
                     ->paginate((int)$length)
                     ->appends([
                         'sort' => $sortColumn,
                         'direction' => $sortDirection,
-                        'length' => $length
+                        'length' => $length,
+                        'search' => $search
                     ]);
 
                 $categoryList = DB::table('category')->select('id', 'name')->get();
@@ -518,6 +538,7 @@ class MasterController extends Controller
         }
         try {
             $length = $request->query('length', 10);
+            $search = $request->query('search');
             $sortColumn = $request->query('sort', 'id');
             $sortDirection = $request->query('direction', 'asc');
             $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'asc';
@@ -525,12 +546,16 @@ class MasterController extends Controller
             $sortColumn = in_array($sortColumn, $allowedColumns) ? $sortColumn : 'id';
 
             $categories = DB::table("inv_catg")
+                ->when($search, function ($query, $search) {
+                    $query->where('name', 'LIKE', '%' . $search . '%');
+                })
                 ->orderBy($sortColumn, $sortDirection)
                 ->paginate((int)$length)
                 ->appends([
                     'sort' => $sortColumn,
                     'direction' => $sortDirection,
-                    'length' => $length
+                    'length' => $length,
+                    'search' => $search
                 ]);
 
             $categoryList = DB::table('category')->select('id', 'name')->get();
@@ -627,6 +652,7 @@ class MasterController extends Controller
         try {
 
             $length = $request->query('length', 10);
+            $search = $request->query('search');
             $sortColumn = $request->query('sort', 'a.id');
             $sortDirection = $request->query('direction', 'asc');
             $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'asc';
@@ -638,11 +664,18 @@ class MasterController extends Controller
                 ->join('inv_catg as b', 'a.catg_id', '=', 'b.id')
                 ->select('a.*', 'b.name as cat_name', 'b.type as type')
                 ->orderBy($sortColumn, $sortDirection)
+                ->when($search, function ($query, $search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('a.name', 'LIKE', "%$search%")
+                            ->orWhere('b.name', 'LIKE', "%$search%");
+                    });
+                })
                 ->paginate((int)$length)
                 ->appends([
                     'sort' => $sortColumn,
                     'direction' => $sortDirection,
-                    'length' => $length
+                    'length' => $length,
+                    'search' => $search
                 ]);
 
             $categories = $this->getCategories();
@@ -730,6 +763,7 @@ class MasterController extends Controller
         try {
             //Params
             $length = $request->query('length', 10);
+            $search = $request->query('search');
             $sortColumn = $request->query('sort', 'id');
             $sortDirection = $request->query('direction', 'desc');
             $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'desc';
@@ -738,9 +772,13 @@ class MasterController extends Controller
 
             // Query
             $attendanceTypes = DB::table('attendance_types')
+                ->when($search, function ($query, $search) {
+                    $query->where('type', 'LIKE', '%' . $search . '%');
+                })
                 ->orderBy($sortColumn, $sortDirection)
                 ->paginate((int)$length)
                 ->appends([
+                    'search' => $search,
                     'sort' => $sortColumn,
                     'direction' => $sortDirection,
                     'length' => $length
@@ -798,6 +836,7 @@ class MasterController extends Controller
         try {
             // Params
             $length = $request->query('length', 10);
+            $search = $request->query('search');
             $sortColumn = $request->query('sort', 'created_at');
             $sortDirection = $request->query('direction', 'desc');
             $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'desc';
@@ -806,9 +845,13 @@ class MasterController extends Controller
 
             //Query
             $questions = DB::table('inquiry_questions')
+                ->when($search, function ($query, $search) {
+                    $query->where('question_text', 'LIKE', '%' . $search . '%');
+                })
                 ->orderBy($sortColumn, $sortDirection)
                 ->paginate((int)$length)
                 ->appends([
+                    'search' => $search,
                     'sort' => $sortColumn,
                     'direction' => $sortDirection,
                     'length' => $length
@@ -910,6 +953,7 @@ class MasterController extends Controller
 
             // Params
             $length = $request->query('length', 10);
+            $search = $request->query('search');
             $sortColumn = $request->query('sort', 'id');
             $sortDirection = $request->query('direction', 'desc');
             $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'desc';
@@ -919,9 +963,16 @@ class MasterController extends Controller
             // Query
             $integrations = DB::table('integration_settings')
                 ->whereIn('user_id', $userIds)
+                ->when($search, function ($query, $search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('integration_type', 'LIKE', "%$search%")
+                            ->orWhere('status', 'LIKE', "%$search%");
+                    });
+                })
                 ->orderBy($sortColumn, $sortDirection)
                 ->paginate((int)$length)
                 ->appends([
+                    'search' => $search,
                     'sort' => $sortColumn,
                     'direction' => $sortDirection,
                     'length' => $length
@@ -1117,6 +1168,7 @@ class MasterController extends Controller
         try {
             // Params
             $length = $request->query('length', 10);
+            $search = $request->query('search');
             $sortColumn = $request->query('sort', 'id');
             $sortDirection = $request->query('direction', 'desc');
             $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'desc';
@@ -1125,12 +1177,20 @@ class MasterController extends Controller
 
             // Query
             $points = DB::table('mis_points')
+                ->when($search, function ($query, $search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('point_name', 'LIKE', "%$search%")
+                            ->orWhere('user_id', 'LIKE', "%$search%")
+                            ->orWhere('id', 'LIKE', "%$search%");
+                    });
+                })
                 ->orderBy($sortColumn, $sortDirection)
                 ->paginate((int)$length)
                 ->appends([
                     'sort' => $sortColumn,
                     'direction' => $sortDirection,
-                    'length' => $length
+                    'length' => $length,
+                    'search' => $search
                 ]);
 
             $users = DB::table('users')->get()->keyBy('id');
@@ -1223,59 +1283,12 @@ class MasterController extends Controller
         }
     }
 
-    // public function property_name(Request $request)
-    // {
-    //     try {
-    //         $length = $request->query('length', 10);
-    //         $sortColumn = $request->query('sort', 'id');
-    //         $sortDirection = $request->query('direction', 'desc');
-    //         $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'desc';
-    //         $allowedColumns = ['id', 'property_category', 'created_at'];
-    //         $sortColumn = in_array($sortColumn, $allowedColumns) ? $sortColumn : 'id';
-
-
-    //         $properties = DB::table("properties")
-    //             ->orderBy($sortColumn, $sortDirection)
-    //             ->paginate((int)$length)
-    //             ->appends([
-    //                 'sort' => $sortColumn,
-    //                 'direction' => $sortDirection,
-    //                 'length' => $length
-    //             ]);
-
-    //         foreach ($properties as $property) {
-    //             if ($property->property_category) {
-    //                 $category = DB::table('inv_catg')
-    //                     ->where('name', $property->property_category)
-    //                     ->first();
-    //                 $property->category_id = $category->id ?? null;
-    //             } else {
-    //                 $property->category_id = null;
-    //             }
-    //         }
-
-    //         $categoryList = DB::table('category')->select('id', 'name')->get();
-    //         $invCatg = DB::table('inv_catg')->select('id', 'type', 'name')->get();
-
-    //         return view('master.property', compact(
-    //             'properties',
-    //             'categoryList',
-    //             'invCatg',
-    //             'length',
-    //             'sortColumn',
-    //             'sortDirection'
-    //         ));
-    //     } catch (\Exception $e) {
-    //         Flasher::addError('Failed to load properties: ' . $e->getMessage());
-    //         return back();
-    //     }
-    // }
 
     public function property_name(Request $request)
     {
-        try 
-        {
+        try {
             $length = $request->query('length', 10);
+            $search = $request->query('search');
             $sortColumn = $request->query('sort', 'id');
             $sortDirection = $request->query('direction', 'desc');
             $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'desc';
@@ -1284,24 +1297,30 @@ class MasterController extends Controller
             $sortColumn = in_array($sortColumn, $allowedColumns) ? $sortColumn : 'id';
             $properties = DB::table("properties as p")
                 ->select('p.*')
-                ->selectSub(function ($query) 
-                {
+                ->selectSub(function ($query) {
                     $query->from('leads as l')
                         ->selectRaw('COUNT(*)')
                         ->whereColumn('l.type', 'p.property_type');
                 }, 'leads_count')
+                ->when($search, function ($query, $search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('p.property_name', 'LIKE', "%$search%")
+                            ->orWhere('p.property_category', 'LIKE', "%$search%")
+                            ->orWhere('p.property_type', 'LIKE', "%$search%");
+                    });
+                })
                 ->orderBy($sortColumn, $sortDirection)
                 ->paginate((int)$length)
                 ->appends([
                     'sort' => $sortColumn,
                     'direction' => $sortDirection,
-                    'length' => $length
+                    'length' => $length,
+                    'search' => $search
                 ]);
             $categoryMap = DB::table('inv_catg')
                 ->pluck('id', 'name');
 
-            foreach ($properties as $property) 
-            {
+            foreach ($properties as $property) {
                 $property->category_id = $categoryMap[$property->property_category] ?? null;
             }
 
@@ -1315,10 +1334,8 @@ class MasterController extends Controller
                 'sortColumn',
                 'sortDirection'
             ));
-        } 
-        catch (\Exception $e) 
-        {
-        //    dd($e->getMessage(), $e->getFile(), $e->getLine());
+        } catch (\Exception $e) {
+            //    dd($e->getMessage(), $e->getFile(), $e->getLine());
         }
     }
 

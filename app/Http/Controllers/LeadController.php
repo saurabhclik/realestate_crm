@@ -1146,7 +1146,7 @@ class LeadController extends Controller
 
             // Handle 'all' length
             if ($length === 'all') {
-                $length = $query->count();
+                $length = $query->count() ?: 1;
             } else {
                 $length = (int)$length;
             }

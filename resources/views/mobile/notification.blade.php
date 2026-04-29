@@ -347,6 +347,8 @@ document.addEventListener('DOMContentLoaded', function()
         }
 
         list.forEach(notif => {
+
+            const phone = normalizePhone(notif.phone);
             const shortComment = notif.last_comment
                 ? (notif.last_comment.length > 50
                     ? notif.last_comment.substring(0, 50) + '... <a href="#" class="view-comment-btn">Read More</a>'
@@ -362,14 +364,14 @@ document.addEventListener('DOMContentLoaded', function()
                         <div>
                             <h6 class="fw-bold mb-1">${escapeHtml(notif.name || 'Lead Notification')}</h6>
                             <small class="text-muted">
-                                <i class="fas fa-phone me-1"></i> ${escapeHtml(notif.phone || '---')}
+                                <i class="fas fa-phone me-1"></i> ${escapeHtml(phone || '---')}
                             </small>
                         </div>
                         <div class="lead-actions">
-                            <a href="https://wa.me/${escapeHtml(notif.phone || '')}" class="action-btn phone" target="_blank" rel="noopener noreferrer">
+                            <a href="https://wa.me/${escapeHtml(phone || '')}" class="action-btn phone" target="_blank" rel="noopener noreferrer">
                                 <i class="fas fa-phone text-light cust-size pt-2"></i>
                             </a>
-                            <a href="https://wa.me/${escapeHtml(notif.phone || '')}" class="action-btn whatsapp" target="_blank" rel="noopener noreferrer">
+                            <a href="https://wa.me/${escapeHtml(phone || '')}" class="action-btn whatsapp" target="_blank" rel="noopener noreferrer">
                                 <i class="fa-brands fa-whatsapp text-light cust-size pt-2"></i>
                             </a>
                             <a class="action-btn update-status-btn" data-lead-id="${notif.id}">
@@ -403,6 +405,17 @@ document.addEventListener('DOMContentLoaded', function()
             notificationContainer.insertAdjacentHTML('beforeend', html);
         });
     }
+
+    function normalizePhone(phone) 
+    {
+        if (!phone) return '';
+        phone = phone.toString().replace(/\D/g, '');
+        if (phone.startsWith('91') && phone.length > 10) 
+        {
+            phone = phone.substring(2);
+        }
+        return phone;
+    } 
     
     function escapeHtml(str) {
         if (!str) return '';

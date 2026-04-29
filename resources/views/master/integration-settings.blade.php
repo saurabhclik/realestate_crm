@@ -389,6 +389,19 @@
                     required: false
                 }
             ],
+            'whatsapp': [{
+                    name: 'key1',
+                    label: 'Key 1',
+                    type: 'text',
+                    required: false
+                },
+                {
+                    name: 'value1',
+                    label: 'Value 1',
+                    type: 'text',
+                    required: false
+                }
+            ],
             'other': [{
                     name: 'key1',
                     label: 'Key 1',

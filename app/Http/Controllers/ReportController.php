@@ -25,48 +25,82 @@ class ReportController extends Controller
         $user_type = Session::get('user_type');
         $childIds  = Session::get('child_ids');
 
-        $query = DB::table('dayend_reports as a')
-            ->join('users as b', 'a.agent_id', '=', 'b.id')
+        $query = DB::table('leads as a')
+            ->join('users as b', 'a.user_id', '=', 'b.id')
             ->select(
                 'b.id',
                 'b.name',
-                'a.pending_followups',
-                'a.pending_followup_leads',
-                'a.total_allocated_leads',
-                'a.total_added_leads',
-                'a.added_leads',
-                'a.visit_done',
-                'a.visit_done_leads',
-                'a.converted_leads',
-                'a.converted_leads_info',
-                'a.completed_leads',
-                'a.completed_leads_info'
-            );
+                DB::raw('COUNT(a.id) as total_allocated_leads'),
+                DB::raw('COUNT(a.id) as total_added_leads'),
+                DB::raw('SUM(CASE WHEN a.status="CALL SCHEDULED" THEN 1 ELSE 0 END) as pending_followups'),
+                DB::raw('SUM(CASE WHEN a.visited_on IS NOT NULL THEN 1 ELSE 0 END) as visit_done'),
+                DB::raw('SUM(CASE WHEN a.status="CONVERTED" THEN 1 ELSE 0 END) as converted_leads'),
+                DB::raw('SUM(CASE WHEN a.status="COMPLETED" THEN 1 ELSE 0 END) as completed_leads'),
+                DB::raw('GROUP_CONCAT(JSON_OBJECT("id", a.id, "name", a.name, "status", a.status) SEPARATOR "||") as pending_followup_leads'),
+                DB::raw('GROUP_CONCAT(JSON_OBJECT("id", a.id, "name", a.name) SEPARATOR "||") as added_leads'),
+                DB::raw('GROUP_CONCAT(JSON_OBJECT("id", a.id, "name", a.name) SEPARATOR "||") as visit_done_leads'),
+                DB::raw('GROUP_CONCAT(JSON_OBJECT("id", a.id, "name", a.name, "conversion_type", a.conversion_type) SEPARATOR "||") as converted_leads_info'),
+                DB::raw('GROUP_CONCAT(JSON_OBJECT("id", a.id, "name", a.name, "conversion_type", a.conversion_type) SEPARATOR "||") as completed_leads_info')
+            )
+            ->groupBy('b.id', 'b.name');
 
-        if ($user_type != 'admin') 
+        if ($user_type != 'admin' && !empty($childIds)) 
         {
             $childIds = explode(',', $childIds);
-            $query->whereIn('a.agent_id', $childIds);
+            $query->whereIn('a.user_id', $childIds);
         }
-
         if (!empty($startDate) && !empty($endDate)) 
         {
-            $query->whereBetween('a.report_date', [$startDate, $endDate]);
+            $query->whereBetween('a.lead_date', [
+                $startDate . ' 00:00:00',
+                $endDate   . ' 23:59:59'
+            ]);
         } 
         elseif (!empty($startDate)) 
         {
-            $query->whereDate('a.report_date', $startDate);
+            $query->whereBetween('a.lead_date', [
+                $startDate . ' 00:00:00',
+                $startDate . ' 23:59:59'
+            ]);
+            $endDate = $startDate;
+        } 
+        else 
+        {
+            $startDate = $endDate = now()->toDateString();
+            $query->whereBetween('a.lead_date', [
+                $startDate . ' 00:00:00',
+                $endDate   . ' 23:59:59'
+            ]);
         }
-
         $reportData = $query->paginate($length);
+        $reportData->getCollection()->transform(function ($item) 
+        {
+            $decodeField = function($field) 
+            {
+                if (empty($field)) return [];
+                return array_map(fn($v) => json_decode($v, true), explode('||', $field));
+            };
 
+            $item->pending_followup_leads = $decodeField($item->pending_followup_leads);
+            $item->added_leads            = $decodeField($item->added_leads);
+            $item->visit_done_leads       = $decodeField($item->visit_done_leads);
+            $item->converted_leads_info   = $decodeField($item->converted_leads_info);
+            $item->completed_leads_info   = $decodeField($item->completed_leads_info);
+            $item->total_allocated_leads  = $item->total_allocated_leads ?? 0;
+            $item->total_added_leads      = $item->total_added_leads ?? 0;
+            $item->pending_followups      = $item->pending_followups ?? 0;
+            $item->visit_done             = $item->visit_done ?? 0;
+            $item->converted_leads        = $item->converted_leads ?? 0;
+            $item->completed_leads        = $item->completed_leads ?? 0;
+            return $item;
+        });
         $totals = [
-            'pending_followups'     => $reportData->sum('pending_followups'),
-            'total_allocated_leads' => $reportData->sum('total_allocated_leads'),
-            'total_added_leads'     => $reportData->sum('total_added_leads'),
-            'visit_done'            => $reportData->sum('visit_done'),
-            'converted_leads'       => $reportData->sum('converted_leads'),
-            'completed_leads'       => $reportData->sum('completed_leads'),
+            'pending_followups'      => $reportData->sum('pending_followups'),
+            'total_allocated_leads'  => $reportData->sum('total_allocated_leads'),
+            'total_added_leads'      => $reportData->sum('total_added_leads'),
+            'visit_done'             => $reportData->sum('visit_done'),
+            'converted_leads'        => $reportData->sum('converted_leads'),
+            'completed_leads'        => $reportData->sum('completed_leads'),
         ];
 
         return view('reports.dayend-reports', compact(

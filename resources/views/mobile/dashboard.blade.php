@@ -28,6 +28,7 @@
                     $hasActiveAttendance = DB::table('attendance')
                         ->where('user_id', session('user_id'))
                         ->whereNull('end_time')
+                        ->whereDate('start_time', now()->toDateString())
                         ->exists();
                 @endphp
                 <input type="checkbox" id="attendanceToggle" class="attendance-toggle-checkbox" {{ $hasActiveAttendance ? 'checked' : '' }}>

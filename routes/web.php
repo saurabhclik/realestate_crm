@@ -55,6 +55,7 @@ Route::prefix('mobile')->group(function ()
 {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('mobile.login.form');
     Route::post('/login', [AuthController::class, 'login'])->name('mobile.login');
+    Route::post('/save-token', [AuthController::class, 'saveFcmToken']);
     Route::middleware(['check.mobile.login'])->group(function () 
     {
         Route::get('/logout', [AuthController::class, 'logout'])->name('mobile.logout');
@@ -512,6 +513,15 @@ Route::middleware(['check.login', 'reception.only'])->group(function ()
     Route::get('/properties', [MasterController::class, 'property_name'])->name('property.name');
     Route::post('/properties/store', [MasterController::class, 'store_property'])->name('property.store');
     Route::put('/properties/{id}', [MasterController::class, 'update_property'])->name('property.update');
+});
+
+Route::get('/firebase-sw-config', function () 
+{
+    $firebase = DB::table('integration_settings')
+        ->where('integration_type', 'firebase')
+        ->where('status', 'active')
+        ->first();
+    return response()->json(json_decode($firebase->settings ?? '{}'));
 });
 
 Route::match(['get', 'post'], '/rate/{token}', [PostSaleController::class, 'rate'])->name('rate.form');

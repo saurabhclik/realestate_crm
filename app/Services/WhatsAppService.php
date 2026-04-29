@@ -14,8 +14,22 @@ class WhatsAppService
     
     public function __construct()
     {
-        $this->apiUrl = '';
-        $this->apiKey = '';
+        $settings = DB::table('integration_settings')
+            ->where('integration_type', 'whatsapp')
+            ->where('status', 'active')
+            ->first();
+
+        if ($settings && !empty($settings->settings)) 
+        {
+            $config = json_decode($settings->settings, true);
+            $this->apiKey = $config['key1'] ?? null;
+            $this->apiUrl = $config['value1'] ?? null;
+        } 
+        else 
+        {
+            $this->apiKey = null;
+            $this->apiUrl = null;
+        }
     }
 
     private function formatPhoneNumber($phone)

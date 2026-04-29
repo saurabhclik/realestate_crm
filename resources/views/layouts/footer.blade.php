@@ -1112,25 +1112,29 @@
                     const app_doa = $('#app_doa').val();
                     const visitProjects = $('#visitProjects').val();
 
-                    if (!newStatus) {
+                    if (!newStatus) 
+                    {
                         flasher.error('Please select a new status');
                         return;
                     }
                     const visitStatuses = ['VISIT SCHEDULED', 'VISIT DONE'];
-                    if (visitStatuses.includes(newStatus)) {
-                        if (!visitProjects || visitProjects.length === 0) {
-                            flasher.error('Please select at least one project for the visit');
-                            return;
-                        }
-                    }
+                    // if (visitStatuses.includes(newStatus)) {
+                    //     if (!visitProjects || visitProjects.length === 0) {
+                    //         flasher.error('Please select at least one project for the visit');
+                    //         return;
+                    //     }
+                    // }
 
-                    if (newStatus === 'CONVERTED' && !conversionType) {
+                    if (newStatus === 'CONVERTED' && !conversionType) 
+                    {
                         flasher.error('Please select a conversion type');
                         return;
                     }
 
-                    if (['CALL SCHEDULED', 'VISIT SCHEDULED', 'INTERESTED'].includes(newStatus)) {
-                        if (!remindDate) {
+                    if (['CALL SCHEDULED', 'VISIT SCHEDULED', 'INTERESTED'].includes(newStatus)) 
+                    {
+                        if (!remindDate) 
+                        {
                             flasher.error('Please select a reminder date');
                             return;
                         }

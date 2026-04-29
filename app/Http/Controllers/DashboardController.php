@@ -689,7 +689,7 @@ class DashboardController extends Controller
             'todayCalls' => $baseQuery('CALL SCHEDULED', $today, 'Call')->orderBy('a.remind_time')->get(),
             'todayVisits' => $baseQuery('VISIT SCHEDULED', $today, 'Visit')->orderBy('a.remind_time')->get(),
             'missedFollowups' => $baseQuery(null, ['<', $today], 'Missed')
-                ->whereIn('a.status', ['CALL SCHEDULED', 'VISIT SCHEDULED', 'WHATSAPP', 'INTERESTED'])
+                ->whereIn('a.status', ['CALL SCHEDULED', 'VISIT SCHEDULED', 'WHATSAPP', 'INTERESTED', 'MEETING SCHEDULED'])
                 ->orderBy('a.remind_date')->get(),
             'interestedLeads' => $baseQuery('INTERESTED', null, 'Interested')->orderBy('a.remind_date')->get(),
             'todayWhatsapp' => $baseQuery('WHATSAPP', $today, 'WhatsApp')->orderBy('a.remind_time')->get(),

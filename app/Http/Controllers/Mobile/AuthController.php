@@ -32,11 +32,25 @@ class AuthController extends Controller
             ]);
         }
         $logo = DB::table('settings')->where('id', 1)->value('logo');
-        return view('mobile.login', compact('logo'));
+        $firebase = DB::table('integration_settings')
+            ->where('integration_type', 'firebase')
+            ->where('status', 'active')
+            ->first();
+
+        $firebaseConfig = null;
+
+        if ($firebase && $firebase->settings) 
+        {
+            $firebaseConfig = json_decode($firebase->settings, true);
+        }
+        // dd($firebaseConfig);
+        return view('mobile.login', compact('logo', 'firebaseConfig'));
     }
 
     public function login(Request $request)
     {
+
+        // dd($request->all());
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required',
@@ -583,5 +597,28 @@ class AuthController extends Controller
     private function generateToken($length = 12)
     {
         return bin2hex(random_bytes($length));
+    }
+
+    public function saveFcmToken(Request $request)
+    {
+        // dd($request->all());
+        $request->validate([
+            'token' => 'required'
+        ]);
+
+        $userId = session('user_id');
+
+        if (!$userId) 
+        {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        DB::table('users')
+            ->where('id', $userId)
+            ->update([
+                'fcm_token' => $request->token
+            ]);
+
+        return response()->json(['message' => 'Token saved']);
     }
 }

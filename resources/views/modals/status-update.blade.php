@@ -25,7 +25,6 @@ $isLeadManagement = $softwareType === 'lead_management';
                         <option value="VISIT DONE">Visit Done</option>
                         <option value="WRONG NUMBER">WRONG NUMBER</option>
                         <option value="NOT INTERESTED">NOT INTERESTED</option>
-                        <option value="BOOKED">BOOKED</option>
                         <option value="FUTURE LEAD">FUTURE LEAD</option>
                         <option value="NOT PICKED">NOT PICKED</option>
                         <option value="NOT REACHABLE">NOT REACHABLE</option>
@@ -159,24 +158,23 @@ $isLeadManagement = $softwareType === 'lead_management';
 </style>
 
 <script>
-    $(document).ready(function() {
-
-        $('#newStatus').on('change', function() {
-
+    $(document).ready(function() 
+    {
+        $('#newStatus').on('change', function() 
+        {
             let status = $(this).val();
             let dateInput = document.getElementById("remindDate");
 
             let today = new Date().toISOString().split("T")[0];
-
-            // reset date every time
             dateInput.value = "";
 
-            if (status === "VISIT DONE") {
-                //  ONLY past + today allowed
+            if (status === "VISIT DONE") 
+            {
                 dateInput.setAttribute("max", today);
                 dateInput.removeAttribute("min");
-            } else {
-                //  future allowed
+            } 
+            else 
+            {
                 dateInput.setAttribute("min", today);
                 dateInput.removeAttribute("max");
             }

@@ -157,6 +157,14 @@
                         </thead>
                         <tbody>
                             @foreach($leads as $row)
+                                @php
+
+                                    $phone = preg_replace('/\D/', '', $row->phone);
+                                    if (substr($phone, 0, 2) == '91') 
+                                    {
+                                        $phone = substr($phone, 2);
+                                    }
+                                @endphp
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>
@@ -177,12 +185,12 @@
                                             </div>
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center">
-                                            <span class="text-muted small">{{ $row->phone }}</span>
+                                            <span class="text-muted small">{{ $phone }}</span>
                                             <div class="d-flex">
-                                                <a href="tel:{{ $row->phone }}" class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip" title="Call">
+                                                <a href="tel:{{ $phone }}" class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip" title="Call">
                                                     <i class="fas fa-phone text-primary"></i>
                                                 </a>
-                                                <a href="https://wa.me/91{{ $row->phone }}" target="_blank" class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip" title="WhatsApp">
+                                                <a href="https://wa.me/91{{ $phone }}" target="_blank" class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip" title="WhatsApp">
                                                     <i class="fab fa-whatsapp text-success"></i>
                                                 </a>
                                                 <a href="{{ route('lead.edit', $row->id) }}" class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip" title="Edit">

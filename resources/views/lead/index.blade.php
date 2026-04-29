@@ -7,6 +7,23 @@
     $activeFeatures = session('active_features', []);
     $softwareType = session('software_type', 'real_state');
     $isLeadManagement = $softwareType === 'lead_management';
+    $isEdit = isset($lead);
+    $userType = session('user_type');
+    $canAssignLead = in_array($userType, ['admin', 'team_manager']);
+    $childIds = session('child_ids');
+    $childIdArray = $childIds ? explode(',', str_replace(' ', '', $childIds)) : [];
+    $userType = session('user_type');
+
+    if ($userType === 'admin') 
+    {
+        $users = DB::table('users')->get();
+    } 
+    else 
+    {
+        $users = DB::table('users')
+            ->whereIn('id', $childIdArray)
+            ->get();
+    }
 @endphp
 <style>
     .cust-badge 
@@ -369,6 +386,7 @@
                                     <label for="comment">Comment:</label>
                                     <textarea id="comment" name="comment" rows="3" placeholder="Type your comment here..." class="form-control">{{ isset($lead) ? $lead->last_comment : old('comment') }}</textarea>
                                 </div>
+                                @if($canAssignLead && !$isEdit)
                                 <div class="col-md-4 mb-3">
                                     <label for="allocate-lead" class="form-label fw-semibold">
                                         ╰┈➤Assigned To (Optional)
@@ -394,6 +412,7 @@
                                         <i class="bi bi-info-circle me-1"></i>Select team member to assign this lead
                                     </div>
                                 </div>
+                                @endif
                             </div>
 
                             <div class="row mt-3">

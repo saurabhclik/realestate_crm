@@ -489,23 +489,20 @@ class MobileDashboardController extends Controller
 
         $latitude = $request->latitude;
         $longitude = $request->longitude;
+        $todayAttendance = DB::table('attendance')
+            ->where('user_id', $userId)
+            ->whereDate('start_time', Carbon::today())
+            ->first();
 
         if ($request->action === 'start') 
         {
-            $active = DB::table('attendance')
-                ->where('user_id', $userId)
-                ->whereNull('end_time')
-                ->latest('start_time')
-                ->first();
-
-            if ($active) 
+            if ($todayAttendance) 
             {
                 return response()->json([
-                    'status' => 'exists',
-                    'message' => 'Attendance already started and active.'
-                ], 200);
+                    'status' => 'error',
+                    'message' => 'Attendance already marked for today. You cannot start again.'
+                ], 400);
             }
-
             DB::table('attendance')->insert([
                 'user_id'        => $userId,
                 'start_time'     => Carbon::now(),
@@ -516,24 +513,22 @@ class MobileDashboardController extends Controller
                 'status' => 'success',
                 'message' => 'Attendance started successfully.'
             ], 200);
-
         } 
         elseif ($request->action === 'end') 
         {
             $active = DB::table('attendance')
                 ->where('user_id', $userId)
+                ->whereDate('start_time', Carbon::today())
                 ->whereNull('end_time')
-                ->latest('start_time')
                 ->first();
 
             if (!$active) 
             {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'No active attendance found to end.'
+                    'message' => 'No active attendance found for today.'
                 ], 400);
             }
-
             DB::table('attendance')
                 ->where('id', $active->id)
                 ->update([
@@ -560,13 +555,14 @@ class MobileDashboardController extends Controller
         $active = DB::table('attendance')
             ->where('user_id', $userId)
             ->whereNull('end_time')
+            ->whereDate('start_time', Carbon::today())
             ->latest('start_time')
             ->first();
 
         return response()->json([
             'action' => $active ? 'start' : 'end',
+            'has_active' => $active ? true : false,
             'message' => $active ? 'Attendance is active.' : 'No active attendance.'
         ]);
     }
-
 }

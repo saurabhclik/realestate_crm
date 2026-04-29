@@ -148,7 +148,7 @@
                     @enderror
                 </div>
                 
-                <div class="col-md-6 mb-3">
+                <!-- <div class="col-md-6 mb-3">
                     <label class="form-label">Country <span class="text-danger">*</span></label>
                     <select class="form-select select2" name="country_id" id="country" required>
                         <option value="">Select Country</option>
@@ -163,7 +163,7 @@
                     @error('country_id')
                     <div class="error-message">{{ $message }}</div>
                     @enderror
-                </div>
+                </div> -->
                 
                 <div class="col-md-6 mb-3">
                     <label for="phone" class="form-label">Phone <span class="text-danger">*</span></label>
@@ -196,40 +196,49 @@
                     <div class="error-message">{{ $message }}</div>
                     @enderror
                 </div>
-                
+
                 <div class="col-md-6 mb-3">
+                    <label for="attented_by" class="form-label">Attended By</label>
+                    <div class="attended-by-group">
+                        <div class="attended-prefix-editable" id="attended-by" contenteditable="true">
+                            <input type="text" name="attended_by" id="attended-by" class="form-control" value="{{old('attended_by')}}" placeholder="Enter Attended By">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- <div class="col-md-6 mb-3">
                     <label for="email" class="form-label">Email</label>
                     <input type="email" name="email" id="email" class="form-control" value="{{ old('email') }}">
                     @error('email')
                     <div class="error-message">{{ $message }}</div>
                     @enderror
-                </div>
+                </div> -->
                 
-                <div class="col-md-6 mb-3">
+                <!-- <div class="col-md-6 mb-3">
                     <label for="company" class="form-label">Company</label>
                     <input type="text" name="company" id="company" class="form-control" value="{{ old('company') }}">
                     @error('company')
                     <div class="error-message">{{ $message }}</div>
                     @enderror
-                </div>
+                </div> -->
                 
-                <div class="col-md-6 mb-3">
+                <!-- <div class="col-md-6 mb-3">
                     <label for="website" class="form-label">Website</label>
                     <input type="text" name="website" id="website" class="form-control" value="{{ old('website') }}">
                     @error('website')
                     <div class="error-message">{{ $message }}</div>
                     @enderror
-                </div>
+                </div> -->
                 
-                <div class="col-md-6 mb-3">
+                <!-- <div class="col-md-6 mb-3">
                     <label for="fax" class="form-label">Fax</label>
                     <input type="text" name="fax" id="fax" class="form-control" value="{{ old('fax') }}">
                     @error('fax')
                     <div class="error-message">{{ $message }}</div>
                     @enderror
-                </div>
+                </div> -->
                 
-                <div class="col-md-12 mb-3">
+                <!-- <div class="col-md-12 mb-3">
                     <label for="operating_country" class="form-label">Operating Countries</label>
                     <select class="form-select select2" name="operating_country[]" id="operating_country" multiple>
                         @foreach($countries as $country)
@@ -242,11 +251,11 @@
                     @error('operating_country')
                     <div class="error-message">{{ $message }}</div>
                     @enderror
-                </div>
+                </div> -->
             </div>
 
             <div class="mb-3">
-                <label for="address" class="form-label">Address</label>
+                <label for="address" class="form-label">Address/City</label>
                 <textarea class="form-control" name="address" id="address" rows="2">{{ old('address') }}</textarea>
                 @error('address')
                 <div class="error-message">{{ $message }}</div>
@@ -261,7 +270,7 @@
                 @enderror
             </div>
 
-            <div class="mb-3">
+            <!-- <div class="mb-3">
                 <label for="visit_card" class="form-label">Visit Card</label>
                 <input type="file" class="form-control" name="visit_card[]" id="visit_card" accept="image/*" multiple>
                 @error('visit_card')
@@ -270,10 +279,10 @@
                 @error('visit_card.*')
                 <div class="error-message">{{ $message }}</div>
                 @enderror
-            </div>
+            </div> -->
 
             <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
+                <label for="description" class="form-label">Description/Remarks</label>
                 <textarea class="form-control" name="description" id="description" rows="3">{{ old('description') }}</textarea>
                 @error('description')
                 <div class="error-message">{{ $message }}</div>
@@ -353,13 +362,7 @@
                     return false;
                 }
                 
-                if (!country) 
-                {
-                    e.preventDefault();
-                    alert('Please select your country');
-                    $('#country').select2('open');
-                    return false;
-                }
+                
                 
                 if (!phone) 
                 {

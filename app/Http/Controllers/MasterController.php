@@ -1298,10 +1298,22 @@ class MasterController extends Controller
             $properties = DB::table("properties as p")
                 ->select('p.*')
                 ->selectSub(function ($query) {
+                    $currentUserId = session()->get('user_id');
+                    $childIds = session()->get('child_ids', []);
+
+                    if (is_string($childIds)) {
+                        $childIds = array_map('trim', explode(',', $childIds));
+                    }
+
+                    $userIds = array_merge([$currentUserId], $childIds);
+
                     $query->from('leads as l')
                         ->selectRaw('COUNT(*)')
-                        ->whereColumn('l.type', 'p.property_type');
+                        ->where('l.status', '!=', 'allocated_lead')
+                        ->whereIn('l.user_id', $userIds)
+                        ->whereRaw('LOWER(TRIM(l.type)) = LOWER(TRIM(p.property_type))');
                 }, 'leads_count')
+
                 ->when($search, function ($query, $search) {
                     $query->where(function ($q) use ($search) {
                         $q->where('p.property_name', 'LIKE', "%$search%")

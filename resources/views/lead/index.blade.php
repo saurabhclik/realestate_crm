@@ -386,7 +386,7 @@
                                     <label for="comment">Comment:</label>
                                     <textarea id="comment" name="comment" rows="3" placeholder="Type your comment here..." class="form-control">{{ isset($lead) ? $lead->last_comment : old('comment') }}</textarea>
                                 </div>
-                                @if($canAssignLead && !$isEdit)
+                              @if($canAssignLead && !$isEdit && session('user_type') === 'admin')
                                 <div class="col-md-4 mb-3">
                                     <label for="allocate-lead" class="form-label fw-semibold">
                                         ╰┈➤Assigned To (Optional)

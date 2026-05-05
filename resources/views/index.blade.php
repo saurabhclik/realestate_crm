@@ -552,6 +552,11 @@ $totalOthersLead = ($leadStats->total_lead ?? 0.00)
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <h4 class="mb-sm-0 font-size-18">Dashboard</h4>
                     <div class="d-flex align-items-center flex-wrap gap-2">
+
+                        <button type="button" class="btn btn-primary btn-sm circle-btn" data-bs-toggle="modal" data-bs-target="#dataCenterModal" title="Data Center">
+                            <i class="fas fa-database"></i>
+                        </button>
+
                         <button type="button" class="btn btn-info btn-sm circle-btn" data-bs-toggle="modal" data-bs-target="#importModal" title="Bulk Import">
                             <i class="fas fa-file-import"></i>
                         </button>

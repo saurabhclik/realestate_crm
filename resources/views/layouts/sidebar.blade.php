@@ -4,11 +4,11 @@ $softwareType = session('software_type', 'real_state');
 $userType = session('user_type');
 
 $menuAccess = [
-'real_state' => ['dashboard', 'staff_management', 'master', 'leads_management', 'transfer_leads', 'mis_management', 'task_management', 'inventory','post_sale', 'events', 'attendance', 'employee_track', 'expense_management', 'reports', 'settings'],
-'lead_management' => ['dashboard', 'staff_management', 'master', 'leads_management', 'transfer_leads', 'mis_management', 'task_management','post_sale', 'events', 'attendance', 'employee_track', 'expense_management', 'reports', 'settings'],
-'task_management' => ['dashboard', 'task_management', 'settings', 'reports'],
-'mis_management' => ['dashboard', 'mis_management', 'settings'],
-'exhibition' => ['dashboard', 'exhibition', 'settings']
+'real_state' => ['dashboard', 'staff_management', 'master', 'leads_management', 'transfer_leads', 'mis_management', 'task_management', 'inventory','post_sale', 'events', 'attendance', 'employee_track', 'expense_management', 'reports', 'settings', 'data_center'],
+'lead_management' => ['dashboard', 'staff_management', 'master', 'leads_management', 'transfer_leads', 'mis_management', 'task_management','post_sale', 'events', 'attendance', 'employee_track', 'expense_management', 'reports', 'settings', 'data_center'],
+'task_management' => ['dashboard', 'task_management', 'settings', 'reports', 'data_center'],
+'mis_management' => ['dashboard', 'mis_management', 'settings', 'data_center'],
+'exhibition' => ['dashboard', 'exhibition', 'settings', 'data_center']
 ];
 
 $currentMenuAccess = $menuAccess[$softwareType] ?? $menuAccess['real_state'];
@@ -277,6 +277,24 @@ $currentMenuAccess = $menuAccess[$softwareType] ?? $menuAccess['real_state'];
                         </li>
                         <li>
                             <a href="{{route('task.list')}}" key="t-task-list">Task List</a>
+                        </li>
+                    </ul>
+                </li>
+                @endif
+
+                @if(in_array('data_center', $currentMenuAccess) &&
+                ($userType == 'admin' || $userType == 'salesman' || $userType == 'team_manager' || $softwareType == 'task_management'))
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <i class="bx bx-data"></i>
+                        <span>Data Center</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li>
+                            <a href="#">All Data</a>
+                        </li>
+                        <li>
+                            <a href="#">Add Data</a>
                         </li>
                     </ul>
                 </li>

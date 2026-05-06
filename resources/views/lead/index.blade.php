@@ -62,6 +62,7 @@ $users = DB::table('users')
         font-size: 1.1rem;
     }
 </style>
+
 <div class="page-content">
     <div class="container-fluid">
         <div class="row justify-content-center">

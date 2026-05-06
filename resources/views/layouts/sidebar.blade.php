@@ -291,10 +291,10 @@ $currentMenuAccess = $menuAccess[$softwareType] ?? $menuAccess['real_state'];
                     </a>
                     <ul class="sub-menu" aria-expanded="false">
                         <li>
-                            <a href="#">All Data</a>
+                            <a href="{{route('data-center.index')}}">All Data</a>
                         </li>
                         <li>
-                            <a href="#">Add Data</a>
+                            <a href="{{route('data-center.create')}}">Add Data</a>
                         </li>
                     </ul>
                 </li>

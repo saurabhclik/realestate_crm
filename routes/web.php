@@ -486,8 +486,11 @@ Route::middleware(['check.login', 'reception.only'])->group(function () {
         Route::get('/create', 'create')->name('data-center.create');
         Route::post('/store', 'store')->name('data-center.store');
         Route::post('/import/upload', 'importUpload')->name('data-center.import.upload');
-        Route::get('/{id}', 'show')->name('data-center.show');
+        Route::get('/{id}/edit', 'edit')->name('data-center.edit');
+        Route::post('/{id}', 'update')->name('data-center.update');
         Route::delete('/{id}', 'destroy')->name('data-center.destroy');
+       Route::get('/comments/{id}', 'getComments')->name('data-center.comments');
+
     });
 
     Route::post('/exhibitions/{id}/toggle-auto-welcome', [WebExhibitionController::class, 'toggleAutoWelcome'])->name('exhibitions.toggle-auto-welcome');

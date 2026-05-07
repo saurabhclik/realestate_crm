@@ -20,6 +20,37 @@ class DataCenterController extends Controller
         $this->dataCenterService = $dataCenterService;
     }
 
+    public function index()
+    {
+        $categoryMap = DB::table('inv_catg')->pluck('name', 'id')->toArray();
+        $subCategoryMap = DB::table('inv_subcatg')->pluck('name', 'id')->toArray();
+        $projectMap = DB::table('projects')->pluck('project_name', 'id')->toArray();
+        $sourceMap = DB::table('sources')->pluck('name', 'id')->toArray();
+
+        $projects = DB::table('projects')->get();
+        $dataCenters = DB::table('data_center')->get()->map(function ($row) use ($categoryMap, $subCategoryMap, $projectMap, $sourceMap) {
+
+            if (!empty($row->source)) {
+                $row->source = $sourceMap[$row->source] ?? $row->source;
+            }
+            $row->project_ids = $row->project_name;
+
+            if (!empty($row->project_name)) {
+                $projectIds = array_filter(array_map('trim', explode(',', $row->project_name)));
+
+                $resolvedNames = array_map(function ($projectId) use ($projectMap) {
+                    return $projectMap[$projectId] ?? $projectId;
+                }, $projectIds);
+
+                // show names in table
+                $row->project_name = implode(', ', $resolvedNames);
+            }
+            return $row;
+        });
+
+        return view('data_center.index', compact('dataCenters', 'projects'));
+    }
+
     public function create()
     {
         $data = $this->dataCenterService->create();
@@ -29,7 +60,6 @@ class DataCenterController extends Controller
 
         return view('data_center.create_data', array_merge($data, ['users' => $users]));
     }
-
 
     public function store(Request $request)
     {
@@ -56,7 +86,8 @@ class DataCenterController extends Controller
             'project_name' => implode(',', $request->project_name ?? []),
             'budget' => $request->budget,
             'comment' => $request->comment,
-            'changed_by' => $request->changed_by,
+            'user_id' => session('user_id'),
+
         ];
 
         if (Schema::hasColumn('data_center', 'status')) {
@@ -65,8 +96,97 @@ class DataCenterController extends Controller
 
         DB::table('data_center')->insert($insertData);
 
+        DB::table('data_center_history')->insert([
+            'data_center_id' => DB::getPdo()->lastInsertId(),
+            'user_id' => session('user_id'),
+            'remark' => $request->comment,
+            'remind_date' => $request->remind_date,
+            'status' => 'pending',
+            'remind_time' => $request->remind_time,
+        ]);
+
         return redirect()->route('data-center.index')
             ->with('success', 'Data created successfully.');
+    }
+
+    public function edit($id)
+    {
+        $data = DB::table('data_center')->find($id);
+        if (!$data) {
+            return redirect()->route('data-center.index')->with('error', 'Data not found.');
+        }
+
+        $serviceData = $this->dataCenterService->create();
+        $users = session('user_type') === 'admin'
+            ? DB::table('users')->get()
+            : null;
+
+        return view('data_center.edit_data', array_merge($serviceData, ['users' => $users, 'data' => $data]));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $data = $request->all();
+
+        // Only validate name and phone if they are being updated
+        if ($request->filled('name') || $request->filled('phone')) {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'phone' => 'required|digits:10|unique:data_center,phone,' . $id
+            ], [
+                'phone.unique' => 'This phone number already exists.'
+            ]);
+        }
+
+        $updateData = [];
+
+        // Only add fields to update if they are present in the request
+        if ($request->filled('name')) $updateData['name'] = $request->input('name');
+        if ($request->filled('email')) $updateData['email'] = $request->input('email');
+        if ($request->filled('phone')) $updateData['phone'] = $request->input('phone');
+        if ($request->filled('state')) $updateData['state'] = $request->input('state');
+        if ($request->filled('city')) $updateData['city'] = $request->input('city');
+        if ($request->filled('source')) $updateData['source'] = $request->input('source');
+        if ($request->filled('property_type')) $updateData['property_type'] = $request->input('property_type');
+        if ($request->filled('property_category')) {
+            $updateData['property_category'] = $this->resolvePropertyCategoryName($request->input('property_category'));
+        }
+        if ($request->filled('property_sub_category')) {
+            $updateData['property_sub_category'] = $this->resolvePropertySubCategoryName($request->input('property_sub_category'));
+        }
+        if ($request->filled('project_name')) {
+            $updateData['project_name'] = implode(',', $request->input('project_name') ?? []);
+        }
+        if ($request->filled('budget')) $updateData['budget'] = $request->input('budget');
+        if ($request->filled('comment')) $updateData['comment'] = $request->input('comment');
+        if ($request->filled('status')) $updateData['status'] = $request->input('status');
+        if ($request->filled('changed_by')) $updateData['changed_by'] = $request->input('changed_by');
+
+        // Check if there's anything to update
+        if (empty($updateData)) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'No data provided to update.'], 400);
+            }
+            return redirect()->back()->with('error', 'No data provided to update.');
+        }
+
+        DB::table('data_center')->where('id', $id)->update($updateData);
+
+        DB::table('data_center_history')->insert([
+            'data_center_id' => $id,
+            'user_id' => session('user_id'),
+            'remark' => $request->comment,
+            'remind_date' => $request->remind_date,
+            'status' => $request->status,
+            'remind_time' => $request->remind_time,
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Data updated successfully.']);
+        }
+
+        return redirect()->route('data-center.index')
+            ->with('success', 'Data updated successfully.');
     }
 
     public function importUpload(Request $request)
@@ -286,34 +406,6 @@ class DataCenterController extends Controller
         return redirect()->back();
     }
 
-    public function index()
-    {
-        $categoryMap = DB::table('inv_catg')->pluck('name', 'id')->toArray();
-        $subCategoryMap = DB::table('inv_subcatg')->pluck('name', 'id')->toArray();
-        $projectMap = DB::table('projects')->pluck('project_name', 'id')->toArray();
-
-        $dataCenters = DB::table('data_center')->get()->map(function ($row) use ($categoryMap, $subCategoryMap, $projectMap) {
-            if (!empty($row->property_category) && is_numeric($row->property_category)) {
-                $row->property_category = $categoryMap[$row->property_category] ?? $row->property_category;
-            }
-            if (!empty($row->property_sub_category) && is_numeric($row->property_sub_category)) {
-                $row->property_sub_category = $subCategoryMap[$row->property_sub_category] ?? $row->property_sub_category;
-            }
-
-            if (!empty($row->project_name)) {
-                $projectIds = array_filter(array_map('trim', explode(',', $row->project_name)));
-                $resolvedNames = array_map(function ($projectId) use ($projectMap) {
-                    return $projectMap[$projectId] ?? $projectId;
-                }, $projectIds);
-                $row->project_name = implode(', ', $resolvedNames);
-            }
-
-            return $row;
-        });
-
-        return view('data_center.index', compact('dataCenters'));
-    }
-
     private function resolvePropertyCategoryName($category)
     {
         if (empty($category)) {
@@ -345,10 +437,54 @@ class DataCenterController extends Controller
     public function destroy($id)
     {
         try {
+
+            $data = DB::table('data_center')->where('id', $id)->first();
+
+            if (!$data) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data not found.'
+                ], 404);
+            }
+
             DB::table('data_center')->where('id', $id)->delete();
-            return response()->json(['success' => true, 'message' => 'Data deleted successfully.'], 200);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data deleted successfully.'
+            ], 200);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Error deleting data.'], 500);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deleting data.'
+            ], 500);
+        }
+    }
+
+
+    public function getComments($id)
+    {
+        try {
+            $comments = DB::table('data_center_history')
+                ->where('data_center_id', $id)
+                ->leftJoin('users', 'data_center_history.user_id', '=', 'users.id')
+                ->select(
+                    'data_center_history.*',
+                    'users.name as user_name'
+                )
+                ->orderBy('data_center_history.created_at', 'desc')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'comments' => $comments
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch comments'
+            ], 500);
         }
     }
 }

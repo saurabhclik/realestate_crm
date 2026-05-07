@@ -1,7 +1,9 @@
-
 @extends('layouts.app')
 @section('title', 'Data Center | Pro-leadexpertz')
 @section('content')
+
+@include('modals.data-status-update')
+@include('modals.view-data-comment')
 
 <style>
     .add-project-btn {
@@ -198,7 +200,7 @@
                         <h4 class="mb-0 text-gradient-primary">
                             <i class="fas fa-database me-2"></i>All Data
                         </h4>
-                        <span class="cust-badge text-dark bg-soft-primary ms-2">{{ $dataCenters->count() }} Records</span>
+                        <span class="cust-badge text-dark bg-soft-primary ms-2">{{ $dataCenters->count() }} Datas</span>
                     </div>
                     <div class="d-flex gap-2">
                         <button id="btnExportExcel" class="shadow btn btn-success btn-sm d-flex align-items-center" data-bs-toggle="tooltip" data-bs-placement="top" title="Export table data to Excel">
@@ -215,6 +217,7 @@
             <div class="col-12">
                 <div class="card p-3">
                     <form class="data-list-form" action="" method="POST">
+                        @csrf
                         <div>
                             <label>
                                 Show
@@ -246,30 +249,24 @@
                                     <th>Property Category</th>
                                     <th>Property Sub Category</th>
                                     <th>Project</th>
+                                    <th>Date</th>
                                     <th>Last Comment</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($dataCenters as $row)
                                 @php
-                                    $phone = preg_replace('/\D/', '', $row->phone);
-                                    if (substr($phone, 0, 2) == '91') {
-                                        $phone = substr($phone, 2);
-                                    }
+                                $phone = preg_replace('/\D/', '', $row->phone);
+                                if (substr($phone, 0, 2) == '91') {
+                                $phone = substr($phone, 2);
+                                }
                                 @endphp
-                                <tr>
+                                <tr data-id="{{ $row->id }}" data-comment="{{ $row->comment }}">
                                     <td>
                                         {{ $loop->iteration }}
                                     </td>
                                     <td>
                                         <div class="d-flex gap-3 align-items-center">
-                                            <div class="position-relative d-inline-block text-center">
-                                                @if(session('user_type') == 'admin' || session('user_type') == 'team_manager')
-                                                <div class="action-item duplicate-item" onclick="editData('{{ $row->id }}')" data-bs-toggle="tooltip" title="Edit Data" style="cursor:pointer;">
-                                                    <i class="fas fa-edit"></i>
-                                                </div>
-                                                @endif
-                                            </div>
                                             <span class="fw-semibold">{{ $row->id }}</span>
                                         </div>
                                     </td>
@@ -288,13 +285,24 @@
                                                     <a href="https://wa.me/91{{ $phone }}" target="_blank" class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip" title="WhatsApp">
                                                         <i class="fab fa-whatsapp text-success"></i>
                                                     </a>
-                                                   
+
+                                                    <a href="{{ route('data-center.edit', $row->id) }}" class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip" title="Edit">
+                                                        <i class="fas fa-edit text-warning"></i>
+                                                    </a>
+
+                                                    <button type="button" class="btn btn-xs btn-soft-light update-status-btn"
+                                                        data-id="{{ $row->id }}"
+                                                        data-status="{{ $row->status }}"
+                                                        data-projects="{{ $row->project_ids }}">
+                                                        <i class="fas fa-sync-alt text-info"></i>
+                                                    </button>
+
                                                     @if(session('user_type') == 'admin')
                                                     <button class="btn btn-xs btn-soft-light delete-data-btn"
                                                         data-data-id="{{ $row->id }}"
                                                         data-data-name="{{ $row->name }}"
                                                         data-bs-toggle="tooltip"
-                                                        title="Delete Data">
+                                                        title="Delete Data" type="button">
                                                         <i class="fas fa-trash text-danger"></i>
                                                     </button>
                                                     @endif
@@ -326,8 +334,8 @@
                                     </td>
                                     <td>
                                         @php
-                                            $status = strtolower(trim($row->status ?? 'pending'));
-                                            $statusClass = $status === 'approved' ? 'success' : ($status === 'rejected' || $status === 'reject' ? 'danger' : 'warning');
+                                        $status = strtolower(trim($row->status ?? 'pending'));
+                                        $statusClass = $status === 'approved' ? 'success' : ($status === 'rejected' || $status === 'reject' ? 'danger' : 'warning');
                                         @endphp
                                         <span class="badge bg-{{ $statusClass }} text-capitalize">
                                             {{ $row->status ?? 'pending' }}
@@ -359,14 +367,19 @@
                                         </div>
                                     </td>
                                     <td>
+                                        <span class="cust-badge text-dark">
+                                            {{ \Carbon\Carbon::parse($row->created_at)->format('d M Y') }}
+                                        </span>
+                                    </td>
+                                    <td>
                                         <div class="d-flex align-items-center">
                                             <div class="flex-shrink-0 me-2">
                                                 <i class="fas fa-comment-alt text-muted"></i>
                                             </div>
                                             <div class="flex-grow-1">
                                                 @php
-                                                    $comment = strtolower(trim(strip_tags($row->comment ?? '')));
-                                                    $short = \Illuminate\Support\Str::limit($comment, 30);
+                                                $comment = strtolower(trim(strip_tags($row->comment ?? '')));
+                                                $short = \Illuminate\Support\Str::limit($comment, 30);
                                                 @endphp
                                                 <span class="d-block" data-bs-toggle="tooltip" title="{{ $comment }}">
                                                     {!! $short !!}
@@ -384,87 +397,11 @@
                             </tbody>
                         </table>
                     </form>
-                   
+
                     <div class="d-flex justify-content-end mt-3">
-                      
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Data Details Modal -->
-<div class="modal fade data-modal" id="dataModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Data Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="data-section">
-                    <div class="data-section-title">Personal Information</div>
-                    <div class="data-detail">
-                        <span class="data-label">Name:</span>
-                        <span class="data-value" id="modal-name">-</span>
-                    </div>
-                    <div class="data-detail">
-                        <span class="data-label">Phone:</span>
-                        <span class="data-value" id="modal-phone">-</span>
-                    </div>
-                    <div class="data-detail">
-                        <span class="data-label">Email:</span>
-                        <span class="data-value" id="modal-email">-</span>
-                    </div>
-                    <div class="data-detail">
-                        <span class="data-label">State:</span>
-                        <span class="data-value" id="modal-state">-</span>
-                    </div>
-                    <div class="data-detail">
-                        <span class="data-label">City:</span>
-                        <span class="data-value" id="modal-city">-</span>
                     </div>
                 </div>
-
-                <div class="data-section">
-                    <div class="data-section-title">Property Details</div>
-                    <div class="data-detail">
-                        <span class="data-label">Source:</span>
-                        <span class="data-value" id="modal-source">-</span>
-                    </div>
-                    <div class="data-detail">
-                        <span class="data-label">Budget:</span>
-                        <span class="data-value" id="modal-budget">-</span>
-                    </div>
-                    <div class="data-detail">
-                        <span class="data-label">Property Type:</span>
-                        <span class="data-value" id="modal-property-type">-</span>
-                    </div>
-                    <div class="data-detail">
-                        <span class="data-label">Category:</span>
-                        <span class="data-value" id="modal-property-category">-</span>
-                    </div>
-                    <div class="data-detail">
-                        <span class="data-label">Sub Category:</span>
-                        <span class="data-value" id="modal-property-sub-category">-</span>
-                    </div>
-                    <div class="data-detail">
-                        <span class="data-label">Project:</span>
-                        <span class="data-value" id="modal-project-name">-</span>
-                    </div>
-                </div>
-
-                <div class="data-section">
-                    <div class="data-section-title">Additional Information</div>
-                    <div class="data-detail">
-                        <span class="data-label">Comment:</span>
-                        <span class="data-value" id="modal-comment">-</span>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -488,79 +425,196 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-// View Data Details Modal
-document.addEventListener('click', function(event) {
-    if (event.target.closest('.view-data-btn')) {
-        const btn = event.target.closest('.view-data-btn');
-        document.getElementById('modal-name').textContent = btn.dataset.name || '-';
-        document.getElementById('modal-phone').textContent = btn.dataset.phone || '-';
-        document.getElementById('modal-email').textContent = btn.dataset.email || '-';
-        document.getElementById('modal-state').textContent = btn.dataset.state || '-';
-        document.getElementById('modal-city').textContent = btn.dataset.city || '-';
-        document.getElementById('modal-source').textContent = btn.dataset.source || '-';
-        document.getElementById('modal-budget').textContent = btn.dataset.budget || '-';
-        document.getElementById('modal-property-type').textContent = btn.dataset.propertyType || '-';
-        document.getElementById('modal-property-category').textContent = btn.dataset.propertyCategory || '-';
-        document.getElementById('modal-property-sub-category').textContent = btn.dataset.propertySubCategory || '-';
-        document.getElementById('modal-project-name').textContent = btn.dataset.projectName || '-';
-        document.getElementById('modal-comment').textContent = btn.dataset.comment || '-';
-    }
-});
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.update-status-btn')) {
 
-// Show full comment
-function showComment(dataId) {
-    const row = document.querySelector(`[data-id="${dataId}"]`);
-    if (row) {
-        const comment = row.dataset.comment || 'No comment available';
-        document.getElementById('fullCommentText').textContent = comment;
-        const commentModal = new bootstrap.Modal(document.getElementById('commentModal'));
-        commentModal.show();
-    }
-}
+            let btn = e.target.closest('.update-status-btn');
 
-// Edit Data
-function editData(dataId) {
-    // Redirect to edit page if route exists
-    window.location.href = `/data-center/${dataId}/edit`;
-}
+            let dataId = btn.getAttribute('data-id');
+            let status = btn.getAttribute('data-status');
+            let projectIds = btn.getAttribute('data-projects');
 
-// Delete Data
-document.addEventListener('click', function(event) {
-    if (event.target.closest('.delete-data-btn')) {
-        const btn = event.target.closest('.delete-data-btn');
-        const dataId = btn.dataset.dataId;
-        const dataName = btn.dataset.dataName;
-        
-        if (confirm(`Are you sure you want to delete "${dataName}"?`)) {
-            // Make delete request
-            fetch(`/data-center/${dataId}`, {
-                method: 'DELETE',
+            // console.log("DATA ID FROM BUTTON:", dataId);
+
+            document.getElementById('dataId').value = dataId;
+            document.getElementById('newStatus').value = status || '';
+
+            if (projectIds) {
+                let ids = projectIds.split(',');
+                $('#visitProjects').val(ids).trigger('change');
+            } else {
+                $('#visitProjects').val(null).trigger('change');
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById('statusUpdateModal'));
+            modal.show();
+        }
+    });
+
+    // Show status update modal
+    function updateDataStatus() {
+
+        const dataId = document.getElementById('dataId').value.trim();
+        const newStatus = document.getElementById('newStatus').value;
+        const comment = document.getElementById('comment').value.trim();
+
+        if (!dataId) {
+            toastr.error('Data ID missing. Try again.');
+            return;
+        }
+
+        if (!newStatus) {
+            toastr.error('Please select status');
+            return;
+        }
+
+        if (newStatus === 'REJECTED' && !comment) {
+            toastr.error('Remark is mandatory for Rejected status');
+            return;
+        }
+
+        fetch(`/data-center/${dataId}`, {
+                method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Content-Type': 'application/json'
-                }
-            }).then(response => {
-                if (response.ok) {
-                    location.reload();
-                } else {
-                    alert('Error deleting data');
-                }
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    status: newStatus,
+                    comment: comment
+                })
+            })
+            .then(res => {
+                if (!res.ok) throw new Error("Request failed");
+                return res.json();
+            })
+            .then(data => {
+                toastr.success(data.message || 'Status updated successfully');
+
+                const modal = bootstrap.Modal.getInstance(document.getElementById('statusUpdateModal'));
+                modal.hide();
+            })
+            .catch(err => {
+                console.error("ERROR:", err);
+                toastr.error('Update failed');
             });
-        }
     }
-});
 
-// Export functionality
-document.getElementById('btnExportExcel').addEventListener('click', function() {
-    // Implement Excel export
-    alert('Excel export functionality to be implemented');
-});
+    // Edit Data
+    function editData(dataId) {
+        window.location.href = `/data-center/${dataId}/edit`;
+    }
 
-document.getElementById('btnExportPDF').addEventListener('click', function() {
-    // Implement PDF export
-    alert('PDF export functionality to be implemented');
-});
+    // Delete Data
+    document.addEventListener('click', function(event) {
+
+        if (event.target.closest('.delete-data-btn')) {
+
+            const btn = event.target.closest('.delete-data-btn');
+            const dataId = btn.dataset.dataId;
+
+            Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                })
+                .then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/data-center/${dataId}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json'
+                                }
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+
+                                if (data.success) {
+                                    Swal.fire('Deleted!', data.message, 'success');
+
+                                    setTimeout(() => {
+                                        location.reload();
+                                    }, 1000);
+
+                                } else {
+                                    Swal.fire('Error!', data.message, 'error');
+                                }
+                            })
+                            .catch(error => {
+                                toastr.clear();
+                                console.error('Delete error:', error);
+
+                                Swal.fire('Error!', 'Something went wrong.', 'error');
+                            });
+                    }
+
+                });
+        }
+    });
+
+
+    // Export functionality
+    document.getElementById('btnExportExcel').addEventListener('click', function() {
+        // Implement Excel export
+        alert('Excel export functionality to be implemented');
+    });
+
+    document.getElementById('btnExportPDF').addEventListener('click', function() {
+        // Implement PDF export
+        alert('PDF export functionality to be implemented');
+    });
+
+    function showComment(id) {
+        console.log("Fetching comments for ID:", id);
+
+        fetch(`/data-center/comments/${id}`)
+            .then(res => res.json())
+            .then(data => {
+
+                if (!data.success) {
+                    toastr.error('Failed to load comments');
+                    return;
+                }
+
+                let html = '';
+
+                if (data.comments.length === 0) {
+                    html = `<tr><td colspan="5" class="text-center">No comments found</td></tr>`;
+                } else {
+
+                    data.comments.forEach((item, index) => {
+
+                        html += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${item.remark ?? '-'}</td>
+                            <td>${item.status ?? '-'}</td>
+                            <td>${item.created_at ?? '-'}</td>
+                            <td>${item.user_name ?? '-'}</td>
+                        </tr>
+                    `;
+                    });
+                }
+
+                document.getElementById('commentList').innerHTML = html;
+
+                let modal = new bootstrap.Modal(document.getElementById('commentModal'));
+                modal.show();
+            })
+            .catch(err => {
+                console.error(err);
+                toastr.error('Error loading comments');
+            });
+    }
 </script>
 
 @endsection

@@ -210,8 +210,7 @@ class LeadController extends Controller
                         ->orWhere('phone', '+91' . $phone)
                         ->first();
 
-                    if ($existingLead) 
-                    {
+                    if ($existingLead) {
                         $duplicate++;
                         continue;
                     }
@@ -398,121 +397,6 @@ class LeadController extends Controller
         ));
     }
 
-    // public function allocateLeads(Request $request)
-    // {
-    //     $validator = Validator::make($request->all(), [
-    //         'user' => 'required|exists:users,id',
-    //         'checked' => 'required|array',
-    //         'checked.*' => 'exists:leads,id'
-    //     ]);
-
-    //     if ($validator->fails()) 
-    //     {
-    //         foreach ($validator->errors()->all() as $error) 
-    //         {
-    //             Flasher::addError($error);
-    //         }
-    //         return redirect()->back();
-    //     }
-
-    //     $userType = Session::get('user_type');
-    //     $userId = Session::get('user_id');
-    //     $allocatedTo = DB::table('users')->where('id', $request->user)->first();
-
-    //     if (!$allocatedTo) 
-    //     {
-    //         Flasher::addError('User not found');
-    //         return redirect()->back();
-    //     }
-    //     $status = null;
-    //     $unAllocated = 0;
-
-    //     if ($userType == 'admin') 
-    //     {
-    //         if ($request->user == $userId) 
-    //         {
-    //             $status = 'NEW LEAD';
-    //             $unAllocated = 0; 
-    //         } 
-    //         elseif ($allocatedTo->role == 'team_manager') 
-    //         {
-    //             $status = 'allocated_lead';
-    //             $unAllocated = 1;
-    //         } 
-    //         elseif ($allocatedTo->role == 'salesman') 
-    //         {
-    //             $status = 'NEW LEAD';
-    //             $unAllocated = 0;
-    //         }
-    //     } 
-    //     elseif ($userType == 'team_manager') 
-    //     {
-    //         if ($request->user == $userId) 
-    //         {
-    //             $status = 'NEW LEAD';
-    //             $unAllocated = 0;
-    //         } 
-    //         elseif ($allocatedTo->role == 'salesman') 
-    //         {
-    //             $status = 'NEW LEAD';
-    //             $unAllocated = 0;
-    //         }
-    //     }
-    //     elseif ($userType == 'salesman') 
-    //     {
-    //         if ($allocatedTo->role == 'salesman') 
-    //         {
-    //             $status = 'NEW LEAD';
-    //             $unAllocated = 0;
-    //         } 
-    //         else 
-    //         {
-    //             Flasher::addError('Salesman can only allocate leads to other salesmen.');
-    //             return redirect()->back();
-    //         }
-    //     } 
-    //     else 
-    //     {
-    //         Flasher::addError('Invalid user role.');
-    //         return redirect()->back();
-    //     }
-
-    //     try 
-    //     {
-    //         DB::beginTransaction();
-    //         DB::table('leads')
-    //             ->whereIn('id', $request->checked)
-    //             ->update([
-    //                 'allocated_date' => now(),
-    //                 'unallocated_lead' => $unAllocated,
-    //                 'is_allocated' => $userId,
-    //                 'user_id' => $request->user,
-    //                 'status' => $status,
-    //                 'updated_date' => now()
-    //             ]);
-
-    //         foreach ($request->checked as $leadId) 
-    //         {
-    //             DB::table('lead_comments')->insert([
-    //                 'lead_id' => $leadId,
-    //                 'user_id' => $userId,
-    //                 'comment' => 'Lead allocated to ' . $allocatedTo->name,
-    //                 'status' => 'ALLOCATED',
-    //                 'created_date' => now()
-    //             ]);
-    //         }
-
-    //         DB::commit();
-    //         Flasher::addSuccess('Leads allocated successfully!');
-    //         return redirect()->route('lead.allocate');
-    //     } 
-    //     catch (\Exception $e) 
-    //     {
-    //         DB::rollBack();
-    //         Flasher::addError('Error allocating leads: ' . $e->getMessage());
-    //         return redirect()->back();
-    //     }
-    // }
 
     public function allocateLeads(Request $request)
     {
@@ -564,6 +448,9 @@ class LeadController extends Controller
                 } elseif ($allocatedTo->role == 'salesman') {
                     $status = 'NEW LEAD';
                     $unAllocated = 0;
+                } elseif ($allocatedTo->role == 'team_manager') {
+                    $status = 'allocated_lead';
+                    $unAllocated = 1;
                 }
             } elseif ($userType == 'salesman') {
                 if ($allocatedTo->role == 'salesman') {
@@ -706,21 +593,15 @@ class LeadController extends Controller
     {
         $length = $request->query('length', 10);
 
-        if (in_array(strtolower($lead_name), ['booked', 'completed', 'cancelled'])) 
-        {
+        if (in_array(strtolower($lead_name), ['booked', 'completed', 'cancelled'])) {
             $conversionType = ucfirst(strtolower($lead_name));
 
-            if ($conversionType === 'Booked') 
-            {
+            if ($conversionType === 'Booked') {
                 $query = $this->getLeadsByStatus('BOOKED', $lead_name);
-            } 
-            else 
-            {
+            } else {
                 $query = $this->getLeadsByConversionType($conversionType);
             }
-        } 
-        else 
-        {
+        } else {
             $query = $this->getLeadsByStatus($status, $lead_name);
         }
         $query = $this->applyLeadFilters($query, $request);
@@ -1015,21 +896,16 @@ class LeadController extends Controller
         $users = [];
         $length = $request->query('length', 20);
         $requestedLength = $length;
-        if ($user_role == 'admin') 
-        {
+        if ($user_role == 'admin') {
             $users = DB::table('users')
                 ->where('is_active', 1)
                 ->get();
-        } 
-        else 
-        {
+        } else {
             $childIdArray = array_filter(explode(',', $child_ids));
             $users = DB::table('users')
-                ->where(function ($query) use ($childIdArray, $user_role, $userId) 
-                {
+                ->where(function ($query) use ($childIdArray, $user_role, $userId) {
                     $query->whereIn('id', $childIdArray)
-                        ->orWhere(function ($q) use ($user_role, $userId) 
-                        {
+                        ->orWhere(function ($q) use ($user_role, $userId) {
                             $q->where('role', $user_role)
                                 ->where('id', '!=', $userId);
                         });
@@ -1092,8 +968,7 @@ class LeadController extends Controller
             'BOOKED'
         ];
 
-        if ($request->has('user') && $request->has('status')) 
-        {
+        if ($request->has('user') && $request->has('status')) {
             $selected_user = $request->user;
             $selected_status = $request->status;
             $from_date = $request->from_date;
@@ -1158,7 +1033,7 @@ class LeadController extends Controller
 
         $projects = DB::table('projects')->get();
         $cities = DB::table('state_district')->orderBy('District', 'asc')->get();
-        
+
         return view('lead.transfer-lead', compact(
             'lead_name',
             'leads',
@@ -1680,67 +1555,54 @@ class LeadController extends Controller
 
     protected function applyLeadFilters($query, Request $request)
     {
-        if ($request->filled('search')) 
-        {
+        if ($request->filled('search')) {
             $searchTerm = $request->search;
-            $query->where(function ($q) use ($searchTerm) 
-            {
+            $query->where(function ($q) use ($searchTerm) {
                 $q->where('a.name', 'LIKE', '%' . $searchTerm . '%')
                     ->orWhere('a.email', 'LIKE', '%' . $searchTerm . '%')
                     ->orWhere('a.phone', 'LIKE', '%' . $searchTerm . '%');
-                if (is_numeric($searchTerm)) 
-                {
+                if (is_numeric($searchTerm)) {
                     $q->orWhere('a.id', $searchTerm);
                 }
             });
         }
-        if ($request->filled('source')) 
-        {
+        if ($request->filled('source')) {
             $query->where('a.source', $request->source);
         }
 
-        if ($request->filled('user')) 
-        {
+        if ($request->filled('user')) {
             $query->where('a.user_id', $request->user);
         }
 
-        if ($request->filled('status')) 
-        {
+        if ($request->filled('status')) {
             $query->where('a.status', $request->status);
         }
 
-        if($request->filled('type'))
-        {
+        if ($request->filled('type')) {
             $query->where('a.type', $request->type);
         }
-        
-        if ($request->filled('classification')) 
-        {
+
+        if ($request->filled('classification')) {
             $query->where('a.classification', $request->classification);
         }
 
-        if ($request->filled('agent')) 
-        {
+        if ($request->filled('agent')) {
             $query->where('a.user_id', $request->agent);
         }
 
-        if ($request->filled('project')) 
-        {
+        if ($request->filled('project')) {
             $query->where('a.project_id', $request->project);
         }
 
-        if ($request->filled('date_from')) 
-        {
+        if ($request->filled('date_from')) {
             $query->whereDate('a.lead_date', '>=', $request->date_from);
         }
 
-        if ($request->filled('date_to')) 
-        {
+        if ($request->filled('date_to')) {
             $query->whereDate('a.lead_date', '<=', $request->date_to);
         }
 
-        if ($request->filled('lead_days')) 
-        {
+        if ($request->filled('lead_days')) {
             $days = (int) $request->lead_days;
             $query->whereDate(
                 'a.lead_date',
@@ -1749,33 +1611,24 @@ class LeadController extends Controller
             );
         }
 
-        if ($request->filled('shared_filter')) 
-        {
+        if ($request->filled('shared_filter')) {
             $current_user_id = Session::get('user_id');
             $sharedFilter = $request->shared_filter;
 
-            if ($sharedFilter == 'shared_by_me') 
-            {
+            if ($sharedFilter == 'shared_by_me') {
                 $query->where('a.user_id', $current_user_id)
                     ->whereNotNull('a.lead_shared_with')
                     ->where('a.lead_shared_with', '!=', '');
-            } 
-            elseif ($sharedFilter == 'shared_with_me') 
-            {
-                $query->where(function ($q) use ($current_user_id) 
-                {
+            } elseif ($sharedFilter == 'shared_with_me') {
+                $query->where(function ($q) use ($current_user_id) {
                     $q->whereNotNull('a.lead_shared_with')
-                        ->where(function ($q2) use ($current_user_id) 
-                        {
+                        ->where(function ($q2) use ($current_user_id) {
                             $q2->where('a.lead_shared_with', 'LIKE', '%' . $current_user_id . '%')
                                 ->orWhereRaw("FIND_IN_SET(?, a.lead_shared_with)", [$current_user_id]);
                         });
                 });
-            } 
-            elseif ($sharedFilter == 'not_shared') 
-            {
-                $query->where(function ($q) 
-                {
+            } elseif ($sharedFilter == 'not_shared') {
+                $query->where(function ($q) {
                     $q->whereNull('a.lead_shared_with')
                         ->orWhere('a.lead_shared_with', '');
                 });
@@ -2544,72 +2397,53 @@ class LeadController extends Controller
         ];
 
         $totalWeight = array_sum($weights);
-        if (!empty($lead->type) && !empty($property->property_type)) 
-        {
-            if (strcasecmp(trim($lead->type), trim($property->property_type)) == 0) 
-            {
+        if (!empty($lead->type) && !empty($property->property_type)) {
+            if (strcasecmp(trim($lead->type), trim($property->property_type)) == 0) {
                 $score += $weights['type'];
-            } 
-            elseif (
+            } elseif (
                 stripos($property->property_type, $lead->type) !== false ||
                 stripos($lead->type, $property->property_type) !== false
-            ) 
-            {
+            ) {
                 $score += $weights['type'] * 0.5;
             }
         }
-        if ($category && !empty($property->property_category)) 
-        {
-            if (strcasecmp(trim($category->name), trim($property->property_category)) == 0) 
-            {
+        if ($category && !empty($property->property_category)) {
+            if (strcasecmp(trim($category->name), trim($property->property_category)) == 0) {
                 $score += $weights['category'];
-            } 
-            elseif (
+            } elseif (
                 stripos($property->property_category, $category->name) !== false
-            ) 
-            {
+            ) {
                 $score += $weights['category'] * 0.5;
             }
         }
-        if ($subCategory && !empty($property->property_sub_category)) 
-        {
-            if (strcasecmp(trim($subCategory->name), trim($property->property_sub_category)) == 0) 
-            {
+        if ($subCategory && !empty($property->property_sub_category)) {
+            if (strcasecmp(trim($subCategory->name), trim($property->property_sub_category)) == 0) {
                 $score += $weights['sub_category'];
-            } 
-            elseif (
+            } elseif (
                 stripos($property->property_sub_category, $subCategory->name) !== false
-            ) 
-            {
+            ) {
                 $score += $weights['sub_category'] * 0.5;
             }
         }
 
         $locationMatch = false;
-        if (!empty($lead->property_state) && !empty($property->state)) 
-        {
-            if (stripos($property->state, $lead->property_state) !== false) 
-            {
+        if (!empty($lead->property_state) && !empty($property->state)) {
+            if (stripos($property->state, $lead->property_state) !== false) {
                 $locationMatch = true;
             }
         }
 
-        if (!$locationMatch && !empty($lead->property_city) && !empty($property->city)) 
-        {
-            if (stripos($property->city, $lead->property_city) !== false) 
-            {
+        if (!$locationMatch && !empty($lead->property_city) && !empty($property->city)) {
+            if (stripos($property->city, $lead->property_city) !== false) {
                 $locationMatch = true;
             }
         }
 
-        if ($locationMatch) 
-        {
+        if ($locationMatch) {
             $score += $weights['location'];
         }
-        if (!empty($lead->budget) && !empty($property->budget_price)) 
-        {
-            if ($this->isBudgetMatch($lead->budget, $property->budget_price)) 
-            {
+        if (!empty($lead->budget) && !empty($property->budget_price)) {
+            if ($this->isBudgetMatch($lead->budget, $property->budget_price)) {
                 $score += $weights['budget'];
             }
         }

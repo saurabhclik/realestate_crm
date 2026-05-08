@@ -339,7 +339,7 @@ class StaffManagementController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
                 'mobile' => $request->mobile,
-                'role' => $oldRole,
+                'role' => $newRole,
                 'designation_id' => $request->designation ?? null,
                 'tm_id' => $request->reporting_manager ?? null,
                 'updated_date' => now(),

@@ -488,8 +488,11 @@ Route::middleware(['check.login', 'reception.only'])->group(function () {
         Route::post('/import/upload', 'importUpload')->name('data-center.import.upload');
         Route::get('/{id}/edit', 'edit')->name('data-center.edit');
         Route::post('/{id}', 'update')->name('data-center.update');
+        Route::put('/status/{id}', 'updateStatusApi')->name('data-center.update-status');
         Route::delete('/{id}', 'destroy')->name('data-center.destroy');
-       Route::get('/comments/{id}', 'getComments')->name('data-center.comments');
+        Route::get('/comments/{id}', 'getComments')->name('data-center.comments');
+        Route::post('/comments/{id}', 'addComment')->name('data-center.add-comment');
+        Route::get('/converted/leads', 'getConvertedLeads')->name('data-center.converted-leads');
 
     });
 

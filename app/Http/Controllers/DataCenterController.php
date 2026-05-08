@@ -20,7 +20,7 @@ class DataCenterController extends Controller
         $this->dataCenterService = $dataCenterService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $categoryMap = DB::table('inv_catg')->pluck('name', 'id')->toArray();
         $subCategoryMap = DB::table('inv_subcatg')->pluck('name', 'id')->toArray();
@@ -28,11 +28,61 @@ class DataCenterController extends Controller
         $sourceMap = DB::table('sources')->pluck('name', 'id')->toArray();
 
         $projects = DB::table('projects')->get();
-        $dataCenters = DB::table('data_center')->get()->map(function ($row) use ($categoryMap, $subCategoryMap, $projectMap, $sourceMap) {
+
+        // Start query (NO get() here)
+        $query = DB::table('data_center')
+            ->where(function ($q) {
+                $q->where('is_converted', 0)
+                    ->orWhereNull('is_converted');
+            });
+
+        //SEARCH FILTER
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                    ->orWhere('phone', 'like', "%$search%")
+                    ->orWhere('email', 'like', "%$search%");
+            });
+        }
+
+        // STATUS FILTER
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // SOURCE FILTER
+        if ($request->filled('source')) {
+            $query->where('source', $request->source);
+        }
+
+        // DATE FILTER
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        // PAGINATION LENGTH
+        $length = $request->get('length', 10);
+
+        if ($length === 'all') {
+            $length = $query->count();
+        }
+
+        // PAGINATE
+        $dataCenters = $query->orderBy('id', 'desc')->paginate($length)->withQueryString();
+
+        // MAP AFTER PAGINATION (IMPORTANT)
+        $dataCenters->getCollection()->transform(function ($row) use ($categoryMap, $subCategoryMap, $projectMap, $sourceMap) {
 
             if (!empty($row->source)) {
                 $row->source = $sourceMap[$row->source] ?? $row->source;
             }
+
             $row->project_ids = $row->project_name;
 
             if (!empty($row->project_name)) {
@@ -42,9 +92,9 @@ class DataCenterController extends Controller
                     return $projectMap[$projectId] ?? $projectId;
                 }, $projectIds);
 
-                // show names in table
                 $row->project_name = implode(', ', $resolvedNames);
             }
+
             return $row;
         });
 
@@ -63,6 +113,13 @@ class DataCenterController extends Controller
 
     public function store(Request $request)
     {
+        $total = DB::table('data_center')->count();
+
+        if ($total >= 500) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Data Center limit reached (500 records only). Please delete old data.');
+        }
         $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'required|digits:10|unique:data_center,phone'
@@ -191,6 +248,7 @@ class DataCenterController extends Controller
 
     public function importUpload(Request $request)
     {
+
         if (session('user_type') !== 'admin') {
             return redirect()->back()->with('error', 'Only admin users can upload bulk data.');
         }
@@ -219,12 +277,27 @@ class DataCenterController extends Controller
         $csv->setHeaderOffset(0);
         $records = $csv->getRecords();
 
+        $currentCount = DB::table('data_center')->count();
+
+        // Block if already 500
+        if ($currentCount >= 500) {
+            return redirect()->back()->with('error', 'Data Center already has 500 records.');
+        }
+
+        // Convert iterator to array
+        $recordsArray = iterator_to_array($records);
+
+        // Block if file > 500 rows
+        if (count($recordsArray) > 500) {
+            return redirect()->back()->with('error', 'You can upload maximum 500 records at a time.');
+        }
+
         $success = 0;
         $duplicate = 0;
         $errors = [];
         $validationErrors = [];
 
-        foreach ($records as $index => $row) {
+        foreach ($recordsArray as $index => $row) {
             $rowNumber = $index + 2;
 
             if (empty(array_filter($row))) {
@@ -462,6 +535,130 @@ class DataCenterController extends Controller
         }
     }
 
+    public function updateStatusApi(Request $request, $id)
+    {
+        DB::beginTransaction();
+
+        try {
+            $request->validate([
+                'status' => 'required|string',
+                'comment' => 'nullable|string',
+                'remind_date' => 'nullable|date',
+                'remind_time' => 'nullable',
+                'is_converted' => 'nullable'
+            ]);
+
+            $updateData = [
+                'status' => $request->status,
+            ];
+
+            if ($request->filled('comment')) {
+                $updateData['comment'] = $request->comment;
+            }
+
+            if ((int)$request->is_converted === 1) {
+
+                $alreadyConverted = DB::table('data_center')
+                    ->where('id', $id)
+                    ->where('is_converted', 1)
+                    ->exists();
+
+                if ($alreadyConverted) {
+                    DB::rollBack(); // ✅ FIX
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Already converted'
+                    ], 400);
+                }
+
+                $data = DB::table('data_center')->find($id);
+
+                if (!$data) {
+                    throw new \Exception('Record not found');
+                }
+
+                $userId = session('user_id') ?? 1;
+
+                DB::table('leads')->insert([
+                    'name' => $data->name ?? '',
+                    'email' => $data->email ?? '',
+                    'phone' => $data->phone ?? '',
+
+                    'property_city' => $data->city ?? '',
+                    'property_state' => $data->state ?? '',
+
+                    'source' => $data->source ?? '',
+                    'type' => $data->property_type ?? '',
+
+                    'catg_id' => $catgId ?? null,
+                    'sub_catg_id' => $subCatgId ?? null,
+
+                    'project_id' => $data->project_name ?? '',
+                    'budget' => $data->budget ?? '',
+                    'last_comment' => $request->comment ?? '',
+
+                    'status' => 'NEW LEAD',
+                    'user_id' => $userId,
+
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                $updateData['is_converted'] = 1;
+            }
+
+            DB::table('data_center')->where('id', $id)->update($updateData);
+
+            DB::table('data_center_history')->insert([
+                'data_center_id' => $id,
+                'user_id' => session('user_id'),
+                'remark' => $request->comment,
+                'remind_date' => $request->remind_date,
+                'status' => $request->status,
+                'remind_time' => $request->remind_time,
+            ]);
+
+            DB::commit();
+
+            //IMPORTANT RESPONSE
+            $data = DB::table('data_center')->find($id);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Status updated successfully',
+                'data' => $data
+            ]);
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getConvertedLeads()
+    {
+        try {
+            $convertedLeads = DB::table('data_center')
+                ->where('is_converted', 1)
+                ->orderBy('updated_at', 'desc')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'leads' => $convertedLeads,
+                'count' => $convertedLeads->count()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch converted leads'
+            ], 500);
+        }
+    }
 
     public function getComments($id)
     {

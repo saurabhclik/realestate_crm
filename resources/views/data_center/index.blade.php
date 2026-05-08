@@ -5,6 +5,28 @@
 @include('modals.data-status-update')
 @include('modals.view-data-comment')
 
+<div class="modal fade" id="addCommentModal" tabindex="-1" aria-labelledby="addCommentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="addCommentModalLabel">Add Comment</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="addCommentDataId" value="">
+                <div class="mb-3">
+                    <label for="addCommentRemark" class="form-label">Comment</label>
+                    <textarea class="form-control" id="addCommentRemark" rows="4" placeholder="Enter your comment"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitDataCenterComment()">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
     .add-project-btn {
         padding: 2px 6px;
@@ -297,6 +319,13 @@
                                                         <i class="fas fa-sync-alt text-info"></i>
                                                     </button>
 
+                                                    <button type="button" class="btn btn-xs btn-soft-light add-comment-btn"
+                                                        data-id="{{ $row->id }}"
+                                                        data-bs-toggle="tooltip"
+                                                        title="Add Comment">
+                                                        <i class="fas fa-comments text-info"></i>
+                                                    </button>
+
                                                     @if(session('user_type') == 'admin')
                                                     <button class="btn btn-xs btn-soft-light delete-data-btn"
                                                         data-data-id="{{ $row->id }}"
@@ -337,7 +366,7 @@
                                         $status = strtolower(trim($row->status ?? 'pending'));
                                         $statusClass = $status === 'approved' ? 'success' : ($status === 'rejected' || $status === 'reject' ? 'danger' : 'warning');
                                         @endphp
-                                        <span class="badge bg-{{ $statusClass }} text-capitalize">
+                                        <span class="cust-badge {{ $statusClass }} text-dark">
                                             {{ $row->status ?? 'pending' }}
                                         </span>
                                     </td>
@@ -385,7 +414,7 @@
                                                     {!! $short !!}
                                                 </span>
                                                 @if(!empty($row->comment))
-                                                <a href="javascript:void(0);" onclick="showComment('{{ $row->id }}')" class="text-primary small">
+                                                <a href="javascript:void(0);" onclick="showDataCenterComment('{{ $row->id }}')" class="text-primary small">
                                                     View more
                                                 </a>
                                                 @endif
@@ -399,7 +428,7 @@
                     </form>
 
                     <div class="d-flex justify-content-end mt-3">
-
+                        {{ $dataCenters->links() }}
                     </div>
                 </div>
             </div>
@@ -407,25 +436,8 @@
     </div>
 </div>
 
-<!-- Comment Modal -->
-<div class="modal fade" id="commentModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Full Comment</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="fullCommentText">
-                <!-- Comment will be displayed here -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
     document.addEventListener('click', function(e) {
         if (e.target.closest('.update-status-btn')) {
@@ -459,43 +471,50 @@
         const dataId = document.getElementById('dataId').value.trim();
         const newStatus = document.getElementById('newStatus').value;
         const comment = document.getElementById('comment').value.trim();
+        const remindDate = document.getElementById('remindDate').value;
+        const remindTime = document.getElementById('remindTime').value;
 
-        if (!dataId) {
-            toastr.error('Data ID missing. Try again.');
-            return;
-        }
+        const payload = {
+            status: newStatus,
+            comment: comment,
+            remind_date: remindDate,
+            remind_time: remindTime,
+            is_converted: document.getElementById('isConverted').checked ? 1 : 0
+        };
 
-        if (!newStatus) {
-            toastr.error('Please select status');
-            return;
-        }
+        console.log("Payload:", payload);
 
-        if (newStatus === 'REJECTED' && !comment) {
-            toastr.error('Remark is mandatory for Rejected status');
-            return;
-        }
-
-        fetch(`/data-center/${dataId}`, {
-                method: 'POST',
+        fetch(`/data-center/status/${dataId}`, {
+                method: 'PUT',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({
-                    status: newStatus,
-                    comment: comment
-                })
+                body: JSON.stringify(payload)
             })
-            .then(res => {
-                if (!res.ok) throw new Error("Request failed");
-                return res.json();
-            })
+            .then(res => res.json())
             .then(data => {
-                toastr.success(data.message || 'Status updated successfully');
 
-                const modal = bootstrap.Modal.getInstance(document.getElementById('statusUpdateModal'));
-                modal.hide();
+                if (data.success) {
+
+                    toastr.success(data.message || 'Status updated successfully');
+
+                    // redirect if converted
+                    if (payload.is_converted === 1) {
+                        setTimeout(() => {
+                            window.location.href = '/lead/all-lead';
+                        }, 800);
+                    } else {
+                        setTimeout(() => {
+                            location.reload();
+                        }, 500);
+                    }
+
+                } else {
+                    toastr.error(data.message || 'Failed to update status');
+                }
+
             })
             .catch(err => {
                 console.error("ERROR:", err);
@@ -508,9 +527,21 @@
         window.location.href = `/data-center/${dataId}/edit`;
     }
 
-    // Delete Data
+    // Add Comment
     document.addEventListener('click', function(event) {
+        if (event.target.closest('.add-comment-btn')) {
+            const btn = event.target.closest('.add-comment-btn');
+            const dataId = btn.dataset.id;
 
+            document.getElementById('addCommentDataId').value = dataId;
+            document.getElementById('addCommentRemark').value = '';
+
+            const addCommentModal = new bootstrap.Modal(document.getElementById('addCommentModal'));
+            addCommentModal.show();
+            return;
+        }
+
+        // Delete Data
         if (event.target.closest('.delete-data-btn')) {
 
             const btn = event.target.closest('.delete-data-btn');
@@ -573,7 +604,7 @@
         alert('PDF export functionality to be implemented');
     });
 
-    function showComment(id) {
+    function showDataCenterComment(id) {
         console.log("Fetching comments for ID:", id);
 
         fetch(`/data-center/comments/${id}`)
@@ -599,7 +630,6 @@
                             <td>${item.remark ?? '-'}</td>
                             <td>${item.status ?? '-'}</td>
                             <td>${item.created_at ?? '-'}</td>
-                            <td>${item.user_name ?? '-'}</td>
                         </tr>
                     `;
                     });
@@ -615,6 +645,76 @@
                 toastr.error('Error loading comments');
             });
     }
+
+    function submitDataCenterComment() {
+        const dataId = document.getElementById('addCommentDataId').value;
+        const remark = document.getElementById('addCommentRemark').value.trim();
+
+        if (!remark) {
+            toastr.warning('Please enter comment here');
+            return;
+        }
+
+        fetch(`/data-center/comments/${dataId}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ remark })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const addCommentModal = bootstrap.Modal.getInstance(document.getElementById('addCommentModal'));
+                    if (addCommentModal) {
+                        addCommentModal.hide();
+                    }
+
+                    toastr.success(data.message || 'Comment added successfully');
+                    showDataCenterComment(dataId);
+
+                    const row = document.querySelector(`tr[data-id="${dataId}"]`);
+                    if (row) {
+                        const commentCell = row.cells[15];
+                        if (commentCell) {
+                            const shortComment = remark.length > 30 ? remark.substring(0, 30) + '...' : remark;
+                            commentCell.innerHTML = `
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0 me-2">
+                                        <i class="fas fa-comment-alt text-muted"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <span class="d-block" title="${remark}">${shortComment}</span>
+                                        <a href="javascript:void(0);" onclick="showDataCenterComment('${dataId}')" class="text-primary small">View more</a>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }
+                } else {
+                    toastr.error(data.message || 'Failed to add comment');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                toastr.error('Error adding comment');
+            });
+    }
+
+    // Handle is_converted checkbox
+    document.addEventListener('DOMContentLoaded', function() {
+        const isConvertedCheckbox = document.getElementById('isConverted');
+
+        if (isConvertedCheckbox) {
+            isConvertedCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    toastr.info('This lead will be added to New Leads section after update', 'Converting Lead');
+                }
+            });
+        }
+    });
 </script>
 
 @endsection

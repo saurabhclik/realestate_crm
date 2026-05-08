@@ -1164,15 +1164,83 @@ class LeadController extends Controller
         return view('lead.transfer-lead-history', compact('leads', 'users'));
     }
 
-    public function transfer_lead()
+    // public function transfer_lead()
+    // {
+    //     $lead_name = 'transfer_lead';
+    //     $users = DB::table('users')->select('id', 'name')->get();
+
+    //     $leads = DB::table('transfer_leads')
+    //         ->join('leads', 'transfer_leads.lead_id', '=', 'leads.id')
+    //         ->leftJoin('users as from_user', 'transfer_leads.from', '=', 'from_user.id')
+    //         ->leftJoin('users as to_user', 'transfer_leads.to', '=', 'to_user.id')
+    //         ->select(
+    //             'transfer_leads.*',
+    //             'leads.name as lead_name',
+    //             'leads.phone as lead_phone',
+    //             'leads.status as lead_status',
+    //             'from_user.name as from_user_name',
+    //             'to_user.name as to_user_name'
+    //         )
+    //         ->orderBy('transfer_leads.created_at', 'desc')
+    //         ->paginate(10);
+
+    //     return view('lead.transfer-lead-history', compact('lead_name', 'leads', 'users'));
+    // }
+    public function transfer_lead(Request $request)
     {
         $lead_name = 'transfer_lead';
+
+        $userId   = Session::get('user_id');
+        $userType = Session::get('user_type');
+        $childIds = Session::get('child_ids');
+
+        //  Normalize child IDs
+        $childIdsArr = is_array($childIds) ? $childIds : explode(',', $childIds);
+        $childIdsArr = array_filter(array_map('trim', $childIdsArr));
+
+        //  Role-based hierarchy
+        if ($userType === 'admin') {
+            $accessibleUserIds = DB::table('users')->pluck('id')->toArray();
+        } elseif ($userType === 'team_manager') {
+            $accessibleUserIds = array_merge([$userId], $childIdsArr);
+        } else {
+            // salesman
+            $accessibleUserIds = [$userId];
+        }
+
+        $accessibleUserIds = array_values(array_unique($accessibleUserIds));
+
+        // Users for filter dropdown
         $users = DB::table('users')->select('id', 'name')->get();
 
-        $leads = DB::table('transfer_leads')
+        // Main query (ONLY RECEIVED LEADS → Transferred Leads)
+        $query = DB::table('transfer_leads')
             ->join('leads', 'transfer_leads.lead_id', '=', 'leads.id')
             ->leftJoin('users as from_user', 'transfer_leads.from', '=', 'from_user.id')
             ->leftJoin('users as to_user', 'transfer_leads.to', '=', 'to_user.id')
+
+            // IMPORTANT: match dashboard logic
+            ->whereIn('transfer_leads.to', $accessibleUserIds);
+
+        // Filters (optional but now working)
+        if ($request->filled('from_user')) {
+            $query->where('transfer_leads.from', $request->from_user);
+        }
+
+        if ($request->filled('to_user')) {
+            $query->where('transfer_leads.to', $request->to_user);
+        }
+
+        if ($request->filled('from_date')) {
+            $query->whereDate('transfer_leads.created_at', '>=', $request->from_date);
+        }
+
+        if ($request->filled('to_date')) {
+            $query->whereDate('transfer_leads.created_at', '<=', $request->to_date);
+        }
+
+        //  Final data
+        $leads = $query
             ->select(
                 'transfer_leads.*',
                 'leads.name as lead_name',
@@ -1184,7 +1252,11 @@ class LeadController extends Controller
             ->orderBy('transfer_leads.created_at', 'desc')
             ->paginate(10);
 
-        return view('lead.transfer-lead-history', compact('lead_name', 'leads', 'users'));
+        return view('lead.transfer-lead-history', compact(
+            'lead_name',
+            'leads',
+            'users'
+        ));
     }
 
     public function getCategories($type)

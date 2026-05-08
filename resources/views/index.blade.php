@@ -636,7 +636,7 @@ $totalOthersLead = ($leadStats->total_lead ?? 0.00)
                                             </div>
                                             <div class="col-6">
                                                 <a href="{{ route('lead.transfer_lead') }}" class="text-decoration-none" style="cursor:pointer;">
-                                                    <h5 class="font-size-15">{{ $transferLeadCount ?? 0 }}</h5>
+                                                    <h5 class="font-size-15">{{ $transferredLeadCount ?? 0 }}</h5>
                                                     <p class="text-muted mb-0">Transferred Leads</p>
                                                 </a>
                                             </div>

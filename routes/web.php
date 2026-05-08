@@ -9,6 +9,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MasterController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\DataCenterController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\AttendanceController;
@@ -51,13 +52,11 @@ Route::get('/lead/get-subcategories/{category_id}', [LeadController::class, 'get
 Route::get('/lead/get-cities/{state}', [LeadController::class, 'getCities']);
 Route::get('projects/{token}', [ProjectController::class, 'showPublic'])->name('project.public.show');
 
-Route::prefix('mobile')->group(function () 
-{
+Route::prefix('mobile')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('mobile.login.form');
     Route::post('/login', [AuthController::class, 'login'])->name('mobile.login');
     Route::post('/save-token', [AuthController::class, 'saveFcmToken']);
-    Route::middleware(['check.mobile.login'])->group(function () 
-    {
+    Route::middleware(['check.mobile.login'])->group(function () {
         Route::get('/logout', [AuthController::class, 'logout'])->name('mobile.logout');
         Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('mobile.dashboard');
         Route::get('/dashboard-charts', [MobileDashboardController::class, 'getChartData'])->name('mobile.dashboard-charts');
@@ -111,10 +110,8 @@ Route::prefix('mobile')->group(function ()
     });
 });
 
-Route::middleware(['check.login', 'reception.only'])->group(function () 
-{
-    Route::prefix('setting')->controller(SettingsController::class)->group(function() 
-    {
+Route::middleware(['check.login', 'reception.only'])->group(function () {
+    Route::prefix('setting')->controller(SettingsController::class)->group(function () {
         Route::get('/profile', 'profile')->name('setting.profile');
         Route::post('/profile/update', 'updateProfile')->name('setting.update_profile');
         Route::post('/password/update', 'updatePassword')->name('setting.update_password');
@@ -122,11 +119,10 @@ Route::middleware(['check.login', 'reception.only'])->group(function ()
         Route::get('/login/log', 'login_log')->name('setting.login_log');
         Route::post('/update/logo', 'update_logo')->name('setting.update_logo');
         Route::get('/settings/ratings', [App\Http\Controllers\SettingsController::class, 'ratings'])
-        ->name('settings.ratings');
+            ->name('settings.ratings');
     });
 
-    Route::middleware(['check.software.type:universal_modules'])->group(function () 
-    {
+    Route::middleware(['check.software.type:universal_modules'])->group(function () {
         Route::resource('users', StaffManagementController::class);
         Route::post('/users/import', [StaffManagementController::class, 'import'])->name('users.import');
         Route::post('/users/update-status', [StaffManagementController::class, 'updateStatus'])->name('users.update-status');
@@ -144,17 +140,16 @@ Route::middleware(['check.login', 'reception.only'])->group(function ()
         Route::post('/category/store', [StaffManagementController::class, 'store_category'])->name('category.store');
     });
 
-    Route::middleware(['check.software.type:all_modules,real_state_only'])->group(function () 
-    {
+    Route::middleware(['check.software.type:all_modules,real_state_only'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
         Route::get('/search', [DashboardController::class, 'search'])->name('search');
         Route::post('/attendance-toggle', [DashboardController::class, 'toggle'])->name('attendance.toggle');
-        
+
         Route::get('/dashboard/get-chart-data', [DashboardController::class, 'getChartData'])->name('dashboard.chart-data');
         Route::get('/dashboard/export-chart', [DashboardController::class, 'exportChartData'])->name('dashboard.export-chart');
         Route::post('/dashboard/analytics', [DashboardController::class, 'getAnalyticsData'])->name('dashboard.analytics');
         Route::post('/dashboard/export-analytics', [DashboardController::class, 'exportAnalyticsData'])->name('dashboard.export.analytics');
-        
+
         Route::get('/role-permission/{secret}', [RolePermissionController::class, 'form'])->name('role.permission.form');
         Route::post('/role-permission/store', [RolePermissionController::class, 'store'])->name('role.permission.store');
         Route::post('/role-permission/update/{id}', [RolePermissionController::class, 'update'])->name('role.permission.update');
@@ -188,11 +183,11 @@ Route::middleware(['check.login', 'reception.only'])->group(function ()
         Route::get('/project/sub-category', [MasterController::class, 'project_sub_category'])->name('project.sub_category');
         Route::post('/sub-category', [MasterController::class, 'sub_category_store'])->name('sub_category.store');
         Route::put('/sub-category/{id}', [MasterController::class, 'sub_category_update'])->name('sub_category.update');
-        
+
         Route::get('/attendance', [MasterController::class, 'attendance'])->name('attendance');
         Route::post('/attendance', [MasterController::class, 'store'])->name('attendance.store');
         Route::put('/attendance/{id}', [MasterController::class, 'update'])->name('attendance.update');
-        
+
         Route::get('inquiry-question', [MasterController::class, 'inquiry_question'])->name('inquiry_question');
         Route::post('inquiry-question/store', [MasterController::class, 'inquiry_question_store'])->name('inquiry-question.store');
         Route::post('inquiry-question/update', [MasterController::class, 'inquiry_question_update'])->name('inquiry-question.update');
@@ -201,20 +196,19 @@ Route::middleware(['check.login', 'reception.only'])->group(function ()
         Route::post('/integration-settings', [MasterController::class, 'integration_store'])->name('integration.store');
         Route::put('/integration-settings/{id}', [MasterController::class, 'integration_update'])->name('integration.update');
         Route::delete('/integration-settings/{id}', [MasterController::class, 'integration_destroy'])->name('integration.destroy');
-        
+
         Route::get('/integrations/facebook/status', [IntegrationController::class, 'checkFacebookSyncStatus'])->name('integrations.facebook.status');
         Route::get('/get-project-name/{id}', [LeadController::class, 'getProjectName']);
         Route::post('/integration/auto-sync/{integrationType}', [IntegrationController::class, 'updateAutoSync'])->name('integration.auto-sync.update');
 
-        Route::prefix('lead')->controller(LeadController::class)->group(function () 
-        {
+        Route::prefix('lead')->controller(LeadController::class)->group(function () {
             Route::get('/add', 'add_lead')->name('lead.add');
-            Route::post('/import/upload','importUpload')->name('lead.import.upload');
+            Route::post('/import/upload', 'importUpload')->name('lead.import.upload');
             Route::get('/all-lead', 'all_lead')->name('lead.all_lead');
             Route::post('/generate-share-link', 'generateShareLink')->name('lead.generate-share-link');
-            Route::post('/update-status','updateStatus')->name('lead.updateStatus');
+            Route::post('/update-status', 'updateStatus')->name('lead.updateStatus');
             Route::post('/create', 'create_lead')->name('lead.index');
-            Route::get('/import','showImportForm')->name('lead.import');
+            Route::get('/import', 'showImportForm')->name('lead.import');
             Route::post('/import', 'processImport')->name('lead.import.process');
             Route::get('/allocate', 'allocate_lead')->name('lead.allocate');
             Route::post('allocate/lead', 'allocateLeads')->name('lead.allocate_user');
@@ -229,7 +223,7 @@ Route::middleware(['check.login', 'reception.only'])->group(function ()
             Route::get('/meeting-scheduled', 'meeting_scheduled')->name('lead.meeting_scheduled');
             Route::get('/whatsapp', 'whatsapp')->name('lead.whatsapp');
             Route::get('/visit-scheduled', 'visit_scheduled')->name('lead.visit_scheduled');
-            Route::get('/visit-done' , 'visit_done')->name('lead.visit_done');
+            Route::get('/visit-done', 'visit_done')->name('lead.visit_done');
             Route::get('/booked', 'booked')->name('lead.booked');
             Route::get('/completed', 'completed')->name('lead.completed');
             Route::get('/cancelled', 'cancelled')->name('lead.cancelled');
@@ -250,7 +244,7 @@ Route::middleware(['check.login', 'reception.only'])->group(function ()
             Route::post('/duplicate', 'duplicateLead')->name('lead.duplicate');
             Route::post('/share', 'shareLead')->name('lead.share');
             Route::post('/add-projects', 'addProjects')->name('lead.add-projects');
-            Route::post('/get-project-names','getProjectNames')->name('lead.get-project-names');
+            Route::post('/get-project-names', 'getProjectNames')->name('lead.get-project-names');
             Route::post('/get-lead-projects', 'getLeadProjects')->name('lead.get-lead-projects');
             Route::get('/{id}/project-visits', 'getLeadProjectVisits')->name('lead.project-visits');
             Route::get('/filter-lead', 'filterLeads')->name('lead.filter');
@@ -259,8 +253,7 @@ Route::middleware(['check.login', 'reception.only'])->group(function ()
 
         Route::get('/leads/filter-lead', [LeadController::class, 'filterLeads'])->name('leads.filter.leads');
 
-        Route::prefix('task')->controller(TaskController::class)->group(function() 
-        {
+        Route::prefix('task')->controller(TaskController::class)->group(function () {
             Route::get('/create/{id?}', 'create')->name('task.create');
             Route::post('/store/{id?}', 'store')->name('task.store');
             Route::get('/list', 'list')->name('task.list');
@@ -268,29 +261,27 @@ Route::middleware(['check.login', 'reception.only'])->group(function ()
             Route::post('/update-status/{id}', 'updateStatus')->name('task.update.status');
             Route::post('/task-project-store', 'task_project_store')->name('task.project.store');
             Route::post('/project/update/{id}', 'task_project_update')->name('task.project.update');
-            Route::delete('/project/delete/{id}','task_project_destroy')->name('task.project.delete');
+            Route::delete('/project/delete/{id}', 'task_project_destroy')->name('task.project.delete');
             Route::post('/project/update-status/{id}', 'updateProjectStatus')->name('task.project.update-status');
         });
+
 
         Route::resource('project-details', ProjectController::class);
         Route::get('project-details/get-categories/{type}', [ProjectController::class, 'getCategories']);
         Route::get('project-details/get-subcategories/{categoryId}', [ProjectController::class, 'getSubcategories']);
         Route::post('project-details/remove-image', [ProjectController::class, 'removeImage'])->name('project-details.remove_image');
 
-        Route::prefix('event')->controller(EventController::class)->group(function() 
-        {
+        Route::prefix('event')->controller(EventController::class)->group(function () {
             Route::get('/', 'index')->name('event.index');
             Route::get('/comments/{id}', 'showComments')->name('event.comments');
         });
 
-        Route::prefix('attendance')->controller(AttendanceController:: class)->group(function()
-        {
+        Route::prefix('attendance')->controller(AttendanceController::class)->group(function () {
             Route::get('/daily', 'daily')->name('attendance.daily');
             Route::get('/monthly', 'monthly')->name('attendance.monthly');
         });
 
-        Route::prefix('employee')->controller(EmployeeTrackController:: class)->group(function()
-        {
+        Route::prefix('employee')->controller(EmployeeTrackController::class)->group(function () {
             Route::get('/tracking', 'tracking')->name('employee.tracking');
             Route::get('timeline', 'timeline')->name('employee.timeline');
         });
@@ -304,8 +295,7 @@ Route::middleware(['check.login', 'reception.only'])->group(function ()
         Route::post('/expense/{id}/clear', [ExpenseController::class, 'clear'])->name('expense.clear');
         Route::get('/expense/{id}/images', [ExpenseController::class, 'getImages'])->name('expense.images');
 
-        Route::prefix('report')->controller(ReportController:: class)->group(function()
-        {
+        Route::prefix('report')->controller(ReportController::class)->group(function () {
             Route::get('/reports', 'reports')->name('reports');
             Route::get('/dayend-reports', 'dayend_reports')->name('report.dayend_reports');
             Route::get('/talecaller-reports', 'talecaller_reports')->name('report.talecaller_reports');
@@ -337,9 +327,9 @@ Route::middleware(['check.login', 'reception.only'])->group(function ()
             Route::get('/project-wise-task', [ReportController::class, 'projectWiseTaskReport'])->name('project-wise-task');
             Route::get('/communication-reports', 'communication_reports')->name('report.communication_reports');
             Route::get('/agent-call-details/{id?}', 'agentCallDetails')
-            ->name('report.agent_call_details');
+                ->name('report.agent_call_details');
             Route::get('/client-communications', [ReportController::class, 'clientCommunications'])
-            ->name('report.client_communications');
+                ->name('report.client_communications');
         });
 
         Route::post('/leads/toggle-pin', [LeadController::class, 'togglePin'])->name('lead.toggle-pin');
@@ -351,28 +341,26 @@ Route::middleware(['check.login', 'reception.only'])->group(function ()
         Route::post('/facebook/groups/fetch', [IntegrationController::class, 'groupPages'])->name('facebook.group.fetch');
         Route::post('/facebook/campaigns/fetch', [IntegrationController::class, 'fetchCampaigns'])->name('facebook.campaigns.fetch');
 
-        Route::prefix('notifications')->name('notifications.')->group(function () 
-        {
+        Route::prefix('notifications')->name('notifications.')->group(function () {
             Route::get('/', [SettingsController::class, 'index'])->name('index');
             Route::post('/mark-all-read', [SettingsController::class, 'markAllAsRead'])->name('markAllRead');
         });
 
-        Route::prefix('setting')->controller(SettingsController::class)->group(function() 
-        {
+        Route::prefix('setting')->controller(SettingsController::class)->group(function () {
             Route::get('/integration', 'integration')->name('setting.integration');
             Route::get('/notification', 'notification')->name('setting.notification');
             Route::post('/notification/mark-read', 'markAllRead')->name('setting.notification.mark_all_read');
         });
 
         Route::get('/mis/targets', [MISController::class, 'targets'])->name('mis.targets');
-        Route::post('/mis/targets/save', [MISController::class, 'saveTargets'])->name('mis.targets.save');  
+        Route::post('/mis/targets/save', [MISController::class, 'saveTargets'])->name('mis.targets.save');
         Route::post('/mis/admin/update', [MISController::class, 'adminUpdate'])->name('mis.admin.update');
         Route::get('/mis/summary-report', [MISController::class, 'summaryReport'])->name('mis.summary-report');
         Route::get('/mis/daily-report', [MISController::class, 'dailyReport'])->name('mis.daily-report');
         Route::get('/mis/get-week-daily-data', [MISController::class, 'getWeekDailyData'])->name('mis.get.week.daily.data');
         Route::post('/mis/admin/update-daily-achieved', [MISController::class, 'updateDailyAchieved'])->name('mis.admin.update.daily.achieved');
         Route::get('/mis/get-autoassign-status', [MISController::class, 'getAutoAssignStatus'])->name('mis.get.autoassign.status');
-        
+
         Route::get('/mis-points', [MasterController::class, 'mis_points'])->name('mis.points');
         Route::post('/mis-points/store', [MasterController::class, 'mis_points_store'])->name('mis.points.store');
         Route::put('/mis-points/update/{id}', [MasterController::class, 'mis_points_update'])->name('mis.points.update');
@@ -389,8 +377,7 @@ Route::middleware(['check.login', 'reception.only'])->group(function ()
         Route::put('/support-tickets/{id}', [SupportTicketController::class, 'update'])->name('support.update');
         Route::patch('/support-tickets/{id}/toggle', [SupportTicketController::class, 'toggleStatus'])->name('support.toggle');
 
-        Route::prefix('post-sale')->name('post-sale.')->group(function () 
-        {
+        Route::prefix('post-sale')->name('post-sale.')->group(function () {
             Route::get('/', [PostSaleController::class, 'index'])->name('index');
             Route::post('/', [PostSaleController::class, 'store'])->name('store');
             Route::get('/{id}/edit', [PostSaleController::class, 'edit'])->name('edit');
@@ -407,10 +394,8 @@ Route::middleware(['check.login', 'reception.only'])->group(function ()
         });
     });
 
-    Route::middleware(['check.software.type:real_state_only'])->group(function () 
-    {
-        Route::prefix('inventory')->group(function () 
-        {
+    Route::middleware(['check.software.type:real_state_only'])->group(function () {
+        Route::prefix('inventory')->group(function () {
             Route::get('/', [InventoryController::class, 'index'])->name('inventory.index');
             Route::post('/store', [InventoryController::class, 'store'])->name('inventory.store');
             Route::post('/update-sale', [InventoryController::class, 'updateSale'])->name('inventory.updateSale');
@@ -421,10 +406,8 @@ Route::middleware(['check.login', 'reception.only'])->group(function ()
         });
     });
 
-    Route::middleware(['check.software.type:task_management'])->group(function () 
-    {
-        Route::prefix('task')->controller(TaskController::class)->group(function() 
-        {
+    Route::middleware(['check.software.type:task_management'])->group(function () {
+        Route::prefix('task')->controller(TaskController::class)->group(function () {
             Route::get('/create/{id?}', 'create')->name('task.create');
             Route::post('/store/{id?}', 'store')->name('task.store');
             Route::get('/list', 'list')->name('task.list');
@@ -432,15 +415,14 @@ Route::middleware(['check.login', 'reception.only'])->group(function ()
             Route::post('/update-status/{id}', 'updateStatus')->name('task.update.status');
             Route::post('/task-project-store', 'task_project_store')->name('task.project.store');
             Route::post('/project/update/{id}', 'task_project_update')->name('task.project.update');
-            Route::delete('/project/delete/{id}','task_project_destroy')->name('task.project.delete');
+            Route::delete('/project/delete/{id}', 'task_project_destroy')->name('task.project.delete');
             Route::post('/project/update-status/{id}', 'updateProjectStatus')->name('task.project.update-status');
         });
     });
 
-    Route::middleware(['check.software.type:mis_management'])->group(function () 
-    {
+    Route::middleware(['check.software.type:mis_management'])->group(function () {
         Route::get('/mis/targets', [MISController::class, 'targets'])->name('mis.targets');
-        Route::post('/mis/targets/save', [MISController::class, 'saveTargets'])->name('mis.targets.save');  
+        Route::post('/mis/targets/save', [MISController::class, 'saveTargets'])->name('mis.targets.save');
         Route::post('/mis/admin/update', [MISController::class, 'adminUpdate'])->name('mis.admin.update');
         Route::get('/mis/summary-report', [MISController::class, 'summaryReport'])->name('mis.summary-report');
         Route::get('/mis/daily-report', [MISController::class, 'dailyReport'])->name('mis.daily-report');
@@ -452,19 +434,18 @@ Route::middleware(['check.login', 'reception.only'])->group(function ()
         Route::put('/mis-points/update/{id}', [MasterController::class, 'mis_points_update'])->name('mis.points.update');
         Route::delete('/mis-points/destroy/{id}', [MasterController::class, 'mis_points_destroy'])->name('mis.points.destroy');
         Route::get('/mis/get-team-points', [MISController::class, 'getTeamPoints'])->name('mis.get.team.points');
-    
+
         Route::post('/mis/save-daily-entries', [MISController::class, 'saveDailyEntries'])->name('mis.save.daily.entries');
         Route::get('/mis/get-daily-data', [MISController::class, 'getDailyData'])->name('mis.get.daily.data');
         Route::get('/mis/get-week-number', [MISController::class, 'getWeekNumber'])->name('mis.get.week.number');
     });
 
-    Route::prefix('exhibitions')->name('exhibition.')->group(function () 
-    {
+    Route::prefix('exhibitions')->name('exhibition.')->group(function () {
         Route::get('/', [WebExhibitionController::class, 'index'])->name('index');
         Route::post('/', [WebExhibitionController::class, 'store'])->name('store');
         Route::put('/{id}', [WebExhibitionController::class, 'update'])->name('update');
         Route::delete('/{id}', [WebExhibitionController::class, 'destroy'])->name('destroy');
-        
+
         Route::get('/{id}/view', [WebExhibitionController::class, 'view'])->name('view');
         Route::get('/{id}/leads-page', [WebExhibitionController::class, 'leadsPage'])->name('leads.page');
         Route::put('/leads/{id}', [WebExhibitionController::class, 'updateLead'])->name('leads.update');
@@ -474,15 +455,14 @@ Route::middleware(['check.login', 'reception.only'])->group(function ()
         Route::post('/{id}/store', [WebExhibitionController::class, 'storeLead'])->name('leads.store');
         Route::delete('/{id}/{exhibition_id}', [WebExhibitionController::class, 'destroyLead']);
         Route::post('/{lead}/convert', [WebExhibitionController::class, 'convertLeadToCRM'])->name('leads.convert');
-        Route::post('/convert-multiple', [WebExhibitionController::class, 'convertMultipleLeads'])->name('leads.convert.multiple');       
+        Route::post('/convert-multiple', [WebExhibitionController::class, 'convertMultipleLeads'])->name('leads.convert.multiple');
         Route::post('{exhibition}/share/create', [WebExhibitionController::class, 'createShareLink'])->name('share.create');
         Route::get('{exhibition}/share/links', [WebExhibitionController::class, 'getShareLinks'])->name('share.links');
         Route::post('/{exhibition}/leads/import', [WebExhibitionController::class, 'import'])->name('exhibition.leads.import');
         Route::post('/{exhibition}/leads/import', [WebExhibitionController::class, 'import'])->name('leads.import');
     });
-    
-    Route::prefix('messaging')->group(function () 
-    {
+
+    Route::prefix('messaging')->group(function () {
         Route::get('/', [UnifiedMessagingController::class, 'index'])->name('messaging.index');
         Route::post('/send', [UnifiedMessagingController::class, 'sendMessage'])->name('messaging.send');
         Route::post('/send-with-attachments', [UnifiedMessagingController::class, 'sendWithAttachments'])->name('messaging.send.with-attachments');
@@ -497,6 +477,23 @@ Route::middleware(['check.login', 'reception.only'])->group(function ()
         Route::get('/{template}/edit', [UnifiedMessagingController::class, 'edit'])->name('messaging.templates.edit');
         Route::put('/{template}', [UnifiedMessagingController::class, 'update'])->name('messaging.templates.update');
         Route::delete('/{template}', [UnifiedMessagingController::class, 'destroy'])->name('messaging.templates.destroy');
+    });
+
+    
+    // datacenter routes
+    Route::prefix('data-center')->controller(DataCenterController::class)->group(function () {
+        Route::get('/data', 'index')->name('data-center.index');
+        Route::get('/create', 'create')->name('data-center.create');
+        Route::post('/store', 'store')->name('data-center.store');
+        Route::post('/import/upload', 'importUpload')->name('data-center.import.upload');
+        Route::get('/{id}/edit', 'edit')->name('data-center.edit');
+        Route::post('/{id}', 'update')->name('data-center.update');
+        Route::put('/status/{id}', 'updateStatusApi')->name('data-center.update-status');
+        Route::delete('/{id}', 'destroy')->name('data-center.destroy');
+        Route::get('/comments/{id}', 'getComments')->name('data-center.comments');
+        Route::post('/comments/{id}', 'addComment')->name('data-center.add-comment');
+        Route::get('/converted/leads', 'getConvertedLeads')->name('data-center.converted-leads');
+
     });
 
     Route::post('/exhibitions/{id}/toggle-auto-welcome', [WebExhibitionController::class, 'toggleAutoWelcome'])->name('exhibitions.toggle-auto-welcome');
@@ -515,8 +512,7 @@ Route::middleware(['check.login', 'reception.only'])->group(function ()
     Route::put('/properties/{id}', [MasterController::class, 'update_property'])->name('property.update');
 });
 
-Route::get('/firebase-sw-config', function () 
-{
+Route::get('/firebase-sw-config', function () {
     $firebase = DB::table('integration_settings')
         ->where('integration_type', 'firebase')
         ->where('status', 'active')
@@ -525,14 +521,12 @@ Route::get('/firebase-sw-config', function ()
 });
 
 Route::match(['get', 'post'], '/rate/{token}', [PostSaleController::class, 'rate'])->name('rate.form');
-Route::get('/create-storage-link', function () 
-{
+Route::get('/create-storage-link', function () {
     Artisan::call('storage:link');
     return 'Storage link created!';
 });
 
-Route::get('/clear-all', function () 
-{
+Route::get('/clear-all', function () {
     Artisan::call('cache:clear');
     Artisan::call('route:clear');
     Artisan::call('config:clear');
@@ -541,8 +535,7 @@ Route::get('/clear-all', function ()
     return 'All caches cleared and optimized!';
 });
 
-Route::get('/refresh-storage', function () 
-{
+Route::get('/refresh-storage', function () {
     $src = storage_path('app/public');
     $dst = public_path('storage');
     \File::deleteDirectory($dst);

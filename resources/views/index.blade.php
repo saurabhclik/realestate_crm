@@ -552,6 +552,11 @@ $totalOthersLead = ($leadStats->total_lead ?? 0.00)
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <h4 class="mb-sm-0 font-size-18">Dashboard</h4>
                     <div class="d-flex align-items-center flex-wrap gap-2">
+
+                        <button type="button" class="btn btn-primary btn-sm circle-btn" data-bs-toggle="modal" data-bs-target="#dataCenterModal" title="Data Center">
+                            <i class="fas fa-database"></i>
+                        </button>
+
                         <button type="button" class="btn btn-info btn-sm circle-btn" data-bs-toggle="modal" data-bs-target="#importModal" title="Bulk Import">
                             <i class="fas fa-file-import"></i>
                         </button>
@@ -631,7 +636,7 @@ $totalOthersLead = ($leadStats->total_lead ?? 0.00)
                                             </div>
                                             <div class="col-6">
                                                 <a href="{{ route('lead.transfer_lead') }}" class="text-decoration-none" style="cursor:pointer;">
-                                                    <h5 class="font-size-15">{{ $transferLeadCount ?? 0 }}</h5>
+                                                    <h5 class="font-size-15">{{ $transferredLeadCount ?? 0 }}</h5>
                                                     <p class="text-muted mb-0">Transferred Leads</p>
                                                 </a>
                                             </div>

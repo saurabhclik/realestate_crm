@@ -11,6 +11,7 @@ use App\Services\LeadService;
 use App\Services\NormalizeIdsService;
 use Flasher\Laravel\Facade\Flasher;
 use App\Traits\TaskEventTrait;
+
 class DashboardController extends Controller
 {
     use TaskEventTrait;
@@ -33,7 +34,7 @@ class DashboardController extends Controller
 
         $dateRangeValid = !empty($dateRange) && isset($dateRange['start'], $dateRange['end']) && $dateRange['start'] && $dateRange['end'];
 
-        $baseQuery = function($status = null, $remindDate = null, $typeLabel = null) use ($childIds, $dateRangeValid, $dateRange) {
+        $baseQuery = function ($status = null, $remindDate = null, $typeLabel = null) use ($childIds, $dateRangeValid, $dateRange) {
             return DB::table('leads as a')
                 ->join('users as b', 'b.id', '=', 'a.user_id')
                 ->leftJoin('projects as c', 'c.id', '=', 'a.project_id')
@@ -56,15 +57,11 @@ class DashboardController extends Controller
                     'a.classification',
                     'a.last_comment'
                 )
-                ->when($remindDate !== null, function ($q) use ($remindDate) 
-                {
-                    if (is_array($remindDate)) 
-                    {
+                ->when($remindDate !== null, function ($q) use ($remindDate) {
+                    if (is_array($remindDate)) {
                         [$operator, $value] = $remindDate;
                         return $q->whereDate('a.remind_date', $operator, $value);
-                    } 
-                    else 
-                    {
+                    } else {
                         return $q->whereDate('a.remind_date', $remindDate);
                     }
                 })
@@ -72,8 +69,7 @@ class DashboardController extends Controller
                 ->when(!empty($childIds), fn($q) => $q->whereIn('a.user_id', $childIds))
                 ->when($dateRangeValid, fn($q) => $q->whereBetween('a.lead_date', [$dateRange['start'], $dateRange['end']]));
         };
-        if ($tab === 'today') 
-        {
+        if ($tab === 'today') {
             $queries = [
                 $baseQuery('CALL SCHEDULED', $today, 'Call'),
                 $baseQuery('VISIT SCHEDULED', $today, 'Visit'),
@@ -81,27 +77,22 @@ class DashboardController extends Controller
                 $baseQuery('WHATSAPP', $today, 'WhatsApp'),
                 $baseQuery('MEETING SCHEDULED', $today, 'Meeting')
             ];
-            
+
             $unionQuery = null;
-            foreach ($queries as $index => $query)
-            {
-                if ($index === 0) 
-                {
+            foreach ($queries as $index => $query) {
+                if ($index === 0) {
                     $unionQuery = $query;
-                } 
-                else 
-                {
+                } else {
                     $unionQuery = $unionQuery->unionAll($query);
                 }
             }
-            
+
             return DB::table(DB::raw("({$unionQuery->toSql()}) as combined"))
                 ->mergeBindings($unionQuery)
                 ->orderBy('datetime')
                 ->paginate($perPage);
         }
-        if ($tab === 'tomorrow') 
-        {
+        if ($tab === 'tomorrow') {
             $queries = [
                 $baseQuery('CALL SCHEDULED', $tomorrow, 'Call'),
                 $baseQuery('VISIT SCHEDULED', $tomorrow, 'Visit'),
@@ -109,30 +100,25 @@ class DashboardController extends Controller
                 $baseQuery('MEETING SCHEDULED', $tomorrow, 'Meeting'),
                 $baseQuery('INTERESTED', $tomorrow, 'Interested')
             ];
-            
+
             $unionQuery = null;
-            foreach ($queries as $index => $query) 
-            {
-                if ($index === 0) 
-                {
+            foreach ($queries as $index => $query) {
+                if ($index === 0) {
                     $unionQuery = $query;
-                } 
-                else 
-                {
+                } else {
                     $unionQuery = $unionQuery->unionAll($query);
                 }
             }
-            
+
             return DB::table(DB::raw("({$unionQuery->toSql()}) as combined"))
                 ->mergeBindings($unionQuery)
                 ->orderBy('datetime')
                 ->paginate($perPage);
         }
-        if ($tab === 'missed') 
-        {
+        if ($tab === 'missed') {
             $missedQuery = $baseQuery(null, ['<', $today], 'Missed')
                 ->whereIn('a.status', ['CALL SCHEDULED', 'VISIT SCHEDULED', 'WHATSAPP', 'INTERESTED', 'MEETING SCHEDULED']);
-                
+
             return $missedQuery->orderBy('a.remind_date')->paginate($perPage);
         }
 
@@ -145,36 +131,33 @@ class DashboardController extends Controller
         $userId = Session::get('user_id');
         $user = DB::table('users')->where('id', $userId)->first();
         $userType = Session::get('user_type');
-        
-        if (!$user || $user->token !== $sessionToken) 
-        {
+
+        if (!$user || $user->token !== $sessionToken) {
             Session::flush();
             Flasher::addError('Someone else has logged in with your account. You have been logged out');
             return redirect('/')->withErrors('Logut succesfully')->withInput();
         }
-        
+
         $childIds = Session::get('child_ids');
         $selectedAgentId = $request->input('agent_id');
-        if ($selectedAgentId) 
-        {
+        if ($selectedAgentId) {
             $childIds = $selectedAgentId;
         }
-        $length = $request->query('length', 10); 
+        $length = $request->query('length', 10);
         $agents = DB::table('users')
             ->whereIn('id', explode(',', Session::get('child_ids')))
             ->orderBy('name')
             ->get(['id', 'name']);
 
         $allocatedLeadCount = DB::table('leads as a')
-            ->where(function ($query) 
-            {
+            ->where(function ($query) {
                 $query->where('a.status', 'allocated_lead')
                     ->orWhereNull('a.status')
                     ->orWhere('a.status', '');
             })
             ->whereIn('a.user_id', explode(',', $childIds))
             ->where('a.is_allocated', '!=', $userId)
-            ->leftJoin('users as b', 'b.id', '=', 'a.user_id') 
+            ->leftJoin('users as b', 'b.id', '=', 'a.user_id')
             ->leftJoin('projects as c', 'c.id', '=', 'a.project_id')
             ->select(
                 'a.*',
@@ -187,12 +170,12 @@ class DashboardController extends Controller
 
         $unallocatedLeadCount = DB::table('leads as a')
             ->join('users as b', 'b.id', '=', 'a.user_id')
-            ->leftJoin('projects as c', 'c.id', '=', 'a.project_id') 
+            ->leftJoin('projects as c', 'c.id', '=', 'a.project_id')
             ->select(
                 'a.*',
                 'b.name as agent',
                 'b.role',
-                'c.project_name as project_name' 
+                'c.project_name as project_name'
             )
             ->where('a.unallocated_lead', 1)
             ->where('a.is_allocated', $userId)
@@ -204,10 +187,8 @@ class DashboardController extends Controller
             ->orderBy('id', 'desc')
             ->first();
 
-        if ($advertisement) 
-        {
-            if ($advertisement->features && is_string($advertisement->features)) 
-            {
+        if ($advertisement) {
+            if ($advertisement->features && is_string($advertisement->features)) {
                 $advertisement->features = json_decode($advertisement->features, true) ?? [];
             }
         }
@@ -215,7 +196,7 @@ class DashboardController extends Controller
         $user_type = Session::get('user_type');
         $childIds = $this->normalizeIdsService->normalize($childIds);
         $dateRange = $this->getDateRange($request);
-        
+
         $projects = DB::table('projects')->orderBy('project_name')->get();
         $cities = DB::table('state_district')->orderBy('District', 'asc')->get();
         $sources = DB::table('sources')->orderBy('name')->get();
@@ -224,16 +205,21 @@ class DashboardController extends Controller
         $task_all_comments = $this->getTaskComments($taskIds, $dateRange);
         $transferredToUserIds = $this->leadService->getTransferredLeadIds($userId);
         $leadStats = $this->leadService->getLeadStatistics(
-            $userId, 
-            $transferredToUserIds, 
-            $dateRange, 
+            $userId,
+            $transferredToUserIds,
+            $dateRange,
             $childIds
         );
-        
+
         $transferLeadCount = $this->getTransferLeadCount($childIds, $dateRange);
+        $childIdsArr = is_array($childIds) ? $childIds : explode(',', $childIds);
+
+        $transferredLeadCount = DB::table('transfer_leads')
+            ->whereIn('to', $childIdsArr)
+            ->count();
         $monthsReport = $this->getMonthlyLeadReport(
-            $request->input('year'), 
-            $request->input('datasearch'), 
+            $request->input('year'),
+            $request->input('datasearch'),
             $dateRange,
             $childIds
         );
@@ -241,19 +227,19 @@ class DashboardController extends Controller
         $convertedLeads = $this->getConvertedLeads($childIds, $dateRange);
         $upcomingBirthdays = $this->getUpcomingBirthdays($dateRange);
         $upcomingAnniversaries = $this->getUpcomingAnniversaries($dateRange);
-        $events = $this->getCombinedEvents($dateRange, $childIds); 
+        $events = $this->getCombinedEvents($dateRange, $childIds);
         $followups = $this->getFollowups($dateRange, $childIds);
         $availableYears = $this->getAvailableYears($childIds, $dateRange);
         $selectedYear = $request->input('year', date('Y'));
         $statuses = $this->getLeadStatuses($childIds, $dateRange);
-        $campaignData = $this->getCampaignAnalysisData($childIds, [], $dateRange);  
+        $campaignData = $this->getCampaignAnalysisData($childIds, [], $dateRange);
         $categorys = DB::table('inv_catg')->get();
         $sources = DB::table('sources')->get();
         $campaigns = DB::table('campaigns')->get();
         $projects = DB::table('projects')->get();
         $cities = DB::table('state_district')->orderBy('District', 'asc')->get();
         $task_owner = Session::get('user_id');
-        $selectedAgent = $selectedAgentId; 
+        $selectedAgent = $selectedAgentId;
         $calendarEvents = $this->getCalendarEvents($childIds, $dateRange);
         return view('index', compact(
             'taskStats',
@@ -284,21 +270,19 @@ class DashboardController extends Controller
             'userType',
             'agents',
             'selectedAgent',
-            'calendarEvents'
+            'calendarEvents',
+            'transferredLeadCount'
         ));
     }
 
     private function getDateRange(Request $request)
     {
-        if ($request->filled('start_date') && $request->filled('end_date')) 
-        {
+        if ($request->filled('start_date') && $request->filled('end_date')) {
             return [
                 'start' => Carbon::parse($request->input('start_date'))->startOfDay(),
                 'end' => Carbon::parse($request->input('end_date'))->endOfDay()
             ];
-        } 
-        elseif ($request->filled('dateRange')) 
-        {
+        } elseif ($request->filled('dateRange')) {
             $dates = explode(' - ', $request->input('dateRange'));
             // echo '<pre>'; print_r($dates); exit;
             return [
@@ -352,12 +336,10 @@ class DashboardController extends Controller
     {
         return DB::table('leads')
             ->where('status', 'TRANSFER LEAD')
-            ->when(!empty($childIds), function ($query) use ($childIds) 
-            {
+            ->when(!empty($childIds), function ($query) use ($childIds) {
                 $query->whereIn('user_id', $childIds);
             })
-            ->when(isset($dateRange['start'], $dateRange['end']), function ($query) use ($dateRange) 
-            {
+            ->when(isset($dateRange['start'], $dateRange['end']), function ($query) use ($dateRange) {
                 $query->whereBetween('created_at', [$dateRange['start'], $dateRange['end']]);
             })
             ->count();
@@ -366,12 +348,11 @@ class DashboardController extends Controller
     private function getMonthlyLeadReport($year = null, $dataSearch = null, $dateRange = [], $childIds = null): array
     {
         $userId = session('user_id');
-        if ($childIds === null) 
-        {
+        if ($childIds === null) {
             $childIds = Session::get('child_ids');
             $childIds = $this->normalizeIdsService->normalize($childIds);
         }
-        
+
         $year = $year ?: date('Y');
 
         $query = DB::table('leads')
@@ -380,34 +361,27 @@ class DashboardController extends Controller
             ->when(!empty($dateRange), fn($q) => $q->whereBetween('lead_date', [$dateRange['start'], $dateRange['end']]));
         $userIds = is_array($childIds) ? $childIds : explode(',', $childIds);
 
-        if ($dataSearch === 'Team') 
-        {
+        if ($dataSearch === 'Team') {
             $query->whereIn('user_id', $userIds)
                 ->where('user_id', '!=', $userId);
-        } 
-        elseif ($dataSearch === 'Self') 
-        {
+        } elseif ($dataSearch === 'Self') {
             $query->where('user_id', $userId);
-        } 
-        else 
-        {
+        } else {
             $query->whereIn('user_id', $userIds);
         }
 
         $results = $query->groupBy(DB::raw('MONTH(lead_date)'))->get();
 
         $monthsReport = array_fill(0, 12, 0);
-        foreach ($results as $row) 
-        {
+        foreach ($results as $row) {
             $idx = (int)$row->month - 1;
-            if ($idx >= 0 && $idx <= 11) 
-            {
+            if ($idx >= 0 && $idx <= 11) {
                 $monthsReport[$idx] = $row->total;
             }
         }
         return $monthsReport;
     }
-    
+
     private function getConvertedLeads($childIds, $dateRange)
     {
         return DB::table('leads as a')
@@ -457,13 +431,12 @@ class DashboardController extends Controller
         $today = now()->format('Y-m-d');
         $tomorrow = now()->addDay()->format('Y-m-d');
         $userId = Session::get('user_id');
-        
-        if ($childIds === null) 
-        {
+
+        if ($childIds === null) {
             $childIds = Session::get('child_ids');
             $childIds = $this->normalizeIdsService->normalize($childIds);
         }
-        
+
         $userIds = is_array($childIds) ? $childIds : explode(',', $childIds);
         $todayTasks = DB::table('tasks')
             ->join('task_user', 'task_user.task_id', '=', 'tasks.id')
@@ -619,8 +592,7 @@ class DashboardController extends Controller
             ->merge($tomorrowLeadEvents)
             ->merge($missedLeadEvents)
             ->unique('id')
-            ->map(function ($item) 
-            {
+            ->map(function ($item) {
                 $item->date = Carbon::parse($item->date)->format('M d, Y');
                 $item->overdue_days = (int) ($item->overdue_days ?? 0);
                 $item->project_name = $item->project_name ?? 'No Project';
@@ -643,7 +615,7 @@ class DashboardController extends Controller
 
         $dateRangeValid = !empty($dateRange) && isset($dateRange['start'], $dateRange['end']) && $dateRange['start'] && $dateRange['end'];
 
-        $baseQuery = function($status = null, $remindDate = null, $typeLabel = null) use ($childIds, $dateRangeValid, $dateRange) {
+        $baseQuery = function ($status = null, $remindDate = null, $typeLabel = null) use ($childIds, $dateRangeValid, $dateRange) {
             return DB::table('leads as a')
                 ->join('users as b', 'b.id', '=', 'a.user_id')
                 ->leftJoin('projects as c', 'c.id', '=', 'a.project_id')
@@ -668,15 +640,11 @@ class DashboardController extends Controller
                     'a.classification',
                     'a.last_comment'
                 )
-                ->when($remindDate !== null, function ($q) use ($remindDate) 
-                {
-                    if (is_array($remindDate)) 
-                    {
+                ->when($remindDate !== null, function ($q) use ($remindDate) {
+                    if (is_array($remindDate)) {
                         [$operator, $value] = $remindDate;
                         return $q->whereDate('a.remind_date', $operator, $value);
-                    } 
-                    else 
-                    {
+                    } else {
                         return $q->whereDate('a.remind_date', $remindDate);
                     }
                 })
@@ -716,7 +684,7 @@ class DashboardController extends Controller
             ->orderBy('year', 'desc')
             ->pluck('year');
     }
-    
+
     private function getLeadStatuses($childIds, $dateRange)
     {
         return DB::table('leads')
@@ -735,14 +703,12 @@ class DashboardController extends Controller
         $childIds = $this->normalizeIdsService->normalize($childIds);
         $userId = session('user_id');
 
-        if (!isset($filters['team'])) 
-        {
+        if (!isset($filters['team'])) {
             $filters['team'] = 'all';
         }
 
         $dateRange = [];
-        if (!empty($filters['dateRange'])) 
-        {
+        if (!empty($filters['dateRange'])) {
             $dates = explode(' - ', $filters['dateRange']);
             $dateRange = [
                 'start' => Carbon::parse($dates[0])->startOfDay(),
@@ -762,7 +728,7 @@ class DashboardController extends Controller
             'monthlyTrendData' => $monthlyTrendData
         ]);
     }
-    
+
     private function getSourceAnalysisData($childIds, $filters, $dateRange)
     {
         $query = DB::table('leads')
@@ -807,11 +773,11 @@ class DashboardController extends Controller
             'values' => $results->pluck('lead_count')->toArray()
         ];
     }
-    
+
     private function getMonthlyTrendData($childIds, $filters, $dateRange)
     {
         $year = $filters['year'] ?? date('Y');
-        
+
         $query = DB::table('leads')
             ->select(
                 DB::raw('MONTH(lead_date) as month'),
@@ -826,20 +792,19 @@ class DashboardController extends Controller
             ->when($filters['team'] === 'self', fn($q) => $q->where('user_id', session('user_id')))
             ->groupBy(DB::raw('MONTH(lead_date)'))
             ->orderBy('month');
-            
+
         $results = $query->get();
         $monthlyData = array_fill(1, 12, 0);
-        foreach ($results as $row) 
-        {
+        foreach ($results as $row) {
             $monthlyData[$row->month] = $row->lead_count;
         }
-        
+
         return [
             'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
             'values' => array_values($monthlyData)
         ];
     }
-    
+
     public function exportAnalyticsData(Request $request)
     {
         $type = $request->input('type');
@@ -847,8 +812,7 @@ class DashboardController extends Controller
         $childIds = Session::get('child_ids');
         $childIds = $this->normalizeIdsService->normalize($childIds);
         $dateRange = [];
-        if (!empty($filters['dateRange'])) 
-        {
+        if (!empty($filters['dateRange'])) {
             $dates = explode(' - ', $filters['dateRange']);
             $dateRange = [
                 'start' => Carbon::parse($dates[0])->startOfDay(),
@@ -856,8 +820,7 @@ class DashboardController extends Controller
             ];
         }
 
-        switch ($type) 
-        {
+        switch ($type) {
             case 'source-analysis':
                 $data = $this->getSourceAnalysisData($childIds, $filters, $dateRange);
                 $filename = 'source_analysis_' . date('Ymd_His') . '.csv';
@@ -876,22 +839,21 @@ class DashboardController extends Controller
             default:
                 return response()->json(['error' => 'Invalid export type'], 400);
         }
-        
+
         return response($csvData)
             ->header('Content-Type', 'text/csv')
             ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
-    
+
     private function generateCsv($labels, $values, $labelHeader, $valueHeader)
     {
         $output = fopen('php://output', 'w');
         fputcsv($output, [$labelHeader, $valueHeader]);
-        
-        foreach ($labels as $index => $label) 
-        {
+
+        foreach ($labels as $index => $label) {
             fputcsv($output, [$label, $values[$index]]);
         }
-        
+
         return stream_get_contents($output);
     }
 
@@ -901,43 +863,39 @@ class DashboardController extends Controller
         $type = $request->input('type', 'csv');
         $childIds = Session::get('child_ids');
         $childIds = $this->normalizeIdsService->normalize($childIds);
-        
+
         $monthsReport = $this->getMonthlyLeadReport($year);
-        
-        if ($type === 'csv') 
-        {
+
+        if ($type === 'csv') {
             $headers = [
                 'Content-Type' => 'text/csv',
                 'Content-Disposition' => 'attachment; filename="lead_conversion_' . $year . '.csv"',
             ];
-            
-            $callback = function() use ($monthsReport) 
-            {
+
+            $callback = function () use ($monthsReport) {
                 $file = fopen('php://output', 'w');
                 fputcsv($file, ['Month', 'Leads']);
                 $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                 foreach ($months as $index => $month) {
                     fputcsv($file, [$month, $monthsReport[$index]]);
                 }
-                
+
                 fclose($file);
             };
             return response()->stream($callback, 200, $headers);
-        } 
-        else 
-        {
+        } else {
             return response()->json(['error' => 'Export type not supported'], 400);
         }
     }
-    
+
     public function getChartData(Request $request)
     {
         $year = $request->input('year', date('Y'));
         $childIds = Session::get('child_ids');
         $childIds = $this->normalizeIdsService->normalize($childIds);
-        
+
         $monthsReport = $this->getMonthlyLeadReport($year);
-        
+
         return response()->json($monthsReport);
     }
 
@@ -962,7 +920,7 @@ class DashboardController extends Controller
                 'b.role',
                 'c.project_name as project_name'
             )
-            ->where(function($query) use ($q) {
+            ->where(function ($query) use ($q) {
                 $query->where('a.name', 'like', "%$q%")
                     ->orWhere('a.phone', 'like', "%$q%")
                     ->orWhere('a.email', 'like', "%$q%");
@@ -971,7 +929,7 @@ class DashboardController extends Controller
             ->orderBy('a.lead_date', 'desc')
             ->paginate(10);
 
-        return view('search.index', compact('categorys', 'sources', 'campaigns', 'projects', 'cities','leads', 'q'));
+        return view('search.index', compact('categorys', 'sources', 'campaigns', 'projects', 'cities', 'leads', 'q'));
     }
 
     public function toggle(Request $request)
@@ -979,22 +937,20 @@ class DashboardController extends Controller
         $userId = session('user_id');
         $action = $request->input('action');
 
-        if ($action === 'start') 
-        {
+        if ($action === 'start') {
             $existing = DB::table('attendance')
                 ->where('user_id', $userId)
                 ->whereDate('start_time', Carbon::today())
                 ->exists();
 
-            if ($existing) 
-            {
+            if ($existing) {
                 return response()->json(['message' => 'Attendance already started for today.'], 409);
             }
 
             DB::table('attendance')->insert([
                 'user_id'       => $userId,
                 'start_time'    => Carbon::now(),
-                'start_location'=> $request->latitude . ',' . $request->longitude,
+                'start_location' => $request->latitude . ',' . $request->longitude,
             ]);
 
             session(['attendance_active' => true]);
@@ -1002,16 +958,14 @@ class DashboardController extends Controller
             return response()->json(['message' => 'Attendance started.']);
         }
 
-        if ($action === 'end') 
-        {
+        if ($action === 'end') {
             $record = DB::table('attendance')
                 ->where('user_id', $userId)
                 ->whereNull('end_time')
                 ->orderByDesc('id')
                 ->first();
 
-            if (!$record) 
-            {
+            if (!$record) {
                 return response()->json(['message' => 'No active session found to end.'], 404);
             }
 
@@ -1020,8 +974,7 @@ class DashboardController extends Controller
             $hours = round($start->diffInMinutes($end) / 60, 2);
 
             $types = DB::table('attendance_types')->get();
-            $matched = $types->first(function ($type) use ($hours) 
-            {
+            $matched = $types->first(function ($type) use ($hours) {
                 return abs($type->hours - $hours) <= 0.5;
             });
 
@@ -1036,12 +989,9 @@ class DashboardController extends Controller
 
             session()->forget('attendance_active');
 
-            if ($status) 
-            {
+            if ($status) {
                 return response()->json(['message' => "Attendance ended. Marked as: {$status}."]);
-            } 
-            else 
-            {
+            } else {
                 return response()->json([
                     'message' => "Attendance ended, but duration doesn't match any known attendance type (duration: {$hours}h)."
                 ], 200);
@@ -1053,8 +1003,7 @@ class DashboardController extends Controller
     private function getCalendarEvents($childIds, $dateRange = [])
     {
         $events = collect();
-        try 
-        {
+        try {
             $scheduledLeads = DB::table('leads as a')
                 ->join('users as b', 'b.id', '=', 'a.user_id')
                 ->leftJoin('projects as c', 'c.id', '=', 'a.project_id')
@@ -1092,48 +1041,37 @@ class DashboardController extends Controller
                     'FUTURE LEAD',
                     'PENDING',
                 ])
-                ->when(!empty($childIds), function($q) use ($childIds) 
-                {
-                    if (is_array($childIds)) 
-                    {
+                ->when(!empty($childIds), function ($q) use ($childIds) {
+                    if (is_array($childIds)) {
                         $q->whereIn('a.user_id', $childIds);
-                    } 
-                    else 
-                    {
+                    } else {
                         $q->whereIn('a.user_id', explode(',', $childIds));
                     }
                 })
                 ->orderBy('a.remind_date')
                 ->orderBy('a.remind_time')
                 ->get();
-                
+
             $events = $events->concat($scheduledLeads);
-            
-        }
-        catch (\Exception $e) 
-        {
-        
+        } catch (\Exception $e) {
         }
         $groupedEvents = [];
-        foreach ($events as $event) 
-        {
+        foreach ($events as $event) {
             $date = $event->start_date;
-            if (!isset($groupedEvents[$date])) 
-            {
+            if (!isset($groupedEvents[$date])) {
                 $groupedEvents[$date] = [];
             }
             $groupedEvents[$date][] = $event;
         }
-        
+
         return $groupedEvents;
     }
 
     public function getDetails($id)
     {
         $type = request()->get('type', '');
-        
-        if ($type === 'lead') 
-        {
+
+        if ($type === 'lead') {
             $lead = DB::table('leads as a')
                 ->join('users as b', 'b.id', '=', 'a.user_id')
                 ->leftJoin('projects as c', 'c.id', '=', 'a.project_id')
@@ -1144,15 +1082,12 @@ class DashboardController extends Controller
                 )
                 ->where('a.id', $id)
                 ->first();
-            
-            if ($lead) 
-            {
+
+            if ($lead) {
                 return response()->json($lead);
             }
             return response()->json(['error' => 'Lead not found'], 404);
-        } 
-        else 
-        {
+        } else {
             $task = DB::table('tasks as t')
                 ->join('users as u', 'u.id', '=', 't.user_id')
                 ->leftJoin('task_projects as tp', 'tp.id', '=', 't.task_project_id')
@@ -1169,9 +1104,8 @@ class DashboardController extends Controller
                 )
                 ->where('t.id', $id)
                 ->first();
-            
-            if ($task) 
-            {
+
+            if ($task) {
                 return response()->json($task);
             }
             return response()->json(['error' => 'Task not found'], 404);
@@ -1198,12 +1132,10 @@ class DashboardController extends Controller
             ->limit(10);
 
         $results = $query->get();
-        
+
         return [
             'labels' => $results->pluck('campaign')->toArray(),
             'values' => $results->pluck('total_leads')->toArray()
         ];
     }
-
-
 }

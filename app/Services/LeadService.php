@@ -64,7 +64,7 @@ class LeadService
                 $validator->errors()->add('phone', 'Duplicate Lead ID: ' . $duplicate->id . ' User: ' . $duplicate->name);
             }
         });
-
+       $unallocate_lead = '';
         if ($validator->fails()) {
             foreach ($validator->errors()->all() as $error) {
                 Flasher::addError($error);
@@ -79,14 +79,20 @@ class LeadService
             $allocatedUser = DB::table('users')->where('id', $allocated_to)->first();
             if (in_array($allocatedUser->role, ['admin', 'team_manager'])) {
                 $status = 'allocated_lead';
+                 $unallocate_lead = 1;
+               
             } else {
                 $status = 'NEW LEAD';
+                 $unallocate_lead = 0;
+               
             }
         } else {
             if (in_array($user_type, ['admin', 'team_manager'])) {
                 $status = 'allocated_lead';
+                 $unallocate_lead = 1;
             } else {
                 $status = 'NEW LEAD';
+                 $unallocate_lead = 0;
             }
         }
 
@@ -123,6 +129,7 @@ class LeadService
                 'property_city' => $request->property_city,
                 'property_state' => $request->property_state,
                 'property_location' => $request->property_location,
+                'unallocated_lead' => $unallocate_lead,
                 'lead_date' => $now,
                 'created_at' => $now,
                 'updated_at' => $now,
@@ -132,10 +139,10 @@ class LeadService
             if ($allocated_to && $allocated_to != $current_user_id) {
                 $leadData['is_allocated'] = $current_user_id;
                 $leadData['allocated_date'] = $now;
-                $leadData['unallocated_lead'] = 0;
+
             } else {
                 $leadData['is_allocated'] = 0;
-                $leadData['unallocated_lead'] = 0;
+
             }
 
             $leadId = DB::table('leads')->insertGetId($leadData);

@@ -358,6 +358,6 @@
     }, false);
 </script>
 
-@include('data_center.bulk-import-modal')
+@include('data-center.bulk-import-modal')
 
 @endsection

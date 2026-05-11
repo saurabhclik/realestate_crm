@@ -1215,7 +1215,7 @@ class LeadController extends Controller
 
         // Main query (ONLY RECEIVED LEADS → Transferred Leads)
         $query = DB::table('transfer_leads')
-            ->join('leads', 'transfer_leads.lead_id', '=', 'leads.id')
+            ->leftJoin('leads', 'transfer_leads.lead_id', '=', 'leads.id')
             ->leftJoin('users as from_user', 'transfer_leads.from', '=', 'from_user.id')
             ->leftJoin('users as to_user', 'transfer_leads.to', '=', 'to_user.id')
 

@@ -98,7 +98,7 @@ class DataCenterController extends Controller
             return $row;
         });
 
-        return view('data_center.index', compact('dataCenters', 'projects'));
+        return view('data-center.index', compact('dataCenters', 'projects'));
     }
 
     public function create()
@@ -108,7 +108,7 @@ class DataCenterController extends Controller
             ? DB::table('users')->get()
             : null;
 
-        return view('data_center.create_data', array_merge($data, ['users' => $users]));
+        return view('data-center.create-data', array_merge($data, ['users' => $users]));
     }
 
     public function store(Request $request)
@@ -178,7 +178,7 @@ class DataCenterController extends Controller
             ? DB::table('users')->get()
             : null;
 
-        return view('data_center.edit_data', array_merge($serviceData, ['users' => $users, 'data' => $data]));
+        return view('data-center.edit-data', array_merge($serviceData, ['users' => $users, 'data' => $data]));
     }
 
     public function update(Request $request, $id)

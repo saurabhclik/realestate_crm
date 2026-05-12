@@ -13,11 +13,204 @@ use League\Csv\Reader;
 
 class DataCenterController extends Controller
 {
+    const STATUS_PENDING = 'PENDING';
+    const STATUS_PROCESSING = 'PROCESSING';
+    const STATUS_INTERESTED = 'INTERESTED';
+    const STATUS_WHATSAPP = 'WHATSAPP';
+    const STATUS_CALL_SCHEDULED = 'CALL SCHEDULED';
+    const STATUS_MEETING_SCHEDULED = 'MEETING SCHEDULED';
+    const STATUS_VISIT_SCHEDULED = 'VISIT SCHEDULED';
+    const STATUS_VISIT_DONE = 'VISIT DONE';
+    const STATUS_FUTURE = 'FUTURE LEAD';
+    const STATUS_NOT_REACHABLE = 'NOT REACHABLE';
+    const STATUS_WRONG_NUMBER = 'WRONG NUMBER';
+    const STATUS_CHANNEL_PARTNER = 'CHANNEL PARTNER';
+    const STATUS_NOT_INTERESTED = 'NOT INTERESTED';
+    const STATUS_NOT_PICKED = 'NOT PICKED';
+    const STATUS_LOST = 'LOST';
+
     protected $dataCenterService;
 
     public function __construct(DataCenterService $dataCenterService)
     {
         $this->dataCenterService = $dataCenterService;
+    }
+
+    public function pending(Request $request)
+    {
+        return $this->getDataByStatusType(
+            $request,
+            self::STATUS_PENDING,
+            'pending'
+        );
+    }
+
+    public function processing(Request $request)
+    {
+        return $this->getDataByStatusType(
+            $request,
+            self::STATUS_PROCESSING,
+            'processing'
+        );
+    }
+
+    public function interested(Request $request)
+    {
+        return $this->getDataByStatusType(
+            $request,
+            self::STATUS_INTERESTED,
+            'interested'
+        );
+    }
+
+    public function call_scheduled(Request $request)
+    {
+        return $this->getDataByStatusType(
+            $request,
+            self::STATUS_CALL_SCHEDULED,
+            'call_scheduled'
+        );
+    }
+
+    public function meeting_scheduled(Request $request)
+    {
+        return $this->getDataByStatusType(
+            $request,
+            self::STATUS_MEETING_SCHEDULED,
+            'meeting_scheduled'
+        );
+    }
+
+    public function visit_scheduled(Request $request)
+    {
+        return $this->getDataByStatusType(
+            $request,
+            self::STATUS_VISIT_SCHEDULED,
+            'visit_scheduled'
+        );
+    }
+
+    public function whatsApp(Request $request)
+    {
+        return $this->getDataByStatusType(
+            $request,
+            self::STATUS_WHATSAPP,
+            'whatsApp'
+        );
+    }
+
+    public function visit_done(Request $request)
+    {
+        return $this->getDataByStatusType(
+            $request,
+            self::STATUS_VISIT_DONE,
+            'visit_done'
+        );
+    }
+
+    public function future_leads(Request $request)
+    {
+        return $this->getDataByStatusType(
+            $request,
+            self::STATUS_FUTURE,
+            'future'
+        );
+    }
+
+    public function not_reachable(Request $request)
+    {
+        return $this->getDataByStatusType(
+            $request,
+            self::STATUS_NOT_REACHABLE,
+            'not_reachable'
+        );
+    }
+
+    public function wrong_number(Request $request)
+    {
+        return $this->getDataByStatusType(
+            $request,
+            self::STATUS_WRONG_NUMBER,
+            'wrong_number'
+        );
+    }
+
+    public function channel_partner(Request $request)
+    {
+        return $this->getDataByStatusType(
+            $request,
+            self::STATUS_CHANNEL_PARTNER,
+            'channel_partner'
+        );
+    }
+
+    public function not_interested(Request $request)
+    {
+        return $this->getDataByStatusType(
+            $request,
+            self::STATUS_NOT_INTERESTED,
+            'not_interested'
+        );
+    }
+
+    public function not_picked(Request $request)
+    {
+        return $this->getDataByStatusType(
+            $request,
+            self::STATUS_NOT_PICKED,
+            'not_picked'
+        );
+    }
+
+    public function lost(Request $request)
+    {
+        return $this->getDataByStatusType(
+            $request,
+            self::STATUS_LOST,
+            'lost'
+        );
+    }
+
+
+    private function getDataByStatusType(Request $request, $status, $page_name)
+    {
+        $length = $request->query('length', 10);
+
+        $query = DB::table('data_center')
+            ->where('status', $status)
+            ->orderBy('id', 'desc');
+
+        // SEARCH FILTER
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                    ->orWhere('phone', 'like', "%$search%")
+                    ->orWhere('email', 'like', "%$search%");
+            });
+        }
+
+        // DATE FILTER
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $dataCenters = $query
+            ->paginate($length)
+            ->withQueryString();
+
+        $projects = DB::table('projects')->get();
+
+        return view('data-center.index', compact(
+            'dataCenters',
+            'projects',
+            'page_name'
+        ));
     }
 
     public function index(Request $request)
@@ -162,8 +355,8 @@ class DataCenterController extends Controller
             'remind_time' => $request->remind_time,
         ]);
 
-        return redirect()->route('data-center.index')
-            ->with('success', 'Data created successfully.');
+        return redirect()->back()->with('success', 'Data created successfully.');
+           
     }
 
     public function edit($id)
@@ -242,8 +435,7 @@ class DataCenterController extends Controller
             return response()->json(['success' => true, 'message' => 'Data updated successfully.']);
         }
 
-        return redirect()->route('data-center.index')
-            ->with('success', 'Data updated successfully.');
+        return redirect()->back()->with('success', 'Data updated successfully.');
     }
 
     public function importUpload(Request $request)
@@ -549,7 +741,7 @@ class DataCenterController extends Controller
             ]);
 
             $updateData = [
-                'status' => $request->status,
+                'status' => strtoupper($request->status),
             ];
 
             if ($request->filled('comment')) {
@@ -564,7 +756,7 @@ class DataCenterController extends Controller
                     ->exists();
 
                 if ($alreadyConverted) {
-                    DB::rollBack(); // ✅ FIX
+                    DB::rollBack(); 
                     return response()->json([
                         'success' => false,
                         'message' => 'Already converted'
@@ -597,7 +789,7 @@ class DataCenterController extends Controller
                     'budget' => $data->budget ?? '',
                     'last_comment' => $request->comment ?? '',
 
-                    'status' => 'NEW LEAD',
+                    'status' => strtoupper($request->status),
                     'user_id' => $userId,
 
                     'created_at' => now(),
@@ -614,7 +806,7 @@ class DataCenterController extends Controller
                 'user_id' => session('user_id'),
                 'remark' => $request->comment,
                 'remind_date' => $request->remind_date,
-                'status' => $request->status,
+                'status' => strtoupper($request->status),
                 'remind_time' => $request->remind_time,
             ]);
 

@@ -5,9 +5,9 @@
                 <h5 class="modal-title" id="commentModalLabel">Data Comments</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body bg-light">
+            <div class="modal-body">
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
+                    <table class="table table-borderless table-hover align-middle">
                         <thead class="table-light">
                             <tr>
                                 <th>#</th>

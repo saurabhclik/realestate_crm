@@ -6,9 +6,9 @@ $userType = session('user_type');
 $menuAccess = [
 'real_state' => ['dashboard', 'staff_management', 'master', 'leads_management', 'transfer_leads', 'mis_management', 'task_management', 'inventory','post_sale', 'events', 'attendance', 'employee_track', 'expense_management', 'reports', 'settings', 'data_center'],
 'lead_management' => ['dashboard', 'staff_management', 'master', 'leads_management', 'transfer_leads', 'mis_management', 'task_management','post_sale', 'events', 'attendance', 'employee_track', 'expense_management', 'reports', 'settings', 'data_center'],
-'task_management' => ['dashboard', 'task_management', 'settings', 'reports', 'data_center'],
-'mis_management' => ['dashboard', 'mis_management', 'settings', 'data_center'],
-'exhibition' => ['dashboard', 'exhibition', 'settings', 'data_center']
+'task_management' => ['dashboard', 'task_management', 'settings', 'reports'],
+'mis_management' => ['dashboard', 'mis_management', 'settings'],
+'exhibition' => ['dashboard', 'exhibition', 'settings']
 ];
 
 $currentMenuAccess = $menuAccess[$softwareType] ?? $menuAccess['real_state'];

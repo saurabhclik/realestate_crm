@@ -684,4 +684,40 @@ class DataCenterController extends Controller
             ], 500);
         }
     }
+
+
+    public function addComment(Request $request, $id)
+    {
+        // get main data center record
+        $data = DB::table('data_center')
+            ->where('id', $id)
+            ->first();
+
+        if (!$data) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data not found'
+            ]);
+        }
+
+        DB::table('data_center_history')->insert([
+            'data_center_id' => $id,
+            'remark' => $request->remark,
+            'status' => $data->status,
+            'user_id' => Session::get('user_id'),
+            'created_at' => now(),
+        ]);
+
+        // update latest comment in main table
+        DB::table('data_center')
+            ->where('id', $id)
+            ->update([
+                'comment' => strip_tags($request->remark)
+            ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Comment added successfully'
+        ]);
+    }
 }

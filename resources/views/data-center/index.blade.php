@@ -27,6 +27,9 @@
     </div>
 </div>
 
+
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs5.min.css" rel="stylesheet">
+
 <style>
     .add-project-btn {
         padding: 2px 6px;
@@ -437,6 +440,23 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs5.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#addCommentRemark').summernote({
+            height: 180,
+            placeholder: 'Enter your comment...',
+            toolbar: [
+                ['style', ['bold', 'italic', 'underline', 'clear']],
+                ['font', ['fontsize', 'color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['insert', ['link']],
+                ['view', ['codeview']]
+            ]
+        });
+
+    });
+</script>
 
 <script>
     document.addEventListener('click', function(e) {
@@ -662,7 +682,9 @@
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({ remark })
+                body: JSON.stringify({
+                    remark
+                })
             })
             .then(res => res.json())
             .then(data => {

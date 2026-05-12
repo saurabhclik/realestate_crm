@@ -479,7 +479,7 @@ Route::middleware(['check.login', 'reception.only'])->group(function () {
         Route::delete('/{template}', [UnifiedMessagingController::class, 'destroy'])->name('messaging.templates.destroy');
     });
 
-    
+
     // datacenter routes
     Route::prefix('data-center')->controller(DataCenterController::class)->group(function () {
         Route::get('/data', 'index')->name('data-center.index');
@@ -493,7 +493,20 @@ Route::middleware(['check.login', 'reception.only'])->group(function () {
         Route::get('/comments/{id}', 'getComments')->name('data-center.comments');
         Route::post('/comments/{id}', 'addComment')->name('data-center.add-comment');
         Route::get('/converted/leads', 'getConvertedLeads')->name('data-center.converted-leads');
-
+        Route::get('/pending', 'pending')->name('data-center.pending');
+        Route::get('/processing', 'processing')->name('data-center.processing');
+        Route::get('/interested', 'interested')->name('data-center.interested');
+        Route::get('/call-scheduled', 'call_scheduled')->name('data-center.call_scheduled');
+        Route::get('/meeting-scheduled', 'meeting_scheduled')->name('data-center.meeting_scheduled');
+        Route::get('/visit-scheduled', 'visit_scheduled')->name('data-center.visit_scheduled');
+        Route::get('/visited', 'visit_done')->name('data-center.visited'); 
+        Route::get('/future', 'future_leads')->name('lead.future');
+        Route::get('/channel-partner', 'channel_partner')->name('lead.channel_partner');
+        Route::get('/not-interested', 'not_interested')->name('lead.not_interested');
+        Route::get('/not-picked', 'not_picked')->name('lead.not_picked');
+        Route::get('/lost', 'lost')->name('lead.lost');
+        Route::get('/wrong-number', 'wrong_number')->name('lead.wrong_number');
+        Route::get('/not-reachable', 'not_reachable')->name('lead.not_reachable');
     });
 
     Route::post('/exhibitions/{id}/toggle-auto-welcome', [WebExhibitionController::class, 'toggleAutoWelcome'])->name('exhibitions.toggle-auto-welcome');

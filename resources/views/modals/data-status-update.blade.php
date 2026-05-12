@@ -38,7 +38,6 @@
                             <option value="NOT REACHABLE">NOT REACHABLE</option>
                             <option value="LOST">LOST</option>
                             <option value="CHANNEL PARTNER">CHANNEL PARTNER</option>
-                            <option value="REJECTED">Rejected</option>
                         </select>
                     </div>
 

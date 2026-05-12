@@ -521,15 +521,148 @@
                     toastr.success(data.message || 'Status updated successfully');
 
                     // redirect if converted
+                    let redirectUrl = '/data-center';
+
                     if (payload.is_converted === 1) {
-                        setTimeout(() => {
-                            window.location.href = '/lead/all-lead';
-                        }, 800);
+
+                        switch (newStatus.toUpperCase()) {
+
+                            case 'PENDING':
+                                redirectUrl = '/lead/pending';
+                                break;
+
+                            case 'PROCESSING':
+                                redirectUrl = '/lead/processing';
+                                break;
+
+                            case 'INTERESTED':
+                                redirectUrl = '/lead/interested';
+                                break;
+
+                            case 'CALL SCHEDULED':
+                                redirectUrl = '/lead/call-scheduled';
+                                break;
+
+                            case 'WHATSAPP':
+                                redirectUrl = '/lead/whatsapp';
+                                break;
+
+                            case 'MEETING SCHEDULED':
+                                redirectUrl = '/lead/meeting-scheduled';
+                                break;
+
+                            case 'VISIT SCHEDULED':
+                                redirectUrl = '/lead/visit-scheduled';
+                                break;
+
+                            case 'VISIT DONE':
+                                redirectUrl = '/lead/visit-done';
+                                break;
+
+                            case 'NOT INTERESTED':
+                                redirectUrl = '/lead/not-interested';
+                                break;
+
+                            case 'NOT PICKED':
+                                redirectUrl = '/lead/not-picked';
+                                break;
+
+                            case 'NOT REACHABLE':
+                                redirectUrl = '/lead/not-reachable';
+                                break;
+
+                            case 'FUTURE LEAD':
+                                redirectUrl = '/lead/future';
+                                break;
+
+                            case 'WRONG NUMBER':
+                                redirectUrl = '/lead/wrong-number';
+                                break;
+
+                            case 'CHANNEL PARTNER':
+                                redirectUrl = '/lead/channel-partner';
+                                break;
+
+                            case 'LOST':
+                                redirectUrl = '/lead/lost';
+                                break;
+
+                            default:
+                                redirectUrl = '/lead/all-lead';
+                        }
+
                     } else {
-                        setTimeout(() => {
-                            location.reload();
-                        }, 500);
+
+                        switch (newStatus.toUpperCase()) {
+
+                            case 'PENDING':
+                                redirectUrl = '/data-center/pending';
+                                break;
+
+                            case 'PROCESSING':
+                                redirectUrl = '/data-center/processing';
+                                break;
+
+                            case 'INTERESTED':
+                                redirectUrl = '/data-center/interested';
+                                break;
+
+                            case 'CALL SCHEDULED':
+                                redirectUrl = '/data-center/call-scheduled';
+                                break;
+
+                            case 'WHATSAPP':
+                                redirectUrl = '/data-center/whatsapp';
+                                break;
+
+                            case 'MEETING SCHEDULED':
+                                redirectUrl = '/data-center/meeting-scheduled';
+                                break;
+
+                            case 'VISIT SCHEDULED':
+                                redirectUrl = '/data-center/visit-scheduled';
+                                break;
+
+                            case 'VISIT DONE':
+                                redirectUrl = '/data-center/visit-done';
+                                break;
+
+                            case 'NOT INTERESTED':
+                                redirectUrl = '/data-center/not-interested';
+                                break;
+
+                            case 'NOT PICKED':
+                                redirectUrl = '/data-center/not-picked';
+                                break;
+
+                            case 'NOT REACHABLE':
+                                redirectUrl = '/data-center/not-reachable';
+                                break;
+
+                            case 'FUTURE LEAD':
+                                redirectUrl = '/data-center/future';
+                                break;
+
+                            case 'WRONG NUMBER':
+                                redirectUrl = '/data-center/wrong-number';
+                                break;
+
+                            case 'CHANNEL PARTNER':
+                                redirectUrl = '/data-center/channel-partner';
+                                break;
+
+                            case 'LOST':
+                                redirectUrl = '/data-center/lost';
+                                break;
+
+                            default:
+                                redirectUrl = '/data-center';
+                        }
                     }
+
+                    setTimeout(() => {
+                        window.location.href = redirectUrl;
+                    }, 800);
 
                 } else {
                     toastr.error(data.message || 'Failed to update status');
@@ -649,7 +782,16 @@
                             <td>${index + 1}</td>
                             <td>${item.remark ?? '-'}</td>
                             <td>${item.status ?? '-'}</td>
-                            <td>${item.created_at ?? '-'}</td>
+                            <td>
+                                ${item.created_at 
+                                    ? new Date(item.created_at).toLocaleDateString('en-GB', {
+                                        day: '2-digit',
+                                        month: 'short',
+                                        year: 'numeric'
+                                    })
+                                    : '-'
+                                }
+                            </td>
                         </tr>
                     `;
                     });

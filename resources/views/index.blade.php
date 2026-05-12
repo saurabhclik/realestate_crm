@@ -741,6 +741,9 @@ $totalOthersLead = ($leadStats->total_lead ?? 0.00)
         initSourceAnalysisChart();
         initProjectAnalysisChart();
         initCampaignAnalysisChart();
+        initCategoryTypeChart();
+        initCategoryChart();
+        initSubCategoryChart();
         loadAllChartData();
 
         $('.date-range-filter').daterangepicker({
@@ -1023,6 +1026,136 @@ $totalOthersLead = ($leadStats->total_lead ?? 0.00)
             window.campaignAnalysisChart = chart;
         }
 
+        function initCategoryTypeChart() {
+            const options = {
+                chart: {
+                    type: 'line',
+                    height: 350,
+                    toolbar: {
+                        show: true
+                    },
+                    zoom: {
+                        enabled: true
+                    }
+                },
+
+                series: [{
+                    name: 'Leads',
+                    data: []
+                }],
+
+                xaxis: {
+                    categories: [],
+                    title: {
+                        text: 'Category Type'
+                    }
+                },
+
+                yaxis: {
+                    title: {
+                        text: 'Lead Count'
+                    }
+                },
+
+                stroke: {
+                    curve: 'smooth',
+                    width: 3
+                },
+
+                markers: {
+                    size: 5
+                },
+
+                colors: ['#556ee6'],
+
+                dataLabels: {
+                    enabled: true
+                },
+
+                tooltip: {
+                    y: {
+                        formatter: function(value) {
+                            return value + " leads";
+                        }
+                    }
+                },
+
+                grid: {
+                    borderColor: '#f1f1f1'
+                }
+            };
+
+            const chart = new ApexCharts(
+                document.querySelector("#category-type-analytics-chart"),
+                options
+            );
+
+            chart.render();
+            window.categoryTypeChart = chart;
+        }
+
+
+        function initCategoryChart() {
+            const options = {
+                chart: {
+                    type: 'pie',
+                    height: 350
+                },
+                series: [],
+                labels: [],
+                colors: ['#34c38f', '#50a5f1', '#f1b44c', '#f46a6a', '#74788d'],
+                legend: {
+                    position: 'bottom'
+                },
+                tooltip: {
+                    y: {
+                        formatter: function(value) {
+                            return value + " leads";
+                        }
+                    }
+                }
+            };
+
+            const chart = new ApexCharts(
+                document.querySelector("#category-analytics-chart"),
+                options
+            );
+
+            chart.render();
+            window.categoryChart = chart;
+        }
+
+
+        function initSubCategoryChart() {
+            const options = {
+                chart: {
+                    type: 'donut',
+                    height: 350
+                },
+                series: [],
+                labels: [],
+                colors: ['#5b73e8', '#34c38f', '#f1b44c', '#f46a6a', '#50a5f1'],
+                legend: {
+                    position: 'bottom'
+                },
+                tooltip: {
+                    y: {
+                        formatter: function(value) {
+                            return value + " leads";
+                        }
+                    }
+                }
+            };
+
+            const chart = new ApexCharts(
+                document.querySelector("#sub-category-analytics-chart"),
+                options
+            );
+
+            chart.render();
+            window.subCategoryChart = chart;
+        }
+
         function loadAllChartData() {
             const dateRange = $('.date-range-filter').val();
             const year = $('#year-filter').val();
@@ -1066,6 +1199,32 @@ $totalOthersLead = ($leadStats->total_lead ?? 0.00)
                             labels: response.campaignData.labels
                         });
                     }
+
+                    if (response.categoryTypeData) {
+                        window.categoryTypeChart.updateOptions({
+                            series: [{
+                                name: 'Leads',
+                                data: response.categoryTypeData.values
+                            }],
+                            xaxis: {
+                                categories: response.categoryTypeData.labels
+                            }
+                        });
+                    }
+
+                    if (response.categoryData) {
+                        window.categoryChart.updateOptions({
+                            series: response.categoryData.values,
+                            labels: response.categoryData.labels
+                        });
+                    }
+
+                    if (response.subCategoryData) {
+                        window.subCategoryChart.updateOptions({
+                            series: response.subCategoryData.values,
+                            labels: response.subCategoryData.labels
+                        });
+                    }
                 },
                 error: function(xhr, status, error) {
                     console.error('Error fetching chart data:', error);
@@ -1089,6 +1248,15 @@ $totalOthersLead = ($leadStats->total_lead ?? 0.00)
                     break;
                 case '#campaign-analysis':
                     chart = window.campaignAnalysisChart;
+                    break;
+                case '#category-type':
+                    chart = window.categoryTypeChart;
+                    break;
+                case '#category':
+                    chart = window.categoryChart;
+                    break;
+                case '#sub-category':
+                    chart = window.subCategoryChart;
                     break;
             }
 

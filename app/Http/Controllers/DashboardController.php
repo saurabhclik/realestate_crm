@@ -720,12 +720,18 @@ class DashboardController extends Controller
         $projectData = $this->getProjectAnalysisData($childIds, $filters, $dateRange);
         $monthlyTrendData = $this->getMonthlyTrendData($childIds, $filters, $dateRange);
         $campaignData = $this->getCampaignAnalysisData($childIds, $filters, $dateRange);
+        $categoryTypeData = $this->getCategoryTypeAnalysisData($childIds, $filters, $dateRange);
+        $categoryData = $this->getCategoryAnalysisData($childIds, $filters, $dateRange);
+        $subCategoryData = $this->getSubCategoryAnalysisData($childIds, $filters, $dateRange);
         // echo '<pre>'; print_r($monthlyTrendData); exit;
         return response()->json([
             'sourceData' => $sourceData,
             'projectData' => $projectData,
             'campaignData' => $campaignData,
-            'monthlyTrendData' => $monthlyTrendData
+            'monthlyTrendData' => $monthlyTrendData,
+            'categoryTypeData' => $categoryTypeData,
+            'categoryData' => $categoryData,
+            'subCategoryData' => $subCategoryData
         ]);
     }
 
@@ -802,6 +808,96 @@ class DashboardController extends Controller
         return [
             'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
             'values' => array_values($monthlyData)
+        ];
+    }
+
+    private function getCategoryTypeAnalysisData($childIds, $filters, $dateRange)
+    {
+        $query = DB::table('leads')
+            ->select(
+                'type',
+                DB::raw('COUNT(id) as total_leads')
+            )
+            ->whereNotNull('type')
+            ->where('type', '!=', '')
+            ->when(!empty($childIds), fn($q) => $q->whereIn('user_id', $childIds))
+            ->when(!empty($filters['sourceId']), fn($q) => $q->where('source', $filters['sourceId']))
+            ->when(!empty($filters['projectId']), fn($q) => $q->where('project_id', $filters['projectId']))
+            ->when(!empty($filters['status']), fn($q) => $q->where('status', $filters['status']))
+            ->when(!empty($dateRange), fn($q) => $q->whereBetween('lead_date', [$dateRange['start'], $dateRange['end']]))
+            ->when(
+                isset($filters['team']) && $filters['team'] === 'self',
+                fn($q) => $q->where('user_id', session('user_id'))
+            )
+            ->groupBy('type')
+            ->orderByDesc('total_leads')
+            ->limit(10);
+
+        $results = $query->get();
+
+        return [
+            'labels' => $results->pluck('type')->toArray(),
+            'values' => $results->pluck('total_leads')->toArray()
+        ];
+    }
+
+    private function getCategoryAnalysisData($childIds, $filters, $dateRange)
+    {
+        $query = DB::table('leads')
+            ->join('inv_catg', 'leads.catg_id', '=', 'inv_catg.id')
+            ->select(
+                'inv_catg.name as category',
+                DB::raw('COUNT(leads.id) as total_leads')
+            )
+            ->whereNotNull('leads.catg_id')
+            ->when(!empty($childIds), fn($q) => $q->whereIn('leads.user_id', $childIds))
+            ->when(!empty($filters['sourceId']), fn($q) => $q->where('leads.source', $filters['sourceId']))
+            ->when(!empty($filters['projectId']), fn($q) => $q->where('leads.project_id', $filters['projectId']))
+            ->when(!empty($filters['status']), fn($q) => $q->where('leads.status', $filters['status']))
+            ->when(!empty($dateRange), fn($q) => $q->whereBetween('leads.lead_date', [$dateRange['start'], $dateRange['end']]))
+            ->when(
+                isset($filters['team']) && $filters['team'] === 'self',
+                fn($q) => $q->where('leads.user_id', session('user_id'))
+            )
+            ->groupBy('inv_catg.name')
+            ->orderByDesc('total_leads')
+            ->limit(10);
+
+        $results = $query->get();
+
+        return [
+            'labels' => $results->pluck('category')->toArray(),
+            'values' => $results->pluck('total_leads')->toArray()
+        ];
+    }
+
+    private function getSubCategoryAnalysisData($childIds, $filters, $dateRange)
+    {
+        $query = DB::table('leads')
+            ->join('inv_subcatg', 'leads.sub_catg_id', '=', 'inv_subcatg.id')
+            ->select(
+                'inv_subcatg.name as sub_category',
+                DB::raw('COUNT(leads.id) as total_leads')
+            )
+            ->whereNotNull('leads.sub_catg_id')
+            ->when(!empty($childIds), fn($q) => $q->whereIn('leads.user_id', $childIds))
+            ->when(!empty($filters['sourceId']), fn($q) => $q->where('leads.source', $filters['sourceId']))
+            ->when(!empty($filters['projectId']), fn($q) => $q->where('leads.project_id', $filters['projectId']))
+            ->when(!empty($filters['status']), fn($q) => $q->where('leads.status', $filters['status']))
+            ->when(!empty($dateRange), fn($q) => $q->whereBetween('leads.lead_date', [$dateRange['start'], $dateRange['end']]))
+            ->when(
+                isset($filters['team']) && $filters['team'] === 'self',
+                fn($q) => $q->where('leads.user_id', session('user_id'))
+            )
+            ->groupBy('inv_subcatg.name')
+            ->orderByDesc('total_leads')
+            ->limit(10);
+
+        $results = $query->get();
+
+        return [
+            'labels' => $results->pluck('sub_category')->toArray(),
+            'values' => $results->pluck('total_leads')->toArray()
         ];
     }
 

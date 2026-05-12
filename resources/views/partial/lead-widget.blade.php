@@ -76,6 +76,23 @@
                         Campaign Analysis
                     </a>
                 </li>
+
+                  <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#category-type" role="tab">
+                        Category Type
+                    </a>
+                </li>
+                  <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#category" role="tab">
+                        Category 
+                    </a>
+                </li>
+                  <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#sub-category" role="tab">
+                        Sub Category
+                    </a>
+                </li>
+
             </ul>
             <div class="tab-content p-3 border border-top-0">
                 <div class="tab-pane active" id="monthly-report" role="tabpanel">
@@ -102,6 +119,15 @@
                 </div>
                 <div class="tab-pane" id="campaign-analysis" role="tabpanel">
                     <div id="campaign-analytics-chart" style="height: 350px;"></div>
+                </div>
+                <div class="tab-pane" id="category-type" role="tabpanel">
+                    <div id="category-type-analytics-chart" style="height: 350px;"></div>
+                </div>
+                <div class="tab-pane" id="category" role="tabpanel">
+                    <div id="category-analytics-chart" style="height: 350px;"></div>
+                </div>
+                <div class="tab-pane" id="sub-category" role="tabpanel">
+                    <div id="sub-category-analytics-chart" style="height: 350px;"></div>
                 </div>
             </div>
         </div>

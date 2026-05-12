@@ -406,7 +406,7 @@ class LeadService
         $rules = [
             'leadId' => 'required|exists:leads,id',
             'newStatus' => 'required|in:NEW LEAD,ALLOCATED,PENDING,PROCESSING,INTERESTED,CALL SCHEDULED,VISIT SCHEDULED,VISIT DONE,SM NEW LEADS,WRONG NUMBER,NOT INTERESTED,FUTURE LEAD,NOT PICKED,NOT REACHABLE,LOST,CHANNEL PARTNER,CONVERTED,MEETING SCHEDULED,WHATSAPP,booked',
-            'conversionType' => 'required_if:newStatus,CONVERTED|in:Completed,Cancelled,booked',
+            'conversionType' => 'required_if:newStatus,CONVERTED|in:Completed,Cancelled,Booked',
             'comment' => 'nullable|string|max:500',
             'remindDate' => 'nullable|required_if:newStatus,CALL SCHEDULED,VISIT SCHEDULED,MEETING SCHEDULED,INTERESTED|date',
             'remindTime' => 'nullable|required_if:newStatus,CALL SCHEDULED,VISIT SCHEDULED,MEETING SCHEDULED,INTERESTED',

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', session('software_type') === 'lead_management' 
+@section('title', session('software_type') === 'lead_management'
 ? 'Product Category | Pro-leadexpertz' : 'Project Category | Pro-leadexpertz')
 
 @section('content')
@@ -96,12 +96,12 @@
                                                 <button
                                                     class="btn btn-sm btn-outline-primary edit-btn"
                                                     data-id="{{ $category->id }}"
-                                                    data-type="{{ $category->type }}"
+                                                    data-category-type="{{ $category->type }}"
                                                     data-name="{{ $category->name }}"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#Modalbox"
                                                     data-action="{{ url('project-category/update') }}"
-                                                    data-type="Update"
+                                                    data-action-type="save"
                                                     data-modal="Project">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
@@ -131,6 +131,42 @@
         const url = new URL(window.location.href);
         url.searchParams.set('length', this.value);
         window.location.href = url.toString();
+    });
+</script>
+
+<script>
+    // Edit Modal Data
+    $('.edit-btn').on('click', function() {
+
+        let id = $(this).data('id');
+        let name = $(this).data('name');
+        let categoryType = $(this).data('category-type');
+        let action = $(this).data('action');
+        let actionType = $(this).data('action-type');
+
+        // set hidden id
+        $('#id').val(id);
+
+        // prefill category/project name
+        $('#name').val(name);
+
+        // show category dropdown
+        $('.cat-type').removeClass('d-none');
+
+        // prefill dropdown
+        $('#cat_type').val(categoryType).trigger('change');
+
+        // form action
+        $('#action').attr('action', action);
+
+        // button text
+        $('#data-action-type').text(actionType);
+
+        // modal title
+        $('#ModalboxLabel').text('Update Project Category');
+
+        // label name
+        $('#modal-name').text('Project Category Name');
     });
 </script>
 @endsection

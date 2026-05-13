@@ -30,10 +30,30 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary" id="modal-type"></button>
+                    <button type="submit" class="btn btn-primary" id="data-action-type">create</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+$('.edit-btn').on('click', function () {
+
+    $('#id').val($(this).data('id'));
+    $('#name').val($(this).data('name'));
+
+    // show dropdown on edit
+    $('.cat-type').removeClass('d-none');
+
+    // set selected value
+    $('#cat_type').val($(this).data('category-type')).trigger('change');
+
+    // button text
+    $('#data-action-type').text($(this).data('action-type'));
+
+    // form action
+    $('#action').attr('action', $(this).data('action'));
+});
+</script>

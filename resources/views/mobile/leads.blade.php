@@ -178,8 +178,28 @@
         statusSelect.addEventListener('change', function() 
         {
             const selectedStatus = this.value;
-            const showReminderFields = ['CALL SCHEDULED', 'VISIT SCHEDULED', 'FUTURE LEAD'].includes(selectedStatus);
-            reminderFields.style.display = 'block'; 
+            const statusesRequiringReminder = ['CALL SCHEDULED', 'VISIT SCHEDULED', 'MEETING SCHEDULED', 'INTERESTED', 'FUTURE LEAD'];
+            const statusesRequiringConversion = ['CONVERTED'];
+            
+            // Show reminder fields for statuses that need them
+            if (statusesRequiringReminder.includes(selectedStatus)) 
+            {
+                reminderFields.style.display = 'block'; 
+            } 
+            else 
+            {
+                reminderFields.style.display = 'none';
+            }
+            
+            // Show conversion fields only for CONVERTED status
+            if (statusesRequiringConversion.includes(selectedStatus)) 
+            {
+                conversionFields.style.display = 'block';
+            } 
+            else 
+            {
+                conversionFields.style.display = 'none';
+            }
         });
         statusUpdateForm.addEventListener('submit', function(e) 
         {
@@ -692,6 +712,23 @@
                 return;
             }
 
+            // Statuses that require reminder date and time
+            const statusesRequiringReminder = ['CALL SCHEDULED', 'VISIT SCHEDULED', 'MEETING SCHEDULED', 'INTERESTED', 'FUTURE LEAD'];
+            
+            if (statusesRequiringReminder.includes(status)) 
+            {
+                if (!remindDate) 
+                {
+                    toastr.error('Remind date is required for ' + status);
+                    return;
+                }
+                if (!remindTime) 
+                {
+                    toastr.error('Remind time is required for ' + status);
+                    return;
+                }
+            }
+
             const requestData = {
                 leadId: leadId,
                 newStatus: status,
@@ -728,10 +765,12 @@
                 body: JSON.stringify(requestData)
             })
             .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
+                return response.json().then(data => {
+                    return { data: data, ok: response.ok, status: response.status };
+                });
             })
-            .then(data => {
+            .then(result => {
+                const { data, ok, status } = result;
                 if (data.success) 
                 {
                     toastr.success('Status updated successfully!');
@@ -745,7 +784,7 @@
                 }
                 else 
                 {
-                    toastr.error('Error updating status: ' + data.message);
+                    toastr.error(data.message || 'Error updating status');
                 }
             })
             .catch(error => {

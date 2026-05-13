@@ -61,13 +61,13 @@ $currentMenuAccess = $menuAccess[$softwareType] ?? $menuAccess['real_state'];
                     <ul class="sub-menu" aria-expanded="false">
                         @if(in_array('master', $currentMenuAccess) && ($userType == 'admin' || $userType == 'team_manager'))
                         <li>
-                            <a href="{{route('category.list')}}" key="t-category">Category Type</a>
+                            <a href="{{route('category.list')}}" key="t-category">Property Type</a>
                         </li>
                         <li>
-                            <a href="{{route('project.category')}}" key="t-category"> {{ $softwareType === 'lead_management' ? 'Product Category' : 'Project Category' }}</a>
+                            <a href="{{route('project.category')}}" key="t-category"> {{ $softwareType === 'lead_management' ? 'Product Category' : 'Property Category' }}</a>
                         </li>
                         <li>
-                            <a href="{{route('project.sub_category')}}" key="t-shops">{{ $softwareType === 'lead_management' ? 'Product Sub Category' : 'Project Sub Category' }}</a>
+                            <a href="{{route('project.sub_category')}}" key="t-shops">{{ $softwareType === 'lead_management' ? 'Product Sub Category' : 'Property Sub Category' }}</a>
                         </li>
                         <li>
                             <a href="{{route('source.platform')}}" key="t-platform">Source Platform</a>
@@ -101,9 +101,11 @@ $currentMenuAccess = $menuAccess[$softwareType] ?? $menuAccess['real_state'];
                             <a href="{{route('inquiry_question')}}" key="t-shops">Inquiry Question</a>
                         </li>
                         @endif
+                        @if($userType == 'admin')
                         <li>
                             <a href="{{route('integration.settings')}}" key="t-shops">API Integrations</a>
                         </li>
+                        @endif
                         @endif
                         @if(in_array('mis_management', $activeFeatures) && in_array('mis_management', $currentMenuAccess))
                         <li>

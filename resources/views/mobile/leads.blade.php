@@ -178,8 +178,28 @@
         statusSelect.addEventListener('change', function() 
         {
             const selectedStatus = this.value;
-            const showReminderFields = ['CALL SCHEDULED', 'VISIT SCHEDULED', 'FUTURE LEAD'].includes(selectedStatus);
-            reminderFields.style.display = 'block'; 
+            const statusesRequiringReminder = ['CALL SCHEDULED', 'VISIT SCHEDULED', 'MEETING SCHEDULED', 'INTERESTED', 'FUTURE LEAD'];
+            const statusesRequiringConversion = ['CONVERTED'];
+            
+            // Show reminder fields for statuses that need them
+            if (statusesRequiringReminder.includes(selectedStatus)) 
+            {
+                reminderFields.style.display = 'block'; 
+            } 
+            else 
+            {
+                reminderFields.style.display = 'none';
+            }
+            
+            // Show conversion fields only for CONVERTED status
+            if (statusesRequiringConversion.includes(selectedStatus)) 
+            {
+                conversionFields.style.display = 'block';
+            } 
+            else 
+            {
+                conversionFields.style.display = 'none';
+            }
         });
         statusUpdateForm.addEventListener('submit', function(e) 
         {
@@ -690,6 +710,23 @@
             {
                 toastr.error('Please select a status');
                 return;
+            }
+
+            // Statuses that require reminder date and time
+            const statusesRequiringReminder = ['CALL SCHEDULED', 'VISIT SCHEDULED', 'MEETING SCHEDULED', 'INTERESTED', 'FUTURE LEAD'];
+            
+            if (statusesRequiringReminder.includes(status)) 
+            {
+                if (!remindDate) 
+                {
+                    toastr.error('Remind date is required for ' + status);
+                    return;
+                }
+                if (!remindTime) 
+                {
+                    toastr.error('Remind time is required for ' + status);
+                    return;
+                }
             }
 
             const requestData = {

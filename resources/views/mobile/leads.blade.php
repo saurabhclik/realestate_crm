@@ -728,10 +728,12 @@
                 body: JSON.stringify(requestData)
             })
             .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
+                return response.json().then(data => {
+                    return { data: data, ok: response.ok, status: response.status };
+                });
             })
-            .then(data => {
+            .then(result => {
+                const { data, ok, status } = result;
                 if (data.success) 
                 {
                     toastr.success('Status updated successfully!');
@@ -745,7 +747,7 @@
                 }
                 else 
                 {
-                    toastr.error('Error updating status: ' + data.message);
+                    toastr.error(data.message || 'Error updating status');
                 }
             })
             .catch(error => {

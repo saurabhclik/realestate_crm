@@ -15,28 +15,29 @@
                         <i class="fas fa-info-circle me-2"></i>
                         Share this lead with multiple team members. You can select multiple users from the dropdown.
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="share_users" class="form-label">Select Users <span class="text-danger">*</span></label>
                         <select class="form-control select2-multiple" id="share_users" name="users[]" multiple="multiple" required>
                             @foreach($users as $user)
-                                <option value="{{ $user->id }}">{{ $user->name }} - {{ $user->email }} ({{ ucfirst($user->role) }})</option>
+                            <option value="{{ $user->id }}">{{ $user->name }} - {{ $user->email }} ({{ ucfirst($user->role) }})</option>
                             @endforeach
                         </select>
                         <div class="form-text">You can select multiple users by clicking and holding Ctrl/Cmd or using the search</div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="share_message" class="form-label">Message (Optional)</label>
-                        <textarea class="form-control" id="share_message" name="message" rows="3" 
-                        placeholder="Add a message for the recipients..."></textarea>
+                        <textarea class="form-control" id="share_message" name="message" rows="3"
+                            placeholder="Add a message for the recipients..."></textarea>
                     </div>
                     <div class="selected-users-preview mt-3" style="display: none;">
                         <h6 class="text-muted mb-2">Selected Users:</h6>
                         <div id="selectedUsersList" class="d-flex flex-wrap gap-2"></div>
                     </div>
                 </div>
-                <div class="modal-footer">
+
+                <!-- <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary" id="ShareSubmitBtn">
                         <span id="ShareSubmitText">Share with Selected Users</span>
@@ -44,8 +45,74 @@
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Please wait...
                         </span>
                     </button>
+                </div> -->
+
+                <div class="modal-footer d-flex justify-content-between">
+
+                    <div id="undoShareSection" class="d-none">
+                        <button type="button" class="btn btn-danger btn-sm" id="undoShareBtn">
+                            <i class="fas fa-undo"></i> Undo Share
+                            (<span id="undoTimer">3</span>s)
+                        </button>
+                    </div>
+
+                    <div class="ms-auto">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+
+                        <button type="submit" class="btn btn-primary" id="ShareSubmitBtn">
+                            <span id="ShareSubmitText">
+                                Share with Selected Users
+                            </span>
+
+                            <span id="ShareSubmitSpinner" class="d-none">
+                                <span class="spinner-border spinner-border-sm"></span>
+                                Please wait...
+                            </span>
+                        </button>
+                    </div>
+
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+    let undoTimeout;
+    let undoSeconds = 3;
+    let undoData = {};
+
+    $('form').on('submit', function() {
+
+        $('#ShareSubmitText').addClass('d-none');
+        $('#ShareSubmitSpinner').removeClass('d-none');
+
+        undoData = {
+            lead_id: $('#shareLeadId').val(),
+            users: $('#share_users').val()
+        };
+
+        $('#undoShareSection').removeClass('d-none');
+
+        undoSeconds = 3;
+
+        $('#undoTimer').text(undoSeconds);
+
+        undoTimeout = setInterval(function() {
+
+            undoSeconds--;
+
+            $('#undoTimer').text(undoSeconds);
+
+            if (undoSeconds <= 0) {
+                clearInterval(undoTimeout);
+
+                $('#undoShareSection').addClass('d-none');
+            }
+
+        }, 1000);
+
+    });
+</script>

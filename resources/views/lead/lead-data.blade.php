@@ -444,7 +444,7 @@ $isSalesman = ($userType == 'salesman');
                                                 @endif
                                             </div>
                                             @if(session('user_type') == 'admin' || session('user_type') == 'team_manager')
-                                            <div class="action-item share-item" onclick="showShareModal('{{ $row->id }}')" data-bs-toggle="tooltip" title="Share Lead" style="cursor:pointer;">
+                                            <div class="action-item share-item" onclick="showShareModal('{{ $row->id }}', '{{ $row->lead_shared_with }}')" data-bs-toggle="tooltip" title="Share Lead" style="cursor:pointer;">
                                                 <i class="fas fa-share-alt"></i>
                                             </div>
                                             @endif
@@ -656,7 +656,7 @@ $isSalesman = ($userType == 'salesman');
 
                                                 $comment = strtolower(trim(strip_tags($row->last_comment ?? '')));
 
-                                             
+
                                                 if ($userType === 'salesman') {
                                                 if (str_contains($comment, 'transfer') || str_contains($comment, 'allocated')) {
                                                 $comment = '';
@@ -873,6 +873,18 @@ $isSalesman = ($userType == 'salesman');
 </div>
 
 <script>
+    function showShareModal(leadId, sharedUsers = '') {
+        $('#shareLeadId').val(leadId);
+        $('#share_users').val(null).trigger('change');
+
+        if (sharedUsers != '') {
+            let userArray = sharedUsers.split(',');
+            $('#share_users').val(userArray).trigger('change');
+        }
+        $('#shareLeadModal').modal('show');
+    }
+
+
     $('#all-check').on('change', function() {
         const isChecked = $(this).is(':checked');
         $('.checked').prop('checked', isChecked);

@@ -32,65 +32,48 @@ class MobileDashboardController extends Controller
                 'leads.phone',
                 'leads.status',
                 'leads.lead_date',
+                'leads.source',
                 'leads.user_id',
                 'leads.last_comment',
                 'leads.project_id',
+                'leads.type',
                 'inv_catg.name as category',
                 'inv_subcatg.name as sub_category',
                 DB::raw('GROUP_CONCAT(projects.project_name SEPARATOR ", ") as project_names'),
                 'users.name as agent'
             )
             ->whereIn('leads.user_id', $userIds)
-            ->groupBy('leads.id', 'leads.name', 'leads.phone', 'leads.status', 'leads.lead_date', 'leads.user_id', 'leads.last_comment', 'leads.project_id', 'inv_catg.name', 'inv_subcatg.name', 'users.name');
-            
-        if ($status === 'Completed') 
-        {
-            $query->where(function ($q) 
-            {
+            ->groupBy('leads.id', 'leads.name', 'leads.phone', 'leads.status', 'leads.lead_date', 'leads.source', 'leads.user_id', 'leads.last_comment', 'leads.project_id', 'leads.type', 'inv_catg.name', 'inv_subcatg.name', 'users.name');
+
+        if ($status === 'Completed') {
+            $query->where(function ($q) {
                 $q->where('leads.status', 'COMPLETED')
-                ->orWhere(function ($q) 
-                {
-                    $q->where('leads.status', 'CONVERTED')
-                        ->where('leads.conversion_type', 'Completed');
-                });
+                    ->orWhere(function ($q) {
+                        $q->where('leads.status', 'CONVERTED')
+                            ->where('leads.conversion_type', 'Completed');
+                    });
             });
-        } 
-        elseif ($status === 'Booked') 
-        {
-            $query->where(function ($q) 
-            {
+        } elseif ($status === 'Booked') {
+            $query->where(function ($q) {
                 $q->where('leads.status', 'BOOKED')
-                ->orWhere(function ($q) 
-                {
-                    $q->where('leads.status', 'CONVERTED')
-                        ->where('leads.conversion_type', 'Booked');
-                });
+                    ->orWhere(function ($q) {
+                        $q->where('leads.status', 'CONVERTED')
+                            ->where('leads.conversion_type', 'Booked');
+                    });
             });
-        } 
-        elseif ($status === 'MEETING SCHEDULED') 
-        {
+        } elseif ($status === 'MEETING SCHEDULED') {
             $query->where('leads.status', 'MEETING SCHEDULED');
-        } 
-        elseif ($status === 'WHATSAPP') 
-        {
+        } elseif ($status === 'WHATSAPP') {
             $query->where('leads.status', 'WHATSAPP');
-        } 
-        elseif ($status === 'facebook') 
-        {
+        } elseif ($status === 'facebook') {
             $query->where('leads.source', 'Facebook');
-        } 
-        elseif ($status === 'All lead') 
-        {
-        } 
-        elseif (!empty($status)) 
-        {
+        } elseif ($status === 'All lead') {
+        } elseif (!empty($status)) {
             $query->where('leads.status', $status);
         }
-        
-        if ($search) 
-        {
-            $query->where(function ($q) use ($search) 
-            {
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('leads.name', 'like', "%{$search}%")
                     ->orWhere('leads.phone', 'like', "%{$search}%")
                     ->orWhere('leads.email', 'like', "%{$search}%")
@@ -107,9 +90,8 @@ class MobileDashboardController extends Controller
                     ->orWhere('leads.last_comment', 'like', "%{$search}%");
             });
         }
-        
-        if ($startDate && $endDate) 
-        {
+
+        if ($startDate && $endDate) {
             $query->whereBetween('leads.lead_date', [$startDate, $endDate . ' 23:59:59']);
         }
 
@@ -119,8 +101,7 @@ class MobileDashboardController extends Controller
     protected function handleLeadRequest(Request $request, $status, $leadType)
     {
         $userId = Session::get('user_id');
-        if (!$userId) 
-        {
+        if (!$userId) {
             return response()->json(['success' => false, 'message' => 'User not authenticated'], 401);
         }
 
@@ -131,14 +112,13 @@ class MobileDashboardController extends Controller
         $endDate   = $request->input('end_date');
 
         $query     = $this->getLeadsQuery($status, $userId, $search, $startDate, $endDate);
-        $paginator = $query->orderBy('leads.lead_date', 'desc')->paginate($perPage, ['*'], 'page', $page);
+        $paginator = $query->orderBy('leads.created_at', 'desc')->paginate($perPage, ['*'], 'page', $page);
 
         $leads            = $paginator->items();
         $hasMoreInitial   = $paginator->hasMorePages();
         $totalLeadsCount  = $paginator->total();
 
-        if ($request->wantsJson()) 
-        {
+        if ($request->wantsJson()) {
             return response()->json([
                 'leads'        => $leads,
                 'current_page' => $paginator->currentPage(),
@@ -302,8 +282,7 @@ class MobileDashboardController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
-        try 
-        {
+        try {
             DB::beginTransaction();
             DB::table('leads')
                 ->whereIn('id', $validated['lead_ids'])
@@ -313,9 +292,7 @@ class MobileDashboardController extends Controller
                 ]);
             DB::commit();
             return response()->json(['success' => true, 'message' => 'Leads shared successfully']);
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['success' => false, 'message' => 'Error sharing leads: ' . $e->getMessage()], 500);
         }
@@ -335,8 +312,7 @@ class MobileDashboardController extends Controller
             'lead_date' => 'nullable|date',
         ]);
 
-        try 
-        {
+        try {
             DB::beginTransaction();
             $leadId = DB::table('leads')->insertGetId([
                 'name' => $validated['name'],
@@ -352,8 +328,7 @@ class MobileDashboardController extends Controller
                 'updated_at' => now(),
             ]);
 
-            if ($request->filled('comment')) 
-            {
+            if ($request->filled('comment')) {
                 DB::table('lead_comments')->insert([
                     'lead_id' => $leadId,
                     'comment' => $validated['comment'],
@@ -365,9 +340,7 @@ class MobileDashboardController extends Controller
 
             DB::commit();
             return response()->json(['success' => true, 'message' => 'Lead created successfully']);
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['success' => false, 'message' => 'Error creating lead: ' . $e->getMessage()], 500);
         }
@@ -386,8 +359,7 @@ class MobileDashboardController extends Controller
             'lead_date' => 'nullable|date',
         ]);
 
-        try 
-        {
+        try {
             DB::beginTransaction();
             DB::table('leads')
                 ->where('id', $id)
@@ -405,9 +377,7 @@ class MobileDashboardController extends Controller
                 ]);
             DB::commit();
             return response()->json(['success' => true, 'message' => 'Lead updated successfully']);
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['success' => false, 'message' => 'Error updating lead: ' . $e->getMessage()], 500);
         }
@@ -439,17 +409,14 @@ class MobileDashboardController extends Controller
 
     public function profile_update(Request $request)
     {
-        try 
-        {
+        try {
             $validator = Validator::make($request->all(), [
                 'new_password' => 'required|string|min:4|max:250',
                 'confirm_password' => 'required|same:new_password',
             ]);
 
-            if ($validator->fails()) 
-            {
-                foreach ($validator->errors()->all() as $error) 
-                {
+            if ($validator->fails()) {
+                foreach ($validator->errors()->all() as $error) {
                     Flasher::addError($error);
                 }
                 return redirect()->back()->withInput();
@@ -466,10 +433,7 @@ class MobileDashboardController extends Controller
 
             Flasher::addSuccess('Password updated successfully.');
             return redirect()->back();
-
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             Flasher::addError('Something went wrong: ' . $e->getMessage());
             return redirect()->back();
         }
@@ -479,8 +443,7 @@ class MobileDashboardController extends Controller
     {
         $userId = Session::get('user_id');
 
-        if (!$request->has(['latitude', 'longitude', 'action'])) 
-        {
+        if (!$request->has(['latitude', 'longitude', 'action'])) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Location not available. Please enable location.'
@@ -494,10 +457,8 @@ class MobileDashboardController extends Controller
             ->whereDate('start_time', Carbon::today())
             ->first();
 
-        if ($request->action === 'start') 
-        {
-            if ($todayAttendance) 
-            {
+        if ($request->action === 'start') {
+            if ($todayAttendance) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Attendance already marked for today. You cannot start again.'
@@ -513,17 +474,14 @@ class MobileDashboardController extends Controller
                 'status' => 'success',
                 'message' => 'Attendance started successfully.'
             ], 200);
-        } 
-        elseif ($request->action === 'end') 
-        {
+        } elseif ($request->action === 'end') {
             $active = DB::table('attendance')
                 ->where('user_id', $userId)
                 ->whereDate('start_time', Carbon::today())
                 ->whereNull('end_time')
                 ->first();
 
-            if (!$active) 
-            {
+            if (!$active) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'No active attendance found for today.'

@@ -1,4 +1,4 @@
-<style>
+{{-- <style>
     .modal-overlay {
         position: fixed;
         top: 0;
@@ -47,9 +47,224 @@
     .choices__input {
         font-size: 14px;
     }
+</style> --}}
+
+<style>
+    /* ===== Modal Overlay ===== */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.65);
+        backdrop-filter: blur(4px);
+        z-index: 1050;
+        overflow-y: auto;
+        padding: 20px;
+        display: none;
+        animation: fadeIn 0.25s ease;
+    }
+
+    /* ===== Modal Card ===== */
+    .modal-content {
+        background: #ffffff;
+        width: 100%;
+        max-width: 520px;
+        margin: 30px auto;
+        border-radius: 22px;
+        padding: 24px;
+        border: none;
+        box-shadow:
+            0 10px 30px rgba(0, 0, 0, 0.08),
+            0 2px 8px rgba(0, 0, 0, 0.04);
+        max-height: 92vh;
+        overflow-y: auto;
+        animation: slideUp 0.3s ease;
+    }
+
+    /* ===== Scrollbar ===== */
+    .modal-content::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .modal-content::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+
+    /* ===== Title ===== */
+    .modal-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 24px;
+        text-align: center;
+        position: relative;
+    }
+
+    .modal-title::after {
+        content: "";
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(90deg, #2563eb, #60a5fa);
+        display: block;
+        margin: 10px auto 0;
+        border-radius: 20px;
+    }
+
+    /* ===== Form Group ===== */
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+    .form-group label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    /* ===== Inputs ===== */
+    .form-control,
+    .form-select,
+    select,
+    textarea,
+    input {
+        width: 100%;
+        border-radius: 12px !important;
+        border: 1px solid #dbe2ea !important;
+        padding: 12px 14px !important;
+        font-size: 14px !important;
+        background: #f8fafc !important;
+        transition: all 0.25s ease;
+        box-shadow: none !important;
+    }
+
+    .form-control:focus,
+    .form-select:focus,
+    select:focus,
+    textarea:focus,
+    input:focus {
+        border-color: #2563eb !important;
+        background: #fff !important;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12) !important;
+    }
+
+    textarea {
+        resize: none;
+    }
+
+    /* ===== Section Box ===== */
+    #reminderFields,
+    #conversionFields,
+    .applicant_div {
+        background: #f8fbff;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        padding: 18px;
+        margin-top: 16px;
+    }
+
+    /* ===== Choices Multi Select ===== */
+    .choices__inner {
+        min-height: 48px;
+        border-radius: 12px !important;
+        border: 1px solid #dbe2ea !important;
+        background: #f8fafc !important;
+        padding: 6px 10px !important;
+    }
+
+    .choices__list--multiple .choices__item {
+        background: linear-gradient(135deg, #2563eb, #3b82f6);
+        border: none;
+        border-radius: 8px;
+        padding: 5px 10px;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .choices__input {
+        background: transparent !important;
+        font-size: 14px;
+    }
+
+    /* ===== Buttons ===== */
+    .modal-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+    }
+
+    .modal-actions .btn {
+        flex: 1;
+        border-radius: 12px;
+        padding: 12px;
+        font-size: 15px;
+        font-weight: 600;
+        border: none;
+        transition: all 0.25s ease;
+    }
+
+    .btn-secondary {
+        background: #e2e8f0 !important;
+        color: #334155 !important;
+    }
+
+    .btn-secondary:hover {
+        background: #cbd5e1 !important;
+        transform: translateY(-1px);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
+        color: white !important;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 576px) {
+        .modal-content {
+            padding: 18px;
+            border-radius: 18px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+        }
+
+        .modal-actions {
+            flex-direction: column;
+        }
+    }
+
+    /* ===== Animations ===== */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
 </style>
 @php
-use Illuminate\Support\Facades\DB;
+    use Illuminate\Support\Facades\DB;
 @endphp
 <div id="statusModal" class="modal-overlay" style="display: none;">
     <div class="modal-content">
@@ -78,12 +293,12 @@ use Illuminate\Support\Facades\DB;
             <div class="form-group col-md-6 col-lg-6 mb-2 mobile-schedule-project">
                 <label for="">Project</label>
                 @php
-                $projects = DB::table('projects')->select('id', 'project_name')->get();
+                    $projects = DB::table('projects')->select('id', 'project_name')->get();
                 @endphp
 
                 <select class="form-control" name="prj_id[]" id="prj_id" multiple>
                     @foreach ($projects as $project)
-                    <option value="{{ $project->id }}">{{ $project->project_name }}</option>
+                        <option value="{{ $project->id }}">{{ $project->project_name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -114,58 +329,64 @@ use Illuminate\Support\Facades\DB;
                     <div class="form-group col-md-6 col-lg-6 mb-2">
                         <label for="">Project</label>
                         @php
-                        $projects = DB::table('projects')->select('id', 'project_name')->get();
+                            $projects = DB::table('projects')->select('id', 'project_name')->get();
                         @endphp
 
                         <select class="form-select" name="prj_id" id="prj_id">
                             <option value="">--- Select Project ---</option>
                             @foreach ($projects as $project)
-                            <option value="{{ $project->id }}">{{ $project->project_name }}</option>
+                                <option value="{{ $project->id }}">{{ $project->project_name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group col-md-6 col-lg-6 mb-2">
                         <label for="">Size</label>
-                        <input type="text" class="form-control" name="prop_size" id="prop_size" placeholder="Enter Size">
+                        <input type="text" class="form-control" name="prop_size" id="prop_size"
+                            placeholder="Enter Size">
                     </div>
                     <div class="form-group col-md-6 col-lg-6 mb-2">
                         <label for="">Final Price</label>
-                        <input type="text" class="form-control" name="final_price" id="final_price" placeholder="Enter final price">
+                        <input type="text" class="form-control" name="final_price" id="final_price"
+                            placeholder="Enter final price">
                     </div>
                     <div class="form-group col-md-6 col-lg-6 mb-2">
                         <label for="">Applicant Name</label>
-                        <input type="text" class="form-control" name="app_name" id="app_name" placeholder="Enter applicant name">
+                        <input type="text" class="form-control" name="app_name" id="app_name"
+                            placeholder="Enter applicant name">
                     </div>
                     <div class="form-group col-md-6 col-lg-6 mb-2">
                         <label for="">Applicant Contact</label>
-                        <input type="number" class="form-control" name="app_contact" id="app_contact" placeholder="Enter applicant contact">
+                        <input type="number" class="form-control" name="app_contact" id="app_contact"
+                            placeholder="Enter applicant contact">
                     </div>
                     <div class="form-group col-md-6 col-lg-6 mb-2">
                         <label for="">Applicant City</label>
                         @php
-                        $cities = DB::table('state_district')->select('District')->get();
+                            $cities = DB::table('state_district')->select('District')->get();
                         @endphp
 
                         <select class="form-select" name="app_city" id="app_city">
                             <option value="">---- Select City ----</option>
                             @foreach ($cities as $city)
-                            <option value="{{ $city->District }}">{{ $city->District }}</option>
+                                <option value="{{ $city->District }}">{{ $city->District }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group col-md-6 col-lg-6 mb-2">
                         <label for="">Applicant DOB</label>
-                        <input type="date" class="form-control" name="app_dob" id="app_dob" placeholder="Enter applicant DOB">
+                        <input type="date" class="form-control" name="app_dob" id="app_dob"
+                            placeholder="Enter applicant DOB">
                     </div>
                     <div class="form-group col-md-6 col-lg-6 mb-2">
                         <label for="">Applicant DOA</label>
-                        <input type="date" class="form-control" name="app_doa" id="app_doa" placeholder="Enter applicant date of anniversary">
+                        <input type="date" class="form-control" name="app_doa" id="app_doa"
+                            placeholder="Enter applicant date of anniversary">
                     </div>
                 </div>
             </div>
             <div class="form-group">
                 <label for="statusComment">Comment:</label>
-                <textarea id="statusComment" name="comment" class="form-control" rows="4"></textarea>
+                <textarea id="statusComment" name="comment" class="form-control" placeholder="Add any additional comments" rows="4"></textarea>
             </div>
             <div class="modal-actions mb-5">
                 <button type="button" id="cancelStatusUpdate" class="btn btn-secondary text-light">Cancel</button>
@@ -177,31 +398,6 @@ use Illuminate\Support\Facades\DB;
 
 
 <script>
-    // $(document).ready(function() {
-
-    //     $('#statusSelect').on('change', function() {
-
-    //         let status = $(this).val();
-    //         let dateInput = document.getElementById("remindDate");
-
-    //         let today = new Date().toISOString().split("T")[0];
-
-    //         // reset old value
-    //         dateInput.value = "";
-
-    //         if (status === "VISIT DONE") {
-    //             // only past + today allowed
-    //             dateInput.setAttribute("max", today);
-    //             dateInput.removeAttribute("min");
-    //         } else {
-    //             // future allowed
-    //             dateInput.setAttribute("min", today);
-    //             dateInput.removeAttribute("max");
-    //         }
-    //     });
-
-    // });
-
     $(document).ready(function() {
 
         $('#statusSelect').on('change', function() {

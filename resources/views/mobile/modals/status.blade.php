@@ -70,13 +70,16 @@
         max-width: 520px;
         margin: 30px auto;
         border-radius: 22px;
-        padding: 24px;
         border: none;
         box-shadow:
             0 10px 30px rgba(0, 0, 0, 0.08),
             0 2px 8px rgba(0, 0, 0, 0.04);
-        max-height: 92vh;
-        overflow-y: auto;
+
+        height: calc(100vh - 60px);
+        display: flex;
+        flex-direction: column;
+
+        overflow: hidden;
         animation: slideUp 0.3s ease;
     }
 
@@ -92,12 +95,18 @@
 
     /* ===== Title ===== */
     .modal-title {
-        font-size: 24px;
-        font-weight: 700;
-        color: #1e293b;
-        margin-bottom: 24px;
+        position: sticky;
+        top: 0;
+        z-index: 20;
+
+        background: #fff;
+
+        padding-top: 10px;
+        padding-bottom: 20px;
+
+        margin-bottom: 0;
+
         text-align: center;
-        position: relative;
     }
 
     .modal-title::after {
@@ -262,6 +271,46 @@
             opacity: 1;
         }
     }
+
+    /* FORM SCROLL */
+    #statusUpdateForm {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 20px;
+        padding-top: 15px;
+        padding-left: 35px;
+
+    }
+
+    .modal-actions {
+        position: sticky;
+        bottom: 0;
+        background: #fff;
+        padding-top: 15px;
+        padding-bottom: 5px;
+        z-index: 20;
+    }
+
+    /* SCROLLBAR */
+    #statusUpdateForm::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #statusUpdateForm::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+
+    /* MOBILE */
+    @media (max-width:576px) {
+
+        .modal-content {
+            height: calc(100vh - 20px);
+            margin: 10px auto;
+            border-radius: 18px;
+        }
+    }
 </style>
 @php
     use Illuminate\Support\Facades\DB;
@@ -386,7 +435,8 @@
             </div>
             <div class="form-group">
                 <label for="statusComment">Comment:</label>
-                <textarea id="statusComment" name="comment" class="form-control" placeholder="Add any additional comments" rows="4"></textarea>
+                <textarea id="statusComment" name="comment" class="form-control" placeholder="Add any additional comments"
+                    rows="4"></textarea>
             </div>
             <div class="modal-actions mb-5">
                 <button type="button" id="cancelStatusUpdate" class="btn btn-secondary text-light">Cancel</button>

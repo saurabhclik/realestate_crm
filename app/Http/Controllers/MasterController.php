@@ -1392,9 +1392,11 @@ class MasterController extends Controller
             if (session('software_type') !== 'lead_management') {
                 if ($request->hasFile('gallery_images')) {
                     $images = [];
-                    foreach ($request->file('gallery_images') as $image) {
-                        $path = $image->store('property-gallery', 'public');
-                        $images[] = '/storage/' . $path;
+
+                    foreach ($request->file('gallery_images') as $key => $image) {
+                        $imageName = time() . '_' . $key . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                        $image->move(public_path('property_images'), $imageName);
+                        $images[] = '/property_images/' . $imageName;
                     }
                     $data['gallery_images'] = json_encode($images);
                 }

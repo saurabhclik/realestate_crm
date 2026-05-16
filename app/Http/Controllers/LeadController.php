@@ -2633,7 +2633,27 @@ class LeadController extends Controller
                     'data' => null
                 ]);
             }
+
+            $imageUrl = '';
+
+            if (!empty($property->gallery_images)) {
+
+                $galleryImages = json_decode($property->gallery_images, true);
+
+                if (!empty($galleryImages) && isset($galleryImages[0])) {
+
+                    $imagePath = $galleryImages[0];
+
+                    $imageUrl = asset($imagePath);
+                }
+            }
             $message = "🏠 *EXCLUSIVE PROPERTY DETAILS* 🏠\n\n";
+
+            if (!empty($imageUrl)) {
+
+                $message .= "📸 *Project Image:* \n";
+                $message .= $imageUrl . "\n\n";
+            }
             $message .= "📍 *PROJECT HIGHLIGHTS*\n";
             $message .= "┌─────────────────────\n";
             $message .= "│ 🏢 *Project:* {$property->property_name}\n";

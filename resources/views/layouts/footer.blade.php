@@ -91,7 +91,35 @@
                     <div id="calendarWidget"></div>
                 </div>
             </div>
+            <div class="floating-chat-toggle" id="chatToggle" title="CHATBOT Assistant" role="button" tabindex="0" aria-label="Open CHATBOT Assistant">
+                <span class="chatbot-robot" aria-hidden="true">
+                    <span class="chatbot-antenna"></span>
+                    <span class="chatbot-ear chatbot-ear-left"></span>
+                    <span class="chatbot-face">
+                        <span class="chatbot-eye chatbot-eye-left"></span>
+                        <span class="chatbot-eye chatbot-eye-right"></span>
+                        <span class="chatbot-smile"></span>
+                    </span>
+                    <span class="chatbot-ear chatbot-ear-right"></span>
+                    <span class="chatbot-heart"></span>
+                </span>
+            </div>
 
+            <div class="floating-chat" id="floatingChat" style="display:none;">
+                <div class="floating-chat-header">
+                    <div class="floating-chat-title">
+                        <i class="fas fa-robot me-2"></i>CHATBOT Assistant
+                    </div>
+                    <button class="floating-chat-close btn-close btn-close-white btn-sm" id="closeChat"></button>
+                </div>
+                <div class="floating-chat-body">
+                    <div id="chatWidget" style="height:320px; overflow:auto; padding:12px; background:#f8f9fa;"></div>
+                    <div class="floating-chat-input d-flex gap-2" style="padding:10px; border-top:1px solid #eee; background:#fff;">
+                        <input id="chatText" class="form-control" placeholder="Type a message..." />
+                        <button id="sendChat" class="btn btn-primary">Send</button>
+                    </div>
+                </div>
+            </div>
             @include('modals.bulk-import')
             <div class="rightbar-overlay"></div>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/4.7.0/apexcharts.min.js" integrity="sha512-xHtgQEymzQrphqglnjawC6hqXjIlzaGwK4h5xfYKIr/rM5CI9RXazkGZHzn5lIBxzU7vCb8uacAe5ACUGyz/Ow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -116,7 +144,83 @@
             <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
             <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
             <script>
-                $(document).ready(function() {
+                  $(document).ready(function() 
+                {
+                    let isChatVisible = false;
+                    $('#chatToggle').off('click').on('click', function(e)
+                    {
+                        e.preventDefault(); e.stopPropagation();
+                        if ($('#floatingChat').is(':visible')) 
+                        {
+                            $('#floatingChat').fadeOut(200);
+                            isChatVisible = false;
+                        } 
+                        else 
+                        {
+                            $('#floatingChat').fadeIn(200);
+                            isChatVisible = true;
+                        }
+                    });
+
+                    $('#chatToggle').off('keydown').on('keydown', function(e) 
+                    {
+                        if (e.key === 'Enter' || e.key === ' ') 
+                        {
+                            e.preventDefault();
+                            $(this).trigger('click');
+                        }
+                    });
+
+                    $('#closeChat').off('click').on('click', function(e) 
+                    {
+                        e.preventDefault(); e.stopPropagation();
+                        $('#floatingChat').fadeOut(200);
+                        isChatVisible = false;
+                    });
+
+                    function appendChat(msg, who) 
+                    {
+                        const cls = who === 'user' ? 'user' : 'ai';
+                        const $message = $('<div>').addClass('chat-msg ' + cls);
+                        const $bubble = $('<span>').addClass('bubble').text(msg);
+                        $message.append($bubble);
+                        $('#chatWidget').append($message);
+                        $('#chatWidget').scrollTop($('#chatWidget')[0].scrollHeight);
+                    }
+
+                    $('#sendChat').on('click', function() 
+                    {
+                        const v = $('#chatText').val().trim();
+                        if (!v) return;
+                        appendChat(v, 'user');
+                        $('#chatText').val('');
+                        setTimeout(function() 
+                        { 
+                            appendChat('Thanks - I\'ll look into that and get back to you.', 'ai'); 
+                        }, 800);
+                    });
+
+                    $('#chatText').on('keydown', function(e) 
+                    { 
+                        if (e.key === 'Enter' && !e.shiftKey) 
+                        { 
+                            e.preventDefault();
+                            $('#sendChat').click();
+                        } 
+                    });
+                    $(document).on('click', function(e) 
+                    {
+                        if (!$(e.target).closest('#floatingChat').length && !$(e.target).closest('#chatToggle').length) 
+                        {
+                            if ($('#floatingChat').is(':visible')) 
+                            {
+                                $('#floatingChat').fadeOut(200);
+                            }
+                        }
+                    });
+                });
+                $(document).ready(function() 
+                {
                     let currentSelectedDate = null;
                     let isCalendarVisible = false;
                     $('#floatingCalendar').addClass('floating-calendar');

@@ -310,15 +310,11 @@
         updatePropertyCategoryOptions($('#property_type').val());
     });
 
-    // State change handler to load cities dynamically
     $('#state').on('change', function() {
         var selectedState = $(this).val();
 
         if (selectedState) {
-            // Clear current city options but keep Select2 structure
             $('#city').html('<option value="">-- Select City --</option>').trigger('change');
-
-            // Make AJAX call to get cities for selected state
             $.ajax({
                 url: '/lead/get-cities/' + encodeURIComponent(selectedState),
                 type: 'GET',
@@ -339,7 +335,6 @@
                 }
             });
         } else {
-            // Reset city dropdown if no state selected
             $('#city').html('<option value="">-- Select City --</option>').trigger('change');
         }
     });

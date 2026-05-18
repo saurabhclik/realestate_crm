@@ -7,82 +7,83 @@
 @include('modals.status-update')
 @include('modals.quick-lead')
 @php
-$leadCards = [
+    $leadCards = [
 
-['route' => 'lead.new', 'title' => 'New Leads', 'value' => $leadStats->new_lead ?? 0.00, 'icon' => 'bx bx-copy-alt'],
+    ['route' => 'lead.new', 'title' => 'New Leads', 'value' => $leadStats->new_lead ?? 0.00, 'icon' => 'bx bx-copy-alt'],
 
-['route' => 'transfer_list.lead', 'title' => 'Transfer Leads', 'value' => $leadStats->transfer_lead = $transferLeadCount ?? 0.00, 'icon' => 'bx bx-transfer-alt'],
+    ['route' => 'transfer_list.lead', 'title' => 'Transfer Leads', 'value' => $leadStats->transfer_lead = $transferLeadCount ?? 0.00, 'icon' => 'bx bx-transfer-alt'],
 
-['route' => 'lead.pending', 'title' => 'Pending Leads', 'value' => $leadStats->pending_lead ?? 0.00, 'icon' => 'bx bx-time-five'],
+    ['route' => 'lead.pending', 'title' => 'Pending Leads', 'value' => $leadStats->pending_lead ?? 0.00, 'icon' => 'bx bx-time-five'],
 
-['route' => 'lead.processing', 'title' => 'Processing Leads', 'value' => $leadStats->processing ?? 0.00, 'icon' => 'bx bx-loader-circle'],
+    ['route' => 'lead.processing', 'title' => 'Processing Leads', 'value' => $leadStats->processing ?? 0.00, 'icon' => 'bx bx-loader-circle'],
 
-['route' => 'lead.interested', 'title' => 'Interested Leads', 'value' => $leadStats->interested ?? 0.00, 'icon' => 'bx bx-like'],
+    ['route' => 'lead.interested', 'title' => 'Interested Leads', 'value' => $leadStats->interested ?? 0.00, 'icon' => 'bx bx-like'],
 
-['route' => 'lead.not_picked', 'title' => 'Not Picked Leads', 'value' => $leadStats->not_picked ?? 0.00, 'icon' => 'bx bx-dislike'],
+    ['route' => 'lead.not_picked', 'title' => 'Not Picked Leads', 'value' => $leadStats->not_picked ?? 0.00, 'icon' => 'bx bx-dislike'],
 
-['route' => 'lead.meeting_scheduled', 'title' => 'Meeting Scheduled Leads', 'value' => $leadStats->meeting_scheduled ?? 0.00, 'icon' => 'bx bx-calendar'],
+    ['route' => 'lead.meeting_scheduled', 'title' => 'Meeting Scheduled Leads', 'value' => $leadStats->meeting_scheduled ?? 0.00, 'icon' => 'bx bx-calendar'],
 
-['route' => 'lead.whatsapp', 'title' => 'Whatsapp Scheduled Leads', 'value' => $leadStats->whatsapp ?? 0.00, 'icon' => 'bx bx-check-double'],
+    ['route' => 'lead.whatsapp', 'title' => 'Whatsapp Scheduled Leads', 'value' => $leadStats->whatsapp ?? 0.00, 'icon' => 'bx bx-check-double'],
 
-['route' => 'lead.call_scheduled', 'title' => 'Call Scheduled Leads', 'value' => $leadStats->call_schedule ?? 0.00, 'icon' => 'bx bx-calendar'],
+    ['route' => 'lead.call_scheduled', 'title' => 'Call Scheduled Leads', 'value' => $leadStats->call_schedule ?? 0.00, 'icon' => 'bx bx-calendar'],
 
-['route' => 'lead.visit_scheduled', 'title' => 'Visit Scheduled Leads', 'value' => $leadStats->visit_schedule ?? 0.00, 'icon' => 'bx bx-map'],
+    ['route' => 'lead.visit_scheduled', 'title' => 'Visit Scheduled Leads', 'value' => $leadStats->visit_schedule ?? 0.00, 'icon' => 'bx bx-map'],
 
-['route' => 'lead.visit_done', 'title' => 'Visit Done Leads', 'value' => $leadStats->visit_done ?? 0.00, 'icon' => 'bx bx-check-double'],
+    ['route' => 'lead.visit_done', 'title' => 'Visit Done Leads', 'value' => $leadStats->visit_done ?? 0.00, 'icon' => 'bx bx-check-double'],
 
-['route' => 'lead.booked', 'title' => 'Booked Leads', 'value' => $leadStats->booked ?? 0.00, 'icon' => 'bx bx-bookmark'],
+    ['route' => 'lead.booked', 'title' => 'Booked Leads', 'value' => $leadStats->booked ?? 0.00, 'icon' => 'bx bx-bookmark'],
 
-['route' => 'lead.completed', 'title' => 'Completed', 'value' => $leadStats->completed ?? 0.00, 'icon' => 'bx bx-badge-check'],
+    ['route' => 'lead.completed', 'title' => 'Completed', 'value' => $leadStats->completed ?? 0.00, 'icon' => 'bx bx-badge-check'],
 
-['route' => 'lead.cancelled', 'title' => 'Cancelled', 'value' => $leadStats->cancelled ?? 0.00, 'icon' => 'bx bx-x-circle'],
+    ['route' => 'lead.cancelled', 'title' => 'Cancelled', 'value' => $leadStats->cancelled ?? 0.00, 'icon' => 'bx bx-x-circle'],
 
-['route' => null, 'title' => 'Other Leads', 'value' => ($leadStats->total_lead ?? 0.00)
-- ($leadStats->new_lead ?? 0)
-- ($leadStats->pending_lead ?? 0)
-- ($leadStats->processing ?? 0)
-- ($leadStats->interested ?? 0)
-- ($leadStats->transfer_lead ?? 0)
-- ($leadStats->call_schedule ?? 0)
-- ($leadStats->visit_schedule ?? 0)
-- ($leadStats->visit_done ?? 0)
-- ($leadStats->booked ?? 0)
-- ($leadStats->completed ?? 0)
-- ($leadStats->cancelled ?? 0),
-'icon' => 'bx bx-dots-horizontal-rounded'],
-];
+    ['route' => null, 'title' => 'Other Leads', 'value' => ($leadStats->total_lead ?? 0.00)
+    - ($leadStats->new_lead ?? 0)
+    - ($leadStats->pending_lead ?? 0)
+    - ($leadStats->processing ?? 0)
+    - ($leadStats->interested ?? 0)
+    - ($leadStats->transfer_lead ?? 0)
+    - ($leadStats->call_schedule ?? 0)
+    - ($leadStats->visit_schedule ?? 0)
+    - ($leadStats->visit_done ?? 0)
+    - ($leadStats->booked ?? 0)
+    - ($leadStats->completed ?? 0)
+    - ($leadStats->cancelled ?? 0),
+    'icon' => 'bx bx-dots-horizontal-rounded'],
+    ];
 
-$othersLeadData = [
-['route' => 'lead.allocate', 'title' => 'Allocate Leads', 'value' => $allocatedLeadCount->total(), 'icon' => 'bx bx-copy-alt'],
+    $othersLeadData = [
+    ['route' => 'lead.allocate', 'title' => 'Allocate Leads', 'value' => $allocatedLeadCount->total(), 'icon' => 'bx bx-copy-alt'],
 
-['route' => 'lead.unallocated', 'title' => 'Unallocate Leads', 'value' => $unallocatedLeadCount->total(), 'icon' => 'bx bx-copy-alt'],
+    ['route' => 'lead.unallocated', 'title' => 'Unallocate Leads', 'value' => $unallocatedLeadCount->total(), 'icon' => 'bx bx-copy-alt'],
 
-['route' => 'lead.not_reachable', 'title' => 'Not Reachable', 'value' => $leadStats->not_reachable ?? 0.00, 'icon' => 'bx bx-wifi-off'],
+    ['route' => 'lead.not_reachable', 'title' => 'Not Reachable', 'value' => $leadStats->not_reachable ?? 0.00, 'icon' => 'bx bx-wifi-off'],
 
-['route' => 'lead.wrong_number', 'title' => 'Wrong Number', 'value' => $leadStats->wrong_number ?? 0.00, 'icon' => 'bx bx-error'],
+    ['route' => 'lead.wrong_number', 'title' => 'Wrong Number', 'value' => $leadStats->wrong_number ?? 0.00, 'icon' => 'bx bx-error'],
 
-['route' => 'lead.channel_partner', 'title' => 'Channel Partner', 'value' => $leadStats->channel_partner ?? 0.00, 'icon' => 'bx bx-group'],
+    ['route' => 'lead.channel_partner', 'title' => 'Channel Partner', 'value' => $leadStats->channel_partner ?? 0.00, 'icon' => 'bx bx-group'],
 
-['route' => 'lead.not_interested', 'title' => 'Not Interested', 'value' => $leadStats->not_interested ?? 0.00, 'icon' => 'bx bx-dislike'],
+    ['route' => 'lead.not_interested', 'title' => 'Not Interested', 'value' => $leadStats->not_interested ?? 0.00, 'icon' => 'bx bx-dislike'],
 
-['route' => 'lead.future', 'title' => 'Future Lead', 'value' => $leadStats->future_lead ?? 0.00, 'icon' => 'bx bx-time'],
+    ['route' => 'lead.future', 'title' => 'Future Lead', 'value' => $leadStats->future_lead ?? 0.00, 'icon' => 'bx bx-time'],
 
-['route' => 'lead.lost', 'title' => 'Lost', 'value' => $leadStats->lost ?? 0.00, 'icon' => 'bx bx-block'],
-];
+    ['route' => 'lead.lost', 'title' => 'Lost', 'value' => $leadStats->lost ?? 0.00, 'icon' => 'bx bx-block'],
+    ];
 
-$totalOthersLead = ($leadStats->total_lead ?? 0.00)
-- ($leadStats->new_lead ?? 0)
-- ($leadStats->pending_lead ?? 0)
-- ($leadStats->processing ?? 0)
-- ($leadStats->interested ?? 0)
-- ($leadStats->transfer_lead ?? 0)
-- ($leadStats->call_schedule ?? 0)
-- ($leadStats->visit_schedule ?? 0)
-- ($leadStats->visit_done ?? 0)
-- ($leadStats->booked ?? 0)
-- ($leadStats->completed ?? 0)
-- ($leadStats->cancelled ?? 0);
+    $totalOthersLead = ($leadStats->total_lead ?? 0.00)
+    - ($leadStats->new_lead ?? 0)
+    - ($leadStats->pending_lead ?? 0)
+    - ($leadStats->processing ?? 0)
+    - ($leadStats->interested ?? 0)
+    - ($leadStats->transfer_lead ?? 0)
+    - ($leadStats->call_schedule ?? 0)
+    - ($leadStats->visit_schedule ?? 0)
+    - ($leadStats->visit_done ?? 0)
+    - ($leadStats->booked ?? 0)
+    - ($leadStats->completed ?? 0)
+    - ($leadStats->cancelled ?? 0);
 @endphp
+
 <style>
     .refresh-btn {
         border-radius: 50%;
@@ -545,6 +546,7 @@ $totalOthersLead = ($leadStats->total_lead ?? 0.00)
         display: none !important;
     }
 </style>
+
 <div class="page-content">
     <div class="container-fluid">
         <div class="row">
@@ -705,6 +707,7 @@ $totalOthersLead = ($leadStats->total_lead ?? 0.00)
     @include('modals.advertisement')
     @endif
 </div>
+
 <div class="modal fade day-events-modal" id="dayEventsModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -1302,4 +1305,5 @@ $totalOthersLead = ($leadStats->total_lead ?? 0.00)
         }
     });
 </script>
+
 @endsection

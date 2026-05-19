@@ -599,7 +599,22 @@ class LeadController extends Controller
             if ($conversionType === 'Booked') {
                 $query = $this->getLeadsByStatus('BOOKED', $lead_name);
             } else {
-                $query = $this->getLeadsByConversionType($conversionType);
+
+                $query = DB::table('leads as a')
+                    ->leftJoin('users as b', 'b.id', '=', 'a.user_id')
+                    ->leftJoin('projects as c', 'c.id', '=', 'a.project_id')
+                    ->select(
+                        'a.*',
+                        'b.name as agent',
+                        'b.role',
+                        'c.project_name as project_name'
+                    )
+                    ->where(function ($q) use ($conversionType) {
+                        $q->where('a.conversion_type', $conversionType)
+                            ->orWhere('a.status', $conversionType);
+                    })
+                    ->orderBy('a.is_pinned', 'desc')
+                    ->orderBy('a.id', 'desc');
             }
         } else {
             $query = $this->getLeadsByStatus($status, $lead_name);
@@ -900,19 +915,18 @@ class LeadController extends Controller
             $users = DB::table('users')
                 ->where('is_active', 1)
                 ->get();
-         
         } else {
 
             $childIdArray = array_filter(explode(',', $child_ids));
 
             $users = DB::table('users')
-            ->where(function ($query) use ($childIdArray, $user_role, $userId) {
+                ->where(function ($query) use ($childIdArray, $user_role, $userId) {
 
-            $query->whereIn('id', $childIdArray)
-            ->orWhere('id', $userId);
-            })
-            ->where('is_active', 1)
-            ->get();
+                    $query->whereIn('id', $childIdArray)
+                        ->orWhere('id', $userId);
+                })
+                ->where('is_active', 1)
+                ->get();
         }
 
         $status_counts = [
@@ -992,7 +1006,7 @@ class LeadController extends Controller
                     DB::raw("SUM(CASE WHEN status = 'VISIT SCHEDULED' THEN 1 ELSE 0 END) as visit_schedule"),
                     DB::raw("SUM(CASE WHEN status = 'VISIT DONE' THEN 1 ELSE 0 END) as visit_done"),
                     DB::raw("SUM(CASE WHEN status = 'CONVERTED' THEN 1 ELSE 0 END) as converted"),
-                    DB::raw("SUM(CASE WHEN conversion_type = 'Completed' THEN 1 ELSE 0 END) as completed"),
+                    DB::raw("SUM(CASE WHEN status = 'Completed' OR conversion_type = 'Completed' THEN 1 ELSE 0 END) as completed"),
                     DB::raw("SUM(CASE WHEN conversion_type = 'Cancelled' THEN 1 ELSE 0 END) as cancelled"),
                     DB::raw("SUM(CASE WHEN status = 'BOOKED' THEN 1 ELSE 0 END) as booked"),
                     DB::raw("SUM(CASE WHEN conversion_type = 'open' THEN 1 ELSE 0 END) as open"),
@@ -1164,7 +1178,7 @@ class LeadController extends Controller
         return view('lead.transfer-lead-history', compact('leads', 'users'));
     }
 
-   
+
     public function transfer_lead(Request $request)
     {
         $lead_name = 'transfer_lead';
@@ -1357,6 +1371,7 @@ class LeadController extends Controller
         $user_type = Session::get('user_type');
         $user_id = Session::get('user_id');
         $child_ids = Session::get('child_ids');
+
         if (!is_array($child_ids)) {
             $child_ids = $child_ids ? explode(',', $child_ids) : [];
         }
@@ -1370,12 +1385,25 @@ class LeadController extends Controller
                 'b.role',
                 'c.project_name as project_name',
             )
-            ->where('a.conversion_type', $conversionType)
-            ->where('a.status', 'CONVERTED');
+
+            ->where(function ($q) use ($conversionType) {
+
+                $q->where(function ($sub) use ($conversionType) {
+                    $sub->where('a.conversion_type', $conversionType)
+                        ->where('a.status', 'CONVERTED');
+                })
+
+                    ->orWhere('a.status', $conversionType)
+
+                    ->orWhere('a.conversion_type', $conversionType);
+            });
 
         if ($user_type != 'admin') {
+
             $query->where(function ($q) use ($user_id, $child_ids) {
+
                 $q->where('a.user_id', $user_id);
+
                 if (!empty($child_ids)) {
                     $q->orWhereIn('a.user_id', $child_ids);
                 }

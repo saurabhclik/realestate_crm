@@ -900,19 +900,19 @@ class LeadController extends Controller
             $users = DB::table('users')
                 ->where('is_active', 1)
                 ->get();
+         
         } else {
+
             $childIdArray = array_filter(explode(',', $child_ids));
+
             $users = DB::table('users')
-                ->where(function ($query) use ($childIdArray, $user_role, $userId) {
-                    $query->whereIn('id', $childIdArray)
-                        ->orWhere(function ($q) use ($user_role, $userId) {
-                            $q->where('role', $user_role)
-                                ->where('id', '!=', $userId);
-                        });
-                })
-                ->where('is_active', 1)
-                ->where('id', '!=', $userId)
-                ->get();
+            ->where(function ($query) use ($childIdArray, $user_role, $userId) {
+
+            $query->whereIn('id', $childIdArray)
+            ->orWhere('id', $userId);
+            })
+            ->where('is_active', 1)
+            ->get();
         }
 
         $status_counts = [
@@ -1164,28 +1164,7 @@ class LeadController extends Controller
         return view('lead.transfer-lead-history', compact('leads', 'users'));
     }
 
-    // public function transfer_lead()
-    // {
-    //     $lead_name = 'transfer_lead';
-    //     $users = DB::table('users')->select('id', 'name')->get();
-
-    //     $leads = DB::table('transfer_leads')
-    //         ->join('leads', 'transfer_leads.lead_id', '=', 'leads.id')
-    //         ->leftJoin('users as from_user', 'transfer_leads.from', '=', 'from_user.id')
-    //         ->leftJoin('users as to_user', 'transfer_leads.to', '=', 'to_user.id')
-    //         ->select(
-    //             'transfer_leads.*',
-    //             'leads.name as lead_name',
-    //             'leads.phone as lead_phone',
-    //             'leads.status as lead_status',
-    //             'from_user.name as from_user_name',
-    //             'to_user.name as to_user_name'
-    //         )
-    //         ->orderBy('transfer_leads.created_at', 'desc')
-    //         ->paginate(10);
-
-    //     return view('lead.transfer-lead-history', compact('lead_name', 'leads', 'users'));
-    // }
+   
     public function transfer_lead(Request $request)
     {
         $lead_name = 'transfer_lead';

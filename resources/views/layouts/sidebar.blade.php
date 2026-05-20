@@ -326,26 +326,13 @@
                     </li>
                 @endif
 
-                @if (in_array('data_center', $currentMenuAccess) &&
-                        ($userType == 'admin' ||
-                            $userType == 'salesman' ||
-                            $userType == 'team_manager' ||
-                            $softwareType == 'task_management'))
-                    <li>
-                        <a href="javascript: void(0);" class="has-arrow waves-effect">
-                            <i class="bx bx-data"></i>
-                            <span>Data Center</span>
-                        </a>
-                        <ul class="sub-menu" aria-expanded="false">
-                            <li>
-                                <a href="{{ route('data-center.index') }}">All Data</a>
-                            </li>
-                            <li>
-                                <a href="{{ route('data-center.create') }}">Add Data</a>
-                            </li>
-                        </ul>
-                    </li>
-                @endif
+                <li>
+                    <a href="{{ route('data-center.index') }}">
+                        <i class="bx bx-data"></i>
+                        <span>Data Center</span>
+                    </a>
+                </li>
+
 
                 @if (in_array('inventory', $currentMenuAccess) && in_array('inventory_management', $activeFeatures))
                     <li>

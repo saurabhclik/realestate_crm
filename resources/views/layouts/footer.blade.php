@@ -4,6 +4,7 @@
     }
 </style>
 
+
 <div class="floating-filter">
     <button type="button" class="btn btn-primary btn-floating" id="toggleDashboardFilter">
         <i class="fas fa-filter text-light"></i>
@@ -99,8 +100,8 @@
         <div id="calendarWidget"></div>
     </div>
 </div>
-<div class="floating-chat-toggle" id="chatToggle" title="CHATBOT Assistant" role="button" tabindex="0"
-    aria-label="Open CHATBOT Assistant">
+<div class="floating-chat-toggle {{ in_array('chat_bot', session('active_features', [])) ? '' : 'd-none' }}"
+    id="chatToggle" title="CHATBOT Assistant" role="button" tabindex="0" aria-label="Open CHATBOT Assistant">
     <span class="chatbot-robot" aria-hidden="true">
         <span class="chatbot-antenna"></span>
         <span class="chatbot-ear chatbot-ear-left"></span>
@@ -2082,7 +2083,7 @@
                             // Fix Lead ID column (column index 1)
                             if (index === 1) {
                                 let match = cellText.match(
-                                /\d+$/); // extract last number
+                                    /\d+$/); // extract last number
                                 td.textContent = match ? match[0] : cellText;
                             }
 
@@ -2434,7 +2435,7 @@
                 const today = new Date().toDateString();
                 $('.task-row').each(function() {
                     const dueDate = new Date($(this).find('td:eq(4) span').text())
-                    .toDateString();
+                        .toDateString();
                     if (dueDate !== today) $(this).hide();
                 });
             } else if (filter === 'overdue') {
@@ -3040,7 +3041,8 @@
                             error: function(xhr) {
                                 if (xhr.status === 419) {
                                     reject(
-                                        'Session expired. Please refresh the page.');
+                                        'Session expired. Please refresh the page.'
+                                    );
                                 } else {
                                     reject(xhr.responseJSON?.message ||
                                         'Delete failed');

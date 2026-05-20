@@ -599,7 +599,22 @@ class LeadController extends Controller
             if ($conversionType === 'Booked') {
                 $query = $this->getLeadsByStatus('BOOKED', $lead_name);
             } else {
-                $query = $this->getLeadsByConversionType($conversionType);
+
+                $query = DB::table('leads as a')
+                    ->leftJoin('users as b', 'b.id', '=', 'a.user_id')
+                    ->leftJoin('projects as c', 'c.id', '=', 'a.project_id')
+                    ->select(
+                        'a.*',
+                        'b.name as agent',
+                        'b.role',
+                        'c.project_name as project_name'
+                    )
+                    ->where(function ($q) use ($conversionType) {
+                        $q->where('a.conversion_type', $conversionType)
+                            ->orWhere('a.status', $conversionType);
+                    })
+                    ->orderBy('a.is_pinned', 'desc')
+                    ->orderBy('a.id', 'desc');
             }
         } else {
             $query = $this->getLeadsByStatus($status, $lead_name);
@@ -901,17 +916,16 @@ class LeadController extends Controller
                 ->where('is_active', 1)
                 ->get();
         } else {
+
             $childIdArray = array_filter(explode(',', $child_ids));
+
             $users = DB::table('users')
                 ->where(function ($query) use ($childIdArray, $user_role, $userId) {
+
                     $query->whereIn('id', $childIdArray)
-                        ->orWhere(function ($q) use ($user_role, $userId) {
-                            $q->where('role', $user_role)
-                                ->where('id', '!=', $userId);
-                        });
+                        ->orWhere('id', $userId);
                 })
                 ->where('is_active', 1)
-                ->where('id', '!=', $userId)
                 ->get();
         }
 
@@ -992,7 +1006,7 @@ class LeadController extends Controller
                     DB::raw("SUM(CASE WHEN status = 'VISIT SCHEDULED' THEN 1 ELSE 0 END) as visit_schedule"),
                     DB::raw("SUM(CASE WHEN status = 'VISIT DONE' THEN 1 ELSE 0 END) as visit_done"),
                     DB::raw("SUM(CASE WHEN status = 'CONVERTED' THEN 1 ELSE 0 END) as converted"),
-                    DB::raw("SUM(CASE WHEN conversion_type = 'Completed' THEN 1 ELSE 0 END) as completed"),
+                    DB::raw("SUM(CASE WHEN status = 'Completed' OR conversion_type = 'Completed' THEN 1 ELSE 0 END) as completed"),
                     DB::raw("SUM(CASE WHEN conversion_type = 'Cancelled' THEN 1 ELSE 0 END) as cancelled"),
                     DB::raw("SUM(CASE WHEN status = 'BOOKED' THEN 1 ELSE 0 END) as booked"),
                     DB::raw("SUM(CASE WHEN conversion_type = 'open' THEN 1 ELSE 0 END) as open"),
@@ -1164,28 +1178,7 @@ class LeadController extends Controller
         return view('lead.transfer-lead-history', compact('leads', 'users'));
     }
 
-    // public function transfer_lead()
-    // {
-    //     $lead_name = 'transfer_lead';
-    //     $users = DB::table('users')->select('id', 'name')->get();
 
-    //     $leads = DB::table('transfer_leads')
-    //         ->join('leads', 'transfer_leads.lead_id', '=', 'leads.id')
-    //         ->leftJoin('users as from_user', 'transfer_leads.from', '=', 'from_user.id')
-    //         ->leftJoin('users as to_user', 'transfer_leads.to', '=', 'to_user.id')
-    //         ->select(
-    //             'transfer_leads.*',
-    //             'leads.name as lead_name',
-    //             'leads.phone as lead_phone',
-    //             'leads.status as lead_status',
-    //             'from_user.name as from_user_name',
-    //             'to_user.name as to_user_name'
-    //         )
-    //         ->orderBy('transfer_leads.created_at', 'desc')
-    //         ->paginate(10);
-
-    //     return view('lead.transfer-lead-history', compact('lead_name', 'leads', 'users'));
-    // }
     public function transfer_lead(Request $request)
     {
         $lead_name = 'transfer_lead';
@@ -1378,6 +1371,7 @@ class LeadController extends Controller
         $user_type = Session::get('user_type');
         $user_id = Session::get('user_id');
         $child_ids = Session::get('child_ids');
+
         if (!is_array($child_ids)) {
             $child_ids = $child_ids ? explode(',', $child_ids) : [];
         }
@@ -1391,12 +1385,25 @@ class LeadController extends Controller
                 'b.role',
                 'c.project_name as project_name',
             )
-            ->where('a.conversion_type', $conversionType)
-            ->where('a.status', 'CONVERTED');
+
+            ->where(function ($q) use ($conversionType) {
+
+                $q->where(function ($sub) use ($conversionType) {
+                    $sub->where('a.conversion_type', $conversionType)
+                        ->where('a.status', 'CONVERTED');
+                })
+
+                    ->orWhere('a.status', $conversionType)
+
+                    ->orWhere('a.conversion_type', $conversionType);
+            });
 
         if ($user_type != 'admin') {
+
             $query->where(function ($q) use ($user_id, $child_ids) {
+
                 $q->where('a.user_id', $user_id);
+
                 if (!empty($child_ids)) {
                     $q->orWhereIn('a.user_id', $child_ids);
                 }
@@ -2633,7 +2640,27 @@ class LeadController extends Controller
                     'data' => null
                 ]);
             }
+
+            $imageUrl = '';
+
+            if (!empty($property->gallery_images)) {
+
+                $galleryImages = json_decode($property->gallery_images, true);
+
+                if (!empty($galleryImages) && isset($galleryImages[0])) {
+
+                    $imagePath = $galleryImages[0];
+
+                    $imageUrl = asset($imagePath);
+                }
+            }
             $message = "🏠 *EXCLUSIVE PROPERTY DETAILS* 🏠\n\n";
+
+            if (!empty($imageUrl)) {
+
+                $message .= "📸 *Project Image:* \n";
+                $message .= $imageUrl . "\n\n";
+            }
             $message .= "📍 *PROJECT HIGHLIGHTS*\n";
             $message .= "┌─────────────────────\n";
             $message .= "│ 🏢 *Project:* {$property->property_name}\n";

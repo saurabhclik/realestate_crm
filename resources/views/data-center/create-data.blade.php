@@ -1,125 +1,85 @@
-@extends('layouts.app')
-@section('title', 'Create Data')
-@section('content')
-<style>
-    .cust-badge {
-        white-space: normal;
-        padding: 6px 10px;
-        font-size: 0.9rem;
-        line-height: 1.4;
-    }
+<!-- ADD DATA MODAL -->
+<div class="modal fade" id="addDataModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg">
 
-    .dataTables_scroll {
-        overflow: auto;
-    }
+            <!-- HEADER -->
+            <div class="modal-header border-0 text-white"
+                style="background: linear-gradient(135deg,#556ee6,#556ee6);">
 
-    .dataTables_scrollHead {
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        background: white;
-    }
+                <div>
+                    <h4 class="modal-title fw-bold mb-1">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        Add New Data
+                    </h4>
+                </div>
 
-    .dataTables_scrollBody {
-        max-height: 100% !important;
-    }
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal">
+                </button>
+            </div>
 
-    #table_filter {
-        margin: 10px;
-    }
+            <!-- BODY -->
+            <div class="modal-body p-4">
+                <form method="POST" action="{{ route('data-center.store') }}" class="needs-validation" novalidate>
+                    @csrf
 
-    .section-header {
-        background-color: #f8f9fa;
-        padding: 10px 15px;
-        margin-bottom: 20px;
-        border-left: 4px solid #007bff;
-        font-weight: 600;
-        font-size: 1.1rem;
-    }
-</style>
+                    <!-- BASIC DETAILS -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0 fw-bold">
+                                <i class="fas fa-user me-2 text-primary"></i>
+                                Basic Details
+                            </h5>
+                        </div>
 
-<div class="page-content">
-    <div class="container-fluid">
-        <div class="row justify-content-center">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between">
-                        <h5 class="card-title">
-                            Create New Data
-                        </h5>
-                        @if(session('user_type') === 'admin')
-                        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#bulkImportModal">
-                            <i class="fas fa-file-import me-1"></i> Bulk Import
-                        </button>
-                        @endif
-                    </div>
-
-                    @if(session('success'))
-                    <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    @endif
-                    @if(session('error'))
-                    <div class="alert alert-danger alert-dismissible fade show m-3" role="alert">
-                        {{ session('error') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    @endif
-                    @if(session('import_messages'))
-                    <div class="alert alert-light alert-dismissible fade show m-3" role="alert">
-                        <ul class="mb-0">
-                            @foreach(session('import_messages') as $message)
-                            <li>{!! $message !!}</li>
-                            @endforeach
-                        </ul>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    @endif
-
-                    <div class="card-body">
-                        <form method="POST"
-                            action=" {{ route('data-center.store') }} "
-                            class="needs-validation" novalidate>
-                            @csrf
-
-                            <div class="section-header">
-                                <i class="fas fa-user"></i> Basic Details
-                            </div>
+                        <div class="card-body">
                             <div class="row">
+                                <!-- NAME -->
                                 <div class="col-md-4 mb-3">
                                     <label for="name">Name <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control @error('name') is-invalid @enderror" name="name" id="name"
-                                        value="{{ old('name') }}" required>
+                                    <input type="text" class="form-control @error('name') is-invalid @enderror"
+                                        name="name" id="name" value="{{ old('name') }}" required>
                                     <div class="invalid-feedback">
-                                        @error('name') {{ $message }} @else Please enter a name @enderror
+                                        @error('name')
+                                            {{ $message }}
+                                        @else
+                                            Please enter a name
+                                        @enderror
                                     </div>
                                 </div>
 
+                                <!-- EMAIL -->
                                 <div class="col-md-4 mb-3">
                                     <label for="email">Email</label>
                                     <input type="email" class="form-control" name="email" id="email"
                                         value="{{ old('email') }}">
                                 </div>
 
+                                <!-- PHONE -->
                                 <div class="col-md-4 mb-3">
                                     <label for="phone">Phone No <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control @error('phone') is-invalid @enderror" name="phone" id="phone"
-                                        value="{{ old('phone') }}" required>
+                                    <input type="text" class="form-control @error('phone') is-invalid @enderror"
+                                        name="phone" id="phone" value="{{ old('phone') }}" required>
                                     <div class="invalid-feedback">
-                                        @error('phone') {{ $message }} @else Please enter a phone number @enderror
+                                        @error('phone')
+                                            {{ $message }}
+                                        @else
+                                            Please enter a phone number
+                                        @enderror
                                     </div>
                                 </div>
 
+                                <!-- ALT NUMBER -->
                                 <div class="col-md-4 mb-3">
                                     <label for="alternative phone">Alternative Number</label>
-                                    <input type="text" class="form-control" name="alternative_number" id="alternative_number"
-                                        value="{{ old('alternative_number') }}">
+                                    <input type="text" class="form-control" name="alternative_number"
+                                        id="alternative_number" value="{{ old('alternative_number') }}">
                                 </div>
 
+                                <!-- STATE -->
                                 <div class="col-md-4 mb-3">
                                     <label for="state">State</label>
-                                    <select class="select2" name="state" id="state">
+                                    <select class="select2 dropdown-in-modal" name="state" id="state">
                                         <option value="">-- Select State --</option>
                                         @foreach($states as $state)
                                         <option value="{{ $state->state }}">
@@ -129,9 +89,10 @@
                                     </select>
                                 </div>
 
+                                <!-- CITY -->
                                 <div class="col-md-4 mb-3">
                                     <label for="city">City</label>
-                                    <select class="select2" name="city" id="city">
+                                    <select class="select2 dropdown-in-modal" name="city" id="city">
                                         <option value="">-- Select City --</option>
                                         @foreach($cities as $city)
                                         <option value="{{ $city->city }}">
@@ -141,14 +102,25 @@
                                     </select>
                                 </div>
                             </div>
+                        </div>
+                    </div>
 
-                            <div class="section-header mt-4">
-                                <i class="fas fa-clipboard-list"></i> Requirements
-                            </div>
+                    <!-- REQUIREMENTS -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0 fw-bold">
+                                <i class="fas fa-clipboard-list me-2 text-success"></i>
+                                Requirements
+                            </h5>
+                        </div>
+
+                        <div class="card-body">
                             <div class="row">
+
+                                <!-- PROPERTY TYPE -->
                                 <div class="col-md-4 mb-3">
                                     <label for="property_type">Property Type</label>
-                                    <select class="form-select select2" name="property_type" id="property_type">
+                                    <select class="form-select select2 dropdown-in-modal" name="property_type" id="property_type">
                                         <option value="">-- Select Property Type --</option>
                                         @foreach($propertyTypes as $type)
                                         <option value="{{ $type->type }}" {{ old('property_type') === $type->type ? 'selected' : '' }}>
@@ -158,9 +130,10 @@
                                     </select>
                                 </div>
 
+                                <!-- PROPERTY CATEGORY -->
                                 <div class="col-md-4 mb-3">
                                     <label for="property_category">Property Category</label>
-                                    <select class="select2" name="property_category" id="property_category">
+                                    <select class="select2 dropdown-in-modal" name="property_category" id="property_category">
                                         <option value="">-- Select Property Category --</option>
                                         @foreach($propertyCategories as $item)
                                         <option value="{{ $item->id }}" {{ old('property_category') == $item->id ? 'selected' : '' }}>
@@ -170,9 +143,10 @@
                                     </select>
                                 </div>
 
+                                <!-- SUB CATEGORY -->
                                 <div class="col-md-4 mb-3">
                                     <label for="property_sub_category">Property Sub Category</label>
-                                    <select class="select2" name="property_sub_category" id="property_sub_category">
+                                    <select class="select2 dropdown-in-modal" name="property_sub_category" id="property_sub_category">
                                         <option value="">-- Select Property Sub Category --</option>
                                         @foreach($subCategories as $sub)
                                         <option value="{{ $sub->id }}" {{ old('property_sub_category') == $sub->id ? 'selected' : '' }}>
@@ -182,9 +156,10 @@
                                     </select>
                                 </div>
 
+                                <!-- PROJECT -->
                                 <div class="col-md-4 mb-3">
                                     <label for="projects">Projects</label>
-                                    <select class="select2" name="project_name[]" id="projects" multiple>
+                                    <select class="select2 dropdown-in-modal" name="project_name[]" id="projects" multiple>
                                         <option value="">-- Select Project --</option>
                                         @foreach($projects as $project)
                                         <option value="{{ $project->id }}">
@@ -194,34 +169,63 @@
                                     </select>
                                 </div>
 
+                                <!-- BUDGET -->
                                 <div class="col-md-4 mb-3">
                                     <label for="budget">Budget</label>
-                                    <select class="select2" name="budget" id="budget">
+                                    <select class="select2 dropdown-in-modal" name="budget" id="budget">
                                         <option value="">Select Budget</option>
-                                        <option value="10L-20L" {{ (old('budget') == '10L-20L') ? 'selected' : '' }}>₹10 Lakh - ₹20 Lakh</option>
-                                        <option value="20L-30L" {{ (old('budget') == '20L-30L') ? 'selected' : '' }}>₹20 Lakh - ₹30 Lakh</option>
-                                        <option value="30L-40L" {{ (old('budget') == '30L-40L') ? 'selected' : '' }}>₹30 Lakh - ₹40 Lakh</option>
-                                        <option value="40L-50L" {{ (old('budget') == '40L-50L') ? 'selected' : '' }}>₹40 Lakh - ₹50 Lakh</option>
-                                        <option value="50L-60L" {{ (old('budget') == '50L-60L') ? 'selected' : '' }}>₹50 Lakh - ₹60 Lakh</option>
-                                        <option value="60L-70L" {{ (old('budget') == '60L-70L') ? 'selected' : '' }}>₹60 Lakh - ₹70 Lakh</option>
-                                        <option value="70L-80L" {{ (old('budget') == '70L-80L') ? 'selected' : '' }}>₹70 Lakh - ₹80 Lakh</option>
-                                        <option value="80L-90L" {{ (old('budget') == '80L-90L') ? 'selected' : '' }}>₹80 Lakh - ₹90 Lakh</option>
-                                        <option value="90L-1Cr" {{ (old('budget') == '90L-1Cr') ? 'selected' : '' }}>₹90 Lakh - ₹1 Crore</option>
-                                        <option value="1Cr-1.25Cr" {{ (old('budget') == '1Cr-1.25Cr') ? 'selected' : '' }}>₹1 Crore - ₹1.25 Crore</option>
-                                        <option value="1.25Cr-1.5Cr" {{ (old('budget') == '1.25Cr-1.5Cr') ? 'selected' : '' }}>₹1.25 Crore - ₹1.5 Crore</option>
-                                        <option value="1.5Cr-1.75Cr" {{ (old('budget') == '1.5Cr-1.75Cr') ? 'selected' : '' }}>₹1.5 Crore - ₹1.75 Crore</option>
-                                        <option value="1.75Cr-2Cr" {{ (old('budget') == '1.75Cr-2Cr') ? 'selected' : '' }}>₹1.75 Crore - ₹2 Crore</option>
-                                        <option value="2Cr-2.25Cr" {{ (old('budget') == '2Cr-2.25Cr') ? 'selected' : '' }}>₹2 Crore - ₹2.25 Crore</option>
-                                        <option value="2.25Cr-3Cr" {{ (old('budget') == '2.25Cr-3Cr') ? 'selected' : '' }}>₹2.25 Crore - ₹3 Crore</option>
-                                        <option value="3Cr-3.5Cr" {{ (old('budget') == '3Cr-3.5Cr') ? 'selected' : '' }}>₹3 Crore - ₹3.5 Crore</option>
-                                        <option value="3.5Cr-5Cr" {{ (old('budget') == '3.5Cr-5Cr') ? 'selected' : '' }}>₹3.5 Crore - ₹5 Crore</option>
-                                        <option value="5Cr-10Cr" {{ (old('budget') == '5Cr-10Cr') ? 'selected' : '' }}>₹5 Crore - ₹10 Crore</option>
+                                        <option value="10L-20L" {{ old('budget') == '10L-20L' ? 'selected' : '' }}>
+                                            ₹10 Lakh - ₹20 Lakh</option>
+                                        <option value="20L-30L" {{ old('budget') == '20L-30L' ? 'selected' : '' }}>
+                                            ₹20 Lakh - ₹30 Lakh</option>
+                                        <option value="30L-40L" {{ old('budget') == '30L-40L' ? 'selected' : '' }}>
+                                            ₹30 Lakh - ₹40 Lakh</option>
+                                        <option value="40L-50L" {{ old('budget') == '40L-50L' ? 'selected' : '' }}>
+                                            ₹40 Lakh - ₹50 Lakh</option>
+                                        <option value="50L-60L" {{ old('budget') == '50L-60L' ? 'selected' : '' }}>
+                                            ₹50 Lakh - ₹60 Lakh</option>
+                                        <option value="60L-70L" {{ old('budget') == '60L-70L' ? 'selected' : '' }}>
+                                            ₹60 Lakh - ₹70 Lakh</option>
+                                        <option value="70L-80L" {{ old('budget') == '70L-80L' ? 'selected' : '' }}>
+                                            ₹70 Lakh - ₹80 Lakh</option>
+                                        <option value="80L-90L" {{ old('budget') == '80L-90L' ? 'selected' : '' }}>
+                                            ₹80 Lakh - ₹90 Lakh</option>
+                                        <option value="90L-1Cr" {{ old('budget') == '90L-1Cr' ? 'selected' : '' }}>
+                                            ₹90 Lakh - ₹1 Crore</option>
+                                        <option value="1Cr-1.25Cr"
+                                            {{ old('budget') == '1Cr-1.25Cr' ? 'selected' : '' }}>₹1 Crore - ₹1.25
+                                            Crore</option>
+                                        <option value="1.25Cr-1.5Cr"
+                                            {{ old('budget') == '1.25Cr-1.5Cr' ? 'selected' : '' }}>₹1.25 Crore -
+                                            ₹1.5 Crore</option>
+                                        <option value="1.5Cr-1.75Cr"
+                                            {{ old('budget') == '1.5Cr-1.75Cr' ? 'selected' : '' }}>₹1.5 Crore -
+                                            ₹1.75 Crore</option>
+                                        <option value="1.75Cr-2Cr"
+                                            {{ old('budget') == '1.75Cr-2Cr' ? 'selected' : '' }}>₹1.75 Crore - ₹2
+                                            Crore</option>
+                                        <option value="2Cr-2.25Cr"
+                                            {{ old('budget') == '2Cr-2.25Cr' ? 'selected' : '' }}>₹2 Crore - ₹2.25
+                                            Crore</option>
+                                        <option value="2.25Cr-3Cr"
+                                            {{ old('budget') == '2.25Cr-3Cr' ? 'selected' : '' }}>₹2.25 Crore - ₹3
+                                            Crore</option>
+                                        <option value="3Cr-3.5Cr"
+                                            {{ old('budget') == '3Cr-3.5Cr' ? 'selected' : '' }}>₹3 Crore - ₹3.5
+                                            Crore</option>
+                                        <option value="3.5Cr-5Cr"
+                                            {{ old('budget') == '3.5Cr-5Cr' ? 'selected' : '' }}>₹3.5 Crore - ₹5
+                                            Crore</option>
+                                        <option value="5Cr-10Cr" {{ old('budget') == '5Cr-10Cr' ? 'selected' : '' }}>
+                                            ₹5 Crore - ₹10 Crore
+                                        </option>
                                     </select>
                                 </div>
 
+                                <!-- SOURCE -->
                                 <div class="col-md-4 mb-3">
                                     <label for="source">Source</label>
-                                    <select class="select2" name="source" id="source">
+                                    <select class="select2 dropdown-in-modal" name="source" id="source">
                                         <option value="">-- Select Source --</option>
                                         @foreach($sources as $source)
                                         <option value="{{ $source->id }}">
@@ -231,31 +235,38 @@
                                     </select>
                                 </div>
 
+                                <!-- COMMENT -->
                                 <div class="col-md-12 mb-3">
                                     <label for="comment">Comment:</label>
-                                    <textarea id="comment" name="comment" rows="3" placeholder="Type your comment here..." class="form-control"></textarea>
+                                    <textarea id="comment" name="comment" rows="3" placeholder="Type your comment here..."
+                                        class="form-control"></textarea>
                                 </div>
-                            </div>
 
-                            <div class="row mt-3">
-                                <div class="col-md-12">
-                                    <button type="submit" class="btn btn-primary"> Create Data
-                                    </button>
-                                    <a href="javascript:history.back()" class="btn btn-secondary">Cancel</a>
-                                </div>
                             </div>
-                        </form>
+                        </div>
                     </div>
-                </div>
+
+                    <!-- FOOTER -->
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>
+                            Save Data
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    var propertyCategoryMap = <?php echo json_encode($propertyCategoryMap); ?>;
-    var propertySubCategoryMap = <?php echo json_encode($propertySubCategoryMap); ?>;
-    var allPropertyCategories = <?php echo json_encode($allPropertyCategories); ?>;
+    var propertyCategoryMap = <?php echo json_encode($propertyCategoryMap ?? []); ?>;
+    var propertySubCategoryMap = <?php echo json_encode($propertySubCategoryMap ?? []); ?>;
+    var allPropertyCategories = <?php echo json_encode($allPropertyCategories ?? []); ?>;
     var oldPropertyCategory = <?php echo json_encode(old('property_category')); ?>;
     var oldPropertySubCategory = <?php echo json_encode(old('property_sub_category')); ?>;
 
@@ -298,7 +309,8 @@
     }
 
     $(document).ready(function() {
-        $('.select2').select2({
+        $('.dropdown-in-modal').select2({
+            dropdownParent: $('#addDataModal'),
             placeholder: function() {
                 return $(this).data('placeholder') || 'Select an option';
             },
@@ -356,10 +368,5 @@
                 form.classList.add('was-validated');
             }, false);
         });
-    },
-    false);
+    }, false);
 </script>
-
-@include('data-center.bulk-import-modal')
-
-@endsection

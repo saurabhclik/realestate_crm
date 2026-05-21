@@ -221,6 +221,7 @@ class DataCenterController extends Controller
         $sourceMap = DB::table('sources')->pluck('name', 'id')->toArray();
 
         $projects = DB::table('projects')->get();
+        $createData = $this->dataCenterService->create();
 
         // Start query (NO get() here)
         $query = DB::table('data_center');
@@ -255,6 +256,26 @@ class DataCenterController extends Controller
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
+        // TAB FILTERING
+        $activeTab = $request->get('tab', 'all');
+
+        if ($activeTab === 'rejected') {
+            $query->where('status', 'REJECTED');
+        } elseif ($activeTab === 'schedule') {
+            $query->whereIn('status', ['CALL SCHEDULED', 'MEETING SCHEDULED', 'VISIT SCHEDULED', 'VISIT DONE']);
+        } elseif ($activeTab === 'converted') {
+            $query->where('is_converted', 1);
+        } else {
+            // 'all' tab -> NOT rejected, NOT scheduled, NOT converted
+            $query->where(function ($q) {
+                $q->where(function ($sub) {
+                    $sub->whereNull('is_converted')
+                        ->orWhere('is_converted', '!=', 1);
+                })
+                ->whereNotIn('status', ['REJECTED', 'CALL SCHEDULED', 'MEETING SCHEDULED', 'VISIT SCHEDULED', 'VISIT DONE']);
+            });
+        }
+
         // PAGINATION LENGTH
         $length = $request->get('length', 10);
 
@@ -287,7 +308,7 @@ class DataCenterController extends Controller
             return $row;
         });
 
-        return view('data-center.index', compact('dataCenters', 'projects'));
+        return view('data-center.index', array_merge(compact('dataCenters', 'projects', 'activeTab'), $createData));
     }
 
     public function create()
@@ -406,8 +427,7 @@ class DataCenterController extends Controller
         if ($request->filled('budget')) $updateData['budget'] = $request->input('budget');
         if ($request->filled('comment')) $updateData['comment'] = $request->input('comment');
         if ($request->filled('status')) $updateData['status'] = $request->input('status');
-        if ($request->filled('changed_by')) $updateData['changed_by'] = $request->input('changed_by');
-
+       
         // Check if there's anything to update
         if (empty($updateData)) {
             if ($request->expectsJson()) {
@@ -495,7 +515,10 @@ class DataCenterController extends Controller
 
             $phone = '';
             foreach ($row as $key => $value) {
-                $keyLower = strtolower(trim($key));
+                // Remove invisible characters like BOM
+                $cleanKey = preg_replace('/[\x00-\x1F\x7F\xA0]/u', '', $key);
+                $cleanKey = trim($cleanKey, "\xEF\xBB\xBF");
+                $keyLower = strtolower(trim($cleanKey));
                 if (in_array($keyLower, ['phone no.', 'phone', 'phone no', 'phone number'])) {
                     $phone = trim($value);
                     break;
@@ -520,7 +543,9 @@ class DataCenterController extends Controller
 
             $name = '';
             foreach ($row as $key => $value) {
-                $keyLower = strtolower(trim($key));
+                $cleanKey = preg_replace('/[\x00-\x1F\x7F\xA0]/u', '', $key);
+                $cleanKey = trim($cleanKey, "\xEF\xBB\xBF");
+                $keyLower = strtolower(trim($cleanKey));
                 if (in_array($keyLower, ['name', 'full name', 'customer name'])) {
                     $name = trim($value);
                     break;
@@ -534,7 +559,9 @@ class DataCenterController extends Controller
 
             $email = '';
             foreach ($row as $key => $value) {
-                $keyLower = strtolower(trim($key));
+                $cleanKey = preg_replace('/[\x00-\x1F\x7F\xA0]/u', '', $key);
+                $cleanKey = trim($cleanKey, "\xEF\xBB\xBF");
+                $keyLower = strtolower(trim($cleanKey));
                 if (in_array($keyLower, ['email', 'e-mail', 'mail'])) {
                     $email = trim($value);
                     break;
@@ -558,7 +585,9 @@ class DataCenterController extends Controller
             $changed_by = '';
 
             foreach ($row as $key => $value) {
-                $keyLower = strtolower(trim($key));
+                $cleanKey = preg_replace('/[\x00-\x1F\x7F\xA0]/u', '', $key);
+                $cleanKey = trim($cleanKey, "\xEF\xBB\xBF");
+                $keyLower = strtolower(trim($cleanKey));
                 $cellValue = trim($value);
                 if (in_array($keyLower, ['source'])) {
                     $source = $cellValue;
@@ -586,9 +615,6 @@ class DataCenterController extends Controller
                 }
                 if (in_array($keyLower, ['comment'])) {
                     $comment = $cellValue;
-                }
-                if (in_array($keyLower, ['approved by', 'changed by', 'changed_by'])) {
-                    $changed_by = $cellValue;
                 }
             }
 
@@ -618,7 +644,7 @@ class DataCenterController extends Controller
                     'project_name' => $project_name,
                     'budget' => $budget,
                     'comment' => $comment,
-                    'changed_by' => $changed_by,
+                    'user_id' => session('user_id'),
                 ];
 
                 if (Schema::hasColumn('data_center', 'status')) {

@@ -47,37 +47,8 @@
                     <div class="card-header d-flex justify-content-between">
                         <h5 class="card-title">
                             Edit Data #{{ $data->id }}
-                        </h5>
-                        @if(session('user_type') === 'admin')
-                        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#bulkImportModal">
-                            <i class="fas fa-file-import me-1"></i> Bulk Import
-                        </button>
-                        @endif
+                        </h5>    
                     </div>
-
-                    @if(session('success'))
-                    <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    @endif
-                    @if(session('error'))
-                    <div class="alert alert-danger alert-dismissible fade show m-3" role="alert">
-                        {{ session('error') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    @endif
-                    @if(session('import_messages'))
-                    <div class="alert alert-light alert-dismissible fade show m-3" role="alert">
-                        <ul class="mb-0">
-                            @foreach(session('import_messages') as $message)
-                            <li>{!! $message !!}</li>
-                            @endforeach
-                        </ul>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    @endif
-
                     <div class="card-body">
                         <form method="POST"
                             action="{{ route('data-center.update', $data->id) }}"
@@ -89,11 +60,6 @@
                                 <i class="fas fa-user"></i> Basic Details
                             </div>
                             <div class="row">
-                                <div class="col-md-4 mb-3">
-                                    <label for="id">ID</label>
-                                    <input type="text" class="form-control" id="id" value="{{ $data->id }}" readonly>
-                                </div>
-
                                 <div class="col-md-4 mb-3">
                                     <label for="name">Name <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control @error('name') is-invalid @enderror" name="name" id="name"

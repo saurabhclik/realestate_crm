@@ -223,11 +223,7 @@ class DataCenterController extends Controller
         $projects = DB::table('projects')->get();
 
         // Start query (NO get() here)
-        $query = DB::table('data_center')
-            ->where(function ($q) {
-                $q->where('is_converted', 0)
-                    ->orWhereNull('is_converted');
-            });
+        $query = DB::table('data_center');
 
         //SEARCH FILTER
         if ($request->filled('search')) {

@@ -6,23 +6,60 @@
     @include('modals.view-data-comment')
 
     <div class="modal fade" id="addCommentModal" tabindex="-1" aria-labelledby="addCommentModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="addCommentModalLabel">Add Comment</h5>
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+                <div class="modal-header text-white" style="background: linear-gradient(135deg, #556ee6, #3b50b5); border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                    <h5 class="modal-title fw-bold" id="addCommentModalLabel">
+                        <i class="fas fa-comment-medical me-2"></i>Update Comment
+                    </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     <input type="hidden" id="addCommentDataId" value="">
+                    
+                    <!-- Quick Notes Tags Section -->
                     <div class="mb-3">
-                        <label for="addCommentRemark" class="form-label">Comment</label>
-                        <textarea class="form-control" id="addCommentRemark" rows="4" placeholder="Enter your comment"></textarea>
+                        <label class="form-label fw-bold text-muted small text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Quick Calling Notes</label>
+                        <div class="d-flex flex-wrap gap-2" id="quickNotesContainer">
+                            <button type="button" class="btn btn-sm btn-outline-primary quick-note-btn px-3 py-1.5 rounded-pill" data-note="Not available" style="font-size: 0.8rem; font-weight: 500; transition: all 0.2s;">
+                                Not available
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary quick-note-btn px-3 py-1.5 rounded-pill" data-note="Asked to call tomorrow" style="font-size: 0.8rem; font-weight: 500; transition: all 0.2s;">
+                                Asked to call tomorrow
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary quick-note-btn px-3 py-1.5 rounded-pill" data-note="Interested" style="font-size: 0.8rem; font-weight: 500; transition: all 0.2s;">
+                                Interested
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary quick-note-btn px-3 py-1.5 rounded-pill" data-note="Busy" style="font-size: 0.8rem; font-weight: 500; transition: all 0.2s;">
+                                Busy
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary quick-note-btn px-3 py-1.5 rounded-pill" data-note="Not picked" style="font-size: 0.8rem; font-weight: 500; transition: all 0.2s;">
+                                Not picked
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary quick-note-btn px-3 py-1.5 rounded-pill" data-note="Wrong number" style="font-size: 0.8rem; font-weight: 500; transition: all 0.2s;">
+                                Wrong number
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Custom Comment Textarea Section -->
+                    <div class="mb-3">
+                        <label for="addCommentRemark" class="form-label fw-bold text-muted small text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Custom Calling Note</label>
+                        <textarea class="form-control border-light shadow-sm" id="addCommentRemark" rows="3" placeholder="Type custom note or select a quick note above..." style="border-radius: 8px; resize: none; font-size: 0.9rem; padding: 10px; border: 1px solid #ced4da;"></textarea>
+                    </div>
+
+                    <!-- Beautiful Live Preview Section -->
+                    <div class="p-3 border rounded-3" style="border-style: dashed !important; border-color: #556ee6 !important; background-color: #f4f6fd !important;">
+                        <small class="text-primary fw-bold d-block mb-1 text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Comment Preview</small>
+                        <div id="commentPreview" class="text-secondary fw-semibold font-monospace" style="font-size: 0.85rem; word-break: break-word;">
+                            Called on {{ date('j M') }} - [Your Note] - {{ session('user_name', 'Guest') }}
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="submitDataCenterComment()">Submit</button>
+                <div class="modal-footer bg-light border-0" style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; padding: 12px 24px;">
+                    <button type="button" class="btn btn-secondary px-4 py-2" data-bs-dismiss="modal" style="border-radius: 8px; font-size: 0.85rem; font-weight: 500;">Cancel</button>
+                    <button type="button" class="btn btn-primary px-4 py-2" onclick="submitDataCenterComment()" style="border-radius: 8px; background: #556ee6; border-color: #556ee6; font-size: 0.85rem; font-weight: 500; box-shadow: 0 4px 12px rgba(85, 110, 230, .25);">Submit</button>
                 </div>
             </div>
         </div>
@@ -70,8 +107,34 @@
             max-height: 100% !important;
         }
 
-        #table_filter {
+        #table_filter,
+        #table_rejected_filter,
+        #table_schedule_filter,
+        #table_converted_filter {
             margin: 10px;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.75rem 1rem;
+            vertical-align: middle;
+            line-height: 1.5;
+            font-size: 0.92rem;
+        }
+
+        .table td h6,
+        .table td span,
+        .table td a,
+        .table td small {
+            line-height: 1.4 !important;
+        }
+
+        .table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f9f9f9;
         }
 
         .data-modal .modal-dialog {
@@ -257,12 +320,12 @@
                                         Data Center
                                     </h4>
 
-                                    <span class="badge bg-soft-primary text-dark px-3 py-2">
+                                    <span class="badge bg-soft-primary text-dark px-3 py-2 fs-6 fw-semibold border border-primary border-opacity-25" style="border-radius: 8px;">
                                         {{ $dataCenters->count() }} Datas
                                     </span>
                                 </div>
 
-                                <div class="d-flex gap-2">
+                                <div class="d-flex gap-2 flex-wrap align-items-center">
                                     <button id="btnExportExcel"
                                         class="shadow btn btn-success btn-sm d-flex align-items-center">
                                         <i class="fas fa-file-excel me-2"></i>
@@ -274,15 +337,21 @@
                                         <i class="fas fa-file-pdf me-2"></i>
                                         PDF
                                     </button>
-                                </div>
-                            </div>
 
-                            <div class="card-body1">
-                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDataModal"
-                                    type="button">
-                                    <i class="fas fa-plus-circle me-1"></i>
-                                    Add Data
-                                </button>
+                                    <button class="shadow btn btn-primary btn-sm d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addDataModal"
+                                        type="button">
+                                        <i class="fas fa-plus-circle me-2"></i>
+                                        Add Data
+                                    </button>
+
+                                    @if (session('user_type') === 'admin')
+                                        <button type="button" class="shadow btn btn-info btn-sm text-white d-flex align-items-center" data-bs-toggle="modal"
+                                            data-bs-target="#bulkImportModal">
+                                            <i class="fas fa-file-import me-2"></i>
+                                            Bulk Import
+                                        </button>
+                                    @endif
+                                </div>
                             </div>
 
                             <!-- TABS -->
@@ -333,29 +402,26 @@
                                 <!-- ALL DATA -->
                                 <div class="tab-pane fade show active" id="allData">
 
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered align-middle">
-
-                                            <div class="card p-3">
-                                                <form class="data-list-form" action="" method="POST">
+                                    <div class="card p-3">
+                                        <form class="data-list-form" action="" method="POST">
                                                     @csrf
                                                     <div>
                                                         <label>
                                                             Show
                                                             <select id="lengthSelect" class="form-select form-select-sm"
                                                                 style="width: auto; display: inline-block;">
-                                                                <option value="10">10</option>
-                                                                <option value="25">25</option>
-                                                                <option value="50">50</option>
-                                                                <option value="100">100</option>
-                                                                <option value="500">500</option>
-                                                                <option value="all">All</option>
+                                                                <option value="10" {{ request('length') == 10 ? 'selected' : '' }}>10</option>
+                                                                <option value="25" {{ request('length') == 25 ? 'selected' : '' }}>25</option>
+                                                                <option value="50" {{ request('length') == 50 ? 'selected' : '' }}>50</option>
+                                                                <option value="100" {{ request('length') == 100 ? 'selected' : '' }}>100</option>
+                                                                <option value="500" {{ request('length') == 500 ? 'selected' : '' }}>500</option>
+                                                                <option value="all" {{ request('length') == 'all' ? 'selected' : '' }}>All</option>
                                                             </select>
                                                             entries
                                                         </label>
                                                     </div>
                                                     <table id="table"
-                                                        class="table-hover table-bordered dt-responsive nowrap w-100">
+                                                        class="table table-hover table-bordered dt-responsive nowrap w-100">
                                                         <thead class="table-light">
                                                             <tr>
                                                                 <th>#</th>
@@ -400,6 +466,9 @@
                                                                             <div class="d-flex align-items-center mb-1">
                                                                                 <div class="flex-grow-1">
                                                                                     <h6 class="mb-0">{{ $row->name }}
+                                                                                        @if(isset($row->is_converted) && $row->is_converted == 1)
+                                                                                            <span class="badge bg-success ms-1" style="font-size: 0.65rem;">Converted</span>
+                                                                                        @endif
                                                                                     </h6>
                                                                                 </div>
                                                                             </div>
@@ -434,7 +503,8 @@
                                                                                         class="btn btn-xs btn-soft-light update-status-btn"
                                                                                         data-id="{{ $row->id }}"
                                                                                         data-status="{{ $row->status }}"
-                                                                                        data-projects="{{ $row->project_ids }}">
+                                                                                        data-projects="{{ $row->project_ids }}"
+                                                                                        data-converted="{{ $row->is_converted ?? 0 }}">
                                                                                         <i
                                                                                             class="fas fa-sync-alt text-info"></i>
                                                                                     </button>
@@ -443,7 +513,268 @@
                                                                                         class="btn btn-xs btn-soft-light add-comment-btn"
                                                                                         data-id="{{ $row->id }}"
                                                                                         data-bs-toggle="tooltip"
-                                                                                        title="Add Comment">
+                                                                                        title="Update Comment">
+                                                                                        <i
+                                                                                            class="fas fa-comments text-info"></i>
+                                                                                    </button>
+
+                                                                                    @if (session('user_type') == 'admin')
+                                                                                        <button
+                                                                                            class="btn btn-xs btn-soft-light delete-data-btn"
+                                                                                            data-data-id="{{ $row->id }}"
+                                                                                            data-data-name="{{ $row->name }}"
+                                                                                            data-bs-toggle="tooltip"
+                                                                                            title="Delete Data"
+                                                                                            type="button">
+                                                                                            <i
+                                                                                                class="fas fa-trash text-danger"></i>
+                                                                                        </button>
+                                                                                    @endif
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>{{ $row->phone }}</td>
+                                                                    <td>
+                                                                        <a href="mailto:{{ $row->email }}"
+                                                                            class="text-truncate d-inline-block"
+                                                                            style="max-width: 200px;">
+                                                                            {{ $row->email }}
+                                                                        </a>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span class="cust-badge bg-soft-info text-info">
+                                                                            <i class="fas fa-globe me-1"></i>
+                                                                            {{ $row->source ?? '-' }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span class="cust-badge text-dark">
+                                                                            {{ $row->state ?? '-' }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span class="cust-badge text-dark">
+                                                                            {{ $row->city ?? '-' }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>
+                                                                        @php
+                                                                            $status = strtolower(
+                                                                                trim($row->status ?? 'pending'),
+                                                                            );
+                                                                            $statusClass =
+                                                                                $status === 'approved'
+                                                                                    ? 'success'
+                                                                                    : ($status === 'rejected' ||
+                                                                                    $status === 'reject'
+                                                                                        ? 'danger'
+                                                                                        : 'warning');
+                                                                        @endphp
+                                                                        <span
+                                                                            class="cust-badge {{ $statusClass }} text-dark">
+                                                                            {{ $row->status ?? 'pending' }}
+                                                                        </span>
+                                                                        @if(isset($row->is_converted) && $row->is_converted == 1)
+                                                                            <div class="mt-1">
+                                                                                <span class="badge bg-success">CONVERTED</span>
+                                                                            </div>
+                                                                        @endif
+                                                                    </td>
+                                                                    <td>
+                                                                        {{ $row->budget ?? '-' }}
+                                                                    </td>
+                                                                    <td>
+                                                                        <span class="cust-badge text-dark">
+                                                                            {{ $row->property_type ?? '-' }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span class="cust-badge text-dark">
+                                                                            {{ $row->property_category ?? '-' }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span class="cust-badge text-dark">
+                                                                            {{ $row->property_sub_category ?? '-' }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div
+                                                                            class="d-flex align-items-center justify-content-between">
+                                                                            <div class="flex-grow-1">
+                                                                                {{ $row->project_name ?? '-' }}
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span class="cust-badge text-dark">
+                                                                            {{ \Carbon\Carbon::parse($row->created_at)->format('d M Y') }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <div class="flex-shrink-0 me-2">
+                                                                                <i
+                                                                                    class="fas fa-comment-alt text-muted"></i>
+                                                                            </div>
+                                                                            <div class="flex-grow-1">
+                                                                                @php
+                                                                                    $comment = strtolower(
+                                                                                        trim(
+                                                                                            strip_tags(
+                                                                                                $row->comment ?? '',
+                                                                                            ),
+                                                                                        ),
+                                                                                    );
+                                                                                    $short = \Illuminate\Support\Str::limit(
+                                                                                        $comment,
+                                                                                        30,
+                                                                                    );
+                                                                                @endphp
+                                                                                <span class="d-block"
+                                                                                    data-bs-toggle="tooltip"
+                                                                                    title="{{ $comment }}">
+                                                                                    {!! $short !!}
+                                                                                </span>
+                                                                                @if (!empty($row->comment))
+                                                                                    <a href="javascript:void(0);"
+                                                                                        onclick="showDataCenterComment('{{ $row->id }}')"
+                                                                                        class="text-primary small">
+                                                                                        View more
+                                                                                    </a>
+                                                                                @endif
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </form>
+
+                                                <div class="d-flex justify-content-end mt-3">
+                                                    {{ $dataCenters->links() }}
+                                                </div>
+                                            </div>
+
+                                </div>
+
+                                <!-- REJECTED -->
+                                <div class="tab-pane fade" id="rejectedData">
+
+                                    <div class="card p-3">
+                                        <form class="data-list-form" action="" method="POST">
+                                                    @csrf
+                                                    <div>
+                                                        <label>
+                                                            Show
+                                                            <select id="lengthSelectRejected" class="form-select form-select-sm"
+                                                                style="width: auto; display: inline-block;">
+                                                                <option value="10" {{ request('length') == 10 ? 'selected' : '' }}>10</option>
+                                                                <option value="25" {{ request('length') == 25 ? 'selected' : '' }}>25</option>
+                                                                <option value="50" {{ request('length') == 50 ? 'selected' : '' }}>50</option>
+                                                                <option value="100" {{ request('length') == 100 ? 'selected' : '' }}>100</option>
+                                                                <option value="500" {{ request('length') == 500 ? 'selected' : '' }}>500</option>
+                                                                <option value="all" {{ request('length') == 'all' ? 'selected' : '' }}>All</option>
+                                                            </select>
+                                                            entries
+                                                        </label>
+                                                    </div>
+                                                    <table id="table_rejected"
+                                                        class="table table-hover table-bordered dt-responsive nowrap w-100">
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th>#</th>
+                                                                <th>ID</th>
+                                                                <th>Name</th>
+                                                                <th>Phone</th>
+                                                                <th>Email</th>
+                                                                <th>Source</th>
+                                                                <th>State</th>
+                                                                <th>City</th>
+                                                                <th>Status</th>
+                                                                <th>Budget</th>
+                                                                <th>Property Type</th>
+                                                                <th>Property Category</th>
+                                                                <th>Property Sub Category</th>
+                                                                <th>Project</th>
+                                                                <th>Date</th>
+                                                                <th>Last Comment</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach ($dataCenters->filter(function($item) { return strtoupper($item->status ?? '') === 'REJECTED'; }) as $row)
+                                                                @php
+                                                                    $phone = preg_replace('/\D/', '', $row->phone);
+                                                                    if (substr($phone, 0, 2) == '91') {
+                                                                        $phone = substr($phone, 2);
+                                                                    }
+                                                                @endphp
+                                                                <tr data-id="{{ $row->id }}"
+                                                                    data-comment="{{ $row->comment }}">
+                                                                    <td>
+                                                                        {{ $loop->iteration }}
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="d-flex gap-3 align-items-center">
+                                                                            <span
+                                                                                class="fw-semibold">{{ $row->id }}</span>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="d-flex flex-column">
+                                                                            <div class="d-flex align-items-center mb-1">
+                                                                                <div class="flex-grow-1">
+                                                                                    <h6 class="mb-0">{{ $row->name }}
+                                                                                        @if(isset($row->is_converted) && $row->is_converted == 1)
+                                                                                            <span class="badge bg-success ms-1" style="font-size: 0.65rem;">Converted</span>
+                                                                                        @endif
+                                                                                    </h6>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div
+                                                                                class="d-flex justify-content-between align-items-center">
+                                                                                <div class="d-flex">
+                                                                                    <a href="tel:{{ $phone }}"
+                                                                                        class="btn btn-xs btn-soft-light"
+                                                                                        data-bs-toggle="tooltip"
+                                                                                        title="Call">
+                                                                                        <i
+                                                                                            class="fas fa-phone text-primary"></i>
+                                                                                    </a>
+                                                                                    <a href="https://wa.me/91{{ $phone }}"
+                                                                                        target="_blank"
+                                                                                        class="btn btn-xs btn-soft-light"
+                                                                                        data-bs-toggle="tooltip"
+                                                                                        title="WhatsApp">
+                                                                                        <i
+                                                                                            class="fab fa-whatsapp text-success"></i>
+                                                                                    </a>
+
+                                                                                    <a href="{{ route('data-center.edit', $row->id) }}"
+                                                                                        class="btn btn-xs btn-soft-light"
+                                                                                        data-bs-toggle="tooltip"
+                                                                                        title="Edit">
+                                                                                        <i
+                                                                                            class="fas fa-edit text-warning"></i>
+                                                                                    </a>
+
+                                                                                    <button type="button"
+                                                                                        class="btn btn-xs btn-soft-light update-status-btn"
+                                                                                        data-id="{{ $row->id }}"
+                                                                                        data-status="{{ $row->status }}"
+                                                                                        data-projects="{{ $row->project_ids }}"
+                                                                                        data-converted="{{ $row->is_converted ?? 0 }}">
+                                                                                        <i
+                                                                                            class="fas fa-sync-alt text-info"></i>
+                                                                                    </button>
+
+                                                                                    <button type="button"
+                                                                                        class="btn btn-xs btn-soft-light add-comment-btn"
+                                                                                        data-id="{{ $row->id }}"
+                                                                                        data-bs-toggle="tooltip"
+                                                                                        title="Update Comment">
                                                                                         <i
                                                                                             class="fas fa-comments text-info"></i>
                                                                                     </button>
@@ -583,120 +914,527 @@
                                                 </div>
                                             </div>
 
-
-                                        </table>
-                                    </div>
-
-                                </div>
-
-                                <!-- REJECTED -->
-                                <div class="tab-pane fade" id="rejectedData">
-
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered align-middle">
-
-                                            <thead class="table-danger">
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th>Name</th>
-                                                    <th>Phone</th>
-                                                    <th>Status</th>
-                                                </tr>
-                                            </thead>
-
-                                            <tbody>
-
-                                                @foreach ($dataCenters->where('status', 'Rejected') as $row)
-                                                    <tr>
-                                                        <td>{{ $loop->iteration }}</td>
-                                                        <td>{{ $row->name }}</td>
-                                                        <td>{{ $row->phone }}</td>
-                                                        <td>
-                                                            <span class="badge bg-danger">
-                                                                {{ $row->status }}
-                                                            </span>
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-
-                                            </tbody>
-
-                                        </table>
-                                    </div>
-
                                 </div>
 
                                 <!-- SCHEDULE -->
                                 <div class="tab-pane fade" id="scheduleData">
 
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered align-middle">
+                                    <div class="card p-3">
+                                        <form class="data-list-form" action="" method="POST">
+                                                    @csrf
+                                                    <div>
+                                                        <label>
+                                                            Show
+                                                            <select id="lengthSelectSchedule" class="form-select form-select-sm"
+                                                                style="width: auto; display: inline-block;">
+                                                                <option value="10" {{ request('length') == 10 ? 'selected' : '' }}>10</option>
+                                                                <option value="25" {{ request('length') == 25 ? 'selected' : '' }}>25</option>
+                                                                <option value="50" {{ request('length') == 50 ? 'selected' : '' }}>50</option>
+                                                                <option value="100" {{ request('length') == 100 ? 'selected' : '' }}>100</option>
+                                                                <option value="500" {{ request('length') == 500 ? 'selected' : '' }}>500</option>
+                                                                <option value="all" {{ request('length') == 'all' ? 'selected' : '' }}>All</option>
+                                                            </select>
+                                                            entries
+                                                        </label>
+                                                    </div>
+                                                    <table id="table_schedule"
+                                                        class="table table-hover table-bordered dt-responsive nowrap w-100">
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th>#</th>
+                                                                <th>ID</th>
+                                                                <th>Name</th>
+                                                                <th>Phone</th>
+                                                                <th>Email</th>
+                                                                <th>Source</th>
+                                                                <th>State</th>
+                                                                <th>City</th>
+                                                                <th>Status</th>
+                                                                <th>Budget</th>
+                                                                <th>Property Type</th>
+                                                                <th>Property Category</th>
+                                                                <th>Property Sub Category</th>
+                                                                <th>Project</th>
+                                                                <th>Date</th>
+                                                                <th>Last Comment</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach ($dataCenters->filter(function($item) { return strtoupper($item->status ?? '') === 'CALL SCHEDULED'; }) as $row)
+                                                                @php
+                                                                    $phone = preg_replace('/\D/', '', $row->phone);
+                                                                    if (substr($phone, 0, 2) == '91') {
+                                                                        $phone = substr($phone, 2);
+                                                                    }
+                                                                @endphp
+                                                                <tr data-id="{{ $row->id }}"
+                                                                    data-comment="{{ $row->comment }}">
+                                                                    <td>
+                                                                        {{ $loop->iteration }}
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="d-flex gap-3 align-items-center">
+                                                                            <span
+                                                                                class="fw-semibold">{{ $row->id }}</span>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="d-flex flex-column">
+                                                                            <div class="d-flex align-items-center mb-1">
+                                                                                <div class="flex-grow-1">
+                                                                                    <h6 class="mb-0">{{ $row->name }}
+                                                                                        @if(isset($row->is_converted) && $row->is_converted == 1)
+                                                                                            <span class="badge bg-success ms-1" style="font-size: 0.65rem;">Converted</span>
+                                                                                        @endif
+                                                                                    </h6>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div
+                                                                                class="d-flex justify-content-between align-items-center">
+                                                                                <div class="d-flex">
+                                                                                    <a href="tel:{{ $phone }}"
+                                                                                        class="btn btn-xs btn-soft-light"
+                                                                                        data-bs-toggle="tooltip"
+                                                                                        title="Call">
+                                                                                        <i
+                                                                                            class="fas fa-phone text-primary"></i>
+                                                                                    </a>
+                                                                                    <a href="https://wa.me/91{{ $phone }}"
+                                                                                        target="_blank"
+                                                                                        class="btn btn-xs btn-soft-light"
+                                                                                        data-bs-toggle="tooltip"
+                                                                                        title="WhatsApp">
+                                                                                        <i
+                                                                                            class="fab fa-whatsapp text-success"></i>
+                                                                                    </a>
 
-                                            <thead class="table-warning">
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th>Name</th>
-                                                    <th>Phone</th>
-                                                    <th>Status</th>
-                                                </tr>
-                                            </thead>
+                                                                                    <a href="{{ route('data-center.edit', $row->id) }}"
+                                                                                        class="btn btn-xs btn-soft-light"
+                                                                                        data-bs-toggle="tooltip"
+                                                                                        title="Edit">
+                                                                                        <i
+                                                                                            class="fas fa-edit text-warning"></i>
+                                                                                    </a>
 
-                                            <tbody>
+                                                                                    <button type="button"
+                                                                                        class="btn btn-xs btn-soft-light update-status-btn"
+                                                                                        data-id="{{ $row->id }}"
+                                                                                        data-status="{{ $row->status }}"
+                                                                                        data-projects="{{ $row->project_ids }}"
+                                                                                        data-converted="{{ $row->is_converted ?? 0 }}">
+                                                                                        <i
+                                                                                            class="fas fa-sync-alt text-info"></i>
+                                                                                    </button>
 
-                                                @foreach ($dataCenters->where('status', 'CALL SCHEDULED') as $row)
-                                                    <tr>
-                                                        <td>{{ $loop->iteration }}</td>
-                                                        <td>{{ $row->name }}</td>
-                                                        <td>{{ $row->phone }}</td>
-                                                        <td>
-                                                            <span class="badge bg-warning text-dark">
-                                                                {{ $row->status }}
-                                                            </span>
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
+                                                                                    <button type="button"
+                                                                                        class="btn btn-xs btn-soft-light add-comment-btn"
+                                                                                        data-id="{{ $row->id }}"
+                                                                                        data-bs-toggle="tooltip"
+                                                                                        title="Update Comment">
+                                                                                        <i
+                                                                                            class="fas fa-comments text-info"></i>
+                                                                                    </button>
 
-                                            </tbody>
+                                                                                    @if (session('user_type') == 'admin')
+                                                                                        <button
+                                                                                            class="btn btn-xs btn-soft-light delete-data-btn"
+                                                                                            data-data-id="{{ $row->id }}"
+                                                                                            data-data-name="{{ $row->name }}"
+                                                                                            data-bs-toggle="tooltip"
+                                                                                            title="Delete Data"
+                                                                                            type="button">
+                                                                                            <i
+                                                                                                class="fas fa-trash text-danger"></i>
+                                                                                        </button>
+                                                                                    @endif
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>{{ $row->phone }}</td>
+                                                                    <td>
+                                                                        <a href="mailto:{{ $row->email }}"
+                                                                            class="text-truncate d-inline-block"
+                                                                            style="max-width: 200px;">
+                                                                            {{ $row->email }}
+                                                                        </a>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span class="cust-badge bg-soft-info text-info">
+                                                                            <i class="fas fa-globe me-1"></i>
+                                                                            {{ $row->source ?? '-' }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span class="cust-badge text-dark">
+                                                                            {{ $row->state ?? '-' }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span class="cust-badge text-dark">
+                                                                            {{ $row->city ?? '-' }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>
+                                                                        @php
+                                                                            $status = strtolower(
+                                                                                trim($row->status ?? 'pending'),
+                                                                            );
+                                                                            $statusClass =
+                                                                                $status === 'approved'
+                                                                                    ? 'success'
+                                                                                    : ($status === 'rejected' ||
+                                                                                    $status === 'reject'
+                                                                                        ? 'danger'
+                                                                                        : 'warning');
+                                                                        @endphp
+                                                                        <span
+                                                                            class="cust-badge {{ $statusClass }} text-dark">
+                                                                            {{ $row->status ?? 'pending' }}
+                                                                        </span>
+                                                                        @if(isset($row->is_converted) && $row->is_converted == 1)
+                                                                            <div class="mt-1">
+                                                                                <span class="badge bg-success">CONVERTED</span>
+                                                                            </div>
+                                                                        @endif
+                                                                    </td>
+                                                                    <td>
+                                                                        {{ $row->budget ?? '-' }}
+                                                                    </td>
+                                                                    <td>
+                                                                        <span class="cust-badge text-dark">
+                                                                            {{ $row->property_type ?? '-' }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span class="cust-badge text-dark">
+                                                                            {{ $row->property_category ?? '-' }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span class="cust-badge text-dark">
+                                                                            {{ $row->property_sub_category ?? '-' }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div
+                                                                            class="d-flex align-items-center justify-content-between">
+                                                                            <div class="flex-grow-1">
+                                                                                {{ $row->project_name ?? '-' }}
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span class="cust-badge text-dark">
+                                                                            {{ \Carbon\Carbon::parse($row->created_at)->format('d M Y') }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <div class="flex-shrink-0 me-2">
+                                                                                <i
+                                                                                    class="fas fa-comment-alt text-muted"></i>
+                                                                            </div>
+                                                                            <div class="flex-grow-1">
+                                                                                @php
+                                                                                    $comment = strtolower(
+                                                                                        trim(
+                                                                                            strip_tags(
+                                                                                                $row->comment ?? '',
+                                                                                            ),
+                                                                                        ),
+                                                                                    );
+                                                                                    $short = \Illuminate\Support\Str::limit(
+                                                                                        $comment,
+                                                                                        30,
+                                                                                    );
+                                                                                @endphp
+                                                                                <span class="d-block"
+                                                                                    data-bs-toggle="tooltip"
+                                                                                    title="{{ $comment }}">
+                                                                                    {!! $short !!}
+                                                                                </span>
+                                                                                @if (!empty($row->comment))
+                                                                                    <a href="javascript:void(0);"
+                                                                                        onclick="showDataCenterComment('{{ $row->id }}')"
+                                                                                        class="text-primary small">
+                                                                                        View more
+                                                                                    </a>
+                                                                                @endif
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </form>
 
-                                        </table>
-                                    </div>
+                                                <div class="d-flex justify-content-end mt-3">
+                                                    {{ $dataCenters->links() }}
+                                                </div>
+                                            </div>
 
                                 </div>
 
                                 <!-- CONVERTED -->
                                 <div class="tab-pane fade" id="convertedData">
 
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered align-middle">
+                                    <div class="card p-3">
+                                        <form class="data-list-form" action="" method="POST">
+                                                    @csrf
+                                                    <div>
+                                                        <label>
+                                                            Show
+                                                            <select id="lengthSelectConverted" class="form-select form-select-sm"
+                                                                style="width: auto; display: inline-block;">
+                                                                <option value="10" {{ request('length') == 10 ? 'selected' : '' }}>10</option>
+                                                                <option value="25" {{ request('length') == 25 ? 'selected' : '' }}>25</option>
+                                                                <option value="50" {{ request('length') == 50 ? 'selected' : '' }}>50</option>
+                                                                <option value="100" {{ request('length') == 100 ? 'selected' : '' }}>100</option>
+                                                                <option value="500" {{ request('length') == 500 ? 'selected' : '' }}>500</option>
+                                                                <option value="all" {{ request('length') == 'all' ? 'selected' : '' }}>All</option>
+                                                            </select>
+                                                            entries
+                                                        </label>
+                                                    </div>
+                                                    <table id="table_converted"
+                                                        class="table table-hover table-bordered dt-responsive nowrap w-100">
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th>#</th>
+                                                                <th>ID</th>
+                                                                <th>Name</th>
+                                                                <th>Phone</th>
+                                                                <th>Email</th>
+                                                                <th>Source</th>
+                                                                <th>State</th>
+                                                                <th>City</th>
+                                                                <th>Status</th>
+                                                                <th>Budget</th>
+                                                                <th>Property Type</th>
+                                                                <th>Property Category</th>
+                                                                <th>Property Sub Category</th>
+                                                                <th>Project</th>
+                                                                <th>Date</th>
+                                                                <th>Last Comment</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach ($dataCenters->filter(function($item) { return (int)($item->is_converted ?? 0) === 1; }) as $row)
+                                                                @php
+                                                                    $phone = preg_replace('/\D/', '', $row->phone);
+                                                                    if (substr($phone, 0, 2) == '91') {
+                                                                        $phone = substr($phone, 2);
+                                                                    }
+                                                                @endphp
+                                                                <tr data-id="{{ $row->id }}"
+                                                                    data-comment="{{ $row->comment }}">
+                                                                    <td>
+                                                                        {{ $loop->iteration }}
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="d-flex gap-3 align-items-center">
+                                                                            <span
+                                                                                class="fw-semibold">{{ $row->id }}</span>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="d-flex flex-column">
+                                                                            <div class="d-flex align-items-center mb-1">
+                                                                                <div class="flex-grow-1">
+                                                                                    <h6 class="mb-0">{{ $row->name }}
+                                                                                        @if(isset($row->is_converted) && $row->is_converted == 1)
+                                                                                            <span class="badge bg-success ms-1" style="font-size: 0.65rem;">Converted</span>
+                                                                                        @endif
+                                                                                    </h6>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div
+                                                                                class="d-flex justify-content-between align-items-center">
+                                                                                <div class="d-flex">
+                                                                                    <a href="tel:{{ $phone }}"
+                                                                                        class="btn btn-xs btn-soft-light"
+                                                                                        data-bs-toggle="tooltip"
+                                                                                        title="Call">
+                                                                                        <i
+                                                                                            class="fas fa-phone text-primary"></i>
+                                                                                    </a>
+                                                                                    <a href="https://wa.me/91{{ $phone }}"
+                                                                                        target="_blank"
+                                                                                        class="btn btn-xs btn-soft-light"
+                                                                                        data-bs-toggle="tooltip"
+                                                                                        title="WhatsApp">
+                                                                                        <i
+                                                                                            class="fab fa-whatsapp text-success"></i>
+                                                                                    </a>
 
-                                            <thead class="table-success">
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th>Name</th>
-                                                    <th>Phone</th>
-                                                    <th>Status</th>
-                                                </tr>
-                                            </thead>
+                                                                                    <a href="{{ route('data-center.edit', $row->id) }}"
+                                                                                        class="btn btn-xs btn-soft-light"
+                                                                                        data-bs-toggle="tooltip"
+                                                                                        title="Edit">
+                                                                                        <i
+                                                                                            class="fas fa-edit text-warning"></i>
+                                                                                    </a>
 
-                                            <tbody>
+                                                                                    <button type="button"
+                                                                                        class="btn btn-xs btn-soft-light update-status-btn"
+                                                                                        data-id="{{ $row->id }}"
+                                                                                        data-status="{{ $row->status }}"
+                                                                                        data-projects="{{ $row->project_ids }}"
+                                                                                        data-converted="{{ $row->is_converted ?? 0 }}">
+                                                                                        <i
+                                                                                            class="fas fa-sync-alt text-info"></i>
+                                                                                    </button>
 
-                                                @foreach ($dataCenters->where('is_converted', 1) as $row)
-                                                    <tr>
-                                                        <td>{{ $loop->iteration }}</td>
-                                                        <td>{{ $row->name }}</td>
-                                                        <td>{{ $row->phone }}</td>
-                                                        <td>
-                                                            <span class="badge bg-success">
-                                                                Converted
-                                                            </span>
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
+                                                                                    <button type="button"
+                                                                                        class="btn btn-xs btn-soft-light add-comment-btn"
+                                                                                        data-id="{{ $row->id }}"
+                                                                                        data-bs-toggle="tooltip"
+                                                                                        title="Update Comment">
+                                                                                        <i
+                                                                                            class="fas fa-comments text-info"></i>
+                                                                                    </button>
 
-                                            </tbody>
+                                                                                    @if (session('user_type') == 'admin')
+                                                                                        <button
+                                                                                            class="btn btn-xs btn-soft-light delete-data-btn"
+                                                                                            data-data-id="{{ $row->id }}"
+                                                                                            data-data-name="{{ $row->name }}"
+                                                                                            data-bs-toggle="tooltip"
+                                                                                            title="Delete Data"
+                                                                                            type="button">
+                                                                                            <i
+                                                                                                class="fas fa-trash text-danger"></i>
+                                                                                        </button>
+                                                                                    @endif
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>{{ $row->phone }}</td>
+                                                                    <td>
+                                                                        <a href="mailto:{{ $row->email }}"
+                                                                            class="text-truncate d-inline-block"
+                                                                            style="max-width: 200px;">
+                                                                            {{ $row->email }}
+                                                                        </a>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span class="cust-badge bg-soft-info text-info">
+                                                                            <i class="fas fa-globe me-1"></i>
+                                                                            {{ $row->source ?? '-' }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span class="cust-badge text-dark">
+                                                                            {{ $row->state ?? '-' }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span class="cust-badge text-dark">
+                                                                            {{ $row->city ?? '-' }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>
+                                                                        @php
+                                                                            $status = strtolower(
+                                                                                trim($row->status ?? 'pending'),
+                                                                            );
+                                                                            $statusClass =
+                                                                                $status === 'approved'
+                                                                                    ? 'success'
+                                                                                    : ($status === 'rejected' ||
+                                                                                    $status === 'reject'
+                                                                                        ? 'danger'
+                                                                                        : 'warning');
+                                                                        @endphp
+                                                                        <span
+                                                                            class="cust-badge {{ $statusClass }} text-dark">
+                                                                            {{ $row->status ?? 'pending' }}
+                                                                        </span>
+                                                                        @if(isset($row->is_converted) && $row->is_converted == 1)
+                                                                            <div class="mt-1">
+                                                                                <span class="badge bg-success">CONVERTED</span>
+                                                                            </div>
+                                                                        @endif
+                                                                    </td>
+                                                                    <td>
+                                                                        {{ $row->budget ?? '-' }}
+                                                                    </td>
+                                                                    <td>
+                                                                        <span class="cust-badge text-dark">
+                                                                            {{ $row->property_type ?? '-' }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span class="cust-badge text-dark">
+                                                                            {{ $row->property_category ?? '-' }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span class="cust-badge text-dark">
+                                                                            {{ $row->property_sub_category ?? '-' }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div
+                                                                            class="d-flex align-items-center justify-content-between">
+                                                                            <div class="flex-grow-1">
+                                                                                {{ $row->project_name ?? '-' }}
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span class="cust-badge text-dark">
+                                                                            {{ \Carbon\Carbon::parse($row->created_at)->format('d M Y') }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <div class="flex-shrink-0 me-2">
+                                                                                <i
+                                                                                    class="fas fa-comment-alt text-muted"></i>
+                                                                            </div>
+                                                                            <div class="flex-grow-1">
+                                                                                @php
+                                                                                    $comment = strtolower(
+                                                                                        trim(
+                                                                                            strip_tags(
+                                                                                                $row->comment ?? '',
+                                                                                            ),
+                                                                                        ),
+                                                                                    );
+                                                                                    $short = \Illuminate\Support\Str::limit(
+                                                                                        $comment,
+                                                                                        30,
+                                                                                    );
+                                                                                @endphp
+                                                                                <span class="d-block"
+                                                                                    data-bs-toggle="tooltip"
+                                                                                    title="{{ $comment }}">
+                                                                                    {!! $short !!}
+                                                                                </span>
+                                                                                @if (!empty($row->comment))
+                                                                                    <a href="javascript:void(0);"
+                                                                                        onclick="showDataCenterComment('{{ $row->id }}')"
+                                                                                        class="text-primary small">
+                                                                                        View more
+                                                                                    </a>
+                                                                                @endif
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </form>
 
-                                        </table>
-                                    </div>
+                                                <div class="d-flex justify-content-end mt-3">
+                                                    {{ $dataCenters->links() }}
+                                                </div>
+                                            </div>
 
                                 </div>
 
@@ -722,13 +1460,6 @@
                             <i class="fas fa-plus-circle me-2"></i>
                             Add New Data
                         </h4>
-
-                        @if (session('user_type') === 'admin')
-                            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal"
-                                data-bs-target="#bulkImportModal">
-                                <i class="fas fa-file-import me-1"></i> Bulk Import
-                            </button>
-                        @endif
                     </div>
 
                     @if (session('success'))
@@ -1015,18 +1746,66 @@
 
     <script>
         $(document).ready(function() {
-            $('#addCommentRemark').summernote({
-                height: 180,
-                placeholder: 'Enter your comment...',
-                toolbar: [
-                    ['style', ['bold', 'italic', 'underline', 'clear']],
-                    ['font', ['fontsize', 'color']],
-                    ['para', ['ul', 'ol', 'paragraph']],
-                    ['insert', ['link']],
-                    ['view', ['codeview']]
-                ]
+            const userName = "{{ session('user_name', 'Guest') }}";
+            const addCommentRemark = document.getElementById('addCommentRemark');
+            const commentPreview = document.getElementById('commentPreview');
+
+            function getFormattedDate() {
+                const date = new Date();
+                const day = date.getDate();
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                const month = months[date.getMonth()];
+                return `Called on ${day} ${month}`;
+            }
+
+            window.updateCommentPreview = function() {
+                if (!addCommentRemark) return;
+                const note = addCommentRemark.value.trim();
+                if (note) {
+                    commentPreview.textContent = `${getFormattedDate()} - ${note} - ${userName}`;
+                    commentPreview.classList.remove('text-secondary');
+                    commentPreview.classList.add('text-primary');
+                } else {
+                    commentPreview.textContent = `${getFormattedDate()} - [Your Note] - ${userName}`;
+                    commentPreview.classList.remove('text-primary');
+                    commentPreview.classList.add('text-secondary');
+                }
+            }
+
+            // Bind textarea events for dynamic live preview
+            if (addCommentRemark) {
+                addCommentRemark.addEventListener('input', window.updateCommentPreview);
+            }
+
+            // Quick note buttons click handler
+            $(document).on('click', '.quick-note-btn', function() {
+                // Toggle active class visually
+                $('.quick-note-btn').removeClass('active btn-primary text-white').addClass('btn-outline-primary');
+                $(this).removeClass('btn-outline-primary').addClass('active btn-primary text-white');
+
+                const noteText = $(this).data('note');
+                if (addCommentRemark) {
+                    addCommentRemark.value = noteText;
+                    window.updateCommentPreview();
+                }
             });
 
+            // Expose a function to get formatted comment on submission
+            window.getFormattedComment = function() {
+                if (!addCommentRemark) return '';
+                const note = addCommentRemark.value.trim();
+                if (!note) return '';
+                return `${getFormattedDate()} - ${note} - ${userName}`;
+            };
+
+            // Expose dynamic preview update on modal show
+            $('#addCommentModal').on('show.bs.modal', function () {
+                $('.quick-note-btn').removeClass('active btn-primary text-white').addClass('btn-outline-primary');
+                if (addCommentRemark) {
+                    addCommentRemark.value = '';
+                }
+                window.updateCommentPreview();
+            });
         });
     </script>
 
@@ -1039,6 +1818,7 @@
                 let dataId = btn.getAttribute('data-id');
                 let status = btn.getAttribute('data-status');
                 let projectIds = btn.getAttribute('data-projects');
+                let isAlreadyConverted = btn.getAttribute('data-converted') === '1';
 
                 // console.log("DATA ID FROM BUTTON:", dataId);
 
@@ -1052,6 +1832,60 @@
                     $('#visitProjects').val(null).trigger('change');
                 }
 
+                const isConvertedCheckbox = document.getElementById('isConverted');
+                const isRejectedCheckbox = document.getElementById('isRejected');
+                const allFields = document.getElementById('allFields');
+                const rejectedFields = document.getElementById('rejectedFields');
+
+                if (isAlreadyConverted) {
+                    if (isConvertedCheckbox) {
+                        isConvertedCheckbox.checked = true;
+                        isConvertedCheckbox.disabled = true;
+                        isConvertedCheckbox.closest('.mb-3').style.display = 'none';
+                    }
+                    if (isRejectedCheckbox) {
+                        isRejectedCheckbox.checked = false;
+                        isRejectedCheckbox.disabled = true;
+                        isRejectedCheckbox.closest('.mb-3').style.display = 'none';
+                    }
+                    if (allFields) {
+                        allFields.style.display = 'block';
+                    }
+                    if (rejectedFields) {
+                        rejectedFields.style.display = 'none';
+                    }
+                } else {
+                    if (isConvertedCheckbox) {
+                        isConvertedCheckbox.checked = false;
+                        isConvertedCheckbox.disabled = false;
+                        isConvertedCheckbox.closest('.mb-3').style.display = 'block';
+                    }
+                    if (isRejectedCheckbox) {
+                        isRejectedCheckbox.checked = false;
+                        isRejectedCheckbox.disabled = false;
+                        isRejectedCheckbox.closest('.mb-3').style.display = 'block';
+                    }
+                    if (allFields) {
+                        allFields.style.display = 'none';
+                    }
+                    if (rejectedFields) {
+                        rejectedFields.style.display = 'none';
+                    }
+                }
+
+                // Check if opened from Rejected tab
+                let isRejectedTab = !!btn.closest('#table_rejected') || !!btn.closest('#rejectedData');
+                if (isRejectedCheckbox && !isAlreadyConverted) {
+                    if (isRejectedTab) {
+                        isRejectedCheckbox.disabled = true;
+                        isRejectedCheckbox.checked = false;
+                        isRejectedCheckbox.closest('.form-check').style.opacity = '0.5';
+                    } else {
+                        isRejectedCheckbox.disabled = false;
+                        isRejectedCheckbox.closest('.form-check').style.opacity = '1';
+                    }
+                }
+
                 const modal = new bootstrap.Modal(document.getElementById('statusUpdateModal'));
                 modal.show();
             }
@@ -1061,17 +1895,36 @@
         function updateDataStatus() {
 
             const dataId = document.getElementById('dataId').value.trim();
-            const newStatus = document.getElementById('newStatus').value;
-            const comment = document.getElementById('comment').value.trim();
-            const remindDate = document.getElementById('remindDate').value;
-            const remindTime = document.getElementById('remindTime').value;
+            const isRejectedCheckbox = document.getElementById('isRejected');
+            const isRejected = isRejectedCheckbox && isRejectedCheckbox.checked;
+
+            let newStatus, comment, remindDate, remindTime, isConverted;
+
+            if (isRejected) {
+                newStatus = 'REJECTED';
+                comment = document.getElementById('rejectedComment').value.trim();
+                remindDate = '';
+                remindTime = '';
+                isConverted = 0;
+
+                if (!comment) {
+                    toastr.warning('Please enter a rejection remark or select a quick note');
+                    return;
+                }
+            } else {
+                newStatus = document.getElementById('newStatus').value;
+                comment = document.getElementById('comment').value.trim();
+                remindDate = document.getElementById('remindDate').value;
+                remindTime = document.getElementById('remindTime').value;
+                isConverted = document.getElementById('isConverted').checked ? 1 : 0;
+            }
 
             const payload = {
                 status: newStatus,
                 comment: comment,
                 remind_date: remindDate,
                 remind_time: remindTime,
-                is_converted: document.getElementById('isConverted').checked ? 1 : 0
+                is_converted: isConverted
             };
 
             console.log("Payload:", payload);
@@ -1092,12 +1945,60 @@
 
                         toastr.success(data.message || 'Status updated successfully');
 
+                        const statusUpper = newStatus.toUpperCase();
+
+                        // Handle REJECTED dynamically without page reload
+                        if (payload.is_converted !== 1 && statusUpper === 'REJECTED') {
+                            const row = $(`tr[data-id="${dataId}"]`);
+                            if (row.length) {
+                                // Update Status cell
+                                row.find('td:eq(8)').html(`<span class="cust-badge danger text-dark">REJECTED</span>`);
+                                
+                                // Update Comment cell
+                                const shortComment = payload.comment.length > 30 ? payload.comment.substring(0, 30) + '...' : payload.comment;
+                                row.find('td:eq(15)').html(`
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0 me-2"><i class="fas fa-comment-alt text-muted"></i></div>
+                                        <div class="flex-grow-1">
+                                            <span class="d-block" data-bs-toggle="tooltip" title="${payload.comment}">${shortComment}</span>
+                                            <a href="javascript:void(0);" onclick="showDataCenterComment('${dataId}')" class="text-primary small">View more</a>
+                                        </div>
+                                    </div>
+                                `);
+
+                                // Remove from current table
+                                const currentTableId = row.closest('table').attr('id');
+                                if (currentTableId && $.fn.DataTable.isDataTable('#' + currentTableId)) {
+                                    $('#' + currentTableId).DataTable().row(row).remove().draw(false);
+                                } else {
+                                    row.detach(); 
+                                }
+
+                                // Add to Rejected table
+                                if ($.fn.DataTable.isDataTable('#table_rejected')) {
+                                    $('#table_rejected').DataTable().row.add(row).draw(false);
+                                } else {
+                                    $('#table_rejected tbody').append(row);
+                                }
+
+                                // Close modal and switch tab
+                                $('#statusUpdateModal').modal('hide');
+                                $('.nav-pills button[data-bs-target="#rejectedData"]').tab('show');
+                                
+                                const url = new URL(window.location.href);
+                                url.searchParams.set('tab', 'rejected');
+                                window.history.replaceState({}, '', url.toString());
+
+                                return; // Stop reload
+                            }
+                        }
+
                         // redirect if converted
                         let redirectUrl = '/data-center';
 
                         if (payload.is_converted === 1) {
 
-                            switch (newStatus.toUpperCase()) {
+                            switch (statusUpper) {
 
                                 case 'PENDING':
                                     redirectUrl = '/lead/pending';
@@ -1164,71 +2065,13 @@
                             }
 
                         } else {
-
-                            switch (newStatus.toUpperCase()) {
-
-                                case 'PENDING':
-                                    redirectUrl = '/data-center/pending';
-                                    break;
-
-                                case 'PROCESSING':
-                                    redirectUrl = '/data-center/processing';
-                                    break;
-
-                                case 'INTERESTED':
-                                    redirectUrl = '/data-center/interested';
-                                    break;
-
-                                case 'CALL SCHEDULED':
-                                    redirectUrl = '/data-center/call-scheduled';
-                                    break;
-
-                                case 'WHATSAPP':
-                                    redirectUrl = '/data-center/whatsapp';
-                                    break;
-
-                                case 'MEETING SCHEDULED':
-                                    redirectUrl = '/data-center/meeting-scheduled';
-                                    break;
-
-                                case 'VISIT SCHEDULED':
-                                    redirectUrl = '/data-center/visit-scheduled';
-                                    break;
-
-                                case 'VISIT DONE':
-                                    redirectUrl = '/data-center/visit-done';
-                                    break;
-
-                                case 'NOT INTERESTED':
-                                    redirectUrl = '/data-center/not-interested';
-                                    break;
-
-                                case 'NOT PICKED':
-                                    redirectUrl = '/data-center/not-picked';
-                                    break;
-
-                                case 'NOT REACHABLE':
-                                    redirectUrl = '/data-center/not-reachable';
-                                    break;
-
-                                case 'FUTURE LEAD':
-                                    redirectUrl = '/data-center/future';
-                                    break;
-
-                                case 'WRONG NUMBER':
-                                    redirectUrl = '/data-center/wrong-number';
-                                    break;
-
-                                case 'CHANNEL PARTNER':
-                                    redirectUrl = '/data-center/channel-partner';
-                                    break;
-
-                                case 'LOST':
-                                    redirectUrl = '/data-center/lost';
-                                    break;
-
-                                default:
-                                    redirectUrl = '/data-center';
+                            const statusUpper = newStatus.toUpperCase();
+                            if (statusUpper === 'REJECTED') {
+                                redirectUrl = '/data-center?tab=rejected';
+                            } else if (['CALL SCHEDULED', 'MEETING SCHEDULED', 'VISIT SCHEDULED', 'VISIT DONE'].includes(statusUpper)) {
+                                redirectUrl = '/data-center?tab=schedule';
+                            } else {
+                                redirectUrl = '/data-center';
                             }
                         }
 
@@ -1260,6 +2103,9 @@
 
                 document.getElementById('addCommentDataId').value = dataId;
                 document.getElementById('addCommentRemark').value = '';
+                if (window.updateCommentPreview) {
+                    window.updateCommentPreview();
+                }
 
                 const addCommentModal = new bootstrap.Modal(document.getElementById('addCommentModal'));
                 addCommentModal.show();
@@ -1383,12 +2229,14 @@
 
         function submitDataCenterComment() {
             const dataId = document.getElementById('addCommentDataId').value;
-            const remark = document.getElementById('addCommentRemark').value.trim();
+            const remarkInput = document.getElementById('addCommentRemark').value.trim();
 
-            if (!remark) {
-                toastr.warning('Please enter comment here');
+            if (!remarkInput) {
+                toastr.warning('Please enter comment or select a quick note');
                 return;
             }
+
+            const remark = window.getFormattedComment ? window.getFormattedComment() : remarkInput;
 
             fetch(`/data-center/comments/${dataId}`, {
                     method: 'POST',
@@ -1431,7 +2279,7 @@
                             }
                         }
                     } else {
-                        toastr.error(data.message || 'Failed to add comment');
+                        toastr.error(data.message || 'Failed to update comment');
                     }
                 })
                 .catch(err => {
@@ -1451,6 +2299,231 @@
                             'Converting Lead');
                     }
                 });
+            }
+
+            // Tab selection from URL query
+            const urlParams = new URLSearchParams(window.location.search);
+            const tabParam = urlParams.get('tab');
+            if (tabParam) {
+                const tabButton = document.querySelector(`button[data-bs-target="#${tabParam}Data"]`);
+                if (tabButton) {
+                    const triggerEl = new bootstrap.Tab(tabButton);
+                    triggerEl.show();
+                }
+            }
+
+            // Keep URL query parameter ?tab=... in sync when switching tabs
+            const tabButtons = document.querySelectorAll('button[data-bs-toggle="pill"]');
+            tabButtons.forEach(button => {
+                button.addEventListener('shown.bs.tab', function(e) {
+                    const targetId = e.target.getAttribute('data-bs-target').replace('#', '').replace('Data', '');
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('tab', targetId);
+                    window.history.replaceState({}, '', url.toString());
+                    updatePaginationLinks();
+                    
+                    // Adjust DataTables layout for hidden tabs
+                    if (typeof $ !== 'undefined' && $.fn.dataTable) {
+                        $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust().responsive.recalc();
+                    }
+                });
+            });
+
+            // Append current tab parameter to all pagination links so clicking page number preserves active tab
+            function updatePaginationLinks() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const currentTab = urlParams.get('tab') || 'all';
+                document.querySelectorAll('.pagination a, .page-link').forEach(link => {
+                    if (link.href) {
+                        try {
+                            const linkUrl = new URL(link.href);
+                            linkUrl.searchParams.set('tab', currentTab);
+                            link.href = linkUrl.toString();
+                        } catch (e) {
+                            // Ignore invalid URLs
+                        }
+                    }
+                });
+            }
+
+            // Run initial pagination links update on page load
+            updatePaginationLinks();
+
+            // Handle length select change for Rejected tab
+            const lengthSelectRejected = document.getElementById('lengthSelectRejected');
+            if (lengthSelectRejected) {
+                lengthSelectRejected.addEventListener('change', function() {
+                    const length = this.value;
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('length', length);
+                    url.searchParams.set('tab', 'rejected');
+                    url.searchParams.set('page', 1);
+                    window.location.href = url.toString();
+                });
+            }
+
+            // Initialize DataTable for table_rejected exactly like table
+            if (typeof $ !== 'undefined' && $.fn.DataTable && $('#table_rejected').length) {
+                $('#table_rejected').DataTable({
+                    scrollX: true,
+                    scrollCollapse: true,
+                    responsive: true,
+                    paging: false,
+                    fixedColumns: {
+                        leftColumns: 2,
+                        rightColumns: 1
+                    },
+                });
+
+                // Configure and bind custom search logic for Rejected tab search box
+                const $rejectedSearchInput = $('#table_rejected_filter input');
+                if ($rejectedSearchInput.length) {
+                    $rejectedSearchInput.attr('placeholder', 'Enter search term');
+                    
+                    $rejectedSearchInput.on('keypress', function(e) {
+                        if (e.which === 13) {
+                            const searchValue = $(this).val();
+                            const url = new URL(window.location.href);
+                            url.searchParams.set('search', searchValue);
+                            url.searchParams.set('page', 1);
+                            window.location.href = url.toString();
+                        }
+                    });
+
+                    $rejectedSearchInput.on('input', function() {
+                        if ($(this).val() === '') {
+                            const url = new URL(window.location.href);
+                            url.searchParams.delete('search');
+                            url.searchParams.set('page', 1);
+                            window.location.href = url.toString();
+                        }
+                    });
+
+                    // Pre-fill from URL params
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const searchParam = urlParams.get('search');
+                    if (searchParam) {
+                        $rejectedSearchInput.val(searchParam);
+                    }
+                }
+            }
+
+            // Handle length select change for Schedule tab
+            const lengthSelectSchedule = document.getElementById('lengthSelectSchedule');
+            if (lengthSelectSchedule) {
+                lengthSelectSchedule.addEventListener('change', function() {
+                    const length = this.value;
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('length', length);
+                    url.searchParams.set('tab', 'schedule');
+                    url.searchParams.set('page', 1);
+                    window.location.href = url.toString();
+                });
+            }
+
+            // Initialize DataTable for table_schedule exactly like table
+            if (typeof $ !== 'undefined' && $.fn.DataTable && $('#table_schedule').length) {
+                $('#table_schedule').DataTable({
+                    scrollX: true,
+                    scrollCollapse: true,
+                    responsive: true,
+                    paging: false,
+                    fixedColumns: {
+                        leftColumns: 2,
+                        rightColumns: 1
+                    },
+                });
+
+                // Configure and bind custom search logic for Schedule tab search box
+                const $scheduleSearchInput = $('#table_schedule_filter input');
+                if ($scheduleSearchInput.length) {
+                    $scheduleSearchInput.attr('placeholder', 'Enter search term');
+                    
+                    $scheduleSearchInput.on('keypress', function(e) {
+                        if (e.which === 13) {
+                            const searchValue = $(this).val();
+                            const url = new URL(window.location.href);
+                            url.searchParams.set('search', searchValue);
+                            url.searchParams.set('page', 1);
+                            window.location.href = url.toString();
+                        }
+                    });
+
+                    $scheduleSearchInput.on('input', function() {
+                        if ($(this).val() === '') {
+                            const url = new URL(window.location.href);
+                            url.searchParams.delete('search');
+                            url.searchParams.set('page', 1);
+                            window.location.href = url.toString();
+                        }
+                    });
+
+                    // Pre-fill from URL params
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const searchParam = urlParams.get('search');
+                    if (searchParam) {
+                        $scheduleSearchInput.val(searchParam);
+                    }
+                }
+            }
+
+            // Handle length select change for Converted tab
+            const lengthSelectConverted = document.getElementById('lengthSelectConverted');
+            if (lengthSelectConverted) {
+                lengthSelectConverted.addEventListener('change', function() {
+                    const length = this.value;
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('length', length);
+                    url.searchParams.set('tab', 'converted');
+                    url.searchParams.set('page', 1);
+                    window.location.href = url.toString();
+                });
+            }
+
+            // Initialize DataTable for table_converted exactly like table
+            if (typeof $ !== 'undefined' && $.fn.DataTable && $('#table_converted').length) {
+                $('#table_converted').DataTable({
+                    scrollX: true,
+                    scrollCollapse: true,
+                    responsive: true,
+                    paging: false,
+                    fixedColumns: {
+                        leftColumns: 2,
+                        rightColumns: 1
+                    },
+                });
+
+                // Configure and bind custom search logic for Converted tab search box
+                const $convertedSearchInput = $('#table_converted_filter input');
+                if ($convertedSearchInput.length) {
+                    $convertedSearchInput.attr('placeholder', 'Enter search term');
+                    
+                    $convertedSearchInput.on('keypress', function(e) {
+                        if (e.which === 13) {
+                            const searchValue = $(this).val();
+                            const url = new URL(window.location.href);
+                            url.searchParams.set('search', searchValue);
+                            url.searchParams.set('page', 1);
+                            window.location.href = url.toString();
+                        }
+                    });
+
+                    $convertedSearchInput.on('input', function() {
+                        if ($(this).val() === '') {
+                            const url = new URL(window.location.href);
+                            url.searchParams.delete('search');
+                            url.searchParams.set('page', 1);
+                            window.location.href = url.toString();
+                        }
+                    });
+
+                    // Pre-fill from URL params
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const searchParam = urlParams.get('search');
+                    if (searchParam) {
+                        $convertedSearchInput.val(searchParam);
+                    }
+                }
             }
         });
     </script>

@@ -112,6 +112,12 @@
                                 </div>
 
                                 <div class="col-md-4 mb-3">
+                                    <label for="alternative phone">Alternative Number</label>
+                                    <input type="text" class="form-control" name="alternative_number" id="alternative_number"
+                                        value="{{ old('alternative_number') }}">
+                                </div>
+
+                                <div class="col-md-4 mb-3">
                                     <label for="state">State</label>
                                     <select class="select2" name="state" id="state">
                                         <option value="">-- Select State --</option>
@@ -130,18 +136,6 @@
                                         @foreach($cities as $city)
                                         <option value="{{ $city->city }}">
                                             {{ $city->city }}
-                                        </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="col-md-4 mb-3">
-                                    <label for="source">Source</label>
-                                    <select class="select2" name="source" id="source">
-                                        <option value="">-- Select Source --</option>
-                                        @foreach($sources as $source)
-                                        <option value="{{ $source->id }}">
-                                            {{ $source->name }}
                                         </option>
                                         @endforeach
                                     </select>
@@ -222,6 +216,18 @@
                                         <option value="3Cr-3.5Cr" {{ (old('budget') == '3Cr-3.5Cr') ? 'selected' : '' }}>₹3 Crore - ₹3.5 Crore</option>
                                         <option value="3.5Cr-5Cr" {{ (old('budget') == '3.5Cr-5Cr') ? 'selected' : '' }}>₹3.5 Crore - ₹5 Crore</option>
                                         <option value="5Cr-10Cr" {{ (old('budget') == '5Cr-10Cr') ? 'selected' : '' }}>₹5 Crore - ₹10 Crore</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="source">Source</label>
+                                    <select class="select2" name="source" id="source">
+                                        <option value="">-- Select Source --</option>
+                                        @foreach($sources as $source)
+                                        <option value="{{ $source->id }}">
+                                            {{ $source->name }}
+                                        </option>
+                                        @endforeach
                                     </select>
                                 </div>
 
@@ -350,7 +356,8 @@
                 form.classList.add('was-validated');
             }, false);
         });
-    }, false);
+    },
+    false);
 </script>
 
 @include('data-center.bulk-import-modal')

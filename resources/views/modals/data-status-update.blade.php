@@ -17,6 +17,15 @@
                     </div>
                 </div>
 
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="isRejected" value="1">
+                        <label class="form-check-label" for="isRejected">
+                            <strong style="color: #141313;">Mark as Rejected</strong>
+                        </label>
+                    </div>
+                </div>
+
                 <div id="allFields" style="display:none;">
 
                     <div class="mb-3">
@@ -90,6 +99,14 @@
                         <textarea class="form-control" id="comment" rows="3" placeholder="Add any additional comments..."></textarea>
                     </div>
                 </div>
+
+                <div id="rejectedFields" style="display:none;">
+                    <!-- Custom Comment Section for Rejected -->
+                    <div class="mb-3">
+                        <label for="rejectedComment" class="form-label">Rejection Remark / Reason</label>
+                        <textarea class="form-control" id="rejectedComment" rows="3" placeholder="Add any additional comments..."></textarea>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -125,11 +142,39 @@
     document.addEventListener('DOMContentLoaded', function() {
 
         const checkbox = document.getElementById('isConverted');
+        const isRejectedCheckbox = document.getElementById('isRejected');
         const fields = document.getElementById('allFields');
+        const rejectedFields = document.getElementById('rejectedFields');
 
-        checkbox.addEventListener('change', function() {
-            fields.style.display = this.checked ? 'block' : 'none';
-        });
+        if (checkbox && isRejectedCheckbox) {
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    isRejectedCheckbox.checked = false;
+                    isRejectedCheckbox.closest('.mb-3').style.display = 'none';
+                    rejectedFields.style.display = 'none';
+                    fields.style.display = 'block';
+                } else {
+                    isRejectedCheckbox.closest('.mb-3').style.display = 'block';
+                    fields.style.display = 'none';
+                }
+            });
+
+            isRejectedCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    checkbox.checked = false;
+                    checkbox.closest('.mb-3').style.display = 'none';
+                    fields.style.display = 'none';
+                    rejectedFields.style.display = 'block';
+                } else {
+                    checkbox.closest('.mb-3').style.display = 'block';
+                    rejectedFields.style.display = 'none';
+                }
+            });
+        } else if (checkbox) {
+            checkbox.addEventListener('change', function() {
+                fields.style.display = this.checked ? 'block' : 'none';
+            });
+        }
 
     });
 
@@ -171,6 +216,16 @@
                 $('#remindDate').val('');
                 $('#remindTime').val('');
             }
+        });
+
+        // Clean values when status update modal is shown
+        $('#statusUpdateModal').on('show.bs.modal', function () {
+            $('#isConverted').prop('checked', false);
+            $('#isRejected').prop('checked', false);
+            $('#allFields').hide();
+            $('#rejectedFields').hide();
+            $('#rejectedComment').val('');
+            $('#comment').val('');
         });
 
     });

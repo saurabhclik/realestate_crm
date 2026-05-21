@@ -599,6 +599,9 @@
             </div>
         </div>
     </div>
+    </div>
+    </div>
+
 
    @include('data-center.create-data')
 

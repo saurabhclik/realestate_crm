@@ -1172,8 +1172,8 @@
                 });
             }
 
-            // Tab selection from URL query
-
+        });
+    </script>
     @if(session('import_messages'))
     <script>
         document.addEventListener('DOMContentLoaded', function () {

@@ -732,68 +732,68 @@
 
                 const isConvertedCheckbox = document.getElementById('isConverted');
                 const isRejectedCheckbox = document.getElementById('isRejected');
+                const isFollowupCheckbox = document.getElementById('isFollowup');
+                const isUpdateCommentCheckbox = document.getElementById('isUpdateComment');
+                
                 const allFields = document.getElementById('allFields');
                 const rejectedFields = document.getElementById('rejectedFields');
+                const followupFields = document.getElementById('followupFields');
+                const updateCommentFields = document.getElementById('updateCommentFields');
 
-                if (isAlreadyConverted) {
-                    if (isConvertedCheckbox) {
-                        isConvertedCheckbox.checked = true;
-                        isConvertedCheckbox.disabled = true;
-                        isConvertedCheckbox.closest('.mb-3').style.display = 'none';
-                    }
-                    if (isRejectedCheckbox) {
-                        isRejectedCheckbox.checked = false;
-                        isRejectedCheckbox.disabled = true;
-                        isRejectedCheckbox.closest('.mb-3').style.display = 'none';
-                    }
-                    if (document.getElementById('isFollowup')) {
-                        document.getElementById('isFollowup').closest('.mb-3').style.display = 'none';
-                    }
-                    if (document.getElementById('isUpdateComment')) {
-                        document.getElementById('isUpdateComment').closest('.mb-3').style.display = 'none';
-                    }
-                    if (allFields) {
-                        allFields.style.display = 'block';
-                    }
-                    if (rejectedFields) {
-                        rejectedFields.style.display = 'none';
-                    }
-                } else {
-                    if (isConvertedCheckbox) {
-                        isConvertedCheckbox.checked = false;
-                        isConvertedCheckbox.disabled = false;
-                        isConvertedCheckbox.closest('.mb-3').style.display = 'block';
-                    }
-                    if (isRejectedCheckbox) {
-                        isRejectedCheckbox.checked = false;
-                        isRejectedCheckbox.disabled = false;
-                        isRejectedCheckbox.closest('.mb-3').style.display = 'block';
-                    }
-                    if (document.getElementById('isFollowup')) {
-                        document.getElementById('isFollowup').closest('.mb-3').style.display = 'block';
-                    }
-                    if (document.getElementById('isUpdateComment')) {
-                        document.getElementById('isUpdateComment').closest('.mb-3').style.display = 'block';
-                    }
-                    if (allFields) {
-                        allFields.style.display = 'none';
-                    }
-                    if (rejectedFields) {
-                        rejectedFields.style.display = 'none';
+                // Check if opened from Rejected tab or status is rejected
+                let isRejectedTab = (status && status.toUpperCase() === 'REJECTED') || window.location.search.indexOf('tab=rejected') > -1;
+                window.isRejectedData = isRejectedTab;
+
+                function resetAndHide(chk) {
+                    if (chk) {
+                        chk.checked = false;
+                        chk.disabled = false;
+                        chk.closest('.mb-3').style.display = 'none';
                     }
                 }
 
-                // Check if opened from Rejected tab
-                let isRejectedTab = !!btn.closest('#table_rejected') || !!btn.closest('#rejectedData');
-                if (isRejectedCheckbox && !isAlreadyConverted) {
-                    if (isRejectedTab) {
-                        isRejectedCheckbox.disabled = true;
-                        isRejectedCheckbox.checked = false;
-                        isRejectedCheckbox.closest('.form-check').style.opacity = '0.5';
-                    } else {
-                        isRejectedCheckbox.disabled = false;
-                        isRejectedCheckbox.closest('.form-check').style.opacity = '1';
+                function resetAndDisable(chk) {
+                    if (chk) {
+                        chk.checked = false;
+                        chk.disabled = true;
+                        chk.closest('.mb-3').style.display = 'block';
+                        let formCheck = chk.closest('.form-check');
+                        if (formCheck) formCheck.style.opacity = '0.5';
                     }
+                }
+
+                function resetAndShow(chk) {
+                    if (chk) {
+                        chk.checked = false;
+                        chk.disabled = false;
+                        chk.closest('.mb-3').style.display = 'block';
+                        let formCheck = chk.closest('.form-check');
+                        if (formCheck) formCheck.style.opacity = '1';
+                    }
+                }
+
+                if (allFields) allFields.style.display = 'none';
+                if (rejectedFields) rejectedFields.style.display = 'none';
+                if (followupFields) followupFields.style.display = 'none';
+                if (updateCommentFields) updateCommentFields.style.display = 'none';
+
+                if (isAlreadyConverted) {
+                    resetAndHide(isConvertedCheckbox);
+                    resetAndHide(isRejectedCheckbox);
+                    resetAndHide(isFollowupCheckbox);
+                    resetAndHide(isUpdateCommentCheckbox);
+                    toastr.warning('This data is already converted to a lead and cannot be modified.');
+                    return; // Prevent opening the modal
+                } else if (isRejectedTab) {
+                    resetAndDisable(isConvertedCheckbox);
+                    resetAndDisable(isRejectedCheckbox);
+                    resetAndShow(isFollowupCheckbox);
+                    resetAndShow(isUpdateCommentCheckbox);
+                } else {
+                    resetAndShow(isConvertedCheckbox);
+                    resetAndShow(isRejectedCheckbox);
+                    resetAndShow(isFollowupCheckbox);
+                    resetAndShow(isUpdateCommentCheckbox);
                 }
 
                 const modal = new bootstrap.Modal(document.getElementById('statusUpdateModal'));
@@ -839,15 +839,17 @@
                 }
             } else if (isUpdateComment) {
                 newStatus = document.getElementById('currentStatus').value; // Keep existing status
-                comment = document.getElementById('ucRemark').value.trim();
+                let rawComment = document.getElementById('ucRemark').value.trim();
                 remindDate = document.getElementById('ucDate').value;
                 remindTime = document.getElementById('ucTime').value;
                 isConverted = 0;
 
-                if (!comment && !remindDate) {
+                if (!rawComment && !remindDate) {
                     toastr.warning('Please enter a note or select a date/time');
                     return;
                 }
+                
+                comment = document.getElementById('finalCommentText') ? document.getElementById('finalCommentText').value : rawComment;
             } else {
                 newStatus = document.getElementById('newStatus').value;
                 comment = document.getElementById('statusComment').value.trim();

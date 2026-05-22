@@ -141,32 +141,40 @@
                     </div>
                 </div>
 
-                <div id="updateCommentFields" style="display:none;">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold text-muted small text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Quick Calling Notes</label>
+                <div id="updateCommentFields" style="display:none;" class="mt-4 p-4 rounded-4 shadow-sm border" style="background-color: #fafbfc;">
+                    <h6 class="text-primary mb-3 fw-bold d-flex align-items-center gap-2">
+                        <i class="fas fa-comment-dots"></i> Add Update Comment
+                    </h6>
+                    
+                    <div class="mb-4">
+                        <!-- <label class="form-label fw-bold text-secondary small text-uppercase mb-2" style="font-size: 0.75rem; letter-spacing: 0.5px;">Quick Calling Notes</label> -->
                         <div class="d-flex flex-wrap gap-2" id="quickNotesContainer">
-                            <button type="button" class="btn btn-sm btn-outline-primary quick-note-btn px-3 py-1 rounded-pill" data-note="Not available" style="font-size: 0.8rem; font-weight: 500; transition: all 0.2s;">
-                                Not available
+                            <button type="button" class="btn btn-sm quick-note-btn rounded-pill px-3 py-2 fw-semibold shadow-sm" data-note="Not available" style="transition: all 0.2s; background: #f0f4ff; color: #3b82f6; border: 1px solid #bfdbfe;">
+                                <i class="fas fa-phone-slash me-1"></i> Not available
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-primary quick-note-btn px-3 py-1 rounded-pill" data-note="Asked to call tomorrow" style="font-size: 0.8rem; font-weight: 500; transition: all 0.2s;">
-                                Asked to call tomorrow
+                            <button type="button" class="btn btn-sm quick-note-btn rounded-pill px-3 py-2 fw-semibold shadow-sm" data-note="Asked to call tomorrow" style="transition: all 0.2s; background: #f0fbff; color: #0ea5e9; border: 1px solid #bae6fd;">
+                                <i class="fas fa-calendar-plus me-1"></i> Asked to call tomorrow
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-primary quick-note-btn px-3 py-1 rounded-pill" data-note="Interested" style="font-size: 0.8rem; font-weight: 500; transition: all 0.2s;">
-                                Interested
+                            <button type="button" class="btn btn-sm quick-note-btn rounded-pill px-3 py-2 fw-semibold shadow-sm" data-note="Interested" style="transition: all 0.2s; background: #f0fff4; color: #22c55e; border: 1px solid #bbf7d0;">
+                                <i class="fas fa-thumbs-up me-1"></i> Interested
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-primary quick-note-btn px-3 py-1 rounded-pill" data-note="Busy" style="font-size: 0.8rem; font-weight: 500; transition: all 0.2s;">
-                                Busy
+                            <button type="button" class="btn btn-sm quick-note-btn rounded-pill px-3 py-2 fw-semibold shadow-sm" data-note="Busy" style="transition: all 0.2s; background: #fffaf0; color: #f59e0b; border: 1px solid #fde68a;">
+                                <i class="fas fa-user-clock me-1"></i> Busy
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-primary quick-note-btn px-3 py-1 rounded-pill" data-note="Not picked" style="font-size: 0.8rem; font-weight: 500; transition: all 0.2s;">
-                                Not picked
+                            <button type="button" class="btn btn-sm quick-note-btn rounded-pill px-3 py-2 fw-semibold shadow-sm" data-note="Not picked" style="transition: all 0.2s; background: #fff1f2; color: #f43f5e; border: 1px solid #fecdd3;">
+                                <i class="fas fa-phone-slash me-1"></i> Not picked
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-primary quick-note-btn px-3 py-1 rounded-pill" data-note="Wrong number" style="font-size: 0.8rem; font-weight: 500; transition: all 0.2s;">
-                                Wrong number
+                            <button type="button" class="btn btn-sm quick-note-btn rounded-pill px-3 py-2 fw-semibold shadow-sm" data-note="Wrong number" style="transition: all 0.2s; background: #f8f9fa; color: #64748b; border: 1px solid #e2e8f0;">
+                                <i class="fas fa-times-circle me-1"></i> Wrong number
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-primary quick-note-btn px-3 py-1 rounded-pill" data-note="Not interested" style="font-size: 0.8rem; font-weight: 500; transition: all 0.2s;">
-                                Not interested
+                            <button type="button" class="btn btn-sm quick-note-btn rounded-pill px-3 py-2 fw-semibold shadow-sm" data-note="Not interested" style="transition: all 0.2s; background: #f3f4f6; color: #475569; border: 1px solid #cbd5e1;">
+                                <i class="fas fa-hand-paper me-1"></i> Not interested
                             </button>
                         </div>
+                    </div>
+                    
+                    <div class="mb-2 mt-3">
+                        <span class="bg-success badge text-light p-2"><i class="fa fa-info me-2"></i><span>Comment Date</span></span>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -178,16 +186,25 @@
                             <input type="time" class="form-control" id="ucTime">
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="ucRemark" class="form-label fw-bold text-muted small text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Custom Calling Note</label>
-                        <textarea class="form-control border-light shadow-sm" id="ucRemark" rows="3" placeholder="Type custom note or select a quick note above..." style="border-radius: 8px; resize: none; font-size: 0.9rem; padding: 10px; border: 1px solid #ced4da;"></textarea>
+                    
+                    <div class="mb-4">
+                        <label for="ucRemark" class="form-label fw-bold text-secondary small text-uppercase mb-2" style="font-size: 0.75rem; letter-spacing: 0.5px;">Custom Calling Note</label>
+                        <div class="position-relative shadow-sm rounded-3">
+                            <textarea class="form-control border-light" id="ucRemark" rows="3" placeholder="Type custom note or select a quick note above..." style="border-radius: 8px; resize: none; font-size: 0.95rem; padding: 12px 15px; border: 1px solid #ced4da; background-color: #fcfcfc;"></textarea>
+                        </div>
                     </div>
 
                     <!-- Live Preview Section -->
-                    <div class="p-3 border rounded-3 mb-3" style="border-style: dashed !important; border-color: #556ee6 !important; background-color: #f4f6fd !important;">
-                        <small class="text-primary fw-bold d-block mb-1 text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Comment Preview</small>
-                        <div id="commentPreview" class="text-secondary fw-semibold font-monospace" style="font-size: 0.85rem; word-break: break-word;">
+                    <div class="p-3 border rounded-3 position-relative" style="border-style: dashed !important; border-color: #a5b4fc !important; background: linear-gradient(to right, #eef2ff, #f8faff); overflow: hidden;">
+                        <div class="position-absolute" style="top: -10px; right: -10px; opacity: 0.05; font-size: 5rem;">
+                            <i class="fas fa-quote-right text-primary"></i>
                         </div>
+                        <small class="text-primary fw-bold d-block mb-2 text-uppercase d-flex align-items-center gap-1" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                            <i class="fas fa-eye"></i> Live Comment Preview
+                        </small>
+                        <div id="commentPreview" class="text-dark fw-medium" style="font-size: 0.95rem; word-break: break-word; line-height: 1.5;">
+                        </div>
+                        <input type="hidden" id="finalCommentText" value="">
                     </div>
                 </div>
             </div>
@@ -263,7 +280,13 @@
             } else {
                 // Show all checkboxes if none are checked
                 allCheckboxes.forEach(cb => {
-                    if (cb) cb.closest('.mb-3').style.display = 'block';
+                    if (cb) {
+                        if (window.isRejectedData && (cb === checkbox || cb === isRejectedCheckbox)) {
+                            cb.closest('.mb-3').style.display = 'none';
+                        } else {
+                            cb.closest('.mb-3').style.display = 'block';
+                        }
+                    }
                 });
 
                 fields.style.display = 'none';
@@ -337,23 +360,50 @@
 
         function updatePreview() {
             let note = $('#ucRemark').val().trim();
-            let date = $('#ucDate').val();
-            let time = $('#ucTime').val();
-            let datetimeStr = '';
+            let dateVal = $('#ucDate').val();
+            let timeVal = $('#ucTime').val();
+            let dataName = $('#modalDataName').val() || 'User';
             
-            if (date) {
-                datetimeStr += " at " + date;
-                if (time) datetimeStr += " " + time;
+            let formattedDate = '';
+            if (dateVal) {
+                let d = new Date(dateVal);
+                if (!isNaN(d.getTime())) {
+                    let day = String(d.getDate()).padStart(2, '0');
+                    let month = String(d.getMonth() + 1).padStart(2, '0');
+                    let year = d.getFullYear();
+                    formattedDate = `${day}/${month}/${year}`;
+                } else {
+                    formattedDate = dateVal;
+                }
             }
 
-            let previewText = note || '[Your Note]';
-            if (datetimeStr) {
-                previewText += datetimeStr;
+            let formattedTime = '';
+            if (timeVal) {
+                let [h, m] = timeVal.split(':');
+                let hours = parseInt(h);
+                let ampm = hours >= 12 ? 'pm' : 'am';
+                hours = hours % 12;
+                hours = hours ? hours : 12; 
+                formattedTime = `${hours}.${m}${ampm}`;
             }
 
-            let dataName = $('#modalDataName').val();
-            let finalStr = `${previewText} - ${dataName}`;
+            let datetimeStr = '';
+            if (formattedDate) {
+                datetimeStr += ` on ${formattedDate}`;
+                if (formattedTime) {
+                    datetimeStr += ` at ${formattedTime}`;
+                }
+            }
+
+            let finalStr = '';
+            if (note) {
+                finalStr = `${dataName} ${note.toLowerCase()}${datetimeStr}`;
+            } else {
+                finalStr = `${dataName} [note]${datetimeStr}`;
+            }
+
             $('#commentPreview').text(finalStr);
+            $('#finalCommentText').val(finalStr);
         }
 
         // Clean values when status update modal is shown

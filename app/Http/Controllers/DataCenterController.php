@@ -260,9 +260,17 @@ class DataCenterController extends Controller
         $activeTab = $request->get('tab', 'all');
 
         if ($activeTab === 'rejected') {
-            $query->where('status', 'REJECTED');
+            $query->where('status', 'REJECTED')
+                  ->where(function ($sub) {
+                      $sub->whereNull('is_converted')
+                          ->orWhere('is_converted', '!=', 1);
+                  });
         } elseif ($activeTab === 'schedule') {
-            $query->whereIn('status', ['CALL SCHEDULED', 'MEETING SCHEDULED', 'VISIT SCHEDULED', 'VISIT DONE']);
+            $query->whereIn('status', ['CALL SCHEDULED', 'MEETING SCHEDULED', 'VISIT SCHEDULED', 'VISIT DONE'])
+                  ->where(function ($sub) {
+                      $sub->whereNull('is_converted')
+                          ->orWhere('is_converted', '!=', 1);
+                  });
         } elseif ($activeTab === 'converted') {
             $query->where('is_converted', 1);
         } else {

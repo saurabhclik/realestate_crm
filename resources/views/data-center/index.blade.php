@@ -251,6 +251,31 @@
                     <div class="card shadow-sm border-0">
                         <div class="card-body">
 
+                            @if(session('import_messages'))
+                            <div class="mt-4 mb-4">
+                                @foreach(session('import_messages') as $message)
+                                @php
+                                $type = 'info';
+                                $text = $message;
+                                if (strpos($message, 'success') === 0) {
+                                    $type = 'success';
+                                    $text = substr($message, 8);
+                                } elseif (strpos($message, 'warning') === 0) {
+                                    $type = 'warning';
+                                    $text = substr($message, 8);
+                                } elseif (strpos($message, 'error') === 0) {
+                                    $type = 'danger'; // Bootstrap alert class for error is danger
+                                    $text = substr($message, 6);
+                                }
+                                @endphp
+                                <div class="alert alert-{{ $type }} alert-dismissible fade show" role="alert">
+                                    {!! $text !!}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                                @endforeach
+                            </div>
+                            @endif
+
                             <!-- HEADER -->
                             <div class="page-title-box d-flex align-items-center justify-content-between flex-wrap gap-3">
                                 <div class="d-flex align-items-center flex-wrap gap-2">
@@ -259,7 +284,7 @@
                                         Data Center
                                     </h4>
 
-                                    <span class="badge bg-soft-primary text-dark px-3 py-2">
+                                    <span class="badge bg-soft-primary text-dark px-3 py-2 fs-6">
                                         {{ $dataCenters->total() }} Datas
                                     </span>
                                 </div>
@@ -423,13 +448,14 @@
                                                                                             class="fab fa-whatsapp text-success"></i>
                                                                                     </a>
 
-                                                                                    <a href="{{ route('data-center.edit', $row->id) }}"
-                                                                                        class="btn btn-xs btn-soft-light"
+                                                                                    <button type="button"
+                                                                                        class="btn btn-xs btn-soft-light edit-data-btn"
+                                                                                        data-id="{{ $row->id }}"
                                                                                         data-bs-toggle="tooltip"
                                                                                         title="Edit">
                                                                                         <i
                                                                                             class="fas fa-edit text-warning"></i>
-                                                                                    </a>
+                                                                                    </button>
 
                                                                                     <button type="button"
                                                                                         class="btn btn-xs btn-soft-light update-status-btn"
@@ -592,20 +618,19 @@
                                             </div>
 
                                 </div>
-
-
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    </div>
-    </div>
 
 
-   @include('data-center.create-data')
+   @include('modals.create-data')
 
-    @include('data-center.bulk-import-modal')
+    @include('modals.bulk-import-modal-data')
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs5.min.js"></script>
 
@@ -825,7 +850,7 @@
                 }
             } else {
                 newStatus = document.getElementById('newStatus').value;
-                comment = document.getElementById('comment').value.trim();
+                comment = document.getElementById('statusComment').value.trim();
                 remindDate = document.getElementById('remindDate').value;
                 remindTime = document.getElementById('remindTime').value;
                 isConverted = document.getElementById('isConverted').checked ? 1 : 0;
@@ -1038,16 +1063,21 @@
             }
         });
 
-
-        // Export functionality
+        //excel Export functionality
         document.getElementById('btnExportExcel').addEventListener('click', function() {
-            // Implement Excel export
-            alert('Excel export functionality to be implemented');
+           let btn = $(this);
+           let originalHtml = btn.html();
+           btn.html('<i class="fas fa-spinner fa-spin"></i> Downloading...');
+           btn.prop('disabled', true);
+           
         });
 
+        // PDF export functionality
         document.getElementById('btnExportPDF').addEventListener('click', function() {
-            // Implement PDF export
-            alert('PDF export functionality to be implemented');
+            let btn = $(this);
+            let originalHtml = btn.html();
+            btn.html('<i class="fas fa-spinner fa-spin"></i> Downloading...');
+            btn.prop('disabled', true);
         });
 
         function showDataCenterComment(id) {
@@ -1176,25 +1206,138 @@
             }
 
         });
-    </script>
-    @if(session('import_messages'))
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            @foreach(session('import_messages') as $msg)
-                @php
-                    $type = explode(' ', $msg)[0];
-                    $text = substr($msg, strpos($msg, ' ') + 1);
-                    $text = addslashes($text); // Escape string for JS
-                @endphp
-                @if($type === 'error')
-                    toastr.error("{!! $text !!}");
-                @elseif($type === 'success')
-                    toastr.success("{!! $text !!}");
-                @else
-                    toastr.warning("{!! $text !!}");
-                @endif
-            @endforeach
+
+        // Edit Data Functionality
+        $(document).on('click', '.edit-data-btn', function(e) {
+            e.preventDefault();
+            let dataId = $(this).data('id');
+            let btn = $(this);
+            let originalHtml = btn.html();
+            
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin text-warning"></i>');
+            
+            $.ajax({
+                url: `/data-center/${dataId}/edit`,
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    btn.prop('disabled', false).html(originalHtml);
+                    if (response.success) {
+                        let data = response.data;
+                        let modal = $('#addDataModal');
+                        
+                        modal.find('.modal-title').html('<i class="fas fa-edit me-2"></i>Edit Data');
+                        modal.find('button[type="submit"]').html('<i class="fas fa-save me-2"></i>Update Data');
+                        modal.find('form').attr('action', `/data-center/${dataId}`);
+                        
+                        modal.find('#name').val(data.name || '');
+                        modal.find('#email').val(data.email || '');
+                        modal.find('#phone').val(data.phone || '');
+                        modal.find('#alternative_number').val(data.alternative_number || '');
+                        modal.find('#comment').val(data.comment || '');
+                        
+                        if (data.budget) {
+                            let bgtOption = modal.find('#budget option').filter(function() {
+                                return $(this).val() == data.budget || $(this).text().trim() == data.budget;
+                            });
+                            if (bgtOption.length) {
+                                modal.find('#budget').val(bgtOption.val()).trigger('change');
+                            } else {
+                                modal.find('#budget').val(data.budget).trigger('change');
+                            }
+                        } else {
+                            modal.find('#budget').val('').trigger('change');
+                        }
+                        
+                        if (data.source) {
+                            let sourceOption = modal.find('#source option').filter(function() {
+                                return $(this).text().trim() == data.source || $(this).val() == data.source;
+                            });
+                            if(sourceOption.length) {
+                                modal.find('#source').val(sourceOption.val()).trigger('change');
+                            } else {
+                                modal.find('#source').val(data.source).trigger('change');
+                            }
+                        } else {
+                            modal.find('#source').val('').trigger('change');
+                        }
+
+                        if (data.state) {
+                            modal.find('#state').val(data.state).trigger('change');
+                            setTimeout(() => {
+                                if (data.city) {
+                                    if (modal.find('#city option[value="'+data.city+'"]').length === 0) {
+                                        modal.find('#city').append(new Option(data.city, data.city, true, true));
+                                    }
+                                    modal.find('#city').val(data.city).trigger('change');
+                                }
+                            }, 1000);
+                        } else {
+                            modal.find('#state').val('').trigger('change');
+                            modal.find('#city').val('').trigger('change');
+                        }
+
+                        if (data.property_type) {
+                            modal.find('#property_type').val(data.property_type).trigger('change');
+                            if (data.property_category) {
+                                let catOption = modal.find('#property_category option').filter(function() {
+                                    return $(this).text().trim() == data.property_category || $(this).val() == data.property_category;
+                                });
+                                if(catOption.length) {
+                                    modal.find('#property_category').val(catOption.val()).trigger('change');
+                                } else {
+                                    modal.find('#property_category').append(new Option(data.property_category, data.property_category, true, true)).trigger('change');
+                                }
+                                
+                                if (data.property_sub_category) {
+                                    let subOption = modal.find('#property_sub_category option').filter(function() {
+                                        return $(this).text().trim() == data.property_sub_category || $(this).val() == data.property_sub_category;
+                                    });
+                                    if(subOption.length) {
+                                        modal.find('#property_sub_category').val(subOption.val()).trigger('change');
+                                    } else {
+                                        modal.find('#property_sub_category').append(new Option(data.property_sub_category, data.property_sub_category, true, true)).trigger('change');
+                                    }
+                                } else {
+                                    modal.find('#property_sub_category').val('').trigger('change');
+                                }
+                            } else {
+                                modal.find('#property_category').val('').trigger('change');
+                                modal.find('#property_sub_category').val('').trigger('change');
+                            }
+                        } else {
+                            modal.find('#property_type').val('').trigger('change');
+                            modal.find('#property_category').val('').trigger('change');
+                            modal.find('#property_sub_category').val('').trigger('change');
+                        }
+                        
+                        if (data.project_name) {
+                            let projects = data.project_name.split(',').map(s => s.trim());
+                            modal.find('#projects').val(projects).trigger('change');
+                        } else {
+                            modal.find('#projects').val([]).trigger('change');
+                        }
+                        
+                        modal.modal('show');
+                    } else {
+                        toastr.error('Error: ' + response.message);
+                    }
+                },
+                error: function() {
+                    btn.prop('disabled', false).html(originalHtml);
+                    toastr.error('Failed to fetch data details.');
+                }
+            });
+        });
+
+        $('#addDataModal').on('hidden.bs.modal', function () {
+            $('#addDataModal .modal-title').html('<i class="fas fa-plus-circle me-2"></i>Add New Data');
+            $('#addDataModal button[type="submit"]').html('<i class="fas fa-save me-2"></i>Save Data');
+            $('#addDataModal form').attr('action', "{{ route('data-center.store') }}");
+            $('#addDataModal form')[0].reset();
+            $('#addDataModal form').removeClass('was-validated');
+            $('#addDataModal .select2').val('').trigger('change');
         });
     </script>
-    @endif
+
 @endsection

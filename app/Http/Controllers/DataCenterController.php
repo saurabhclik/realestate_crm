@@ -313,12 +313,8 @@ class DataCenterController extends Controller
 
     public function create()
     {
-        $data = $this->dataCenterService->create();
-        $users = session('user_type') === 'admin'
-            ? DB::table('users')->get()
-            : null;
-
-        return view('data-center.create-data', array_merge($data, ['users' => $users]));
+        // View is handled via modal in index.blade.php
+        return redirect()->route('data-center.index');
     }
 
     public function store(Request $request)
@@ -379,16 +375,12 @@ class DataCenterController extends Controller
     public function edit($id)
     {
         $data = DB::table('data_center')->find($id);
+
         if (!$data) {
-            return redirect()->route('data-center.index')->with('error', 'Data not found.');
+            return response()->json(['success' => false, 'message' => 'Data not found.'], 404);
         }
 
-        $serviceData = $this->dataCenterService->create();
-        $users = session('user_type') === 'admin'
-            ? DB::table('users')->get()
-            : null;
-
-        return view('data-center.edit-data', array_merge($serviceData, ['users' => $users, 'data' => $data]));
+        return response()->json(['success' => true, 'data' => $data]);
     }
 
     public function update(Request $request, $id)
@@ -438,12 +430,16 @@ class DataCenterController extends Controller
 
         DB::table('data_center')->where('id', $id)->update($updateData);
 
+        // Fetch existing status if not provided in request
+        $existingData = DB::table('data_center')->where('id', $id)->first();
+        $currentStatus = $request->status ?? ($existingData ? $existingData->status : 'PENDING');
+
         DB::table('data_center_history')->insert([
             'data_center_id' => $id,
             'user_id' => session('user_id'),
-            'remark' => $request->comment,
+            'remark' => $request->comment ?? 'Data updated',
             'remind_date' => $request->remind_date,
-            'status' => $request->status,
+            'status' => $currentStatus,
             'remind_time' => $request->remind_time,
         ]);
 
@@ -513,18 +509,18 @@ class DataCenterController extends Controller
                 continue;
             }
 
-            $phone = '';
+            // Clean keys once per row
+            $cleanRow = [];
             foreach ($row as $key => $value) {
-                // Remove invisible characters like BOM
                 $cleanKey = preg_replace('/[\x00-\x1F\x7F\xA0]/u', '', $key);
                 $cleanKey = trim($cleanKey, "\xEF\xBB\xBF");
                 $keyLower = strtolower(trim($cleanKey));
-                if (in_array($keyLower, ['phone no.', 'phone', 'phone no', 'phone number'])) {
-                    $phone = trim($value);
-                    break;
-                }
+                $cleanRow[$keyLower] = trim($value);
             }
 
+            // Extract phone
+            $phone = $cleanRow['phone no.'] ?? $cleanRow['phone'] ?? $cleanRow['phone no'] ?? $cleanRow['phone number'] ?? '';
+            
             if (empty($phone)) {
                 $validationErrors[] = "Row $rowNumber: Phone number is required.";
                 continue;
@@ -541,82 +537,32 @@ class DataCenterController extends Controller
                 continue;
             }
 
-            $name = '';
-            foreach ($row as $key => $value) {
-                $cleanKey = preg_replace('/[\x00-\x1F\x7F\xA0]/u', '', $key);
-                $cleanKey = trim($cleanKey, "\xEF\xBB\xBF");
-                $keyLower = strtolower(trim($cleanKey));
-                if (in_array($keyLower, ['name', 'full name', 'customer name'])) {
-                    $name = trim($value);
-                    break;
-                }
-            }
+            // Extract name
+            $name = $cleanRow['name'] ?? $cleanRow['full name'] ?? $cleanRow['customer name'] ?? '';
 
             if (empty($name)) {
                 $validationErrors[] = "Row $rowNumber: Name is required.";
                 continue;
             }
 
-            $email = '';
-            foreach ($row as $key => $value) {
-                $cleanKey = preg_replace('/[\x00-\x1F\x7F\xA0]/u', '', $key);
-                $cleanKey = trim($cleanKey, "\xEF\xBB\xBF");
-                $keyLower = strtolower(trim($cleanKey));
-                if (in_array($keyLower, ['email', 'e-mail', 'mail'])) {
-                    $email = trim($value);
-                    break;
-                }
-            }
+            // Extract email
+            $email = $cleanRow['email'] ?? $cleanRow['e-mail'] ?? $cleanRow['mail'] ?? '';
 
             if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $validationErrors[] = "Row $rowNumber: Invalid email format '$email'.";
                 continue;
             }
 
-            $source = '';
-            $state = '';
-            $city = '';
-            $property_type = '';
-            $property_category = '';
-            $property_sub_category = '';
-            $project_name = '';
-            $budget = '';
-            $comment = '';
-            $changed_by = '';
-
-            foreach ($row as $key => $value) {
-                $cleanKey = preg_replace('/[\x00-\x1F\x7F\xA0]/u', '', $key);
-                $cleanKey = trim($cleanKey, "\xEF\xBB\xBF");
-                $keyLower = strtolower(trim($cleanKey));
-                $cellValue = trim($value);
-                if (in_array($keyLower, ['source'])) {
-                    $source = $cellValue;
-                }
-                if (in_array($keyLower, ['state'])) {
-                    $state = $cellValue;
-                }
-                if (in_array($keyLower, ['city'])) {
-                    $city = $cellValue;
-                }
-                if (in_array($keyLower, ['property type', 'type'])) {
-                    $property_type = $cellValue;
-                }
-                if (in_array($keyLower, ['property category', 'category'])) {
-                    $property_category = $cellValue;
-                }
-                if (in_array($keyLower, ['property sub category', 'sub category', 'sub_category'])) {
-                    $property_sub_category = $cellValue;
-                }
-                if (in_array($keyLower, ['project name', 'project_name', 'project'])) {
-                    $project_name = $cellValue;
-                }
-                if (in_array($keyLower, ['budget'])) {
-                    $budget = $cellValue;
-                }
-                if (in_array($keyLower, ['comment'])) {
-                    $comment = $cellValue;
-                }
-            }
+            // Extract other fields
+            $source = $cleanRow['source'] ?? '';
+            $state = $cleanRow['state'] ?? '';
+            $city = $cleanRow['city'] ?? '';
+            $property_type = $cleanRow['property type'] ?? $cleanRow['type'] ?? '';
+            $property_category = $cleanRow['property category'] ?? $cleanRow['category'] ?? '';
+            $property_sub_category = $cleanRow['property sub category'] ?? $cleanRow['sub category'] ?? $cleanRow['sub_category'] ?? '';
+            $project_name = $cleanRow['project name'] ?? $cleanRow['project_name'] ?? $cleanRow['project'] ?? '';
+            $budget = $cleanRow['budget'] ?? '';
+            $comment = $cleanRow['comment'] ?? '';
 
             $existingData = DB::table('data_center')
                 ->where('phone', $phone)
@@ -662,32 +608,61 @@ class DataCenterController extends Controller
             unlink($fullPath);
         }
 
+        $summaryMessage = "";
+        if ($success > 0) {
+            $summaryMessage .= "✅ $success row(s) imported successfully. ";
+        }
+        if ($duplicate > 0) {
+            $summaryMessage .= "⚠️ $duplicate duplicate(s) skipped. ";
+        }
+
         $allMessages = [];
         if ($success > 0) {
-            $allMessages[] = "success $success row(s) imported successfully.";
+            $allMessages[] = "success <small>✅ $success new row(s) imported successfully.</small>";
         }
 
         if ($duplicate > 0) {
-            $allMessages[] = "warning $duplicate duplicate(s) skipped because they already exist.";
+            $allMessages[] = "warning <small>⚠️ $duplicate duplicate(s) skipped.</small>";
         }
 
         foreach ($validationErrors as $message) {
-            $allMessages[] = "error $message";
+            $allMessages[] = "error <small>❌ $message</small>";
         }
+        
+        if (!empty($validationErrors)) {
+            if (empty($summaryMessage)) {
+                $summaryMessage = "❌ Found " . count($validationErrors) . " validation error(s). ";
+            } else {
+                $summaryMessage .= "❌ Found " . count($validationErrors) . " validation error(s). ";
+            }
+        }
+
         foreach ($errors as $message) {
-            $allMessages[] = "error $message";
+            $allMessages[] = "error <small>❌ $message</small>";
+        }
+        
+        if (!empty($errors)) {
+            if (empty($summaryMessage)) {
+                $summaryMessage = "❌ Found " . count($errors) . " database error(s). ";
+            } else {
+                $summaryMessage .= "❌ Found " . count($errors) . " database error(s). ";
+            }
         }
 
         session()->flash('import_messages', $allMessages);
 
-        if ($success > 0 && empty($validationErrors) && empty($errors)) {
-            Flasher::addSuccess(" $success row(s) imported successfully.");
-        } elseif ($success > 0 && (!empty($validationErrors) || !empty($errors))) {
-            Flasher::addWarning(" $success row(s) imported with some issues. Check details below.");
-        } elseif ($duplicate > 0 && $success === 0 && empty($validationErrors) && empty($errors)) {
-            Flasher::addWarning(" No new rows imported. All rows already existed.");
+        if (!empty($summaryMessage)) {
+            if ($success > 0 && empty($validationErrors) && empty($errors)) {
+                Flasher::addSuccess(trim($summaryMessage));
+            } elseif ($success > 0 && (!empty($validationErrors) || !empty($errors))) {
+                Flasher::addWarning(trim($summaryMessage) . " Check details below.");
+            } elseif ($duplicate > 0 && $success == 0 && empty($validationErrors) && empty($errors)) {
+                Flasher::addWarning(trim($summaryMessage));
+            } else {
+                Flasher::addError(trim($summaryMessage) . " Check details below.");
+            }
         } else {
-            Flasher::addError(' Import finished with errors. Check the details below.');
+            Flasher::addSuccess("✅ File processed successfully. No records were imported.");
         }
 
         return redirect()->back();

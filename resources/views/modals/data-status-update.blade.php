@@ -109,7 +109,7 @@
 
                     <div class="mb-3">
                         <label for="statusComment" class="form-label">Remark</label>
-                        <textarea class="form-control" id="comment" rows="3" placeholder="Add any additional comments..."></textarea>
+                        <textarea class="form-control" id="statusComment" rows="3" placeholder="Add any additional comments..."></textarea>
                     </div>
                 </div>
 
@@ -300,16 +300,16 @@
             }
 
             //  RESET UI
-            $('#comment').removeClass('border-danger');
-            $('#comment').removeAttr('required');
+            $('#statusComment').removeClass('border-danger');
+            $('#statusComment').removeAttr('required');
             $('#reminderFields').show();
 
             //  CONDITION: REJECTED
             if (status === 'REJECTED') {
 
                 // remark mandatory
-                $('#comment').attr('required', true);
-                $('#comment').addClass('border-danger');
+                $('#statusComment').attr('required', true);
+                $('#statusComment').addClass('border-danger');
 
                 // hide reminder fields
                 $('#reminderFields').hide();
@@ -361,7 +361,7 @@
             $('#isConverted, #isRejected, #isFollowup, #isUpdateComment').prop('checked', false);
             $('.form-check').closest('.mb-3').show();
             $('#allFields, #rejectedFields, #followupFields, #updateCommentFields').hide();
-            $('#rejectedComment, #comment, #ucRemark, #ucDate, #ucTime, #followupDate, #followupTime, #followupComment').val('');
+            $('#rejectedComment, #statusComment, #ucRemark, #ucDate, #ucTime, #followupDate, #followupTime, #followupComment').val('');
             updatePreview();
         });
 

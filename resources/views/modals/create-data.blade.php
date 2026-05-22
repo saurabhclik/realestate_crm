@@ -235,6 +235,19 @@
                                     </select>
                                 </div>
 
+                                <!-- CAMPAIGN -->
+                                <div class="col-md-4 mb-3">
+                                    <label for="campaign">Campaign</label>
+                                    <select class="select2 dropdown-in-modal" name="campaign" id="campaign">
+                                        <option value="">-- Select Campaign --</option>
+                                        @foreach($campaigns as $campaign)
+                                        <option value="{{ $campaign->name }}">
+                                            {{ $campaign->name }}
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
                                 <!-- COMMENT -->
                                 <div class="col-md-12 mb-3">
                                     <label for="comment">Comment:</label>

@@ -58,6 +58,7 @@ class DataCenterService
             ->get();
 
         $sources = DB::table('sources')->get();
+        $campaigns = DB::table('campaigns')->get();
         $projects = DB::table('projects')->get();
 
         return [
@@ -74,6 +75,7 @@ class DataCenterService
             'cities' => $cities,
             'sources' => $sources,
             'projects' => $projects,
+            'campaigns' => $campaigns,
         ];
     }
 }

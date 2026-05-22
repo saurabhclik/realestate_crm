@@ -387,6 +387,7 @@
                                                                 <th>Phone</th>
                                                                 <th>Email</th>
                                                                 <th>Source</th>
+                                                                <th>Campaign</th>
                                                                 <th>State</th>
                                                                 <th>City</th>
                                                                 <th>Status</th>
@@ -505,6 +506,11 @@
                                                                         <span class="cust-badge bg-soft-info text-info">
                                                                             <i class="fas fa-globe me-1"></i>
                                                                             {{ $row->source ?? '-' }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span class="cust-badge text-dark">
+                                                                            {{ $row->campaign ?? '-' }}
                                                                         </span>
                                                                     </td>
                                                                     <td>

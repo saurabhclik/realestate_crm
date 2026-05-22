@@ -351,6 +351,7 @@ class DataCenterController extends Controller
             'state' => $request->state,
             'city' => $request->city,
             'source' => $request->source,
+            'campaign' => $request->campaign,
             'property_type' => $request->property_type,
             'property_category' => $propertyCategory,
             'property_sub_category' => $propertySubCategory,
@@ -414,6 +415,7 @@ class DataCenterController extends Controller
         if ($request->filled('state')) $updateData['state'] = $request->input('state');
         if ($request->filled('city')) $updateData['city'] = $request->input('city');
         if ($request->filled('source')) $updateData['source'] = $request->input('source');
+        if ($request->filled('campaign')) $updateData['campaign'] = $request->input('campaign');
         if ($request->filled('property_type')) $updateData['property_type'] = $request->input('property_type');
         if ($request->filled('property_category')) {
             $updateData['property_category'] = $this->resolvePropertyCategoryName($request->input('property_category'));
@@ -784,7 +786,8 @@ class DataCenterController extends Controller
                     'property_city' => $data->city ?? '',
                     'property_state' => $data->state ?? '',
 
-                    'source' => $data->source ?? '',
+                    'source' => $data->source ?? 'data-center',
+                    'campaign' => $data->campaign ?? '',
                     'type' => $data->property_type ?? '',
 
                     'catg_id' => $catgId ?? null,

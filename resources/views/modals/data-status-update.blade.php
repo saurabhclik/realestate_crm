@@ -141,9 +141,9 @@
                     </div>
                 </div>
 
-                <div id="updateCommentFields" style="display:none;" class="mt-4 p-4 rounded-4 shadow-sm border" style="background-color: #fafbfc;">
+                <div id="updateCommentFields" style="display:none;" class="mt-4">
                     <h6 class="text-primary mb-3 fw-bold d-flex align-items-center gap-2">
-                        <i class="fas fa-comment-dots"></i> Add Update Comment
+                        <i class="fas fa-comment-dots"></i>Comments 
                     </h6>
                     
                     <div class="mb-4">
@@ -215,29 +215,6 @@
         </div>
     </div>
 </div>
-<style>
-    .selected-project-badge {
-        background: linear-gradient(45deg, #0d6efd, #0dcaf0);
-        color: white;
-        padding: 4px 8px;
-        border-radius: 12px;
-        font-size: 0.8rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-    }
-
-    .selected-project-badge .remove-btn {
-        background: none;
-        border: none;
-        color: white;
-        cursor: pointer;
-        padding: 0;
-        margin-left: 4px;
-        font-size: 0.7rem;
-    }
-</style>
-
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 

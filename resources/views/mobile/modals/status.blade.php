@@ -325,10 +325,12 @@
                 <select id="statusSelect" name="newStatus" class="form-control" required>
                     <option value="">Select new status</option>
                         @foreach($lead_statuses as $status)
+                        @if($status->system_name !== 'Completed' && $status->system_name !=='BOOKED' && $status->system_name!=='Cancelled' )
                             <option value="{{ $status->display_name }}"
                                 data-system="{{ $status->system_name }}">
                                 {{ $status->display_name }}
                             </option>
+                            @endif
                         @endforeach
                 </select>
             </div>
@@ -360,7 +362,7 @@
                     <label for="conversionType">Conversion Type:</label>
                     <select id="conversionType" name="conversionType" class="form-control">
                         <option value="">Select Conversion Type</option>
-                        <option value="Completed">Completed</option>
+                        <!-- <option value="Completed">Completed</option> -->
                         <option value="Cancelled">Cancelled</option>
                         <option value="Booked">Booked</option>
                     </select>

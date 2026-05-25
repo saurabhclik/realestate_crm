@@ -5,244 +5,33 @@
     @include('modals.data-status-update')
     @include('modals.view-data-comment')
 
-    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs5.min.css" rel="stylesheet">
-
     <style>
-        .add-project-btn {
-            padding: 2px 6px;
-            font-size: 0.7rem;
-            border: 1px solid #0d6efd;
-        }
-
-        .add-project-btn:hover {
-            background-color: #0d6efd;
-            color: white;
-        }
-
-        #currentProjects .badge {
-            font-size: 0.75rem;
-            padding: 4px 8px;
-        }
-
-        .cust-badge {
-            white-space: normal;
-            padding: 6px 10px;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-
-        .dataTables_scroll {
-            overflow: auto;
-        }
-
-        .dataTables_scrollHead {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            background: white;
-        }
-
-        .dataTables_scrollBody {
-            max-height: 100% !important;
-        }
-
-        #table_filter,
-        #table_rejected_filter,
-        #table_schedule_filter,
-        #table_converted_filter {
-            margin: 10px;
-        }
-
-        .table th,
-        .table td {
-            padding: 0.75rem 1rem;
-            vertical-align: middle;
-            line-height: 1.5;
-            font-size: 0.92rem;
-        }
-
-        .table td h6,
-        .table td span,
-        .table td a,
-        .table td small {
-            line-height: 1.4 !important;
-        }
-
-        .table tbody tr {
-            transition: background-color 0.2s ease;
-        }
-
-        .table tbody tr:hover {
-            background-color: #f9f9f9;
-        }
-
-        .data-modal .modal-dialog {
-            max-width: 500px;
-        }
-
-        .data-modal .modal-header {
-            background: #4b6cb7;
-            color: white;
-            border-bottom: none;
-            border-radius: 5px 5px 0 0;
-        }
-
-        .data-modal .modal-title {
-            font-weight: 600;
-            font-size: 1.2rem;
-        }
-
-        .data-modal .modal-body {
-            padding: 20px;
-        }
-
-        .data-detail {
-            display: flex;
-            margin-bottom: 12px;
-            align-items: flex-start;
-        }
-
-        .data-label {
-            font-weight: 600;
-            color: #495057;
-            width: 140px;
-            flex-shrink: 0;
-        }
-
-        .data-value {
-            color: #6c757d;
-            flex-grow: 1;
-            word-break: break-word;
-        }
-
-        .data-section {
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .data-section:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-
-        .data-section-title {
-            font-weight: 600;
-            color: #4b6cb7;
-            margin-bottom: 15px;
-            font-size: 1.1rem;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .eye-btn {
-            color: #17a2b8;
-            transition: all 0.3s;
-        }
-
-        .eye-btn:hover {
-            color: #138496;
-            transform: scale(1.1);
-        }
-
-        .duplicate-item {
-            color: #fd7e14;
-        }
-
-        .share-item {
-            color: #20c997;
-        }
-
-        .pin-item {
-            color: #ffc107;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .pin-item.pinned {
-            color: #fd7e14;
-        }
-
-        .pin-item:hover {
-            transform: scale(1.1);
-        }
-
-        .pinned-badge {
-            background: linear-gradient(45deg, #fd7e14, #ffc107);
-            color: white;
-            font-size: 0.7rem;
-            padding: 2px 6px;
-            border-radius: 10px;
-            margin-left: 5px;
-        }
-
-        .card .card-body.p-2 {
-            padding: 0.5rem !important;
-        }
-
-        .btn-xs {
-            padding: 0.15rem 0.3rem;
-            font-size: 0.7rem;
-            line-height: 1.2;
-            border-radius: 0.2rem;
-        }
-
-        .badge.rounded-pill {
-            font-weight: 500;
-        }
-
-        .text-truncate-2 {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            transition: transform 0.2s ease;
-            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1) !important;
-        }
-
-        .bg-success {
-            background-color: #28a745 !important;
-        }
-
-        .bg-info {
-            background-color: #17a2b8 !important;
-        }
-
-        .bg-warning {
-            background-color: #ffc107 !important;
-        }
-
         .nav-pills .nav-link {
+            position: relative;
+            border-radius: 0;
+            color: #6c757d;
+            font-weight: 500;
+            padding-bottom: 10px;
+            transition: 0.3s;
+        }
+
+        .nav-pills .nav-link.active-tab {
+            color: #3762b8;
+            background: transparent;
+        }
+
+        .nav-pills .nav-link.active-tab::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -2px;
+            width: 100%;
+            height: 3px;
+            background: #3762b8;
             border-radius: 10px;
-            padding: 10px 18px;
-            background: #f8f9fa;
-            color: #495057;
-            font-weight: 600;
-            transition: .3s;
-        }
-
-        .nav-pills .nav-link.active {
-            background: #556ee6;
-            color: #fff;
-            box-shadow: 0 4px 12px rgba(85, 110, 230, .25);
-        }
-
-        .table td,
-        .table th {
-            vertical-align: middle;
-        }
-
-        .card-body1 {
-            text-align: end;
         }
     </style>
-
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs5.min.css" rel="stylesheet">
     <div class="page-content">
         <div class="container-fluid">
             <div class="row">
@@ -279,9 +68,9 @@
                             <!-- HEADER -->
                             <div class="page-title-box d-flex align-items-center justify-content-between flex-wrap gap-3">
                                 <div class="d-flex align-items-center flex-wrap gap-2">
-                                    <h4 class="mb-0 text-primary fw-bold">
+                                    <h4 class="mb-0">
                                         <i class="fas fa-database me-2"></i>
-                                        Data Center
+                                        Data Center<div class="border-bottom border-3 border-primary mb-2 mt-1 w-75"></div>
                                     </h4>
 
                                     <span class="badge bg-soft-primary text-dark px-3 py-2 fs-6">
@@ -322,7 +111,7 @@
                             <ul class="nav nav-pills mt-4 mb-4 gap-2" id="dataTabs" role="tablist">
                                 <!-- ALL DATA -->
                                 <li class="nav-item">
-                                    <a class="nav-link {{ $activeTab === 'all' ? 'active' : '' }}" 
+                                    <a class="nav-link {{ $activeTab === 'all' ? 'active-tab' : '' }}" 
                                        href="{{ request()->fullUrlWithQuery(['tab' => 'all', 'page' => 1]) }}">
                                         <i class="fas fa-list me-1"></i> All Data
                                     </a>
@@ -330,7 +119,7 @@
 
                                 <!-- REJECTED -->
                                 <li class="nav-item">
-                                    <a class="nav-link {{ $activeTab === 'rejected' ? 'active' : '' }}" 
+                                    <a class="nav-link {{ $activeTab === 'rejected' ? 'active-tab' : '' }}" 
                                        href="{{ request()->fullUrlWithQuery(['tab' => 'rejected', 'page' => 1]) }}">
                                         <i class="fas fa-times-circle me-1"></i> Rejected
                                     </a>
@@ -338,7 +127,7 @@
 
                                 <!-- SCHEDULE -->
                                 <li class="nav-item">
-                                    <a class="nav-link {{ $activeTab === 'schedule' ? 'active' : '' }}" 
+                                    <a class="nav-link {{ $activeTab === 'schedule' ? 'active-tab' : '' }}" 
                                        href="{{ request()->fullUrlWithQuery(['tab' => 'schedule', 'page' => 1]) }}">
                                         <i class="fas fa-calendar-alt me-1"></i> Schedule
                                     </a>
@@ -346,7 +135,7 @@
 
                                 <!-- CONVERTED -->
                                 <li class="nav-item">
-                                    <a class="nav-link {{ $activeTab === 'converted' ? 'active' : '' }}" 
+                                    <a class="nav-link {{ $activeTab === 'converted' ? 'active-tab' : '' }}" 
                                        href="{{ request()->fullUrlWithQuery(['tab' => 'converted', 'page' => 1]) }}">
                                         <i class="fas fa-check-circle me-1"></i> Converted
                                     </a>
@@ -1069,23 +858,6 @@
 
                     });
             }
-        });
-
-        //excel Export functionality
-        document.getElementById('btnExportExcel').addEventListener('click', function() {
-           let btn = $(this);
-           let originalHtml = btn.html();
-           btn.html('<i class="fas fa-spinner fa-spin"></i> Downloading...');
-           btn.prop('disabled', true);
-           
-        });
-
-        // PDF export functionality
-        document.getElementById('btnExportPDF').addEventListener('click', function() {
-            let btn = $(this);
-            let originalHtml = btn.html();
-            btn.html('<i class="fas fa-spinner fa-spin"></i> Downloading...');
-            btn.prop('disabled', true);
         });
 
         function showDataCenterComment(id) {

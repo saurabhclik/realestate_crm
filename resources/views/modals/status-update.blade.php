@@ -22,7 +22,7 @@
                             Select new status
                         </option>
                         @foreach($lead_statuses as $status)
-                            <option value="{{ $status->display_name }}"
+                            <option value="{{ $status->system_name }}"
                                 data-system="{{ $status->system_name }}">
                                 {{ $status->display_name }}
                             </option>

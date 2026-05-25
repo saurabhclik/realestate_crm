@@ -567,6 +567,7 @@
     .calendar-day.empty .event-tooltip {
         display: none !important;
     }
+
 </style>
 
 <div class="page-content">

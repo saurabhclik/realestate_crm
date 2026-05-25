@@ -62,8 +62,6 @@
 
        @include('mobile/partials/lead-management')
     </div>
-
-    <!-- FAB Button with Options Menu -->
     <div class="fab-container">
         <div class="fab" role="button" onclick="toggleOptionsMenu()">
             <i class="fa fa-plus"></i>
@@ -85,7 +83,6 @@
         </div>
     </div>
 
-    <!-- Bottom Sheet for Quick Lead -->
     <div class="bottom-sheet-quick-lead" id="leadSheet">
         <div class="sheet-header">
             <div class="handle"></div>
@@ -134,7 +131,7 @@
     {
         width: 47px;
         height: 46px;
-        background: linear-gradient(135deg, #3762b8 0%, #3762b8 100%);
+        background: linear-gradient(135deg, #3762b80%, #3762b8100%);
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -196,7 +193,7 @@
     {
         width: 32px;
         height: 32px;
-        background: linear-gradient(135deg, #3762b8 0%, #3762b8 100%);
+        background: linear-gradient(135deg, #3762b80%, #3762b8100%);
         border-radius: 50%;
         display: flex;
         align-items: center;

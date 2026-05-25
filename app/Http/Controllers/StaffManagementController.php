@@ -10,6 +10,7 @@ use Flasher\Laravel\Facade\Flasher;
 use League\Csv\Reader;
 use App\Services\LeadService;
 use Carbon\Carbon;
+use Illuminate\Validation\Rule; 
 
 class StaffManagementController extends Controller
 {
@@ -770,16 +771,52 @@ class StaffManagementController extends Controller
 
     public function update_category(Request $request, $id)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
+        DB::beginTransaction();
+        try 
+        {
+            $validator = Validator::make($request->all(), [
+                'name' => [
+                    'required', 
+                    'string', 
+                    'max:255',
+                    Rule::unique('category', 'name')->ignore($id)
+                ],
+            ]);
 
-        DB::table('category')->where('id', $id)->update([
-            'name' => $request->name,
-            'updated_at' => now(),
-        ]);
+            if ($validator->fails()) 
+            {
+                foreach ($validator->errors()->all() as $error) 
+                {
+                    Flasher::addError($error);
+                }
+                return redirect()->back()->withInput();
+            }
+            $oldCategory = DB::table('category')->where('id', $id)->first();
+            $oldName = $oldCategory->name;
+            $newName = $request->name;
+            DB::table('category')->where('id', $id)->update([
+                'name' => $newName,
+            ]);
+            if ($oldName !== $newName) 
+            {
+                DB::table('inv_catg')
+                    ->where('type', $oldName)
+                    ->update([
+                        'type' => $newName,
+                    ]);
+            }
 
-        return redirect()->route('category.list')->with('success', 'Category updated successfully.');
+            DB::commit();
+            Flasher::addSuccess('Category updated successfully. Inventory category also updated.');
+            return redirect()->route('category.list');
+            
+        } 
+        catch (\Exception $e) 
+        {
+            DB::rollBack();
+            Flasher::addError('Failed to update category: ' . $e->getMessage());
+            return redirect()->back()->withInput();
+        }
     }
 
 

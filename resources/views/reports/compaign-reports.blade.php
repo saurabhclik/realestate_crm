@@ -7,7 +7,7 @@
     <div class="container-fluid">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h4 class="mb-0">Campaign Reports</h4>
+                <h4 class="mb-0">Campaign Reports<div class="border-bottom border-3 border-primary mb-2 mt-1 w-75"></div></h4>
             </div>
             <div class="card-body">
                 <div class="d-flex gap-2 mb-3">

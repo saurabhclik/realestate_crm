@@ -1,114 +1,36 @@
+@php
+    use Illuminate\Support\Facades\DB;
+    $leadStatuses = DB::table('lead_statuses')
+        ->where('is_active', 1)
+        ->where('system_name', '!=', 'CONVERTED')
+        ->orderBy('seq')
+        ->get();
+    $leadStats = DB::table('leads')
+        ->selectRaw("LOWER(REPLACE(status,' ', '_')) as status_key, COUNT(*) as total")
+        ->groupBy('status_key')
+        ->pluck('total', 'status_key');
+@endphp
+
+
 <div class="lead-management-app">
     <div class="lead-status-tabs">
         <div class="tab-scroll-container">
 
-            <a href="{{ route('mobile.new-leads') }}" class="status-tab">
-                <i class="fas fa-user-plus"></i>
-                <span>New Lead</span>
-                <span>{{ $leadStats->new_lead ?? 0 }}</span>
-            </a>
+            @foreach($leadStatuses as $status)
+                @php
+                    $key = strtolower(str_replace(' ', '_', $status->system_name));
+                @endphp
 
-            <a href="{{ route('mobile.transfer') }}" class="status-tab">
-                <i class="fas fa-exchange-alt"></i>
-                <span>Transfer</span>
-                <span>{{ $leadStats->transfer_lead ?? 0 }}</span>
-            </a>
+                <a href="{{ route($status->mobile_route) }}" class="status-tab">
 
-            <a href="{{ route('mobile.pending-leads') }}" class="status-tab">
-                <i class="fas fa-hourglass-half"></i>
-                <span>Pending</span>
-                <span>{{ $leadStats->pending_lead ?? 0 }}</span>
-            </a>
+                    <i class="{{ $status->mobile_icon ?? 'fas fa-circle' }}"></i>
 
-            <a href="{{ route('mobile.processing-leads') }}" class="status-tab">
-                <i class="fas fa-hourglass-half"></i>
-                <span>Processing</span>
-                <span>{{ $leadStats->processing ?? 0 }}</span>
-            </a>
+                    <span>{{ $status->display_name }}</span>
 
-            <a href="{{ route('mobile.interested-leads') }}" class="status-tab">
-                <i class="fas fa-heart"></i>
-                <span>Interested</span>
-                <span>{{ $leadStats->interested ?? 0 }}</span>
-            </a>
+                    <span>{{ $leadStats[$key] ?? 0 }}</span>
 
-            <a href="{{ route('mobile.call-leads') }}" class="status-tab">
-                <i class="fas fa-phone"></i>
-                <span>Calls</span>
-                <span>{{ $leadStats->call_schedule ?? 0 }}</span>
-            </a>
-
-            <a href="{{ route('mobile.visit-leads') }}" class="status-tab">
-                <i class="fas fa-map-marker-alt"></i>
-                <span>Visits</span>
-                <span>{{ $leadStats->visit_schedule ?? 0 }}</span>
-            </a>
-
-            <a href="{{ route('mobile.visit-done-leads') }}" class="status-tab">
-                <i class="fas fa-clipboard-check"></i>
-                <span>Visits Done</span>
-                <span>{{ $leadStats->visit_done ?? 0 }}</span>
-            </a>
-
-            <a href="{{ route('mobile.booked') }}" class="status-tab">
-                <i class="fa-solid fa-bowl-rice"></i>
-                <span>Booked</span>
-                <span>{{ $leadStats->booked ?? 0 }}</span>
-            </a>
-
-            <a href="{{ route('mobile.whatsapp') }}" class="status-tab">
-                <i class="fa-brands fa-whatsapp"></i>
-                <span>Whatsapp</span>
-                <span>{{ $leadStats->whatsapp ?? 0 }}</span>
-            </a>
-
-            <a href="{{ route('mobile.meeting-scheduled-leads') }}" class="status-tab">
-                <i class="fa-solid fa-handshake"></i>
-                <span>Meeting</span>
-                <span>{{ $leadStats->meeting_scheduled ?? 0 }}</span>
-            </a>
-
-            <a href="{{ route('mobile.completed') }}" class="status-tab">
-                <i class="fas fa-check-circle"></i>
-                <span>Completed</span>
-                <span>{{ $leadStats->completed ?? 0 }}</span>
-            </a>
-
-            <a href="{{ route('mobile.not-interested-leads') }}" class="status-tab">
-                <i class="fas fa-thumbs-down"></i>
-                <span>Not Interested</span>
-                <span>{{ $leadStats->not_interested ?? 0 }}</span>
-            </a>
-
-            <a href="{{ route('mobile.not-picked-leads') }}" class="status-tab">
-                <i class="fas fa-thumbs-down"></i>
-                <span>Not Picked</span>
-                <span>{{ $leadStats->not_picked ?? 0 }}</span>
-            </a>
-
-            <a href="{{ route('mobile.not-reachable-leads') }}" class="status-tab">
-                <i class="fas fa-ban"></i>
-                <span>Not Reachable</span>
-                <span>{{ $leadStats->not_reachable ?? 0 }}</span>
-            </a>
-
-            <a href="{{ route('mobile.wrong-number-leads') }}" class="status-tab">
-                <i class="fas fa-phone-slash"></i>
-                <span>Wrong Number</span>
-                <span>{{ $leadStats->wrong_number ?? 0 }}</span>
-            </a>
-
-            <a href="{{ route('mobile.lost-leads') }}" class="status-tab">
-                <i class="fas fa-user-times"></i>
-                <span>Lost</span>
-                <span>{{ $leadStats->lost ?? 0 }}</span>
-            </a>
-
-            <a href="{{ route('mobile.future-leads') }}" class="status-tab">
-                <i class="fas fa-calendar-alt"></i>
-                <span>Future</span>
-                <span>{{ $leadStats->future_lead ?? 0 }}</span>
-            </a>
+                </a>
+            @endforeach
 
         </div>
     </div>

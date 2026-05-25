@@ -45,12 +45,12 @@
             --success-color: #1cbb8c;
             --dark-color: #343a40;
             --light-color: #f8f9fa;
-            --gradient: linear-gradient(135deg, #3762b8 0%, #f7b84b 100%);
+            --gradient: linear-gradient(135deg, #3762b80%, #f7b84b 100%);
             --ultra-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
         }
 
         .btn-primary {
-            background-color: #3762b8 !important;
+            background-color: #3762b8!important;
         }
 
         .hero {
@@ -1082,7 +1082,7 @@
         }
 
         .bg-gradient-primary {
-            background: linear-gradient(135deg, #3762b8 0%, #b8c9e2ff 100%);
+            background: linear-gradient(135deg, #3762b80%, #b8c9e2ff 100%);
         }
 
         .file-upload-card {
@@ -1231,7 +1231,7 @@
         }
 
         .bg-primary {
-            background-color: #3762b8 !important;
+            background-color: #3762b8!important;
         }
 
         #table_paginate {
@@ -1678,6 +1678,10 @@
             width:54px; 
             height:54px; 
         } 
+    }
+    .border-bottom
+    {
+        border:2px solid #3762b8!important;
     }
     </style>
 </head>

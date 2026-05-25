@@ -3,11 +3,11 @@
 
 @section('content')
 <div class="page-content">
-    <div class="min-vh-100 bg-light py-4 py-md-5">
+    <div class="min-vh-100 py-4 py-md-5">
         <div class="container">
             <div class="row mb-4">
                 <div class="col-12 d-flex justify-content-between align-items-center">
-                    <h1 class="h3 fw-bold text-dark">Support Tickets</h1>
+                    <h4 class="mb-0">Support Tickets <div class="border-bottom border-3 border-primary mb-2 mt-1 w-75"></div></h4>
                     @if($userType == 'admin')
                     <button 
                         class="btn btn-primary" 

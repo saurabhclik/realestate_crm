@@ -11,7 +11,7 @@ Pro-leadexpertz' : 'Category | Pro-leadexpertz')
         <!-- Page Header -->
         <div class="row mb-3">
             <div class="col-12 d-flex justify-content-between align-items-center">
-                <h4 class="mb-0">Category Master</h4>
+                <h4 class="mb-0">Category Master<div class="border-bottom border-3 border-primary mb-2 mt-1 w-75"></div></h4>
                 <!-- <button class="btn btn-gradient-primary" data-bs-toggle="modal" data-bs-target="#categoryModal"
                     data-action="{{ route('category.store') }}" data-type="Add" data-modal="Category">
                     <i class="fas fa-plus"></i> Add Category

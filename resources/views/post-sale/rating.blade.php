@@ -77,7 +77,7 @@
             <div class="col-12 col-md-8 col-lg-6">
                 <div class="card rating-card">
                     <div class="card-header text-white text-center py-3">
-                        <h4 class="mb-0"><i class="fas fa-star me-2"></i>Rate Your Experience</h4>
+                        <h4 class="mb-0"><i class="fas fa-star me-2"></i>Rate Your Experience<div class="border-bottom border-3 border-primary mb-2 mt-1 w-75"></div></h4>
                     </div>
                     
                     <div class="card-body p-4">

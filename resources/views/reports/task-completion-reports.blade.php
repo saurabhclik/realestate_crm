@@ -7,7 +7,7 @@
     <div class="container-fluid mt-4">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h4 class="mb-0">Completed Tasks Report</h4>
+                <h4 class="mb-0">Completed Tasks Report<div class="border-bottom border-3 border-primary mb-2 mt-1 w-75"></div></h4>
                 <div class="d-flex gap-2">
                     <button class="ReportbtnExportExcel shadow btn btn-success btn-sm d-flex align-items-center" data-bs-toggle="tooltip" data-bs-placement="top" title="Export table data to Excel">
                         <i class="fas fa-file-excel me-2"></i> Excel

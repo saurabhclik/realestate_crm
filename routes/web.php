@@ -36,6 +36,8 @@ use App\Http\Controllers\WebExhibitionController;
 use App\Http\Controllers\ShareAppController;
 use App\Http\Controllers\UnifiedMessagingController;
 use App\Http\Controllers\TemplateController;
+use App\Http\Controllers\LeadStatusController;
+use App\Http\Controllers\SystemConfigurationController;
 
 Route::get('/', [AuthenticateController::class, 'show_login']);
 Route::post('/login', [AuthenticateController::class, 'login'])->name('login');
@@ -210,6 +212,8 @@ Route::middleware(['check.login', 'reception.only'])->group(function () {
             Route::post('/create', 'create_lead')->name('lead.index');
             Route::get('/import', 'showImportForm')->name('lead.import');
             Route::post('/import', 'processImport')->name('lead.import.process');
+            Route::post('/import-preview', [LeadController::class, 'importPreview'])->name('lead.import.preview');
+            Route::post('/import-process', [LeadController::class, 'importProcess'])->name('lead.preview.import.process');
             Route::get('/allocate', 'allocate_lead')->name('lead.allocate');
             Route::post('allocate/lead', 'allocateLeads')->name('lead.allocate_user');
             Route::get('/unallocated', 'unallocated_lead')->name('lead.unallocated');
@@ -249,10 +253,10 @@ Route::middleware(['check.login', 'reception.only'])->group(function () {
             Route::get('/{id}/project-visits', 'getLeadProjectVisits')->name('lead.project-visits');
             Route::get('/filter-lead', 'filterLeads')->name('lead.filter');
             Route::delete('/delete', 'delete')->name('lead.delete');
+            Route::post('/revoke-share', [LeadController::class, 'revokeShare'])->name('lead.revoke-share');
         });
-
+        Route::post('/user/check-type', [LeadController::class, 'checkUserType'])->name('user.check-type');
         Route::get('/leads/filter-lead', [LeadController::class, 'filterLeads'])->name('leads.filter.leads');
-
         Route::prefix('task')->controller(TaskController::class)->group(function () {
             Route::get('/create/{id?}', 'create')->name('task.create');
             Route::post('/store/{id?}', 'store')->name('task.store');
@@ -332,6 +336,25 @@ Route::middleware(['check.login', 'reception.only'])->group(function () {
                 ->name('report.client_communications');
         });
 
+        Route::prefix('lead-status')->name('lead-status.')->group(function () {
+            Route::get('/', [LeadStatusController::class, 'index'])->name('index');
+            Route::post('/', [LeadStatusController::class, 'store'])->name('store');
+            Route::put('/{id}', [LeadStatusController::class, 'update'])->name('update');
+            Route::put('/sequence/{id}', [LeadStatusController::class, 'updateSequence'])->name('update-sequence');
+            Route::put('/roles/{id}', [LeadStatusController::class, 'updateRoles'])->name('update-roles');
+            Route::post('/rename/{id}', [LeadStatusController::class, 'rename'])->name('rename');
+            Route::get('/toggle/{id}', [LeadStatusController::class, 'toggleActive'])->name('toggle');
+            Route::delete('/{id}', [LeadStatusController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('system-configuration')
+            ->name('system-configuration.')
+            ->group(function () {
+
+                Route::get('/', [SystemConfigurationController::class, 'index'])
+                    ->name('index');
+            });
+
         Route::post('/leads/toggle-pin', [LeadController::class, 'togglePin'])->name('lead.toggle-pin');
         Route::get('/integrations', [IntegrationController::class, 'index'])->name('integrations.index');
         Route::post('/integrations/housing/sync', [IntegrationController::class, 'syncHousing'])->name('integrations.housing.sync');
@@ -389,7 +412,7 @@ Route::middleware(['check.login', 'reception.only'])->group(function () {
             Route::get('/{id}/documents', [PostSaleController::class, 'getDocuments']);
             Route::post('/{id}/upload-document', [PostSaleController::class, 'uploadDocument']);
             Route::delete('/document/{id}', [PostSaleController::class, 'deleteDocument']);
-
+            Route::get('/lead/{leadId}', [PostSaleController::class, 'getByLeadId'])->name('by-lead');
             Route::post('/rate-link', [PostSaleController::class, 'generateRatingLink'])->name('rate-link');
         });
     });
@@ -492,21 +515,21 @@ Route::middleware(['check.login', 'reception.only'])->group(function () {
         Route::delete('/{id}', 'destroy')->name('data-center.destroy');
         Route::get('/comments/{id}', 'getComments')->name('data-center.comments');
         Route::post('/comments/{id}', 'addComment')->name('data-center.add-comment');
-        Route::get('/converted/leads', 'getConvertedLeads')->name('data-center.converted-leads');
-        Route::get('/pending', 'pending')->name('data-center.pending');
-        Route::get('/processing', 'processing')->name('data-center.processing');
-        Route::get('/interested', 'interested')->name('data-center.interested');
-        Route::get('/call-scheduled', 'call_scheduled')->name('data-center.call_scheduled');
-        Route::get('/meeting-scheduled', 'meeting_scheduled')->name('data-center.meeting_scheduled');
-        Route::get('/visit-scheduled', 'visit_scheduled')->name('data-center.visit_scheduled');
-        Route::get('/visited', 'visit_done')->name('data-center.visited'); 
-        Route::get('/future', 'future_leads')->name('lead.future');
-        Route::get('/channel-partner', 'channel_partner')->name('lead.channel_partner');
-        Route::get('/not-interested', 'not_interested')->name('lead.not_interested');
-        Route::get('/not-picked', 'not_picked')->name('lead.not_picked');
-        Route::get('/lost', 'lost')->name('lead.lost');
-        Route::get('/wrong-number', 'wrong_number')->name('lead.wrong_number');
-        Route::get('/not-reachable', 'not_reachable')->name('lead.not_reachable');
+        // Route::get('/converted/leads', 'getConvertedLeads')->name('data-center.converted-leads');
+        // Route::get('/pending', 'pending')->name('data-center.pending');
+        // Route::get('/processing', 'processing')->name('data-center.processing');
+        // Route::get('/interested', 'interested')->name('data-center.interested');
+        // Route::get('/call-scheduled', 'call_scheduled')->name('data-center.call_scheduled');
+        // Route::get('/meeting-scheduled', 'meeting_scheduled')->name('data-center.meeting_scheduled');
+        // Route::get('/visit-scheduled', 'visit_scheduled')->name('data-center.visit_scheduled');
+        // Route::get('/visited', 'visit_done')->name('data-center.visited'); 
+        // Route::get('/future', 'future_leads')->name('lead.future');
+        // Route::get('/channel-partner', 'channel_partner')->name('lead.channel_partner');
+        // Route::get('/not-interested', 'not_interested')->name('lead.not_interested');
+        // Route::get('/not-picked', 'not_picked')->name('lead.not_picked');
+        // Route::get('/lost', 'lost')->name('lead.lost');
+        // Route::get('/wrong-number', 'wrong_number')->name('lead.wrong_number');
+        // Route::get('/not-reachable', 'not_reachable')->name('lead.not_reachable');
     });
 
     Route::post('/exhibitions/{id}/toggle-auto-welcome', [WebExhibitionController::class, 'toggleAutoWelcome'])->name('exhibitions.toggle-auto-welcome');
@@ -523,6 +546,7 @@ Route::middleware(['check.login', 'reception.only'])->group(function () {
     Route::get('/properties', [MasterController::class, 'property_name'])->name('property.name');
     Route::post('/properties/store', [MasterController::class, 'store_property'])->name('property.store');
     Route::put('/properties/{id}', [MasterController::class, 'update_property'])->name('property.update');
+    
 });
 
 Route::get('/firebase-sw-config', function () {

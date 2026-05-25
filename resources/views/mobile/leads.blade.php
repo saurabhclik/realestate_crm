@@ -180,8 +180,6 @@
             const selectedStatus = this.value;
             const statusesRequiringReminder = ['CALL SCHEDULED', 'VISIT SCHEDULED', 'MEETING SCHEDULED', 'INTERESTED', 'FUTURE LEAD'];
             const statusesRequiringConversion = ['CONVERTED'];
-            
-            // Show reminder fields for statuses that need them
             if (statusesRequiringReminder.includes(selectedStatus)) 
             {
                 reminderFields.style.display = 'block'; 
@@ -190,8 +188,6 @@
             {
                 reminderFields.style.display = 'none';
             }
-            
-            // Show conversion fields only for CONVERTED status
             if (statusesRequiringConversion.includes(selectedStatus)) 
             {
                 conversionFields.style.display = 'block';
@@ -562,7 +558,13 @@
                         </div>
                         <div class="lead-content">
                             <div class="lead-main-info">
-                                <h3 class="lead-title">${lead.status ? lead.status.charAt(0).toUpperCase() + lead.status.slice(1).toLowerCase() : '---'}</h3>
+                                <h3 class="lead-title">
+                                    ${
+                                        lead.status === 'CONVERTED'
+                                        ? (lead.conversion_display_name || '---')
+                                        : (lead.status_display_name || '---')
+                                    }
+                                </h3>
                                 <p class="lead-location">
                                     <i class="fas fa-map-marker-alt"></i> 
                                     ${lead.field1 || '---'}, ${lead.field2 || '---'}

@@ -26,7 +26,7 @@
                                         <select class="form-select selectPostSale" name="lead_id" id="lead_id" required>
                                             <option value="">Select Lead</option>
                                             @foreach($leads as $lead)
-                                                <option value="{{ $lead->id }}">{{ $lead->name }}</option>
+                                                <option value="{{ $lead->id }}">{{$lead->id}}, {{ $lead->name }}, {{$lead->phone}}</option>
                                             @endforeach
                                         </select>
                                     </div>

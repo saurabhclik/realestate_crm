@@ -1,6 +1,6 @@
 @php
-$softwareType = session('software_type', 'real_state');
-$isLeadManagement = $softwareType === 'lead_management';
+    $softwareType = session('software_type', 'real_state');
+    $isLeadManagement = $softwareType === 'lead_management';
 @endphp
 <div class="modal fade" id="statusUpdateModal" tabindex="-1" aria-labelledby="statusUpdateModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -12,25 +12,21 @@ $isLeadManagement = $softwareType === 'lead_management';
             <div class="modal-body">
                 <input type="hidden" id="leadId">
                 <div class="mb-3">
-                    <label for="newStatus" class="form-label">New Status</label>
-                    <select class="select2" id="newStatus" required>
-                        <option value="">Select new status</option>
-                        <option value="PENDING">Pending</option>
-                        <option value="PROCESSING">Processing</option>
-                        <option value="INTERESTED">Interested</option>
-                        <option value="CALL SCHEDULED">Call Scheduled</option>
-                        <option value="WHATSAPP">Whatsapp</option>
-                        <option value="MEETING SCHEDULED">Meeting Scheduled</option>
-                        <option value="VISIT SCHEDULED">Visit Scheduled</option>
-                        <option value="VISIT DONE">Visit Done</option>
-                        <option value="WRONG NUMBER">WRONG NUMBER</option>
-                        <option value="NOT INTERESTED">NOT INTERESTED</option>
-                        <option value="FUTURE LEAD">FUTURE LEAD</option>
-                        <option value="NOT PICKED">NOT PICKED</option>
-                        <option value="NOT REACHABLE">NOT REACHABLE</option>
-                        <option value="LOST">LOST</option>
-                        <option value="CHANNEL PARTNER">CHANNEL PARTNER</option>
-                        <option value="CONVERTED">Converted</option>
+                    <label for="newStatus" class="form-label">
+                        New Status
+                    </label>
+                    <select class="form-select select2StatusUpdate"
+                        id="newStatus"
+                        required>
+                        <option value="">
+                            Select new status
+                        </option>
+                        @foreach($lead_statuses as $status)
+                            <option value="{{ $status->display_name }}"
+                                data-system="{{ $status->system_name }}">
+                                {{ $status->display_name }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
                 <div id="conversionTypeField" style="display: none;">
@@ -59,6 +55,20 @@ $isLeadManagement = $softwareType === 'lead_management';
                         <div id="selectedProjectsList" class="d-flex flex-wrap gap-2"></div>
                     </div>
                 </div>
+                
+                
+                <div id="postSaleOptionField" class="d-none">
+                    <div class="mb-3 p-3 border rounded bg-light">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="createPostSale" value="1">
+                            <label class="form-check-label fw-bold" for="createPostSale">
+                                Add to Post Sale
+                            </label>
+                            <small class="d-block text-muted">Create a post-sale record for this completed lead</small>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="col-md-12 applicant_div" style="display: none;">
                     <div class="row">
                         <div class="form-group col-md-6 col-lg-6 mb-2">

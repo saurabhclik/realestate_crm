@@ -9,6 +9,16 @@
     $softwareType = session('software_type', 'real_state');
     $isLeadManagement = $softwareType === 'lead_management';
 @endphp
+<style>
+    .pinned-badge {
+        background: linear-gradient(45deg, #fd7e14, #ffc107);
+        color: white;
+        font-size: 0.7rem;
+        padding: 2px 6px;
+        border-radius: 10px;
+        margin-left: 5px;
+    }
+</style>
 <div class="page-content">
     <div class="container-fluid">
         <div class="row mb-2">
@@ -65,11 +75,13 @@
                                     </th>
                                     <th>#</th>
                                     <th>Lead ID</th>
-                                    <th>Lead Details</th>
+                                    <th>Name</th>
+                                    <th>Phone</th>
                                     <th>Agent</th>
+                                    <th>Sharing Status</th>
                                     <th>Source</th>
-                                    <th>Classification</th>
                                     <th>Campaign</th>
+                                    <th>Classification</th>
                                     <th>Status</th>
                                     <th>Budget</th>
                                     <th>{{ $isLeadManagement ? 'Product' : 'Project' }}</th>
@@ -81,29 +93,45 @@
                             </thead>
                             <tbody>
                                 @foreach($leads as $lead)
+                                @php
+                                    $phone = preg_replace('/\D/', '', $lead->phone);
+                                    if (substr($phone, 0, 2) == '91') {
+                                        $phone = substr($phone, 2);
+                                    }
+                                @endphp
                                 <tr>
                                     <td class="text-center align-middle">
                                         <input type="checkbox" class="form-check-input checked" name="checked[]" value="{{ $lead->id }}">
                                     </td>
-                                    <td class="align-middle">{{ $loop->iteration + ($leads->currentPage()-1) * $leads->perPage() }}</td>
-                                    <td class="align-middle">{{ $lead->id }}</td>
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>
+                                        <div class="d-flex gap-3 align-items-center">
+                                            <span class="fw-semibold">{{ $lead->id }}</span>
+                                            @if($lead->is_pinned)
+                                            <span class="pinned-badge">Pinned</span>
+                                            @endif
+                                        </div>
+                                    </td>
                                     <td>
                                         <div class="d-flex flex-column">
-                                            <h6 class="mb-1">{{ $lead->name }}</h6>
+                                            <div class="d-flex align-items-center mb-1">
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-0">{{ $lead->name }}</h6>
+                                                </div>
+                                            </div>
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <span class="text-muted small">{{ $lead->phone }}</span>
-                                                <div class="d-flex gap-1">
-                                                    <a href="tel:{{ $lead->phone }}" class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip" title="Call">
+                                                <div class="d-flex">
+                                                    <a href="tel:{{ $phone }}" class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip" title="Call">
                                                         <i class="fas fa-phone text-primary"></i>
                                                     </a>
-                                                    <a href="https://wa.me/91{{ $lead->phone }}" target="_blank" class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip" title="WhatsApp">
+                                                    <a href="https://wa.me/91{{ $phone }}" target="_blank" class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip" title="WhatsApp">
                                                         <i class="fab fa-whatsapp text-success"></i>
                                                     </a>
-                                                    <a href="{{ route('lead.edit', $lead->id) }}" class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip" title="Edit">
+                                                    <a href="{{ route('lead.edit', ['id' => $lead->id] + request()->query()) }}" class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip" title="Edit">
                                                         <i class="fas fa-edit text-warning"></i>
                                                     </a>
-                                                    <button class="btn btn-xs btn-soft-light" 
-                                                        onclick="showStatusUpdateModal({{ $lead->id }}, '{{ $lead->status }}')"
+                                                    <button type="button" class="btn btn-xs btn-soft-light"
+                                                        onclick="showStatusUpdateModal('{{ $lead->id }}', '{{ $lead->status }}')"
                                                         data-bs-toggle="tooltip" title="Update Status">
                                                         <i class="fas fa-sync-alt text-info"></i>
                                                     </button>
@@ -111,18 +139,88 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="align-middle">{{ $lead->agent }}</td>
-                                    <td class="align-middle"><span class="cust-badge bg-soft-info text-info">{{ $lead->source }}</span></td>
-                                    <td class="align-middle">{{ $lead->classification }}</td>
-                                    <td class="align-middle">{{ $lead->campaign }}</td>
-                                    <td class="align-middle">{{ $lead->status }}</td>
-                                    <td class="align-middle">{{ $lead->budget }}</td>
-                                    <td class="align-middle">{{ $lead->project_name }}</td>
+                                    <td>{{ $lead->phone }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1">
+                                                <span class="d-block">{{ $lead->agent ?? '-' }}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if(!empty($lead->lead_shared_with))
+                                        <div class="shared-users">
+                                            @php
+                                                $sharedIds = explode(',', $lead->lead_shared_with);
+                                                $sharedUsers = [];
+                                                foreach($sharedIds as $id) {
+                                                    $user = collect($users)->firstWhere('id', trim($id));
+                                                    if($user) {
+                                                        $sharedUsers[] = $user->name;
+                                                    }
+                                                }
+                                            @endphp
+                                            @if(count($sharedUsers) > 0)
+                                            <span class="badge bg-success me-1">Shared</span>
+                                            <small class="text-muted d-block mt-1">
+                                                With: {{ implode(', ', $sharedUsers) }}
+                                            </small>
+                                            @else
+                                            <span class="badge bg-secondary">Not Shared</span>
+                                            @endif
+                                        </div>
+                                        @else
+                                        <span class="badge bg-secondary">Not Shared</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <span class="cust-badge bg-soft-info text-info">
+                                            <i class="fas fa-{{ $lead->source == 'Website' ? 'globe' : ($lead->source == 'Referral' ? 'user-friends' : 'ad') }} me-1"></i>
+                                            {{ $lead->source }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $lead->campaign }}</td>
+                                    <td>
+                                        <span class="cust-badge text-dark">
+                                            {{ $lead->classification }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="cust-badge text-dark">
+                                            {{ $lead->status }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $lead->budget }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="flex-grow-1">
+                                                @php
+                                                    if (!empty($lead->project_id) && strpos($lead->project_id, ',') !== false) {
+                                                        $projectIds = explode(',', $lead->project_id);
+                                                        $projectNames = [];
+                                                        foreach($projectIds as $projectId) {
+                                                            $project = DB::table('projects')->where('id', trim($projectId))->first();
+                                                            if($project) {
+                                                                $projectNames[] = $project->project_name;
+                                                            }
+                                                        }
+                                                        echo implode(', ', $projectNames);
+                                                    } else {
+                                                        echo $lead->project_name ?? '-';
+                                                    }
+                                                @endphp
+                                            </div>
+                                        </div>
+                                    </td>
                                     <td class="align-middle">
                                         <a href="mailto:{{ $lead->email }}" class="text-truncate d-inline-block" style="max-width: 200px;">{{ $lead->email }}</a>
                                     </td>
-                                    <td class="align-middle">{{ \Carbon\Carbon::parse($lead->updated_date)->format('d M Y') }}</td>
-                                    <td class="align-middle">{{ \Carbon\Carbon::parse($lead->updated_date)->format('d M Y') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($lead->lead_date)->format('d M Y') }}</td>
+                                    <td>
+                                        <span class="cust-badge text-dark">
+                                            {{ \Carbon\Carbon::parse($lead->updated_date)->format('d M Y') }}
+                                        </span>
+                                    </td>
                                     <td class="align-middle">
                                         <div class="d-flex align-items-center">
                                             <div class="flex-shrink-0 me-2">
@@ -130,13 +228,21 @@
                                             </div>
                                             <div class="flex-grow-1">
                                                 @php
-                                                    $comment = strip_tags($lead->last_comment ?? '');
+                                                    $userType = session('user_type');
+                                                    $comment = strtolower(trim(strip_tags($lead->last_comment ?? '')));
+
+                                                    if ($userType === 'salesman') {
+                                                        if (str_contains($comment, 'transfer') || str_contains($comment, 'allocated')) {
+                                                            $comment = '';
+                                                        }
+                                                    }
+
                                                     $short = \Illuminate\Support\Str::limit($comment, 30);
                                                 @endphp
                                                 <span class="d-block" data-bs-toggle="tooltip" title="{{ $comment }}">
                                                     {!! $short !!}
                                                 </span>
-                                                <a href="javascript:void(0);" onclick="showComment({{ $lead->id }})" class="text-primary small">
+                                                <a href="javascript:void(0);" onclick="showComment('{{ $lead->id }}')" class="text-primary small">
                                                     View more
                                                 </a>
                                             </div>

@@ -9,7 +9,7 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">MIS Daily Report</h3>
+                        <h4 class="mb-0">MIS Daily Report<div class="border-bottom border-3 border-primary mb-2 mt-1" style="width:10%;"></div></h4>
                     </div>
                     <div class="card-body">
                         <form method="GET" action="{{ route('mis.daily-report') }}" class="mb-4">

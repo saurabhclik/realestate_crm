@@ -4,11 +4,15 @@
 <div class="page-content">
     <div class="container-fluid">
         <div class="row">
+            <div class="col-12">
+                <div class="page-title-box d-flex align-items-center justify-content-between">
+                    <h4 class="mb-0">User Hierarchy Visualization <div class="border-bottom border-3 border-primary mb-2 mt-1 w-75"></div></h4>
+                </div>
+            </div>
+        </div>
+        <div class="row">
             <div class="col-md-12">
                 <div class="card border-0">
-                    <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
-                        <h3 class="card-title mb-0 text-light">User Hierarchy Visualization</h3>
-                    </div>
                     <div class="card-body p-0">
                         <div id="chart-container" style="position: relative;">
                             <div id="chart_div" class="org-chart-container"></div>
@@ -118,7 +122,7 @@
     }
 
     .org-node {
-        border: 1px solid #3762b8 !important;
+        border: 1px solid #3762b8!important;
         border-radius: 6px;
         padding: 8px 10px;
         background: white;

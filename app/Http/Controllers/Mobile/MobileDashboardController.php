@@ -23,27 +23,72 @@ class MobileDashboardController extends Controller
             ->leftJoin('inv_catg', 'leads.catg_id', '=', 'inv_catg.id')
             ->leftJoin('inv_subcatg', 'leads.sub_catg_id', '=', 'inv_subcatg.id')
             ->leftJoin('users', 'leads.user_id', '=', 'users.id')
-            ->leftJoin('projects', function ($join) {
+
+            ->leftJoin('lead_statuses as ls', function ($join) 
+            {
+                $join->on(
+                    DB::raw('ls.system_name COLLATE utf8mb4_unicode_ci'),
+                    '=',
+                    DB::raw('leads.status COLLATE utf8mb4_unicode_ci')
+                );
+            })
+
+            ->leftJoin('lead_statuses as cls', function ($join) 
+            {
+                $join->on(
+                    DB::raw('cls.system_name COLLATE utf8mb4_unicode_ci'),
+                    '=',
+                    DB::raw('leads.conversion_type COLLATE utf8mb4_unicode_ci')
+                );
+            })
+
+            ->leftJoin('projects', function ($join) 
+            {
                 $join->on(DB::raw("FIND_IN_SET(projects.id, leads.project_id)"), '>', DB::raw('0'));
             })
+
             ->select(
                 'leads.id',
                 'leads.name',
                 'leads.phone',
                 'leads.status',
+                'leads.conversion_type',
                 'leads.lead_date',
                 'leads.source',
                 'leads.user_id',
                 'leads.last_comment',
                 'leads.project_id',
                 'leads.type',
+
                 'inv_catg.name as category',
                 'inv_subcatg.name as sub_category',
+
                 DB::raw('GROUP_CONCAT(projects.project_name SEPARATOR ", ") as project_names'),
-                'users.name as agent'
+                'users.name as agent',
+                'ls.display_name as status_display_name',
+                'cls.display_name as conversion_display_name'
             )
+
             ->whereIn('leads.user_id', $userIds)
-            ->groupBy('leads.id', 'leads.name', 'leads.phone', 'leads.status', 'leads.lead_date', 'leads.source', 'leads.user_id', 'leads.last_comment', 'leads.project_id', 'leads.type', 'inv_catg.name', 'inv_subcatg.name', 'users.name');
+
+            ->groupBy(
+                'leads.id',
+                'leads.name',
+                'leads.phone',
+                'leads.status',
+                'leads.conversion_type',
+                'leads.lead_date',
+                'leads.source',
+                'leads.user_id',
+                'leads.last_comment',
+                'leads.project_id',
+                'leads.type',
+                'inv_catg.name',
+                'inv_subcatg.name',
+                'users.name',
+                'ls.display_name',
+                'cls.display_name'
+            );
 
         if ($status === 'Completed') {
             $query->where(function ($q) {
@@ -53,7 +98,9 @@ class MobileDashboardController extends Controller
                             ->where('leads.conversion_type', 'Completed');
                     });
             });
+
         } elseif ($status === 'Booked') {
+
             $query->where(function ($q) {
                 $q->where('leads.status', 'BOOKED')
                     ->orWhere(function ($q) {
@@ -61,18 +108,40 @@ class MobileDashboardController extends Controller
                             ->where('leads.conversion_type', 'Booked');
                     });
             });
-        } elseif ($status === 'MEETING SCHEDULED') {
+
+        } elseif ($status === 'Cancelled') {
+
+            $query->where(function ($q) {
+                $q->where('leads.status', 'CANCELLED')
+                    ->orWhere(function ($q) {
+                        $q->where('leads.status', 'CONVERTED')
+                            ->where('leads.conversion_type', 'Cancelled');
+                    });
+            });
+
+        } 
+        elseif ($status === 'MEETING SCHEDULED') {
+
             $query->where('leads.status', 'MEETING SCHEDULED');
-        } elseif ($status === 'WHATSAPP') {
+
+        } 
+        elseif ($status === 'WHATSAPP') {
+
             $query->where('leads.status', 'WHATSAPP');
+
         } elseif ($status === 'facebook') {
+
             $query->where('leads.source', 'Facebook');
+
         } elseif ($status === 'All lead') {
+
         } elseif (!empty($status)) {
+
             $query->where('leads.status', $status);
         }
 
         if ($search) {
+
             $query->where(function ($q) use ($search) {
                 $q->where('leads.name', 'like', "%{$search}%")
                     ->orWhere('leads.phone', 'like', "%{$search}%")

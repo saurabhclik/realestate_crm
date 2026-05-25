@@ -57,7 +57,7 @@ $users = DB::table('users')
         background-color: #f8f9fa;
         padding: 10px 15px;
         margin-bottom: 20px;
-        border-left: 4px solid #007bff;
+        border-left: 4px solid #3762b8;
         font-weight: 600;
         font-size: 1.1rem;
     }

@@ -68,28 +68,18 @@
                         <div class="table-responsive">
                             <table class="table table-hover table-bordered">
                                 <thead class="table-light">
-                                    <tr>
-                                        <th class="text-nowrap">Source <span class="text-danger">*</span></th>
-                                        <th class="text-nowrap">Stage <span class="text-danger">*</span></th>
-                                        <th class="text-nowrap">Campaign <span class="text-danger">*</span></th>
-                                        <th class="text-nowrap">Name</th>
-                                        <th class="text-nowrap">Phone No.</th>
-                                        <th class="text-nowrap">E-mail</th>
-                                        <th class="text-nowrap">Alternative No.</th>
+                                    <tr> 
+                                        <th class="text-nowrap">Name <span class="text-danger">*</span></th>
+                                        <th class="text-nowrap">Phone No. <span class="text-danger">*</span></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>Website</td>
-                                        <td>Stage 1</td>
-                                        <td>Summer 2023</td>
                                         <td>John Doe</td>
-                                        <td>9899999999</td>
-                                        <td>john@example.com</td>
                                         <td>9899999999</td>
                                     </tr>
                                     <tr>
-                                        <td colspan="6" class="text-muted small">* Required fields</td>
+                                        <td colspan="2" class="text-muted small">* Required fields</td>
                                     </tr>
                                 </tbody>
                             </table>

@@ -8,8 +8,10 @@
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            
             <div class="modal-body p-4">
                 <div class="row g-4">
+
                     <div class="col-lg-6">
                         <div class="card h-100 border-0 shadow-sm">
                             <div class="card-header bg-light">
@@ -51,6 +53,93 @@
                                         </div>
                                     </div>
                                 </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-4 border-0 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0 fw-bold">
+                            <i class="bi bi-table me-2"></i>Required CSV Format
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="text-nowrap">Source <span class="text-danger">*</span></th>
+                                        <th class="text-nowrap">Stage <span class="text-danger">*</span></th>
+                                        <th class="text-nowrap">Campaign <span class="text-danger">*</span></th>
+                                        <th class="text-nowrap">Name</th>
+                                        <th class="text-nowrap">Phone No.</th>
+                                        <th class="text-nowrap">E-mail</th>
+                                        <th class="text-nowrap">Alternative No.</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Website</td>
+                                        <td>Stage 1</td>
+                                        <td>Summer 2023</td>
+                                        <td>John Doe</td>
+                                        <td>9899999999</td>
+                                        <td>john@example.com</td>
+                                        <td>9899999999</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="6" class="text-muted small">* Required fields</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <h6 class="fw-bold">Available Sources:</h6>
+                                @if(isset($sources) && $sources->count())
+                                    <div class="table-responsive">
+                                        <table id="sourcesTable" class="table table-striped table-bordered table-hover mb-0" style="width:100%">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Source Name</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($sources as $source)
+                                                    <tr>
+                                                        <td>{{ $source->name }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @else
+                                    <p class="text-muted fst-italic">No sources available.</p>
+                                @endif
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-bold">Available Campaigns:</h6>
+                                @if(isset($campaigns) && $campaigns->count())
+                                    <div class="table-responsive">
+                                        <table id="bulkCampaignsTable" class="table table-striped table-bordered table-hover mb-0" style="width:100%">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Campaign Name</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($campaigns as $campaign)
+                                                    <tr>
+                                                        <td>{{ $campaign->name }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @else
+                                    <p class="text-muted fst-italic">No campaigns available.</p>
+                                @endif
                             </div>
                         </div>
                     </div>

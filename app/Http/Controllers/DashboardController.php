@@ -889,9 +889,19 @@ class DashboardController extends Controller
     private function getProjectAnalysisData($childIds, $filters, $dateRange)
     {
         $query = DB::table('leads')
-            ->join('projects', 'leads.project_id', '=', 'projects.id')
             ->select(
-                'projects.project_name as project',
+                DB::raw("CASE 
+                    WHEN leads.project_id = 'others' THEN 'others'
+                    WHEN leads.project_id LIKE '%,others%' THEN 'others'
+                    WHEN leads.custom_project_name IS NOT NULL AND leads.custom_project_name != '' THEN 'others'
+                    WHEN leads.project_id IS NULL OR leads.project_id = '' THEN 'No Project'
+                    ELSE (
+                        SELECT projects.project_name 
+                        FROM projects 
+                        WHERE FIND_IN_SET(projects.id, REPLACE(leads.project_id, ' ', ''))
+                        LIMIT 1
+                    )
+                END as project"),
                 DB::raw('COUNT(leads.id) as lead_count')
             )
             ->when(!empty($childIds), fn($q) => $q->whereIn('leads.user_id', $childIds))
@@ -900,7 +910,7 @@ class DashboardController extends Controller
             ->when(!empty($filters['status']), fn($q) => $q->where('leads.status', $filters['status']))
             ->when(!empty($dateRange), fn($q) => $q->whereBetween('leads.lead_date', [$dateRange['start'], $dateRange['end']]))
             ->when($filters['team'] === 'self', fn($q) => $q->where('leads.user_id', session('user_id')))
-            ->groupBy('projects.project_name')
+            ->groupBy('project')
             ->orderBy('lead_count', 'desc')
             ->limit(10);
 

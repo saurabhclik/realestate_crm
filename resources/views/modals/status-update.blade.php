@@ -47,9 +47,19 @@
                             @foreach ($projects as $project)
                             <option value="{{ $project->id }}">{{ $project->project_name }}</option>
                             @endforeach
+                            <option value="others">Others</option>
                         </select>
                         <div class="form-text">You can select multiple {{ $isLeadManagement ? 'products' : 'projects' }} for this visit</div>
                     </div>
+                    
+                    <!-- Other Project Text Field -->
+                    <div id="otherProjectField" style="display: none;">
+                        <div class="mb-3">
+                            <label for="otherProjectName" class="form-label">Other {{ $isLeadManagement ? 'Product' : 'Project' }} Name</label>
+                            <input type="text" class="form-control" id="otherProjectName" placeholder="Enter {{ $isLeadManagement ? 'product' : 'project' }} name">
+                        </div>
+                    </div>
+                    
                     <div id="selectedProjectsPreview" class="mt-2" style="display: none;">
                         <label class="form-label">Selected {{ $isLeadManagement ? 'Products' : 'Projects' }}:</label>
                         <div id="selectedProjectsList" class="d-flex flex-wrap gap-2"></div>
@@ -144,6 +154,7 @@
         </div>
     </div>
 </div>
+
 <style>
     .selected-project-badge {
         background: linear-gradient(45deg, #0d6efd, #0dcaf0);
@@ -170,6 +181,23 @@
 <script>
     $(document).ready(function() 
     {
+        $('#visitProjects').on('change', function() 
+        {
+            var selectedValues = $(this).val() || [];
+            if (selectedValues.includes('others')) 
+            {
+                $('#otherProjectField').show();
+                $('#otherProjectName').prop('required', true);
+            } 
+            else 
+            {
+                $('#otherProjectField').hide();
+                $('#otherProjectName').prop('required', false);
+                $('#otherProjectName').val('');
+            }
+            updateSelectedProjectsPreview();
+        });
+
         $('#newStatus').on('change', function() 
         {
             let status = $(this).val();
@@ -191,4 +219,104 @@
         });
 
     });
+
+    function updateSelectedProjectsPreview() 
+    {
+        var selectedProjects = $('#visitProjects').val();
+        var previewContainer = $('#selectedProjectsPreview');
+        var projectsList = $('#selectedProjectsList');
+        var otherProjectName = $('#otherProjectName').val();
+
+        projectsList.empty();
+
+        if (selectedProjects && selectedProjects.length > 0) 
+        {
+            previewContainer.show();
+            
+            var hasOthers = selectedProjects.includes('others');
+            var regularProjects = selectedProjects.filter(id => id !== 'others');
+            
+            if (regularProjects.length > 0) 
+            {
+                $.ajax({
+                    url: '{{ route("lead.get-project-names") }}',
+                    type: 'POST',
+                    data: {
+                        project_ids: regularProjects,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) 
+                    {
+                        if (response.success) 
+                        {
+                            response.projectNames.forEach(function(projectName, index) 
+                            {
+                                var projectId = regularProjects[index];
+                                var badge = $('<span class="selected-project-badge"></span>');
+                                badge.html(projectName +
+                                    '<button type="button" class="remove-btn" onclick="removeProjectFromSelection(\'' +
+                                    projectId + '\')">×</button>');
+                                projectsList.append(badge);
+                            });
+                            
+                            if (hasOthers && otherProjectName) 
+                            {
+                                var otherBadge = $('<span class="selected-project-badge" style="background: linear-gradient(45deg, #6c757d, #adb5bd);"></span>');
+                                otherBadge.html('Others: ' + otherProjectName +
+                                    '<button type="button" class="remove-btn" onclick="removeProjectFromSelection(\'others\')">×</button>');
+                                projectsList.append(otherBadge);
+                            }
+                        }
+                    },
+                    error: function() 
+                    {
+                        regularProjects.forEach(function(projectId) 
+                        {
+                            var badge = $('<span class="selected-project-badge"></span>');
+                            badge.html('Project ID: ' + projectId +
+                                '<button type="button" class="remove-btn" onclick="removeProjectFromSelection(\'' +
+                                projectId + '\')">×</button>');
+                            projectsList.append(badge);
+                        });
+                        
+                        if (hasOthers && otherProjectName) 
+                        {
+                            var otherBadge = $('<span class="selected-project-badge" style="background: linear-gradient(45deg, #6c757d, #adb5bd);"></span>');
+                            otherBadge.html('Others: ' + otherProjectName +
+                                '<button type="button" class="remove-btn" onclick="removeProjectFromSelection(\'others\')">×</button>');
+                            projectsList.append(otherBadge);
+                        }
+                    }
+                });
+            } 
+            else if (hasOthers && otherProjectName) 
+            {
+                var otherBadge = $('<span class="selected-project-badge" style="background: linear-gradient(45deg, #6c757d, #adb5bd);"></span>');
+                otherBadge.html('Others: ' + otherProjectName +
+                    '<button type="button" class="remove-btn" onclick="removeProjectFromSelection(\'others\')">×</button>');
+                projectsList.append(otherBadge);
+            }
+        } 
+        else 
+        {
+            previewContainer.hide();
+        }
+    }
+
+    function removeProjectFromSelection(projectId) 
+    {
+        var currentValues = $('#visitProjects').val() || [];
+        var updatedValues = currentValues.filter(function(id) 
+        {
+            return id !== projectId;
+        });
+        
+        if (projectId === 'others') 
+        {
+            $('#otherProjectName').val('');
+            $('#otherProjectField').hide();
+        }
+        
+        $('#visitProjects').val(updatedValues).trigger('change');
+    }
 </script>

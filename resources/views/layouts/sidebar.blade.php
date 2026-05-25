@@ -177,8 +177,8 @@
                         'VISIT SCHEDULED',
                         'VISIT DONE',
                         'BOOKED',
-                        'COMPLETED',
-                        'CANCELLED',
+                        'Completed',
+                        'Cancelled',
                         'FUTURE LEAD',
                     ];
 
@@ -226,15 +226,16 @@
                                 </a>
                             </li>
                             @foreach($dynamicLeadStatuses as $status)
-
                                 @php
                                     $routeName = $status->route_name;
-                                    $displayName = strtoupper(trim($status->display_name));
+                                    $systemName = strtoupper(trim($status->system_name));
                                 @endphp
 
                                 @if(
-                                    !empty($routeName) &&
-                                    in_array($displayName, $mainStatuses)
+                                    !empty($routeName) && 
+                                    !empty($status->system_name) &&
+                                    in_array($systemName, $mainStatuses) &&
+                                    $status->system_name != 'TRANSFER LEAD'
                                 )
                                     <li>
                                         <a href="{{ route($routeName) }}">
@@ -249,15 +250,15 @@
                                 </a>
                                 <ul class="sub-menu" aria-expanded="false">
                                     @foreach($dynamicLeadStatuses as $status)
-
                                         @php
                                             $routeName = $status->route_name;
-                                            $displayName = strtoupper(trim($status->display_name));
+                                            $systemName = strtoupper(trim($status->system_name));
                                         @endphp
 
                                         @if(
-                                            !empty($routeName) &&
-                                            in_array($displayName, $otherStatuses)
+                                            !empty($routeName) && 
+                                            !empty($status->system_name) &&
+                                            in_array($systemName, $otherStatuses)
                                         )
                                             <li>
                                                 <a href="{{ route($routeName) }}">

@@ -23,20 +23,25 @@
     $leadCards = [];
     $othersLeadData = [];
     $systemName = '';
+
+    $propertyMapping = [
+        'CALL SCHEDULED' => 'call_schedule',
+        'VISIT SCHEDULED' => 'visit_schedule',
+    ];
     foreach ($leadStatuses as $status)
     {
-        $ex = explode(' ', trim($status->system_name));
-        $systemName = strtolower(implode('_',$ex));  
-        $title = ucwords(
-            strtolower(
-                trim($status->display_name ?? '')
-            )
-        );
-
-        if (!str_contains(strtolower($title), 'lead'))
+        $systemNameUpper = strtoupper(trim($status->system_name));
+        if (isset($propertyMapping[$systemNameUpper])) 
         {
-            $title .= ' Leads';
+            $propertyName = $propertyMapping[$systemNameUpper];
+        } 
+        else 
+        {
+            $propertyName = strtolower(str_replace(' ', '_', $systemNameUpper));
         }
+        
+        $title = ucwords(strtolower(trim($status->display_name ?? '')));
+
 
         $routeName = !empty($status->route_name)
             ? $status->route_name
@@ -47,10 +52,12 @@
                 ? $status->icon
                 : 'bx ' . $status->icon)
             : 'bx bx-copy-alt';
+            
         $leadStatsArray = (array) $leadStats;
-        $value = $systemName
-            ? data_get($leadStatsArray, $systemName, 0)
+        $value = $propertyName && isset($leadStatsArray[$propertyName]) 
+            ? $leadStatsArray[$propertyName] 
             : 0;
+        
         $card = [
             'route' => $routeName,
             'title' => $title,
@@ -76,34 +83,27 @@
             'value' => $allocatedLeadCount->total() ?? 0,
             'icon'  => 'bx bx-user-check'
         ],
-
         [
             'route' => 'lead.unallocated',
             'title' => 'Unallocate Leads',
             'value' => $unallocatedLeadCount->total() ?? 0,
             'icon'  => 'bx bx-user-x'
         ]
-
     ], $othersLeadData);
+    
     $mainLeadTotal = collect($leadCards)->sum('value');
 
     $leadCards[] = [
-
         'route' => null,
-
         'title' => 'Other Leads',
-
         'value' => max(
             ($leadStatsArray['total_lead'] ?? 0) - $mainLeadTotal,
             0
         ),
-
         'icon' => 'bx bx-dots-horizontal-rounded'
-
     ];
 
     $totalOthersLead = collect($othersLeadData)->sum('value');
-
 @endphp
 
 <style>

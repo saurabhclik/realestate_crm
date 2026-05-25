@@ -5,7 +5,7 @@
     <div class="container-fluid mt-4">
         <div class="row mb-3">
             <div class="col-md-12">
-                <h2>Communication Reports<div class="border-bottom border-3 border-primary mb-2 mt-1 w-75"></div></h2>
+                <h2>Communication Reports<div class="border-bottom border-3 border-primary mb-2 mt-1 w-25"></div></h2>
                 <div class="card">
                     <div class="card-body">
                         <form method="GET" action="{{ route('report.communication_reports') }}" class="row">

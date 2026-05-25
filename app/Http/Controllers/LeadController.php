@@ -178,7 +178,8 @@ class LeadController extends Controller
                     $campaign = '';
                     $whatsapp = '';
                     $address = '';
-                    foreach ($row as $key => $value) {
+                    foreach ($row as $key => $value) 
+                    {
                         $keyLower = strtolower($key);
                         if (in_array($keyLower, ['source', 'lead source'])) {
                             $source = trim($value);

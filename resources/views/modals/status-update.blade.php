@@ -22,10 +22,12 @@
                             Select new status
                         </option>
                         @foreach($lead_statuses as $status)
-                            <option value="{{ $status->system_name }}"
-                                data-system="{{ $status->system_name }}">
-                                {{ $status->display_name }}
-                            </option>
+                            @if($status->system_name !== 'BOOKED' && $status->system_name !== 'Cancelled' && $status->system_name !== 'Completed')
+                                <option value="{{ $status->system_name }}"
+                                    data-system="{{ $status->system_name }}">
+                                    {{ $status->display_name }}
+                                </option>
+                            @endif
                         @endforeach
                     </select>
                 </div>

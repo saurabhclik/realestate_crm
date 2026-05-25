@@ -9,17 +9,24 @@
         <div class="row mb-3">
             <div class="col-12">
                 <div class="p-3 rounded-3">
-                    <div class="d-flex align-items-start gap-2">
-                        <i class="fas fa-cogs fs-5 mt-1"></i>
-                        <div>
-                            <div class="fw-bold h4 mb-1">
-                                System Configuration
-                            </div>
-                            <div class="border-bottom border-3 border-primary mb-2 w-25"></div>
-                            <div class="small text-muted">
-                                Manage CRM settings, logs, ratings and system controls
+                    <div class="d-flex align-items-start justify-content-between gap-2">
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="fas fa-cogs fs-5 mt-1"></i>
+                            <div>
+                                <div class="fw-bold h4 mb-1">
+                                    System Configuration
+                                </div>
+                                <div class="border-bottom border-3 border-primary mb-2 w-25"></div>
+                                <div class="small text-muted">
+                                    Manage CRM settings, logs, ratings and system controls
+                                </div>
                             </div>
                         </div>
+                        <button type="button"
+                            class="btn btn-outline-info btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#softwareGuideModal">
+                            <i class="fas fa-book-open me-1"></i>
+                            Software Guide & Glossary
+                        </button>
                     </div>
                 </div>
             </div>
@@ -131,5 +138,5 @@
         </div>
     </div>
 </div>
-
+@include('modals.software-guild')
 @endsection

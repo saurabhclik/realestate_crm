@@ -2,8 +2,10 @@
 
 namespace App\Exceptions;
 
-use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
+use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Session\TokenMismatchException;
+use Illuminate\Support\Facades\Session;
 
 class Handler extends ExceptionHandler
 {
@@ -26,7 +28,7 @@ class Handler extends ExceptionHandler
     ];
 
     /**
-     * A list of the inputs that are never flashed to the session on validation exceptions.
+     * A list of the inputs that are never flashed for validation exceptions.
      *
      * @var array<int, string>
      */
@@ -46,5 +48,34 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+
+    /**
+     * Render an exception into an HTTP response.
+     */
+    public function render($request, Throwable $exception)
+    {
+        if ($exception instanceof TokenMismatchException)
+        {
+            Session::flush();
+
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            // AJAX Request
+            if ($request->ajax() || $request->wantsJson())
+            {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Session expired. Please login again.'
+                ], 419);
+            }
+
+            // Normal Request
+            return redirect('/login')
+                ->with('error', 'Session expired. Please login again.');
+        }
+
+        return parent::render($request, $exception);
     }
 }

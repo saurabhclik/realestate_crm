@@ -284,7 +284,9 @@ class DashboardController extends Controller
         $task_owner = Session::get('user_id');
         $selectedAgent = $selectedAgentId;
         $calendarEvents = $this->getCalendarEvents($childIds, $dateRange);
-        $lead_statuses = DB::table('lead_statuses')->get();
+        $lead_statuses = DB::table('lead_statuses')
+        ->whereNotIn('system_name', ['BOOKED', 'Completed', 'Cancelled'])
+        ->get();
         return view('index', compact(
             'taskStats',
             'categorys',

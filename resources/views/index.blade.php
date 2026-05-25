@@ -700,7 +700,7 @@
                                         <div class="card-body py-2 px-3">
                                             <div class="d-flex align-items-center justify-content-between">
                                                 <div class="flex-grow-1">
-                                                    <p class="text-muted mb-1 small fw-medium">{{ $other['title'] ?? '' }}</p>
+                                                    <p class="text-muted mb-1 small fw-medium">{{ $other['title'] ?? 0 }}</p>
                                                     <h6 class="mb-0 fw-semibold">{{ $other['value'] ?? 0 }}</h6>
                                                 </div>
                                                 <div class="flex-shrink-0 ms-3">

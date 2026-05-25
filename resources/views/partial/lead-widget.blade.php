@@ -11,7 +11,7 @@
                             <div class="d-flex">
                                 <div class="flex-grow-1">
                                     <p class="text-muted fw-medium">{{ $card['title'] }}</p>
-                                    <h4 class="mb-0">{{ $card['value'] }}</h4>
+                                    <h4 class="mb-0">{{ $card['value'] ?? 0 }}</h4>
                                 </div>
                                 <div class="flex-shrink-0 align-self-center">
                                     <div class="avatar-sm rounded-circle bg-primary mini-stat-icon">

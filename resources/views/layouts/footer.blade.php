@@ -104,7 +104,7 @@
     </div>
 </div>
 @endif
-<div class="floating-chat-toggle {{ in_array('chat_bot', session('active_features', [])) ? '' : 'd-none' }}"
+<div class="floating-chat-toggle {{ in_array('chat_bot', session('active_features', [])) ? 'd-none' : '' }}"
     id="chatToggle" title="CHATBOT Assistant" role="button" tabindex="0" aria-label="Open CHATBOT Assistant">
     <span class="chatbot-robot" aria-hidden="true">
         <span class="chatbot-antenna"></span>
@@ -1227,7 +1227,8 @@
         });
     });
 
-    function updateLeadStatus() {
+    function updateLeadStatus()
+    {
         const leadId = $('#leadId').val();
         const newStatus = $('#newStatus').val();
         const conversionType = $('#conversionType').val();
@@ -1244,40 +1245,51 @@
         const app_doa = $('#app_doa').val();
         const visitProjects = $('#visitProjects').val();
         const post_sale = $('#createPostSale').val();
+        const otherProjectName = $('#otherProjectName').val();
 
-        if (!newStatus) {
+        if (!newStatus) 
+        {
             flasher.error('Please select a new status');
             return;
         }
+        
         const visitStatuses = ['VISIT SCHEDULED', 'VISIT DONE'];
-        // if (visitStatuses.includes(newStatus)) {
-        //     if (!visitProjects || visitProjects.length === 0) {
-        //         flasher.error('Please select at least one project for the visit');
-        //         return;
-        //     }
-        // }
+        if (visitStatuses.includes(newStatus) && visitProjects && visitProjects.includes('others')) 
+        {
+            if (!otherProjectName || otherProjectName.trim() === '') 
+            {
+                flasher.error('Please enter the other project name');
+                return;
+            }
+        }
 
-        if (newStatus === 'CONVERTED' && !conversionType) {
+        if (newStatus === 'CONVERTED' && !conversionType) 
+        {
             flasher.error('Please select a conversion type');
             return;
         }
 
-        if (['CALL SCHEDULED', 'VISIT SCHEDULED', 'INTERESTED'].includes(newStatus)) {
-            if (!remindDate) {
+        if (['CALL SCHEDULED', 'VISIT SCHEDULED', 'INTERESTED'].includes(newStatus)) 
+        {
+            if (!remindDate) 
+            {
                 flasher.error('Please select a reminder date');
                 return;
             }
-            if (!remindTime) {
+            if (!remindTime) 
+            {
                 flasher.error('Please select a reminder time');
                 return;
             }
 
             const reminderDateTime = new Date(`${remindDate}T${remindTime}`);
-            if (reminderDateTime < new Date()) {
+            if (reminderDateTime < new Date()) 
+            {
                 flasher.error('Reminder date/time cannot be in the past');
                 return;
             }
         }
+        
         const submitBtn = $('#statusUpdateModal').find('.btn-primary');
         submitBtn.prop('disabled', true).html(
             '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...');
@@ -1300,30 +1312,45 @@
             app_doa: app_doa,
             create_post_sale: post_sale,
         };
-        if (visitStatuses.includes(newStatus) && visitProjects && visitProjects.length > 0) {
+        
+        if (visitStatuses.includes(newStatus) && visitProjects && visitProjects.length > 0) 
+        {
             formData.visitProjects = visitProjects;
+            if (visitProjects.includes('others')) 
+            {
+                formData.otherProjectName = otherProjectName;
+            }
         }
+        
         $.ajax({
             url: '{{ route('lead.updateStatus') }}',
             type: 'POST',
             data: formData,
-            success: function(response) {
-                if (response.success) {
+            success: function(response) 
+            {
+                if (response.success) 
+                {
                     flasher.success(response.message);
                     setTimeout(() => {
                         $('#statusUpdateModal').modal('hide');
                         location.reload();
                     }, 1000);
-                } else {
+                } 
+                else 
+                {
                     flasher.error(response.message);
                     submitBtn.prop('disabled', false).text('Update Status');
                 }
             },
-            error: function(xhr) {
+            error: function(xhr) 
+            {
                 let errorMessage = 'Error updating status';
-                if (xhr.responseJSON && xhr.responseJSON.message) {
+                if (xhr.responseJSON && xhr.responseJSON.message) 
+                {
                     errorMessage = xhr.responseJSON.message;
-                } else if (xhr.statusText) {
+                } 
+                else if (xhr.statusText) 
+                {
                     errorMessage += `: ${xhr.statusText}`;
                 }
                 flasher.error(errorMessage);

@@ -419,6 +419,10 @@ class LeadService
             'remindDate' => 'required_if:newStatus,CALL SCHEDULED,VISIT SCHEDULED,MEETING SCHEDULED,INTERESTED|nullable|date',
             'remindTime' => 'required_if:newStatus,CALL SCHEDULED,VISIT SCHEDULED,MEETING SCHEDULED,INTERESTED|nullable',
         ];
+        if ($request->has('visitProjects') && is_array($request->visitProjects) && in_array('others', $request->visitProjects)) 
+        {
+            $rules['otherProjectName'] = 'required|string|max:255';
+        }
 
         if ($request->newStatus === 'CONVERTED') 
         {
@@ -466,30 +470,81 @@ class LeadService
             
             $status = strtoupper(trim($request->newStatus));
             $projectIds = $request->prj_id;
+            $visitProjects = $request->visitProjects ?? [];
+            $hasOthers = is_array($visitProjects) && in_array('others', $visitProjects);
+            $otherProjectName = $hasOthers ? $request->otherProjectName : null;
+            $regularProjects = is_array($visitProjects) ? array_filter($visitProjects, function($item) 
+            {
+                return $item !== 'others';
+            }) : [];
             
-            if (is_array($projectIds)) 
+            $finalProjectIds = $projectIds;
+            $projectName = null;
+            $isOtherProject = false;
+            $customProjectName = null;
+            
+            if ($status === 'VISIT SCHEDULED' || $status === 'VISIT DONE') 
             {
-                $projectIds = array_filter($projectIds);
-                $projectIdsString = implode(',', $projectIds);
-                $projectNames = DB::table('projects')
-                    ->whereIn('id', $projectIds)
-                    ->pluck('project_name')
-                    ->toArray();
-                $projectName = implode(', ', $projectNames);
-            } 
-            else 
-            {
-                $projectIdsString = $projectIds;
-                $projectName = null;
-                if (!empty($projectIds)) 
+                if ($hasOthers) 
                 {
-                    $projectName = DB::table('projects')
-                        ->where('id', $projectIds)
-                        ->value('project_name');
+                    $isOtherProject = true;
+                    $customProjectName = $otherProjectName;
+                    $finalProjectIds = 'others';
+                    $projectName = $otherProjectName;
+                }
+                
+                if (!empty($regularProjects)) 
+                {
+                    if ($hasOthers) 
+                    {
+                        $regularProjectIds = implode(',', $regularProjects);
+                        $regularProjectNames = DB::table('projects')
+                            ->whereIn('id', $regularProjects)
+                            ->pluck('project_name')
+                            ->toArray();
+                        $projectName = implode(', ', $regularProjectNames) . ' + Others: ' . $otherProjectName;
+                        $finalProjectIds = $regularProjectIds . ',others';
+                    } 
+                    else 
+                    {
+                        $finalProjectIds = implode(',', $regularProjects);
+                        $projectNames = DB::table('projects')
+                            ->whereIn('id', $regularProjects)
+                            ->pluck('project_name')
+                            ->toArray();
+                        $projectName = implode(', ', $projectNames);
+                    }
+                } 
+                else if ($hasOthers) 
+                {
+                    $projectName = $otherProjectName;
                 }
             }
-            
-            if (empty($projectName) && !empty($lead->project_id)) 
+            if (empty($projectName) && !empty($request->prj_id) && $status !== 'CONVERTED') 
+            {
+                if (is_array($request->prj_id)) 
+                {
+                    $projectIdsArray = array_filter($request->prj_id);
+                    $projectIdsString = implode(',', $projectIdsArray);
+                    $projectNames = DB::table('projects')
+                        ->whereIn('id', $projectIdsArray)
+                        ->pluck('project_name')
+                        ->toArray();
+                    $projectName = implode(', ', $projectNames);
+                    $finalProjectIds = $projectIdsString;
+                } 
+                else 
+                {
+                    $finalProjectIds = $request->prj_id;
+                    if (!empty($request->prj_id)) 
+                    {
+                        $projectName = DB::table('projects')
+                            ->where('id', $request->prj_id)
+                            ->value('project_name');
+                    }
+                }
+            }
+            if (empty($projectName) && !empty($lead->project_id) && $lead->project_id !== 'others') 
             {
                 $existingProjects = explode(',', $lead->project_id);
                 $projectNames = DB::table('projects')
@@ -499,15 +554,19 @@ class LeadService
                 $projectName = implode(', ', $projectNames);
             }
             
-            $baseComment = $request->comment
-                ?: 'Status changed to ' . $status;
+            $baseComment = $request->comment ?: 'Status changed to ' . $status;
             $commentText = $baseComment;
             
-            if (
-                in_array($status, ['VISIT SCHEDULED', 'VISIT DONE'])
-                && !empty($projectName)
-            ) {
-                $commentText .= ' | Project: ' . $projectName;
+            if (in_array($status, ['VISIT SCHEDULED', 'VISIT DONE']) && !empty($projectName)) 
+            {
+                if ($isOtherProject) 
+                {
+                    $commentText .= ' | Custom Project: ' . $projectName;
+                } 
+                else 
+                {
+                    $commentText .= ' | Project: ' . $projectName;
+                }
             }
             
             $updateData = [
@@ -517,6 +576,18 @@ class LeadService
                 'remind_time' => $request->remindTime,
                 'last_comment' => $commentText,
             ];
+            if ($status === 'VISIT SCHEDULED' || $status === 'VISIT DONE') 
+            {
+                $updateData['project_id'] = $finalProjectIds;
+                if ($isOtherProject) 
+                {
+                    $updateData['custom_project_name'] = $customProjectName;
+                }
+                else 
+                {
+                    $updateData['custom_project_name'] = null;
+                }
+            }
             
             if ($status === 'VISIT DONE') 
             {
@@ -534,9 +605,15 @@ class LeadService
                     'app_dob' => $request->app_dob,
                     'app_doa' => $request->app_doa,
                     'final_price' => $request->final_price,
-                    'project_id' => $projectIdsString,
+                    'project_id' => $finalProjectIds,
                     'size' => $request->prop_size,
                 ]);
+                if ($isOtherProject) 
+                {
+                    $projectName = $otherProjectName;
+                    $updateData['custom_project_name'] = $otherProjectName;
+                }
+                
                 if ($request->conversionType === 'Completed' && $request->create_post_sale == 1) 
                 {
                     $postSaleData = [
@@ -556,12 +633,14 @@ class LeadService
                         'updated_at' => now(),
                     ];
                     
+                    if ($isOtherProject) 
+                    {
+                        $postSaleData['is_custom_project'] = 1;
+                        $postSaleData['custom_project_name'] = $otherProjectName;
+                    }
+                    
                     DB::table('post_sales')->insert($postSaleData);
                 }
-            } 
-            else 
-            {
-                $updateData['project_id'] = $projectIdsString;
             }
 
             DB::table('leads')
@@ -579,11 +658,13 @@ class LeadService
             ]);
             
             DB::commit();
+            
             return [
                 'success' => true,
                 'message' => 'Status updated successfully',
                 'status' => 200,
-                'post_sale_created' => ($request->conversionType === 'Completed' && $request->create_post_sale == 1)
+                'post_sale_created' => ($request->conversionType === 'Completed' && $request->create_post_sale == 1),
+                'is_other_project' => $isOtherProject
             ];
 
         } 

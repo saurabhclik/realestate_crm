@@ -2,7 +2,7 @@
 <div class="modal fade" id="projectModal" tabindex="-1" aria-labelledby="projectModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xxl modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-gradient-primary text-white">
+            <div class="modal-header bg-primary text-white">
                 <div class="w-100">
                     <h5 class="modal-title" id="projectModalLabel">Project Inventory Management</h5>
                     <p class="mb-0 small opacity-75" id="formProgressText">Complete all  fields</p>

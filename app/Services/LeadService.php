@@ -592,7 +592,6 @@ class LeadService
             if ($status === 'VISIT DONE') 
             {
                 $updateData['visited_on'] = 1;
-                $updateData['visit_done_date'] = now();
             }
 
             if ($status === 'CONVERTED') 

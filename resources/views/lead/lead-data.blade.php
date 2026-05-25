@@ -658,7 +658,7 @@
                                                     } 
                                                     else 
                                                     {
-                                                        echo $row->project_name ?? '-';
+                                                        echo $row->project_name ?? $row->custom_project_name;
                                                     }
                                                 @endphp
                                             </div>

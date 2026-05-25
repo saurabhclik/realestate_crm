@@ -389,7 +389,9 @@ class MasterController extends Controller
             DB::commit();
             Flasher::addSuccess('Source updated successfully.');
             return redirect()->route('source.platform');
-        } catch (\Exception $e) {
+        } 
+        catch (\Exception $e) 
+        {
             DB::rollBack();
             Flasher::addError('Failed to update source: ' . $e->getMessage());
             return redirect()->back()->withInput();
@@ -447,7 +449,6 @@ class MasterController extends Controller
             }
 
             try {
-                // Params
                 $length = $request->query('length', 10);
                 $search = $request->query('search');
                 $sortColumn = $request->query('sort', 'id');
@@ -455,8 +456,6 @@ class MasterController extends Controller
                 $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'desc';
                 $allowedColumns = ['id', 'name', 'created_at'];
                 $sortColumn = in_array($sortColumn, $allowedColumns) ? $sortColumn : 'id';
-
-                // Query
                 $checklists = DB::table('checklist')
                     ->when($search, function ($query, $search) {
                         $query->where('name', 'LIKE', '%' . $search . '%');
@@ -479,7 +478,9 @@ class MasterController extends Controller
                     'sortColumn',
                     'sortDirection'
                 ));
-            } catch (\Exception $e) {
+            } 
+            catch (\Exception $e) 
+            {
                 Flasher::addError('Failed to load checklists: ' . $e->getMessage());
                 return back();
             }
@@ -491,7 +492,8 @@ class MasterController extends Controller
     public function checklist_update(Request $request)
     {
         DB::beginTransaction();
-        try {
+        try 
+        {
             $request->merge([
                 'type' => strtolower(trim($request->type))
             ]);
@@ -506,8 +508,10 @@ class MasterController extends Controller
                 ],
             ]);
 
-            if ($validator->fails()) {
-                foreach ($validator->errors()->all() as $error) {
+            if ($validator->fails()) 
+            {
+                foreach ($validator->errors()->all() as $error) 
+                {
                     Flasher::addError($error);
                 }
                 return redirect()->back()->withInput();
@@ -523,7 +527,9 @@ class MasterController extends Controller
             DB::commit();
             Flasher::addSuccess('Check List updated successfully.');
             return redirect()->route('check.list');
-        } catch (\Exception $e) {
+        } 
+        catch (\Exception $e) 
+        {
             DB::rollBack();
             Flasher::addError('Failed to update checklist: ' . $e->getMessage());
             return redirect()->back()->withInput();
@@ -533,10 +539,12 @@ class MasterController extends Controller
     public function project_category(Request $request)
     {
         $user_role = session()->get('user_type');
-        if ($user_role !== 'admin' && $user_role !== 'team_manager') {
+        if ($user_role !== 'admin' && $user_role !== 'team_manager') 
+        {
             abort(404);
         }
-        try {
+        try 
+        {
             $length = $request->query('length', 10);
             $search = $request->query('search');
             $sortColumn = $request->query('sort', 'id');
@@ -546,7 +554,8 @@ class MasterController extends Controller
             $sortColumn = in_array($sortColumn, $allowedColumns) ? $sortColumn : 'id';
 
             $categories = DB::table("inv_catg")
-                ->when($search, function ($query, $search) {
+                ->when($search, function ($query, $search) 
+                {
                     $query->where('name', 'LIKE', '%' . $search . '%');
                 })
                 ->orderBy($sortColumn, $sortDirection)
@@ -561,7 +570,9 @@ class MasterController extends Controller
             $categoryList = DB::table('category')->select('id', 'name')->get();
 
             return view('master.project-category', compact('categories', 'categoryList', 'length', 'sortColumn', 'sortDirection'));
-        } catch (\Exception $e) {
+        } 
+        catch (\Exception $e) 
+        {
             Flasher::addError('Failed to load categories: ' . $e->getMessage());
             return back();
         }
@@ -570,7 +581,8 @@ class MasterController extends Controller
     public function project_category_store(Request $request)
     {
         DB::beginTransaction();
-        try {
+        try 
+        {
             $validator = Validator::make($request->all(), [
                 'cat_type' => 'required|string',
                 'name' => [
@@ -606,7 +618,8 @@ class MasterController extends Controller
     public function category_update(Request $request)
     {
         DB::beginTransaction();
-        try {
+        try 
+        {
             $validator = Validator::make($request->all(), [
                 'id' => 'required|exists:inv_catg,id',
                 'cat_type' => 'required|string',
@@ -614,28 +627,42 @@ class MasterController extends Controller
                     'required',
                     'string',
                     'max:255',
-                    Rule::unique('inv_catg', 'name')
+                    Rule::unique('inv_catg', 'name')->ignore($request->id)
                 ],
             ]);
 
-            if ($validator->fails()) {
-                foreach ($validator->errors()->all() as $error) {
+            if ($validator->fails()) 
+            {
+                foreach ($validator->errors()->all() as $error) 
+                {
                     Flasher::addError($error);
                 }
                 return redirect()->back()->withInput();
             }
-
+            $oldCategory = DB::table('inv_catg')->where('id', $request->id)->first();
+            $oldName = $oldCategory->name;
+            $newName = $request->name;
             DB::table('inv_catg')
                 ->where('id', $request->id)
                 ->update([
                     'type' => $request->cat_type,
-                    'name' => $request->name,
+                    'name' => $newName,
                 ]);
+            if ($oldName !== $newName) 
+            {
+                DB::table('inv_subcatg')
+                    ->where('catg_id', $request->id)
+                    ->update([
+                        'catg_id' => $request->id,
+                    ]);
+            }
 
             DB::commit();
-            Flasher::addSuccess('Category updated successfully.');
+            Flasher::addSuccess('Category updated successfully. All related sub-categories have been updated.');
             return redirect()->route('project.category');
-        } catch (\Exception $e) {
+        } 
+        catch (\Exception $e) 
+        {
             DB::rollBack();
             Flasher::addError('Failed to update category: ' . $e->getMessage());
             return redirect()->back()->withInput();
@@ -659,7 +686,6 @@ class MasterController extends Controller
             $allowedColumns = ['a.id', 'a.name', 'a.created_at', 'b.name'];
             $sortColumn = in_array($sortColumn, $allowedColumns) ? $sortColumn : 'a.id';
 
-            //Query with sorting + pagination
             $project_sub_categories = DB::table('inv_subcatg as a')
                 ->join('inv_catg as b', 'a.catg_id', '=', 'b.id')
                 ->select('a.*', 'b.name as cat_name', 'b.type as type')
@@ -760,8 +786,8 @@ class MasterController extends Controller
 
     public function attendance(Request $request)
     {
-        try {
-            //Params
+        try 
+        {
             $length = $request->query('length', 10);
             $search = $request->query('search');
             $sortColumn = $request->query('sort', 'id');
@@ -769,8 +795,6 @@ class MasterController extends Controller
             $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'desc';
             $allowedColumns = ['id', 'name', 'created_at'];
             $sortColumn = in_array($sortColumn, $allowedColumns) ? $sortColumn : 'id';
-
-            // Query
             $attendanceTypes = DB::table('attendance_types')
                 ->when($search, function ($query, $search) {
                     $query->where('type', 'LIKE', '%' . $search . '%');
@@ -790,7 +814,9 @@ class MasterController extends Controller
                 'sortColumn',
                 'sortDirection'
             ));
-        } catch (\Exception $e) {
+        } 
+        catch (\Exception $e) 
+        {
             Flasher::addError('Failed to load attendance types: ' . $e->getMessage());
             return back();
         }
@@ -833,8 +859,8 @@ class MasterController extends Controller
 
     public function inquiry_question(Request $request)
     {
-        try {
-            // Params
+        try 
+        {
             $length = $request->query('length', 10);
             $search = $request->query('search');
             $sortColumn = $request->query('sort', 'created_at');
@@ -842,10 +868,9 @@ class MasterController extends Controller
             $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'desc';
             $allowedColumns = ['id', 'question', 'created_at'];
             $sortColumn = in_array($sortColumn, $allowedColumns) ? $sortColumn : 'created_at';
-
-            //Query
             $questions = DB::table('inquiry_questions')
-                ->when($search, function ($query, $search) {
+                ->when($search, function ($query, $search) 
+                {
                     $query->where('question_text', 'LIKE', '%' . $search . '%');
                 })
                 ->orderBy($sortColumn, $sortDirection)
@@ -863,7 +888,9 @@ class MasterController extends Controller
                 'sortColumn',
                 'sortDirection'
             ));
-        } catch (\Exception $e) {
+        } 
+        catch (\Exception $e) 
+        {
             Flasher::addError('Failed to load questions: ' . $e->getMessage());
             return back();
         }

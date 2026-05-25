@@ -9,7 +9,7 @@
             <div class="col-12">
                 <div class="page-title-box d-flex align-items-center justify-content-between">
                     <h4 class="mb-0">
-                        {{ session('software_type') === 'lead_management' ? 'Manage Product' : 'Property Master' }}
+                        {{ session('software_type') === 'lead_management' ? 'Manage Product' : 'Property Master' }}<div class="border-bottom border-3 border-primary mb-2 mt-1 w-75"></div>
                     </h4>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
@@ -43,8 +43,6 @@
                                 Add {{ session('software_type') === 'lead_management' ? 'Product' : 'Property' }}
                             </button>
                         </div>
-
-                        <!-- Length Dropdown -->
                         <div class="mb-0">
                             <label>
                                 Show

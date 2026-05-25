@@ -1,6 +1,6 @@
 <div class="col-md-6 col-lg-4">
     <div class="card h-100 shadow-sm">
-        <div class="card-header d-flex align-items-center bg-white border-bottom">
+        <div class="card-header d-flex align-items-center bg-white">
             <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
                 <i class="fas fa-envelope"></i>
             </div>

@@ -98,7 +98,7 @@ class LeadController extends Controller
             $csv = \League\Csv\Reader::createFromPath($fullPath, 'r');
             $csv->setHeaderOffset(0);
             $records = $csv->getRecords();
-
+            // echo '<pre>'; print_r($records); exit;
             $success = 0;
             $duplicate = 0;
             $errors = [];
@@ -177,7 +177,7 @@ class LeadController extends Controller
                     $source = '';
                     $campaign = '';
                     $whatsapp = '';
-
+                    $address = '';
                     foreach ($row as $key => $value) {
                         $keyLower = strtolower($key);
                         if (in_array($keyLower, ['source', 'lead source'])) {
@@ -186,8 +186,12 @@ class LeadController extends Controller
                         if (in_array($keyLower, ['campaign', 'campaign name'])) {
                             $campaign = trim($value);
                         }
-                        if (in_array($keyLower, ['alternative no.', 'whatsapp', 'whatsapp no', 'alt phone'])) {
+                        if (in_array($keyLower, ['alternative no', 'whatsapp', 'whatsapp no', 'alt phone', 'Alternative No', 'Whatsapp No'])) {
                             $whatsapp = trim($value);
+                        }
+                        if(in_array($keyLower, ['address', 'location', 'full address', 'permanent address']))
+                        {
+                            $address =  trim($value);
                         }
                     }
                     if (!empty($campaign)) {
@@ -202,7 +206,8 @@ class LeadController extends Controller
                     $name = mb_convert_encoding($name, 'UTF-8', 'auto');
                     $source = mb_convert_encoding($source, 'UTF-8', 'auto');
                     $whatsapp = mb_convert_encoding($whatsapp, 'UTF-8', 'auto');
-
+                    $address = mb_convert_encoding($address, 'UTF-8', 'auto');
+                    // echo '<pre>'; print_r($address); exit;
                     $existingLead = DB::table('leads')
                         ->where('phone', $phone)
                         ->orWhere('phone', '91' . $phone)
@@ -222,6 +227,7 @@ class LeadController extends Controller
                         'source'       => $source,
                         'campaign'     => $campaign,
                         'whatsapp_no'  => $whatsapp,
+                        'field4'       => $address,
                         'status'       => $defaultStatus,
                         'user_id'      => $user_id,
                         'is_allocated' => 0,
@@ -349,7 +355,8 @@ class LeadController extends Controller
         $query = $this->applyLeadFilters($query, $request);
         // dd($query);
         $leads = $query->paginate($length);
-        $leads->getCollection()->transform(function ($lead) {
+        $leads->getCollection()->transform(function ($lead) 
+        {
             $duplicates = \DB::table('leads')
                 ->where('phone', $lead->phone)
                 ->where('id', '!=', $lead->id)
@@ -368,7 +375,18 @@ class LeadController extends Controller
         $statuses = DB::table('status')->pluck('name', 'id');
         $classifications = DB::table('leads')->distinct()->pluck('classification');
         $agents = DB::table('users')->where('role', 'agent')->pluck('name', 'id');
-
+        $lead_statuses = DB::table('lead_statuses')
+            ->where('is_active', 1)
+            ->orderBy('seq', 'asc')
+            ->orderBy('display_name', 'asc')
+            ->get([
+                'id',
+                'system_name',
+                'display_name',
+                'visible_role',
+                'seq',
+                'is_active'
+            ]);
         $hasFilters = $request->anyFilled([
             'source',
             'status',
@@ -379,7 +397,8 @@ class LeadController extends Controller
             'shared_filter',
             'project',
             'date_from',
-            'date_to'
+            'date_to',
+            'lead_statuses'
         ]);
 
         return view('lead.lead-data', compact(
@@ -393,10 +412,10 @@ class LeadController extends Controller
             'statuses',
             'classifications',
             'agents',
-            'hasFilters'
+            'hasFilters',
+            'lead_statuses'
         ));
     }
-
 
     public function allocateLeads(Request $request)
     {
@@ -559,7 +578,18 @@ class LeadController extends Controller
         $statuses = DB::table('status')->pluck('name', 'id');
         $classifications = DB::table('leads')->distinct()->pluck('classification');
         $agents = DB::table('users')->where('role', 'agent')->pluck('name', 'id');
-
+        $lead_statuses = DB::table('lead_statuses')
+            ->where('is_active', 1)
+            ->orderBy('seq', 'asc')
+            ->orderBy('display_name', 'asc')
+            ->get([
+                'id',
+                'system_name',
+                'display_name',
+                'visible_role',
+                'seq',
+                'is_active'
+            ]);
         $hasFilters = $request->anyFilled([
             'source',
             'status',
@@ -571,7 +601,8 @@ class LeadController extends Controller
             'project',
             'date_from',
             'date_to',
-            'users'
+            'users',
+            'lead_statuses'
         ]);
 
         return view('lead.lead-data', compact(
@@ -585,7 +616,8 @@ class LeadController extends Controller
             'classifications',
             'agents',
             'hasFilters',
-            'users'
+            'users',
+            'lead_statuses'
         ));
     }
 
@@ -593,35 +625,52 @@ class LeadController extends Controller
     {
         $length = $request->query('length', 10);
 
-        if (in_array(strtolower($lead_name), ['booked', 'completed', 'cancelled'])) {
+        if (in_array(strtolower($lead_name), ['booked', 'Completed', 'Cancelled'])) 
+        {
             $conversionType = ucfirst(strtolower($lead_name));
-
-            if ($conversionType === 'Booked') {
+            // echo '<pre>'; print_r($conversionType); exit;
+            if ($conversionType === 'Booked') 
+            {
                 $query = $this->getLeadsByStatus('BOOKED', $lead_name);
-            } else {
-
+            } 
+            else 
+            {
+                $userId = Session::get('user_id');
                 $query = DB::table('leads as a')
                     ->leftJoin('users as b', 'b.id', '=', 'a.user_id')
                     ->leftJoin('projects as c', 'c.id', '=', 'a.project_id')
+                    ->leftJoin('lead_statuses as ls', 'ls.system_name', '=', 'a.conversion_type')
                     ->select(
                         'a.*',
                         'b.name as agent',
                         'b.role',
-                        'c.project_name as project_name'
+                        'c.project_name as project_name',
+                        'ls.display_name as status_display_name',
+                        'ls.system_name as status_system_name'
                     )
-                    ->where(function ($q) use ($conversionType) {
+                    ->where(function ($q) use ($conversionType) 
+                    {
                         $q->where('a.conversion_type', $conversionType)
-                            ->orWhere('a.status', $conversionType);
+                        ->orWhere('a.status', 'CONVERTED');
+                    })
+                    ->where(function ($q) use ($userId) 
+                    {
+                        $q->where('a.user_id', $userId)
+                        ->orWhereRaw("FIND_IN_SET(?, a.lead_shared_with)", [$userId]);
                     })
                     ->orderBy('a.is_pinned', 'desc')
                     ->orderBy('a.id', 'desc');
             }
-        } else {
+        } 
+        else 
+        {
             $query = $this->getLeadsByStatus($status, $lead_name);
         }
+        // dd($query->toSql(), $query->getBindings());
         $query = $this->applyLeadFilters($query, $request);
         $leads = $query->paginate($length);
-        $leads->getCollection()->transform(function ($lead) {
+        $leads->getCollection()->transform(function ($lead) 
+        {
             $duplicates = DB::table('leads')
                 ->where('phone', $lead->phone)
                 ->where('id', '!=', $lead->id)
@@ -752,7 +801,8 @@ class LeadController extends Controller
         $current_user_id = Session::get('user_id');
         $child_ids = Session::get('child_ids', []);
 
-        if (is_string($child_ids)) {
+        if (is_string($child_ids)) 
+        {
             $child_ids = array_map('trim', explode(',', $child_ids));
         }
 
@@ -770,60 +820,79 @@ class LeadController extends Controller
         }
 
         $this->applyLeadFilters($query, $request);
-        if ($request->filled('shared_filter')) {
+        if ($request->filled('shared_filter')) 
+        {
             $sharedFilter = $request->shared_filter;
-            if ($sharedFilter == 'shared_by_me') {
+            if ($sharedFilter == 'shared_by_me') 
+            {
                 $query->where('a.user_id', $current_user_id)
                     ->whereNotNull('a.lead_shared_with')
                     ->where('a.lead_shared_with', '!=', '');
-            } elseif ($sharedFilter == 'shared_with_me') {
-                $query->where(function ($q) use ($current_user_id) {
+            } 
+            elseif ($sharedFilter == 'shared_with_me') 
+            {
+                $query->where(function ($q) use ($current_user_id) 
+                {
                     $q->whereNotNull('a.lead_shared_with')
-                        ->where(function ($q2) use ($current_user_id) {
+                        ->where(function ($q2) use ($current_user_id) 
+                        {
                             $q2->where('a.lead_shared_with', 'LIKE', '%' . $current_user_id . '%')
                                 ->orWhereRaw("FIND_IN_SET(?, a.lead_shared_with)", [$current_user_id]);
                         });
                 });
-            } elseif ($sharedFilter == 'not_shared') {
-                $query->where(function ($q) {
+            } 
+            elseif ($sharedFilter == 'not_shared') 
+            {
+                $query->where(function ($q) 
+                {
                     $q->whereNull('a.lead_shared_with')
                         ->orWhere('a.lead_shared_with', '');
                 });
             }
         }
 
-        if ($request->filled('user')) {
+        if ($request->filled('user')) 
+        {
             $query->where('a.user_id', $request->user);
         }
 
-        if ($request->filled('source')) {
+        if ($request->filled('source')) 
+        {
             $query->where('a.source', $request->source);
         }
 
-        if ($request->filled('classification')) {
+        if ($request->filled('classification')) 
+        {
             $query->where('a.classification', $request->classification);
         }
 
-        if ($request->filled('project')) {
+        if ($request->filled('project')) 
+        {
             $query->where('a.project_id', $request->project);
         }
 
-        if ($request->filled('date_from')) {
+        if ($request->filled('date_from')) 
+        {
             $query->whereDate('a.created_at', '>=', $request->date_from);
         }
 
-        if ($request->filled('date_to')) {
+        if ($request->filled('date_to')) 
+        {
             $query->whereDate('a.created_at', '<=', $request->date_to);
         }
 
-        if ($request->filled('lead_days')) {
+        if ($request->filled('lead_days')) 
+        {
             $days = (int)$request->lead_days;
             $query->whereDate('a.created_at', '>=', now()->subDays($days));
         }
 
-        if ($length === 'all') {
+        if ($length === 'all') 
+        {
             $length = DB::table('leads')->count();
-        } else {
+        } 
+        else 
+        {
             $length = (int)$length;
         }
 
@@ -1018,19 +1087,30 @@ class LeadController extends Controller
                 $status_counts = (array)$counts;
             }
 
-            $query = DB::table('leads')
-                ->where('user_id', $selected_user);
+            $query = DB::table('leads as a')
+                ->join('users as b', 'b.id', '=', 'a.user_id')
+                ->leftJoin('projects as c', 'c.id', '=', 'a.project_id')
+                ->leftJoin('lead_statuses as ls', function ($join) 
+                {
+                    $join->on(
+                        DB::raw("ls.system_name COLLATE utf8mb4_unicode_ci"),
+                        '=',
+                        DB::raw("a.status COLLATE utf8mb4_unicode_ci")
+                    );
+                })
+                ->select('a.*', 'b.name as agent', 'b.role', 'c.project_name as project_name', 'ls.display_name as status_display_name','ls.system_name as status_system_name')
+                ->where('a.user_id', $selected_user);
 
             if ($selected_status !== 'ALL LEAD') {
-                $query->where('status', $selected_status);
+                $query->where('a.status', $selected_status);
             }
 
             if ($from_date) {
-                $query->whereDate('lead_date', '>=', $from_date);
+                $query->whereDate('a.lead_date', '>=', $from_date);
             }
 
             if ($to_date) {
-                $query->whereDate('lead_date', '<=', $to_date);
+                $query->whereDate('a.lead_date', '<=', $to_date);
             }
 
             // Handle 'all' length
@@ -1040,14 +1120,25 @@ class LeadController extends Controller
                 $length = (int)$length;
             }
 
-            $leads = $query->orderBy('is_pinned', 'desc')
-                ->orderBy('lead_date', 'desc')
+            $leads = $query->orderBy('a.is_pinned', 'desc')
+                ->orderBy('a.lead_date', 'desc')
                 ->paginate($length);
         }
 
         $projects = DB::table('projects')->get();
         $cities = DB::table('state_district')->orderBy('District', 'asc')->get();
-
+        $lead_statuses = DB::table('lead_statuses')
+            ->where('is_active', 1)
+            ->orderBy('seq', 'asc')
+            ->orderBy('display_name', 'asc')
+            ->get([
+                'id',
+                'system_name',
+                'display_name',
+                'visible_role',
+                'seq',
+                'is_active'
+            ]);
         return view('lead.transfer-lead', compact(
             'lead_name',
             'leads',
@@ -1061,7 +1152,8 @@ class LeadController extends Controller
             'status_counts',
             'projects',
             'cities',
-            'requestedLength' // Pass the original length to view
+            'requestedLength',
+            'lead_statuses'
         ));
     }
 
@@ -1087,9 +1179,21 @@ class LeadController extends Controller
         $toUserId = $request->to_user;
 
         DB::beginTransaction();
-        try {
-            foreach ($leadIds as $leadId) {
-                $lead = DB::table('leads')->where('id', $leadId)->first();
+        try 
+        {
+            foreach ($leadIds as $leadId) 
+            {
+                $lead = DB::table('leads as a')
+                ->leftJoin('lead_statuses as ls', function ($join) 
+                {
+                    $join->on(DB::raw('ls.system_name COLLATE utf8mb4_unicode_ci'), '=', DB::raw('a.status'));
+                })
+                ->where('a.id', $leadId)
+                ->select(
+                    'a.*',
+                    'ls.display_name as status_display_name'
+                )
+                ->first();
                 $previousStatus = $lead->status;
                 DB::table('leads')->where('id', $leadId)->update([
                     'user_id' => $toUserId,
@@ -1113,14 +1217,16 @@ class LeadController extends Controller
                     'lead_id' => $leadId,
                     'from' => $fromUserId,
                     'to' => $toUserId,
-                    'previous_status' => $previousStatus,
+                    'previous_status' => $lead->status_display_name,
                     'new_status' => 'TRANSFER LEAD',
                 ]);
             }
 
             DB::commit();
             return back()->with('success', count($leadIds) . ' lead(s) transferred successfully.');
-        } catch (\Exception $e) {
+        } 
+        catch (\Exception $e) 
+        {
             DB::rollBack();
             return back()->with('error', 'Transfer failed: ' . $e->getMessage());
         }
@@ -1175,7 +1281,19 @@ class LeadController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return view('lead.transfer-lead-history', compact('leads', 'users'));
+        $lead_statuses = DB::table('lead_statuses')
+        ->where('is_active', 1)
+        ->orderBy('seq', 'asc')
+        ->orderBy('display_name', 'asc')
+        ->get([
+            'id',
+            'system_name',
+            'display_name',
+            'visible_role',
+            'seq',
+            'is_active'
+        ]);
+        return view('lead.transfer-lead-history', compact('leads', 'users', 'lead_statuses'));
     }
 
 
@@ -1187,35 +1305,30 @@ class LeadController extends Controller
         $userType = Session::get('user_type');
         $childIds = Session::get('child_ids');
 
-        //  Normalize child IDs
         $childIdsArr = is_array($childIds) ? $childIds : explode(',', $childIds);
         $childIdsArr = array_filter(array_map('trim', $childIdsArr));
 
-        //  Role-based hierarchy
-        if ($userType === 'admin') {
+        if ($userType === 'admin') 
+        {
             $accessibleUserIds = DB::table('users')->pluck('id')->toArray();
-        } elseif ($userType === 'team_manager') {
+        } 
+        elseif ($userType === 'team_manager') 
+        {
             $accessibleUserIds = array_merge([$userId], $childIdsArr);
-        } else {
-            // salesman
+        } 
+        else 
+        {
             $accessibleUserIds = [$userId];
         }
 
         $accessibleUserIds = array_values(array_unique($accessibleUserIds));
-
-        // Users for filter dropdown
         $users = DB::table('users')->select('id', 'name')->get();
-
-        // Main query (ONLY RECEIVED LEADS → Transferred Leads)
         $query = DB::table('transfer_leads')
             ->leftJoin('leads', 'transfer_leads.lead_id', '=', 'leads.id')
             ->leftJoin('users as from_user', 'transfer_leads.from', '=', 'from_user.id')
             ->leftJoin('users as to_user', 'transfer_leads.to', '=', 'to_user.id')
-
-            // IMPORTANT: match dashboard logic
             ->whereIn('transfer_leads.to', $accessibleUserIds);
 
-        // Filters (optional but now working)
         if ($request->filled('from_user')) {
             $query->where('transfer_leads.from', $request->from_user);
         }
@@ -1232,7 +1345,6 @@ class LeadController extends Controller
             $query->whereDate('transfer_leads.created_at', '<=', $request->to_date);
         }
 
-        //  Final data
         $leads = $query
             ->select(
                 'transfer_leads.*',
@@ -1245,10 +1357,23 @@ class LeadController extends Controller
             ->orderBy('transfer_leads.created_at', 'desc')
             ->paginate(10);
 
+        $lead_statuses = DB::table('lead_statuses')
+        ->where('is_active', 1)
+        ->orderBy('seq', 'asc')
+        ->orderBy('display_name', 'asc')
+        ->get([
+            'id',
+            'system_name',
+            'display_name',
+            'visible_role',
+            'seq',
+            'is_active'
+        ]);
         return view('lead.transfer-lead-history', compact(
             'lead_name',
             'leads',
-            'users'
+            'users',
+            'lead_statuses'
         ));
     }
 
@@ -1312,48 +1437,71 @@ class LeadController extends Controller
         $user_id = Session::get('user_id');
         $child_ids = Session::get('child_ids');
 
-        if (!is_array($child_ids)) {
+        if (!is_array($child_ids)) 
+        {
             $child_ids = $child_ids ? explode(',', $child_ids) : [];
         }
 
         $query = DB::table('leads as a')
             ->join('users as b', 'b.id', '=', 'a.user_id')
             ->leftJoin('projects as c', 'c.id', '=', 'a.project_id')
+            ->leftJoin('lead_statuses as ls', function ($join) 
+            {
+                $join->on(
+                    DB::raw("ls.system_name COLLATE utf8mb4_unicode_ci"),
+                    '=',
+                    DB::raw("a.status COLLATE utf8mb4_unicode_ci")
+                );
+            })
             ->select(
                 'a.*',
                 'b.name as agent',
+                'ls.display_name as status_display_name',
+                'ls.system_name as status_system_name',
                 'b.role',
                 'c.project_name as project_name',
             );
         $statusUpper = strtoupper($status);
 
-        if ($statusUpper === 'BOOKED') {
-            $query->where(function ($q) {
+        if ($statusUpper === 'BOOKED') 
+        {
+            $query->where(function ($q) 
+            {
                 $q->where('a.status', 'BOOKED')
-                    ->orWhere(function ($q2) {
+                    ->orWhere(function ($q2) 
+                    {
                         $q2->where('a.status', 'CONVERTED')
                             ->where('a.conversion_type', 'Booked');
                     });
             });
-        } elseif (in_array(strtolower($status), ['completed', 'cancelled'])) {
+        } 
+        elseif (in_array(strtolower($status), ['completed', 'cancelled'])) {
             $query->where(function ($q) use ($status) {
                 $q->where('a.conversion_type', ucfirst(strtolower($status)))
                     ->where('a.status', 'CONVERTED');
             });
-        } elseif ($statusUpper === 'CONVERTED') {
+        } 
+        elseif ($statusUpper === 'CONVERTED') 
+        {
             $query->where('a.status', 'CONVERTED');
-        } else {
+        } 
+        else 
+        {
             $query->where('a.status', $statusUpper);
         }
-        if ($user_type != 'admin') {
-            $query->where(function ($q) use ($user_id, $child_ids) {
+        if ($user_type != 'admin') 
+        {
+            $query->where(function ($q) use ($user_id, $child_ids) 
+            {
                 $q->where('a.user_id', $user_id);
 
-                if (!empty($child_ids)) {
+                if (!empty($child_ids)) 
+                {
                     $q->orWhereIn('a.user_id', $child_ids);
                 }
 
-                $q->orWhere(function ($sharedQ) use ($user_id) {
+                $q->orWhere(function ($sharedQ) use ($user_id) 
+                {
                     $sharedQ->whereNotNull('a.lead_shared_with')
                         ->where('a.lead_shared_with', '!=', '')
                         ->whereRaw("FIND_IN_SET(?, a.lead_shared_with)", [$user_id]);
@@ -1372,7 +1520,8 @@ class LeadController extends Controller
         $user_id = Session::get('user_id');
         $child_ids = Session::get('child_ids');
 
-        if (!is_array($child_ids)) {
+        if (!is_array($child_ids)) 
+        {
             $child_ids = $child_ids ? explode(',', $child_ids) : [];
         }
 
@@ -1386,9 +1535,10 @@ class LeadController extends Controller
                 'c.project_name as project_name',
             )
 
-            ->where(function ($q) use ($conversionType) {
-
-                $q->where(function ($sub) use ($conversionType) {
+            ->where(function ($q) use ($conversionType) 
+            {
+                $q->where(function ($sub) use ($conversionType) 
+                {
                     $sub->where('a.conversion_type', $conversionType)
                         ->where('a.status', 'CONVERTED');
                 })
@@ -1634,18 +1784,22 @@ class LeadController extends Controller
 
     protected function applyLeadFilters($query, Request $request)
     {
-        if ($request->filled('search')) {
+        if ($request->filled('search')) 
+        {
             $searchTerm = $request->search;
-            $query->where(function ($q) use ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) 
+            {
                 $q->where('a.name', 'LIKE', '%' . $searchTerm . '%')
                     ->orWhere('a.email', 'LIKE', '%' . $searchTerm . '%')
                     ->orWhere('a.phone', 'LIKE', '%' . $searchTerm . '%');
-                if (is_numeric($searchTerm)) {
+                if (is_numeric($searchTerm)) 
+                {
                     $q->orWhere('a.id', $searchTerm);
                 }
             });
         }
-        if ($request->filled('source')) {
+        if ($request->filled('source')) 
+        {
             $query->where('a.source', $request->source);
         }
 
@@ -1664,7 +1818,21 @@ class LeadController extends Controller
         if ($request->filled('classification')) {
             $query->where('a.classification', $request->classification);
         }
+        
+        $searchTerm = $request->input('search') ?? $request->input('q');
 
+        if (!empty($searchTerm)) {
+            $query->where(function ($q) use ($searchTerm) {
+
+                $q->where('a.name', 'LIKE', '%' . $searchTerm . '%')
+                ->orWhere('a.email', 'LIKE', '%' . $searchTerm . '%')
+                ->orWhere('a.phone', 'LIKE', '%' . $searchTerm . '%');
+
+                if (is_numeric($searchTerm)) {
+                    $q->orWhere('a.id', $searchTerm);
+                }
+            });
+        }
         if ($request->filled('agent')) {
             $query->where('a.user_id', $request->agent);
         }
@@ -1713,7 +1881,6 @@ class LeadController extends Controller
                 });
             }
         }
-
         return $query;
     }
 
@@ -2073,7 +2240,18 @@ class LeadController extends Controller
         $classifications = DB::table('leads')->distinct()->pluck('classification');
         $agents = DB::table('users')->where('role', 'agent')->pluck('name', 'id');
         $users = DB::table('users')->get();
-
+        $lead_statuses = DB::table('lead_statuses')
+            ->where('is_active', 1)
+            ->orderBy('seq', 'asc')
+            ->orderBy('display_name', 'asc')
+            ->get([
+                'id',
+                'system_name',
+                'display_name',
+                'visible_role',
+                'seq',
+                'is_active'
+            ]);
         $hasFilters = $request->anyFilled([
             'source',
             'status',
@@ -2100,6 +2278,7 @@ class LeadController extends Controller
             'agents',
             'hasFilters',
             'users',
+            'lead_statuses',
             'requestedLength'
         ));
     }
@@ -2739,9 +2918,11 @@ class LeadController extends Controller
 
     public function getPropertyDetails($id)
     {
-        try {
+        try 
+        {
             $property = DB::table('projects')->where('id', $id)->first();
-            if (!$property) {
+            if (!$property) 
+            {
                 return response()->json([
                     'status' => 404,
                     'message' => 'Property not found',
@@ -2757,12 +2938,261 @@ class LeadController extends Controller
                 'data' => $property,
                 'message' => 'Image Retreive Successfully'
             ]);
-        } catch (\Exception $e) {
+        } 
+        catch (\Exception $e) 
+        {
             return response()->json([
                 'status' => 500,
                 'message' => 'Error fetching property details: ' . $e->getMessage(),
                 'data' => ''
             ]);
+        }
+    }
+
+    public function revokeShare(Request $request)
+    {
+        $request->validate([
+            'lead_id' => 'required|exists:leads,id',
+            'user_ids' => 'required|array',
+            'user_ids.*' => 'exists:users,id'
+        ]);
+        $leadId = $request->lead_id;
+        $userIdsToRevoke = $request->user_ids;
+        $currentUserId = Session::get('user_id');
+        try 
+        {
+            DB::beginTransaction();
+            $lead = DB::table('leads')->where('id', $leadId)->first();
+            if (!$lead) 
+            {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Lead not found'
+                ], 404);
+            }
+            $currentSharedUsers = !empty($lead->lead_shared_with) 
+                ? explode(',', $lead->lead_shared_with) 
+                : [];
+
+            $updatedSharedUsers = array_diff($currentSharedUsers, $userIdsToRevoke);
+            $newSharedWith = !empty($updatedSharedUsers) 
+                ? implode(',', $updatedSharedUsers) 
+                : null;
+
+            DB::table('leads')
+                ->where('id', $leadId)
+                ->update([
+                    'lead_shared_with' => $newSharedWith,
+                    'updated_at' => now()
+                ]);
+
+            $revokedUsers = DB::table('users')
+                ->whereIn('id', $userIdsToRevoke)
+                ->pluck('name')
+                ->toArray();
+            
+            $revokedNames = implode(', ', $revokedUsers);
+
+            DB::table('lead_comments')->insert([
+                'lead_id' => $leadId,
+                'user_id' => $currentUserId,
+                'comment' => "Share access revoked for user(s): {$revokedNames}",
+                'status' => $lead->status,
+                'created_date' => now(),
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Share access revoked successfully for ' . count($userIdsToRevoke) . ' user(s)',
+                'revoked_users' => $revokedNames
+            ]);
+
+        } 
+        catch (\Exception $e) 
+        {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Error revoking share access: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function checkUserType(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id'
+        ]);
+        $user = DB::table('users')->where('id', $request->user_id)->first();
+        return response()->json([
+            'user_type' => $user->role
+        ]);
+    }
+
+    public function importPreview(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,txt|max:10240'
+        ]);
+        $file = $request->file('file');
+        $path = $file->getRealPath();
+        $csvData = array_map('str_getcsv', file($path));
+        $header = array_shift($csvData);
+        $validRecords = [];
+        $stats = [
+            'total' => 0,
+            'valid' => 0,
+            'duplicate' => 0,
+            'invalid' => 0
+        ];
+        $seenPhones = [];
+        foreach ($csvData as $index => $row) 
+        {
+            $stats['total']++;
+            $leadData = [
+                'source' => $row[0] ?? '',
+                'campaign' => $row[1] ?? '',
+                'name' => $row[2] ?? '',
+                'phone' => $row[3] ?? '',
+                'email' => $row[4] ?? '',
+                'alternative_phone' => $row[5] ?? '',
+                'address' => $row[6] ?? ''
+            ];
+            $phone = preg_replace('/\D/', '', $leadData['phone']);
+            $isValidPhone = preg_match('/^[6-9]\d{9}$/', $phone);
+            $isDuplicate = DB::table('leads')->where('phone', $phone)->exists();
+            $isDuplicateInCSV = in_array($phone, $seenPhones);
+
+            if (!$isValidPhone) 
+            {
+                $leadData['status'] = 'invalid';
+                $leadData['error_message'] = 'Invalid phone number format';
+                $stats['invalid']++;
+            } 
+            elseif ($isDuplicate) 
+            {
+                $leadData['status'] = 'duplicate';
+                $leadData['error_message'] = 'Phone number already exists in database';
+                $stats['duplicate']++;
+            } 
+            elseif ($isDuplicateInCSV) 
+            {
+                $leadData['status'] = 'duplicate_csv';
+                $leadData['error_message'] = 'Duplicate phone number found in uploaded CSV';
+
+                $stats['duplicate']++;
+            } 
+            else 
+            {
+                $leadData['status'] = 'valid';
+                $leadData['error_message'] = '';
+                $stats['valid']++;
+            }
+            $leadData['phone'] = $phone;
+            $validRecords[] = $leadData;
+        }
+        return response()->json([
+            'success' => true,
+            'data' => $validRecords,
+            'stats' => $stats
+        ]);
+    }
+    public function importProcess(Request $request)
+    {
+        try 
+        {
+            $request->validate([
+                'leads' => 'required|array',
+                'leads.*.name' => 'required|string',
+                'leads.*.phone' => 'required|string',
+                'leads.*.source' => 'required|string',
+                'leads.*.campaign' => 'required|string'
+            ]);
+            
+            $user_type = session()->get('user_type');
+            $user_id = session()->get('user_id');
+            $defaultStatus = in_array($user_type, ['admin', 'team_manager']) ? 'allocated_lead' : 'NEW LEAD';
+            
+            $successCount = 0;
+            $failedCount = 0;
+            $duplicateCount = 0;
+            
+            foreach ($request->leads as $lead) 
+            {
+                if ($lead['status'] !== 'valid') 
+                {
+                    if ($lead['status'] === 'duplicate') 
+                    {
+                        $duplicateCount++;
+                    } 
+                    else 
+                    {
+                        $failedCount++;
+                    }
+                    continue;
+                }
+                
+                try 
+                {
+                    $phone = preg_replace('/\D/', '', $lead['phone']);
+                    $existingLead = DB::table('leads')
+                        ->where('phone', $phone)
+                        ->exists();
+                    
+                    if ($existingLead) 
+                    {
+                        $duplicateCount++;
+                        continue;
+                    }
+                    $name = mb_convert_encoding($lead['name'], 'UTF-8', 'auto');
+                    $source = mb_convert_encoding($lead['source'], 'UTF-8', 'auto');
+                    $campaign = mb_convert_encoding($lead['campaign'], 'UTF-8', 'auto');
+                    $email = !empty($lead['email']) ? filter_var($lead['email'], FILTER_SANITIZE_EMAIL) : null;
+                    $whatsapp = !empty($lead['alternative_phone']) ? preg_replace('/\D/', '', $lead['alternative_phone']) : null;
+                    $address = mb_convert_encoding($lead['address'] ?? '', 'UTF-8', 'auto');
+                    DB::table('leads')->insert([
+                        'name' => $name,
+                        'phone' => $phone,
+                        'email' => $email,
+                        'source' => $source,
+                        'campaign' => $campaign,
+                        'whatsapp_no' => $whatsapp,
+                        'field4' => $address,
+                        'status' => $defaultStatus,
+                        'user_id' => $user_id,
+                        'is_allocated' => 0,
+                        'lead_date' => now(),
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                    
+                    $successCount++;
+                    
+                } 
+                catch (\Exception $e) 
+                {
+                    $failedCount++;
+                    \Log::error('Import failed for lead: ' . json_encode($lead) . ' Error: ' . $e->getMessage());
+                }
+            }
+            
+            return response()->json([
+                'success' => true,
+                'success_count' => $successCount,
+                'failed_count' => $failedCount,
+                'duplicate_count' => $duplicateCount,
+                'message' => "Import completed: $successCount imported, $duplicateCount duplicates skipped, $failedCount failed"
+            ]);
+            
+        } 
+        catch (\Exception $e) 
+        {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error processing import: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

@@ -10,7 +10,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-flex align-items-center justify-content-between">
-                    <h4 class="mb-0">{{ session('software_type') === 'lead_management' ? 'Product Category' : 'Project Category' }}</h4>
+                    <h4 class="mb-0">{{ session('software_type') === 'lead_management' ? 'Product Category' : 'Project Category' }}<div class="border-bottom border-3 border-primary mb-2 mt-1 w-75"></div></h4>
                     <button class="btn btn-primary btn-small px-4 py-1 rounded-pill fw-bold text-white shadow-lg add-project"
                         data-bs-toggle="modal"
                         data-bs-target="#Modalbox"
@@ -23,8 +23,6 @@
             </div>
         </div>
 
-
-        <!-- Table -->
         <div class="row">
             <div class="col-12">
                 <div class="card">
@@ -32,8 +30,6 @@
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h4 class="card-title mb-0">Category</h4>
                         </div>
-
-                        <!-- Length Dropdown -->
                         <div class="mb-0">
                             <label>
                                 Show

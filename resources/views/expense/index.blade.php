@@ -8,7 +8,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-flex align-items-center justify-content-between">
-                    <h4 class="mb-0">Expense Management</h4>
+                    <h4 class="mb-0">Expense Management<div class="border-bottom border-3 border-primary mb-2 w-50 mt-1"></div></h4>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item">
@@ -88,7 +88,7 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h5 class="card-title mb-0">Expense details</h5>
+                            <h5 class="card-title mb-0">Expense details </h5>
                             <div class="d-flex gap-3">
                                 <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#expenseModal">
                                     <i class="ri-add-line align-middle me-1"></i> Add Expense

@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Session;
 use Flasher\Laravel\Facade\Flasher;
-
+use Illuminate\Validation\Rule;
 class LeadService
 {
     public function createLead($request, $isMobile = false)
@@ -206,7 +206,6 @@ class LeadService
         $currentSource = $lead->source;
         $currentCampaign = $lead->campaign;
         $currentProject = $lead->project_id;
-
         return [
             'success' => true,
             'redirect' => null,
@@ -405,28 +404,43 @@ class LeadService
         $user_id = Session::get('user_id');
         $rules = [
             'leadId' => 'required|exists:leads,id',
-            'newStatus' => 'required|in:NEW LEAD,ALLOCATED,PENDING,PROCESSING,INTERESTED,CALL SCHEDULED,VISIT SCHEDULED,VISIT DONE,SM NEW LEADS,WRONG NUMBER,NOT INTERESTED,FUTURE LEAD,NOT PICKED,NOT REACHABLE,LOST,CHANNEL PARTNER,CONVERTED,MEETING SCHEDULED,WHATSAPP,booked',
-            'conversionType' => 'required_if:newStatus,CONVERTED|in:Completed,Cancelled,Booked',
+            'newStatus' => [
+                'required',
+                Rule::in([
+                    'NEW LEAD', 'ALLOCATED', 'PENDING', 'PROCESSING', 'INTERESTED',
+                    'CALL SCHEDULED', 'VISIT SCHEDULED', 'VISIT DONE', 'SM NEW LEADS',
+                    'WRONG NUMBER', 'NOT INTERESTED', 'FUTURE LEAD', 'NOT PICKED',
+                    'NOT REACHABLE', 'LOST', 'CHANNEL PARTNER', 'CONVERTED',
+                    'MEETING SCHEDULED', 'WHATSAPP', 'booked', 'TRANSFER LEAD'
+                ])
+            ],
+            'conversionType' => 'required_if:newStatus,CONVERTED|nullable|in:Completed,Cancelled,Booked',
             'comment' => 'nullable|string|max:500',
-            'remindDate' => 'nullable|required_if:newStatus,CALL SCHEDULED,VISIT SCHEDULED,MEETING SCHEDULED,INTERESTED|date',
-            'remindTime' => 'nullable|required_if:newStatus,CALL SCHEDULED,VISIT SCHEDULED,MEETING SCHEDULED,INTERESTED',
+            'remindDate' => 'required_if:newStatus,CALL SCHEDULED,VISIT SCHEDULED,MEETING SCHEDULED,INTERESTED|nullable|date',
+            'remindTime' => 'required_if:newStatus,CALL SCHEDULED,VISIT SCHEDULED,MEETING SCHEDULED,INTERESTED|nullable',
         ];
 
-        if ($request->newStatus === 'CONVERTED') {
+        if ($request->newStatus === 'CONVERTED') 
+        {
             $rules = array_merge($rules, [
-                'app_name' => 'nullable|string|max:255',
-                'app_contact' => 'nullable|numeric|digits:10',
+                'app_name' => 'required|string|max:255',
+                'app_contact' => [
+                    'required',
+                    'regex:/^[0-9]{10}$/'
+                ],
                 'app_city' => 'nullable|string|max:255',
                 'app_dob' => 'nullable|date',
                 'app_doa' => 'nullable|date',
                 'final_price' => 'nullable|numeric',
-                'prj_id' => 'nullable|integer',
+                'prj_id' => 'required',
                 'prop_size' => 'nullable|string|max:255',
+                'create_post_sale' => 'nullable|boolean',
             ]);
         }
-
+        
         $validator = Validator::make($request->all(), $rules);
-        if ($validator->fails()) {
+        if ($validator->fails()) 
+        {
             return [
                 'success' => false,
                 'message' => $validator->errors()->first(),
@@ -434,50 +448,84 @@ class LeadService
             ];
         }
 
-        try {
+        try 
+        {
             DB::beginTransaction();
-            $lead = DB::table('leads')->where('id', $request->leadId)->first();
-            // $projectIds = $request->prj_id ?? [];
-            // $projectIdsString = implode(',', $projectIds);
+            $lead = DB::table('leads')
+                ->where('id', $request->leadId)
+                ->first();
+                
+            if (!$lead) 
+            {
+                return [
+                    'success' => false,
+                    'message' => 'Lead not found',
+                    'status' => 404
+                ];
+            }
+            
+            $status = strtoupper(trim($request->newStatus));
             $projectIds = $request->prj_id;
-
-            $projectIdsString = is_array($projectIds)
-                ? implode(',', $projectIds)
-                : $projectIds;
-            // dd($projectIdsString);
-            $baseComment = $request->comment ?: 'Status changed to ' . $request->newStatus;
-            $status = trim(strtoupper($request->newStatus));
-            $projectName = null;
-            if (!empty($request->prj_id)) {
-                $projectName = DB::table('projects')->where('id', $request->prj_id)->value('project_name');
-            } elseif (!empty($request->visitProjects) && is_array($request->visitProjects)) {
+            
+            if (is_array($projectIds)) 
+            {
+                $projectIds = array_filter($projectIds);
+                $projectIdsString = implode(',', $projectIds);
                 $projectNames = DB::table('projects')
-                    ->whereIn('id', $request->visitProjects)
+                    ->whereIn('id', $projectIds)
                     ->pluck('project_name')
                     ->toArray();
                 $projectName = implode(', ', $projectNames);
-            } elseif (!empty($lead->project_id)) {
-                $projectName = DB::table('projects')->where('id', $lead->project_id)->value('project_name');
+            } 
+            else 
+            {
+                $projectIdsString = $projectIds;
+                $projectName = null;
+                if (!empty($projectIds)) 
+                {
+                    $projectName = DB::table('projects')
+                        ->where('id', $projectIds)
+                        ->value('project_name');
+                }
             }
-            if (in_array($status, ['VISIT SCHEDULED', 'VISIT DONE']) && $projectName) {
-                $commentText = $baseComment . ' | Project: ' . $projectName;
-            } else {
-                $commentText = $baseComment;
+            
+            if (empty($projectName) && !empty($lead->project_id)) 
+            {
+                $existingProjects = explode(',', $lead->project_id);
+                $projectNames = DB::table('projects')
+                    ->whereIn('id', $existingProjects)
+                    ->pluck('project_name')
+                    ->toArray();
+                $projectName = implode(', ', $projectNames);
             }
-            // dd($commentText);
+            
+            $baseComment = $request->comment
+                ?: 'Status changed to ' . $status;
+            $commentText = $baseComment;
+            
+            if (
+                in_array($status, ['VISIT SCHEDULED', 'VISIT DONE'])
+                && !empty($projectName)
+            ) {
+                $commentText .= ' | Project: ' . $projectName;
+            }
+            
             $updateData = [
-                'status' => $request->newStatus,
+                'status' => $status,
                 'updated_date' => now(),
                 'remind_date' => $request->remindDate,
                 'remind_time' => $request->remindTime,
                 'last_comment' => $commentText,
             ];
-
-            if ($request->newStatus === 'VISIT DONE') {
+            
+            if ($status === 'VISIT DONE') 
+            {
                 $updateData['visited_on'] = 1;
+                $updateData['visit_done_date'] = now();
             }
 
-            if ($request->newStatus === 'CONVERTED') {
+            if ($status === 'CONVERTED') 
+            {
                 $updateData = array_merge($updateData, [
                     'conversion_type' => $request->conversionType,
                     'app_name' => $request->app_name,
@@ -486,35 +534,61 @@ class LeadService
                     'app_dob' => $request->app_dob,
                     'app_doa' => $request->app_doa,
                     'final_price' => $request->final_price,
-                    'project_id' => $request->prj_id,
+                    'project_id' => $projectIdsString,
                     'size' => $request->prop_size,
                 ]);
-            }
-            // $updateData = array_merge($updateData, [
-            //     'project_id' => $projectIdsString,
-            // ]);
-            if ($request->newStatus !== 'CONVERTED') {
+                if ($request->conversionType === 'Completed' && $request->create_post_sale == 1) 
+                {
+                    $postSaleData = [
+                        'lead_id' => $request->leadId,
+                        'sales_person_id' => $lead->user_id,
+                        'applicant_name' => $request->app_name,
+                        'applicant_number' => $request->app_contact,
+                        'project_name' => $projectName,
+                        'unit_number' => $request->prop_size,
+                        'project_category' => $lead->catg_id,
+                        'project_sub_category' => $lead->sub_catg_id,
+                        'dob' => $request->app_dob,
+                        'doa' => $request->app_doa,
+                        'email' => $lead->email,
+                        'user_id' => $user_id,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                    
+                    DB::table('post_sales')->insert($postSaleData);
+                }
+            } 
+            else 
+            {
                 $updateData['project_id'] = $projectIdsString;
             }
-            DB::table('leads')->where('id', $request->leadId)->update($updateData);
+
+            DB::table('leads')
+                ->where('id', $request->leadId)
+                ->update($updateData);
+
             DB::table('lead_comments')->insert([
                 'lead_id' => $request->leadId,
                 'user_id' => $user_id,
                 'comment' => $commentText,
-                'status' => $request->newStatus,
+                'status' => $status,
                 'remind_date' => $request->remindDate,
                 'remind_time' => $request->remindTime,
-                'created_date' => now()->format('Y-m-d H:i:s'),
+                'created_date' => now(),
             ]);
-
+            
             DB::commit();
-
             return [
                 'success' => true,
                 'message' => 'Status updated successfully',
-                'status' => 200
+                'status' => 200,
+                'post_sale_created' => ($request->conversionType === 'Completed' && $request->create_post_sale == 1)
             ];
-        } catch (\Exception $e) {
+
+        } 
+        catch (\Exception $e) 
+        {
             DB::rollBack();
             return [
                 'success' => false,

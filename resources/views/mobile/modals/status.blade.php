@@ -314,6 +314,7 @@
 </style>
 @php
     use Illuminate\Support\Facades\DB;
+    $lead_statuses = DB::table('lead_statuses')->get();
 @endphp
 <div id="statusModal" class="modal-overlay" style="display: none;">
     <div class="modal-content">
@@ -323,20 +324,12 @@
                 <label for="statusSelect">New Status:</label>
                 <select id="statusSelect" name="newStatus" class="form-control" required>
                     <option value="">Select new status</option>
-                    <option value="PENDING">Pending</option>
-                    <option value="INTERESTED">Interested</option>
-                    <option value="WHATSAPP">Whatsapp</option>
-                    <option value="CALL SCHEDULED">Call Scheduled</option>
-                    <option value="MEETING SCHEDULED">Meeting Scheduled</option>
-                    <option value="VISIT SCHEDULED">Visit Scheduled</option>
-                    <option value="VISIT DONE">Visit Done</option>
-                    <option value="WRONG NUMBER">Wrong Number</option>
-                    <option value="NOT INTERESTED">Not Interested</option>
-                    <option value="FUTURE LEAD">Future Lead</option>
-                    <option value="NOT REACHABLE">Not Reachable</option>
-                    <option value="LOST">Lost</option>
-                    <option value="CHANNEL PARTNER">Channel Partner</option>
-                    <option value="CONVERTED">Converted</option>
+                        @foreach($lead_statuses as $status)
+                            <option value="{{ $status->display_name }}"
+                                data-system="{{ $status->system_name }}">
+                                {{ $status->display_name }}
+                            </option>
+                        @endforeach
                 </select>
             </div>
             <div class="form-group col-md-6 col-lg-6 mb-2 mobile-schedule-project">

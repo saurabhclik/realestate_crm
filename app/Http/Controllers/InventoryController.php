@@ -132,7 +132,8 @@ class InventoryController extends Controller
         ]);
 
         DB::beginTransaction();
-        try {
+        try 
+        {
             DB::table('inventory_det')
                 ->where('id', $request->id)
                 ->update([
@@ -159,7 +160,9 @@ class InventoryController extends Controller
             DB::commit();
 
             return redirect()->back()->with('success', 'Inventory sale updated successfully.');
-        } catch (\Exception $error) {
+        } 
+        catch (\Exception $error) 
+        {
             DB::rollBack();
             return redirect()->back()
                 ->withInput()
@@ -198,14 +201,16 @@ class InventoryController extends Controller
             'inventory_file' => 'required|file|mimes:csv,txt'
         ]);
 
-        if ($validator->fails()) {
+        if ($validator->fails()) 
+        {
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput()
                 ->with('error', $validator->errors()->first());
         }
 
-        try {
+        try 
+        {
             $file = $request->file('inventory_file');
             $projectId = $request->inventory_id;
             $imported = 0;
@@ -214,24 +219,23 @@ class InventoryController extends Controller
             if ($file->getClientOriginalExtension() == 'csv' || $file->getClientOriginalExtension() == 'txt') {
                 $handle = fopen($file->getPathname(), 'r');
                 $header = fgetcsv($handle);
-                while (($row = fgetcsv($handle)) !== FALSE) {
-
-                    if (count($row) >= 5) {
+                while (($row = fgetcsv($handle)) !== FALSE) 
+                {
+                    if (count($row) >= 5) 
+                    {
                         $projectName   = trim($row[0]);
                         $propertyType  = trim($row[1]);
                         $location      = trim($row[2]);
                         $unitNo        = trim($row[3]);
                         $size          = trim($row[4]);
-
-
-                        if (!empty($projectName) && !empty($unitNo)) {
-
-                            // get project id by name
+                        if (!empty($projectName) && !empty($unitNo))
+                        {
                             $project = DB::table('projects')
                                 ->where('project_name', $projectName)
                                 ->first();
 
-                            if (!$project) {
+                            if (!$project) 
+                            {
                                 $errors[] = "Project {$projectName} not found";
                                 continue;
                             }
@@ -241,8 +245,8 @@ class InventoryController extends Controller
                                 ->where('unit_no', $unitNo)
                                 ->exists();
 
-                            if (!$exists) {
-
+                            if (!$exists) 
+                            {
                                 DB::table('inventory_det')->insert([
                                     'inventory_id' => $project->id,
                                     'property_type' => $propertyType,
@@ -255,7 +259,9 @@ class InventoryController extends Controller
                                 ]);
 
                                 $imported++;
-                            } else {
+                            } 
+                            else 
+                            {
                                 $errors[] = "Unit {$unitNo} already exists";
                             }
                         }
@@ -265,14 +271,18 @@ class InventoryController extends Controller
             }
 
             $message = "Successfully imported {$imported} inventory units.";
-            if (!empty($errors)) {
+            if (!empty($errors)) 
+            {
                 $message .= " Errors: " . implode(', ', array_slice($errors, 0, 5));
-                if (count($errors) > 5) {
+                if (count($errors) > 5) 
+                {
                     $message .= " and " . (count($errors) - 5) . " more";
                 }
             }
             return redirect()->back()->with('success', $message);
-        } catch (\Exception $error) {
+        } 
+        catch (\Exception $error) 
+        {
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Import failed: ' . $error->getMessage());

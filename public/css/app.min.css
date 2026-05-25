@@ -512,27 +512,27 @@ body[data-layout=horizontal] .footer {
 }
 
 .mm-active {
-    color: #3762b8 !important
+    color: #3762b8!important
 }
 
 .mm-active>a {
-    color: #3762b8 !important
+    color: #3762b8!important
 }
 
 .mm-active>a i {
-    color: #3762b8 !important
+    color: #3762b8!important
 }
 
 .mm-active .active {
-    color: #3762b8 !important
+    color: #3762b8!important
 }
 
 .mm-active .active i {
-    color: #3762b8 !important
+    color: #3762b8!important
 }
 
 .mm-active>i {
-    color: #3762b8 !important
+    color: #3762b8!important
 }
 
 @media (max-width:992px) {
@@ -928,7 +928,7 @@ body[data-sidebar=colored].vertical-collpsed .vertical-menu #sidebar-menu>ul>li:
 }
 
 body[data-sidebar=colored].vertical-collpsed .vertical-menu #sidebar-menu ul li.mm-active .active {
-    color: #3762b8 !important
+    color: #3762b8!important
 }
 
 body[data-sidebar=colored].vertical-collpsed .vertical-menu #sidebar-menu ul li ul.sub-menu li a:hover {
@@ -936,15 +936,15 @@ body[data-sidebar=colored].vertical-collpsed .vertical-menu #sidebar-menu ul li 
 }
 
 body[data-sidebar=colored].vertical-collpsed .vertical-menu #sidebar-menu ul li ul.sub-menu li.mm-active {
-    color: #3762b8 !important
+    color: #3762b8!important
 }
 
 body[data-sidebar=colored].vertical-collpsed .vertical-menu #sidebar-menu ul li ul.sub-menu li.mm-active>a {
-    color: #3762b8 !important
+    color: #3762b8!important
 }
 
 body[data-sidebar=colored].vertical-collpsed .vertical-menu #sidebar-menu ul li ul.sub-menu li.mm-active>a i {
-    color: #3762b8 !important
+    color: #3762b8!important
 }
 
 .topnav {
@@ -2195,7 +2195,7 @@ body[data-layout=horizontal][data-layout-size=boxed] .navbar-header {
 }
 
 .card-radio-input:checked+.card-radio {
-    border-color: #3762b8 !important
+    border-color: #3762b8!important
 }
 
 .navs-carousel .owl-nav {
@@ -2209,7 +2209,7 @@ body[data-layout=horizontal][data-layout-size=boxed] .navbar-header {
     font-size: 20px !important;
     border-radius: 50% !important;
     background-color: rgba(85, 110, 230, .25) !important;
-    color: #3762b8 !important;
+    color: #3762b8!important;
     margin: 4px 8px !important
 }
 
@@ -2860,7 +2860,7 @@ input[type=checkbox].tui-full-calendar-checkbox-round+span {
 .irs--square .irs-from,
 .irs--square .irs-single,
 .irs--square .irs-to {
-    background: #3762b8 !important;
+    background: #3762b8!important;
     font-size: 11px
 }
 
@@ -2954,7 +2954,7 @@ input[type=checkbox].tui-full-calendar-checkbox-round+span {
 }
 
 .swal2-loader {
-    border-color: #3762b8 transparent #3762b8 transparent
+    border-color: #3762b8transparent #3762b8transparent
 }
 
 .swal2-popup {
@@ -3030,7 +3030,7 @@ div:where(.swal2-container) div:where(.swal2-popup) {
 }
 
 .toast-primary {
-    border: 2px solid #3762b8 !important;
+    border: 2px solid #3762b8!important;
     background-color: rgba(85, 110, 230, .8) !important
 }
 
@@ -3584,7 +3584,7 @@ input[switch=dark]:checked+label:before {
 .datepicker table tr td.today.disabled,
 .datepicker table tr td.today.disabled:hover,
 .datepicker table tr td.today:hover {
-    background-color: #3762b8 !important;
+    background-color: #3762b8!important;
     background-image: none;
     -webkit-box-shadow: none;
     box-shadow: none;
@@ -4454,7 +4454,7 @@ table.dataTable.dtr-inline.collapsed>tbody>tr>td.dtr-control:before {
 
 .product-color a.active .product-color-item,
 .product-color a:hover .product-color-item {
-    border-color: #3762b8 !important
+    border-color: #3762b8!important
 }
 
 .visa-card .visa-logo {

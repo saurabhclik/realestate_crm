@@ -8,7 +8,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18">{{ isset($task) ? 'Edit' : 'Create' }} Task</h4>
+                    <h4 class="mb-sm-0 font-size-18">{{ isset($task) ? 'Edit' : 'Create' }} Task<div class="border-bottom border-3 border-primary mb-2 mt-1 w-75"></div></h4>
                     <div class="page-title-right">
                         <!-- <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item">

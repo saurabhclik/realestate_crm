@@ -32,7 +32,7 @@ class PostSaleController extends Controller
                 ->latest('post_sales.created_at')
                 ->get();
 
-            $leads = DB::table('leads')->get();
+            $leads = DB::table('leads')->where('status', 'CONVERTED')->whereIn('conversion_type', ['Booked', 'Completed'])->get();
             $salesPersons = DB::table('users')->where('role', 'salesman')->get();
             $checklistItems = DB::table('checklist')->where('type', 'post_sale')->get();
             $projectCategories = DB::table('inv_catg')->get();
@@ -424,4 +424,20 @@ class PostSaleController extends Controller
         }
         return view('post-sale.rating', compact('ps', 'token', 'rated'));
     }
+    public function getByLeadId($leadId)
+{
+    $postSale = DB::table('post_sales')->where('lead_id', $leadId)->first();
+    
+    if (!$postSale) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No post sale record found for this lead'
+        ], 404);
+    }
+    
+    return response()->json([
+        'success' => true,
+        'data' => $postSale
+    ]);
+}
 }

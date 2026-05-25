@@ -207,7 +207,7 @@
     <div class="container">
         <div class="row mb-4">
             <div class="col-12 d-flex justify-content-between align-items-center">
-                <h4 class="mb-0">Connected Services</h4>
+                <h4 class="mb-0">Connected Services <div class="border-bottom border-3 border-primary mb-2 mt-1 w-75"></div></h4>
                 <nav>
                     <ol class="breadcrumb mb-0">
                         <li class="breadcrumb-item">

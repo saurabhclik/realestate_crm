@@ -318,7 +318,7 @@
                                                         @endif
                                                     @endforeach
                                                 </select>
-<input type="hidden" name="feature_id" id="feature-software-hidden">
+                                            <input type="hidden" name="feature_id" id="feature-software-hidden">
                                             </div>
                                             <button type="submit" class="btn btn-primary w-100" id="submitTrialBtn">
                                                 <span class="submit-trial-text">Start Free Trial</span>

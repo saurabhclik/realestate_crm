@@ -340,7 +340,10 @@
                 @endif
 
                 @if (in_array('data_center', $currentMenuAccess) &&
-                        ($userType != 'post_sale') && $userType != 'reception')
+                        ($userType == 'admin' ||
+                            $userType == 'salesman' ||
+                            $userType == 'team_manager' ||
+                            $softwareType == 'task_management'))
                     <li>
                         <a href="javascript: void(0);" class="has-arrow waves-effect">
                             <i class="bx bx-data"></i>

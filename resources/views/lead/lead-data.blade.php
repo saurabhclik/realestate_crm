@@ -599,8 +599,21 @@
                                     </td>
                                     <td>
                                         <span class="cust-badge bg-soft-info text-info">
-                                            <i class="fas fa-{{ $row->source == 'Website' ? 'globe' : ($row->source == 'Referral' ? 'user-friends' : 'ad') }} me-1"></i>
-                                            {{ $row->source }}
+                                            @php
+                                                $sourceName = $row->source;
+                                                if (is_numeric($row->source)) {
+                                                    $sourceObj = \Illuminate\Support\Facades\DB::table('sources')->where('id', $row->source)->first();
+                                                    if ($sourceObj) {
+                                                        $sourceName = $sourceObj->name;
+                                                    }
+                                                }
+                                                if (empty($sourceName) || trim($sourceName) === '-') {
+                                                    $sourceName = 'Data Center';
+                                                }
+                                                $icon = $sourceName == 'Website' ? 'globe' : ($sourceName == 'Referral' ? 'user-friends' : 'ad');
+                                            @endphp
+                                            <i class="fas fa-{{ $icon }} me-1"></i>
+                                            {{ $sourceName }}
                                         </span>
                                     </td>
                                     <td>{{ $row->campaign }}</td>

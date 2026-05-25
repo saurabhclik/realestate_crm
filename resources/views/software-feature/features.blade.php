@@ -5,7 +5,7 @@
         <div class="container-fluid">
             <section class="hero">
                 <div class="container text-center">
-                    <h2>Unlock Premium Features</h2>
+                    <h2>Unlock Premium Features<div class="border-bottom border-3 m-auto border-primary mb-2 mt-1 w-25"></div></h2>
                     <p>Take your business to the next level with our exclusive premium features designed to maximize productivity and growth.</p>
                 </div>
             </section>

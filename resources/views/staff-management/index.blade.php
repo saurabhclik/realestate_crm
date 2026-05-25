@@ -23,7 +23,7 @@
                 <div class="col-xl-12">
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="card-title mb-0">{{ isset($user) ? 'Edit' : 'Create' }} User</h5>
+                            <h5 class="card-title mb-0">{{ isset($user) ? 'Edit' : 'Create' }} User<div class="border-bottom border-3 border-primary mb-2 mt-1"  style="width:6%"></div></h5>
                             <button type="button" class="btn btn-success btn-sm float-end" data-bs-toggle="modal" data-bs-target="#importModal">
                                 <i class="fas fa-file-import"></i> Bulk Import
                             </button>

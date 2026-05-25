@@ -38,7 +38,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-flex align-items-center justify-content-between">
-                    <h4 class="mb-0 fw-bold">Task Dashboard</h4>
+                    <h4 class="mb-0 fw-bold">Task Dashboard<div class="border-bottom border-3 border-primary mb-2 mt-1 w-75"></div></h4>
                     <div class="d-flex gap-2">
                         @if($user_type == 'admin' || $user_type == 'team_manager')
                         <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createProjectModal">

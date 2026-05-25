@@ -276,6 +276,7 @@ class DashboardController extends Controller
         $statuses = $this->getLeadStatuses($childIds, $dateRange);
         $campaignData = $this->getCampaignAnalysisData($childIds, [], $dateRange);
         $categorys = DB::table('inv_catg')->get();
+        $users = DB::table('users')->select('id', 'name')->get();
         $sources = DB::table('sources')->get();
         $campaigns = DB::table('campaigns')->get();
         $projects = DB::table('projects')->get();
@@ -283,6 +284,7 @@ class DashboardController extends Controller
         $task_owner = Session::get('user_id');
         $selectedAgent = $selectedAgentId;
         $calendarEvents = $this->getCalendarEvents($childIds, $dateRange);
+        $lead_statuses = DB::table('lead_statuses')->get();
         return view('index', compact(
             'taskStats',
             'categorys',
@@ -301,6 +303,7 @@ class DashboardController extends Controller
             'upcomingAnniversaries',
             'campaignData',
             'events',
+            'lead_statuses',
             'followups',
             'availableYears',
             'selectedYear',
@@ -1131,6 +1134,8 @@ class DashboardController extends Controller
         $childIds = $this->normalizeIdsService->normalize($childIds);
         $userId = session('user_id');
 
+        $users = DB::table('users')->whereIn('id', $childIds)->get();
+
         $categorys = DB::table('inv_catg')->get();
         $sources = DB::table('sources')->get();
         $campaigns = DB::table('campaigns')->get();
@@ -1154,7 +1159,7 @@ class DashboardController extends Controller
             ->orderBy('a.lead_date', 'desc')
             ->paginate(10);
 
-        return view('search.index', compact('categorys', 'sources', 'campaigns', 'projects', 'cities', 'leads', 'q'));
+        return view('search.index', compact('categorys', 'users', 'sources', 'campaigns', 'projects', 'cities', 'leads', 'q'));
     }
 
     public function toggle(Request $request)

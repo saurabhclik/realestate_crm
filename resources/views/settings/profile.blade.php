@@ -12,7 +12,7 @@
 
         <div class="row justify-content-center">
             <div class="col-lg-4">
-                <h4 class="pb-2">Profile Information</h4>
+                <h4 class="pb-2">Profile Information<div class="border-bottom border-3 border-primary mb-2 mt-1 w-50"></div></h4>
                 <span class="text-justify mb-3" style="padding-top:-3px;">Update your account's profile information and email address.</span>
             </div>
             <div class="col-lg-8 text-center pt-2">
@@ -45,11 +45,9 @@
             </div>
         </div>
 
-        <div class="border-bottom border-grey"></div>
-
         <div class="row justify-content-center pt-5">
             <div class="col-lg-4">
-                <h4 class="pb-2">Update Password</h4>
+                <h4 class="pb-2">Update Password<div class="border-bottom border-3 border-primary mb-2 mt-1 w-50"></div></h4>
                 <span class="text-justify" style="padding-top:-3px;">Ensure your account is using a long, random password to stay secure.</span>
             </div>
             <div class="col-lg-8 text-center pt-2">
@@ -75,7 +73,6 @@
                 </div>
             </div>
         </div>
-        <div class="border-bottom border-grey"></div>
     </div>
 </div>
 @endsection

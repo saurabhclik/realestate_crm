@@ -75,6 +75,7 @@ $users = DB::table('users')
                             @else
                             Create New Lead
                             @endif
+                            <div class="border-bottom border-3 border-primary mb-2 mt-1 w-75"></div>
                         </h5>
                         <div>
                             @if(session('import_messages'))
@@ -362,6 +363,8 @@ $users = DB::table('users')
                                     <label for="budget">Budget</label>
                                     <select class="select2" name="budget" id="budget">
                                         <option value="">Select Budget</option>
+
+                                        <!-- 10 Lakhs to 1 Crore (10 Lakhs gap) -->
                                         <option value="10L-20L" {{ (isset($lead) && $lead->budget == '10L-20L') || old('budget') == '10L-20L' ? 'selected' : '' }}>₹10 Lakh - ₹20 Lakh</option>
                                         <option value="20L-30L" {{ (isset($lead) && $lead->budget == '20L-30L') || old('budget') == '20L-30L' ? 'selected' : '' }}>₹20 Lakh - ₹30 Lakh</option>
                                         <option value="30L-40L" {{ (isset($lead) && $lead->budget == '30L-40L') || old('budget') == '30L-40L' ? 'selected' : '' }}>₹30 Lakh - ₹40 Lakh</option>
@@ -371,15 +374,97 @@ $users = DB::table('users')
                                         <option value="70L-80L" {{ (isset($lead) && $lead->budget == '70L-80L') || old('budget') == '70L-80L' ? 'selected' : '' }}>₹70 Lakh - ₹80 Lakh</option>
                                         <option value="80L-90L" {{ (isset($lead) && $lead->budget == '80L-90L') || old('budget') == '80L-90L' ? 'selected' : '' }}>₹80 Lakh - ₹90 Lakh</option>
                                         <option value="90L-1Cr" {{ (isset($lead) && $lead->budget == '90L-1Cr') || old('budget') == '90L-1Cr' ? 'selected' : '' }}>₹90 Lakh - ₹1 Crore</option>
+
+                                        <!-- 1 Crore to 5 Crore (25 Lakhs gap) -->
                                         <option value="1Cr-1.25Cr" {{ (isset($lead) && $lead->budget == '1Cr-1.25Cr') || old('budget') == '1Cr-1.25Cr' ? 'selected' : '' }}>₹1 Crore - ₹1.25 Crore</option>
                                         <option value="1.25Cr-1.5Cr" {{ (isset($lead) && $lead->budget == '1.25Cr-1.5Cr') || old('budget') == '1.25Cr-1.5Cr' ? 'selected' : '' }}>₹1.25 Crore - ₹1.5 Crore</option>
                                         <option value="1.5Cr-1.75Cr" {{ (isset($lead) && $lead->budget == '1.5Cr-1.75Cr') || old('budget') == '1.5Cr-1.75Cr' ? 'selected' : '' }}>₹1.5 Crore - ₹1.75 Crore</option>
                                         <option value="1.75Cr-2Cr" {{ (isset($lead) && $lead->budget == '1.75Cr-2Cr') || old('budget') == '1.75Cr-2Cr' ? 'selected' : '' }}>₹1.75 Crore - ₹2 Crore</option>
                                         <option value="2Cr-2.25Cr" {{ (isset($lead) && $lead->budget == '2Cr-2.25Cr') || old('budget') == '2Cr-2.25Cr' ? 'selected' : '' }}>₹2 Crore - ₹2.25 Crore</option>
-                                        <option value="2.25Cr-3Cr" {{ (isset($lead) && $lead->budget == '2.25Cr-3Cr') || old('budget') == '2.25Cr-3Cr' ? 'selected' : '' }}>₹2.25 Crore - ₹3 Crore</option>
-                                        <option value="3Cr-3.5Cr" {{ (isset($lead) && $lead->budget == '3Cr-3.5Cr') || old('budget') == '3Cr-3.5Cr' ? 'selected' : '' }}>₹3 Crore - ₹3.5 Crore</option>
-                                        <option value="3.5Cr-5Cr" {{ (isset($lead) && $lead->budget == '3.5Cr-5Cr') || old('budget') == '3.5Cr-5Cr' ? 'selected' : '' }}>₹3.5 Crore - ₹5 Crore</option>
-                                        <option value="5Cr-10Cr" {{ (isset($lead) && $lead->budget == '5Cr-10Cr') || old('budget') == '5Cr-10Cr' ? 'selected' : '' }}>₹5 Crore - ₹10 Crore</option>
+                                        <option value="2.25Cr-2.5Cr" {{ (isset($lead) && $lead->budget == '2.25Cr-2.5Cr') || old('budget') == '2.25Cr-2.5Cr' ? 'selected' : '' }}>₹2.25 Crore - ₹2.5 Crore</option>
+                                        <option value="2.5Cr-2.75Cr" {{ (isset($lead) && $lead->budget == '2.5Cr-2.75Cr') || old('budget') == '2.5Cr-2.75Cr' ? 'selected' : '' }}>₹2.5 Crore - ₹2.75 Crore</option>
+                                        <option value="2.75Cr-3Cr" {{ (isset($lead) && $lead->budget == '2.75Cr-3Cr') || old('budget') == '2.75Cr-3Cr' ? 'selected' : '' }}>₹2.75 Crore - ₹3 Crore</option>
+                                        <option value="3Cr-3.25Cr" {{ (isset($lead) && $lead->budget == '3Cr-3.25Cr') || old('budget') == '3Cr-3.25Cr' ? 'selected' : '' }}>₹3 Crore - ₹3.25 Crore</option>
+                                        <option value="3.25Cr-3.5Cr" {{ (isset($lead) && $lead->budget == '3.25Cr-3.5Cr') || old('budget') == '3.25Cr-3.5Cr' ? 'selected' : '' }}>₹3.25 Crore - ₹3.5 Crore</option>
+                                        <option value="3.5Cr-3.75Cr" {{ (isset($lead) && $lead->budget == '3.5Cr-3.75Cr') || old('budget') == '3.5Cr-3.75Cr' ? 'selected' : '' }}>₹3.5 Crore - ₹3.75 Crore</option>
+                                        <option value="3.75Cr-4Cr" {{ (isset($lead) && $lead->budget == '3.75Cr-4Cr') || old('budget') == '3.75Cr-4Cr' ? 'selected' : '' }}>₹3.75 Crore - ₹4 Crore</option>
+                                        <option value="4Cr-4.25Cr" {{ (isset($lead) && $lead->budget == '4Cr-4.25Cr') || old('budget') == '4Cr-4.25Cr' ? 'selected' : '' }}>₹4 Crore - ₹4.25 Crore</option>
+                                        <option value="4.25Cr-4.5Cr" {{ (isset($lead) && $lead->budget == '4.25Cr-4.5Cr') || old('budget') == '4.25Cr-4.5Cr' ? 'selected' : '' }}>₹4.25 Crore - ₹4.5 Crore</option>
+                                        <option value="4.5Cr-4.75Cr" {{ (isset($lead) && $lead->budget == '4.5Cr-4.75Cr') || old('budget') == '4.5Cr-4.75Cr' ? 'selected' : '' }}>₹4.5 Crore - ₹4.75 Crore</option>
+                                        <option value="4.75Cr-5Cr" {{ (isset($lead) && $lead->budget == '4.75Cr-5Cr') || old('budget') == '4.75Cr-5Cr' ? 'selected' : '' }}>₹4.75 Crore - ₹5 Crore</option>
+
+                                        <!-- 5 Crore to 10 Crore (50 Lakhs gap) -->
+                                        <option value="5Cr-5.5Cr" {{ (isset($lead) && $lead->budget == '5Cr-5.5Cr') || old('budget') == '5Cr-5.5Cr' ? 'selected' : '' }}>₹5 Crore - ₹5.5 Crore</option>
+                                        <option value="5.5Cr-6Cr" {{ (isset($lead) && $lead->budget == '5.5Cr-6Cr') || old('budget') == '5.5Cr-6Cr' ? 'selected' : '' }}>₹5.5 Crore - ₹6 Crore</option>
+                                        <option value="6Cr-6.5Cr" {{ (isset($lead) && $lead->budget == '6Cr-6.5Cr') || old('budget') == '6Cr-6.5Cr' ? 'selected' : '' }}>₹6 Crore - ₹6.5 Crore</option>
+                                        <option value="6.5Cr-7Cr" {{ (isset($lead) && $lead->budget == '6.5Cr-7Cr') || old('budget') == '6.5Cr-7Cr' ? 'selected' : '' }}>₹6.5 Crore - ₹7 Crore</option>
+                                        <option value="7Cr-7.5Cr" {{ (isset($lead) && $lead->budget == '7Cr-7.5Cr') || old('budget') == '7Cr-7.5Cr' ? 'selected' : '' }}>₹7 Crore - ₹7.5 Crore</option>
+                                        <option value="7.5Cr-8Cr" {{ (isset($lead) && $lead->budget == '7.5Cr-8Cr') || old('budget') == '7.5Cr-8Cr' ? 'selected' : '' }}>₹7.5 Crore - ₹8 Crore</option>
+                                        <option value="8Cr-8.5Cr" {{ (isset($lead) && $lead->budget == '8Cr-8.5Cr') || old('budget') == '8Cr-8.5Cr' ? 'selected' : '' }}>₹8 Crore - ₹8.5 Crore</option>
+                                        <option value="8.5Cr-9Cr" {{ (isset($lead) && $lead->budget == '8.5Cr-9Cr') || old('budget') == '8.5Cr-9Cr' ? 'selected' : '' }}>₹8.5 Crore - ₹9 Crore</option>
+                                        <option value="9Cr-9.5Cr" {{ (isset($lead) && $lead->budget == '9Cr-9.5Cr') || old('budget') == '9Cr-9.5Cr' ? 'selected' : '' }}>₹9 Crore - ₹9.5 Crore</option>
+                                        <option value="9.5Cr-10Cr" {{ (isset($lead) && $lead->budget == '9.5Cr-10Cr') || old('budget') == '9.5Cr-10Cr' ? 'selected' : '' }}>₹9.5 Crore - ₹10 Crore</option>
+
+                                        <!-- 10 Crore to 25 Crore (1 Crore gap) -->
+                                        <option value="10Cr-11Cr" {{ (isset($lead) && $lead->budget == '10Cr-11Cr') || old('budget') == '10Cr-11Cr' ? 'selected' : '' }}>₹10 Crore - ₹11 Crore</option>
+                                        <option value="11Cr-12Cr" {{ (isset($lead) && $lead->budget == '11Cr-12Cr') || old('budget') == '11Cr-12Cr' ? 'selected' : '' }}>₹11 Crore - ₹12 Crore</option>
+                                        <option value="12Cr-13Cr" {{ (isset($lead) && $lead->budget == '12Cr-13Cr') || old('budget') == '12Cr-13Cr' ? 'selected' : '' }}>₹12 Crore - ₹13 Crore</option>
+                                        <option value="13Cr-14Cr" {{ (isset($lead) && $lead->budget == '13Cr-14Cr') || old('budget') == '13Cr-14Cr' ? 'selected' : '' }}>₹13 Crore - ₹14 Crore</option>
+                                        <option value="14Cr-15Cr" {{ (isset($lead) && $lead->budget == '14Cr-15Cr') || old('budget') == '14Cr-15Cr' ? 'selected' : '' }}>₹14 Crore - ₹15 Crore</option>
+                                        <option value="15Cr-16Cr" {{ (isset($lead) && $lead->budget == '15Cr-16Cr') || old('budget') == '15Cr-16Cr' ? 'selected' : '' }}>₹15 Crore - ₹16 Crore</option>
+                                        <option value="16Cr-17Cr" {{ (isset($lead) && $lead->budget == '16Cr-17Cr') || old('budget') == '16Cr-17Cr' ? 'selected' : '' }}>₹16 Crore - ₹17 Crore</option>
+                                        <option value="17Cr-18Cr" {{ (isset($lead) && $lead->budget == '17Cr-18Cr') || old('budget') == '17Cr-18Cr' ? 'selected' : '' }}>₹17 Crore - ₹18 Crore</option>
+                                        <option value="18Cr-19Cr" {{ (isset($lead) && $lead->budget == '18Cr-19Cr') || old('budget') == '18Cr-19Cr' ? 'selected' : '' }}>₹18 Crore - ₹19 Crore</option>
+                                        <option value="19Cr-20Cr" {{ (isset($lead) && $lead->budget == '19Cr-20Cr') || old('budget') == '19Cr-20Cr' ? 'selected' : '' }}>₹19 Crore - ₹20 Crore</option>
+                                        <option value="20Cr-21Cr" {{ (isset($lead) && $lead->budget == '20Cr-21Cr') || old('budget') == '20Cr-21Cr' ? 'selected' : '' }}>₹20 Crore - ₹21 Crore</option>
+                                        <option value="21Cr-22Cr" {{ (isset($lead) && $lead->budget == '21Cr-22Cr') || old('budget') == '21Cr-22Cr' ? 'selected' : '' }}>₹21 Crore - ₹22 Crore</option>
+                                        <option value="22Cr-23Cr" {{ (isset($lead) && $lead->budget == '22Cr-23Cr') || old('budget') == '22Cr-23Cr' ? 'selected' : '' }}>₹22 Crore - ₹23 Crore</option>
+                                        <option value="23Cr-24Cr" {{ (isset($lead) && $lead->budget == '23Cr-24Cr') || old('budget') == '23Cr-24Cr' ? 'selected' : '' }}>₹23 Crore - ₹24 Crore</option>
+                                        <option value="24Cr-25Cr" {{ (isset($lead) && $lead->budget == '24Cr-25Cr') || old('budget') == '24Cr-25Cr' ? 'selected' : '' }}>₹24 Crore - ₹25 Crore</option>
+
+                                        <!-- 25 Crore to 50 Crore (2 Crore gap) -->
+                                        <option value="25Cr-27Cr" {{ (isset($lead) && $lead->budget == '25Cr-27Cr') || old('budget') == '25Cr-27Cr' ? 'selected' : '' }}>₹25 Crore - ₹27 Crore</option>
+                                        <option value="27Cr-29Cr" {{ (isset($lead) && $lead->budget == '27Cr-29Cr') || old('budget') == '27Cr-29Cr' ? 'selected' : '' }}>₹27 Crore - ₹29 Crore</option>
+                                        <option value="29Cr-31Cr" {{ (isset($lead) && $lead->budget == '29Cr-31Cr') || old('budget') == '29Cr-31Cr' ? 'selected' : '' }}>₹29 Crore - ₹31 Crore</option>
+                                        <option value="31Cr-33Cr" {{ (isset($lead) && $lead->budget == '31Cr-33Cr') || old('budget') == '31Cr-33Cr' ? 'selected' : '' }}>₹31 Crore - ₹33 Crore</option>
+                                        <option value="33Cr-35Cr" {{ (isset($lead) && $lead->budget == '33Cr-35Cr') || old('budget') == '33Cr-35Cr' ? 'selected' : '' }}>₹33 Crore - ₹35 Crore</option>
+                                        <option value="35Cr-37Cr" {{ (isset($lead) && $lead->budget == '35Cr-37Cr') || old('budget') == '35Cr-37Cr' ? 'selected' : '' }}>₹35 Crore - ₹37 Crore</option>
+                                        <option value="37Cr-39Cr" {{ (isset($lead) && $lead->budget == '37Cr-39Cr') || old('budget') == '37Cr-39Cr' ? 'selected' : '' }}>₹37 Crore - ₹39 Crore</option>
+                                        <option value="39Cr-41Cr" {{ (isset($lead) && $lead->budget == '39Cr-41Cr') || old('budget') == '39Cr-41Cr' ? 'selected' : '' }}>₹39 Crore - ₹41 Crore</option>
+                                        <option value="41Cr-43Cr" {{ (isset($lead) && $lead->budget == '41Cr-43Cr') || old('budget') == '41Cr-43Cr' ? 'selected' : '' }}>₹41 Crore - ₹43 Crore</option>
+                                        <option value="43Cr-45Cr" {{ (isset($lead) && $lead->budget == '43Cr-45Cr') || old('budget') == '43Cr-45Cr' ? 'selected' : '' }}>₹43 Crore - ₹45 Crore</option>
+                                        <option value="45Cr-47Cr" {{ (isset($lead) && $lead->budget == '45Cr-47Cr') || old('budget') == '45Cr-47Cr' ? 'selected' : '' }}>₹45 Crore - ₹47 Crore</option>
+                                        <option value="47Cr-49Cr" {{ (isset($lead) && $lead->budget == '47Cr-49Cr') || old('budget') == '47Cr-49Cr' ? 'selected' : '' }}>₹47 Crore - ₹49 Crore</option>
+                                        <option value="49Cr-51Cr" {{ (isset($lead) && $lead->budget == '49Cr-51Cr') || old('budget') == '49Cr-51Cr' ? 'selected' : '' }}>₹49 Crore - ₹51 Crore</option>
+
+                                        <!-- 50 Crore to 100 Crore (5 Crore gap) -->
+                                        <option value="50Cr-55Cr" {{ (isset($lead) && $lead->budget == '50Cr-55Cr') || old('budget') == '50Cr-55Cr' ? 'selected' : '' }}>₹50 Crore - ₹55 Crore</option>
+                                        <option value="55Cr-60Cr" {{ (isset($lead) && $lead->budget == '55Cr-60Cr') || old('budget') == '55Cr-60Cr' ? 'selected' : '' }}>₹55 Crore - ₹60 Crore</option>
+                                        <option value="60Cr-65Cr" {{ (isset($lead) && $lead->budget == '60Cr-65Cr') || old('budget') == '60Cr-65Cr' ? 'selected' : '' }}>₹60 Crore - ₹65 Crore</option>
+                                        <option value="65Cr-70Cr" {{ (isset($lead) && $lead->budget == '65Cr-70Cr') || old('budget') == '65Cr-70Cr' ? 'selected' : '' }}>₹65 Crore - ₹70 Crore</option>
+                                        <option value="70Cr-75Cr" {{ (isset($lead) && $lead->budget == '70Cr-75Cr') || old('budget') == '70Cr-75Cr' ? 'selected' : '' }}>₹70 Crore - ₹75 Crore</option>
+                                        <option value="75Cr-80Cr" {{ (isset($lead) && $lead->budget == '75Cr-80Cr') || old('budget') == '75Cr-80Cr' ? 'selected' : '' }}>₹75 Crore - ₹80 Crore</option>
+                                        <option value="80Cr-85Cr" {{ (isset($lead) && $lead->budget == '80Cr-85Cr') || old('budget') == '80Cr-85Cr' ? 'selected' : '' }}>₹80 Crore - ₹85 Crore</option>
+                                        <option value="85Cr-90Cr" {{ (isset($lead) && $lead->budget == '85Cr-90Cr') || old('budget') == '85Cr-90Cr' ? 'selected' : '' }}>₹85 Crore - ₹90 Crore</option>
+                                        <option value="90Cr-95Cr" {{ (isset($lead) && $lead->budget == '90Cr-95Cr') || old('budget') == '90Cr-95Cr' ? 'selected' : '' }}>₹90 Crore - ₹95 Crore</option>
+                                        <option value="95Cr-100Cr" {{ (isset($lead) && $lead->budget == '95Cr-100Cr') || old('budget') == '95Cr-100Cr' ? 'selected' : '' }}>₹95 Crore - ₹100 Crore</option>
+
+                                        <!-- 100 Crore to 250 Crore (10 Crore gap) -->
+                                        <option value="100Cr-110Cr" {{ (isset($lead) && $lead->budget == '100Cr-110Cr') || old('budget') == '100Cr-110Cr' ? 'selected' : '' }}>₹100 Crore - ₹110 Crore</option>
+                                        <option value="110Cr-120Cr" {{ (isset($lead) && $lead->budget == '110Cr-120Cr') || old('budget') == '110Cr-120Cr' ? 'selected' : '' }}>₹110 Crore - ₹120 Crore</option>
+                                        <option value="120Cr-130Cr" {{ (isset($lead) && $lead->budget == '120Cr-130Cr') || old('budget') == '120Cr-130Cr' ? 'selected' : '' }}>₹120 Crore - ₹130 Crore</option>
+                                        <option value="130Cr-140Cr" {{ (isset($lead) && $lead->budget == '130Cr-140Cr') || old('budget') == '130Cr-140Cr' ? 'selected' : '' }}>₹130 Crore - ₹140 Crore</option>
+                                        <option value="140Cr-150Cr" {{ (isset($lead) && $lead->budget == '140Cr-150Cr') || old('budget') == '140Cr-150Cr' ? 'selected' : '' }}>₹140 Crore - ₹150 Crore</option>
+                                        <option value="150Cr-160Cr" {{ (isset($lead) && $lead->budget == '150Cr-160Cr') || old('budget') == '150Cr-160Cr' ? 'selected' : '' }}>₹150 Crore - ₹160 Crore</option>
+                                        <option value="160Cr-170Cr" {{ (isset($lead) && $lead->budget == '160Cr-170Cr') || old('budget') == '160Cr-170Cr' ? 'selected' : '' }}>₹160 Crore - ₹170 Crore</option>
+                                        <option value="170Cr-180Cr" {{ (isset($lead) && $lead->budget == '170Cr-180Cr') || old('budget') == '170Cr-180Cr' ? 'selected' : '' }}>₹170 Crore - ₹180 Crore</option>
+                                        <option value="180Cr-190Cr" {{ (isset($lead) && $lead->budget == '180Cr-190Cr') || old('budget') == '180Cr-190Cr' ? 'selected' : '' }}>₹180 Crore - ₹190 Crore</option>
+                                        <option value="190Cr-200Cr" {{ (isset($lead) && $lead->budget == '190Cr-200Cr') || old('budget') == '190Cr-200Cr' ? 'selected' : '' }}>₹190 Crore - ₹200 Crore</option>
+                                        <option value="200Cr-210Cr" {{ (isset($lead) && $lead->budget == '200Cr-210Cr') || old('budget') == '200Cr-210Cr' ? 'selected' : '' }}>₹200 Crore - ₹210 Crore</option>
+                                        <option value="210Cr-220Cr" {{ (isset($lead) && $lead->budget == '210Cr-220Cr') || old('budget') == '210Cr-220Cr' ? 'selected' : '' }}>₹210 Crore - ₹220 Crore</option>
+                                        <option value="220Cr-230Cr" {{ (isset($lead) && $lead->budget == '220Cr-230Cr') || old('budget') == '220Cr-230Cr' ? 'selected' : '' }}>₹220 Crore - ₹230 Crore</option>
+                                        <option value="230Cr-240Cr" {{ (isset($lead) && $lead->budget == '230Cr-240Cr') || old('budget') == '230Cr-240Cr' ? 'selected' : '' }}>₹230 Crore - ₹240 Crore</option>
+                                        <option value="240Cr-250Cr" {{ (isset($lead) && $lead->budget == '240Cr-250Cr') || old('budget') == '240Cr-250Cr' ? 'selected' : '' }}>₹240 Crore - ₹250 Crore</option>
                                     </select>
                                 </div>
 

@@ -7,7 +7,7 @@
     <div class="container-fluid mt-4">
         <div class="card">
             <div class="card-header">
-                <h4 class="mb-0">Project Reports</h4>
+                <h4 class="mb-0">Project Reports<div class="border-bottom border-3 border-primary mb-2 mt-1 w-75"></div></h4>
             </div>
             <div class="card-body">
                 <div class="d-flex gap-2 mb-3">

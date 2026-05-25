@@ -5,7 +5,7 @@
     }
 
     .nav-tabs .nav-link.active h6 {
-        color: #3762b8 !important;
+        color: #3762b8!important;
     }
 
     .no-data {

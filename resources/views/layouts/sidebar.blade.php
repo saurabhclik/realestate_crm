@@ -60,7 +60,7 @@
                     </li>
                 @endif
                 <li>
-                    @if ($userType != 'salesman')
+                    @if ($userType != 'salesman' && $userType != 'post_sale' && $userType != 'reception')
                         <a href="javascript: void(0);" class="has-arrow waves-effect">
                             <i class="bx bx-user"></i>
                             <span key="t-dashboards">Staff Management</span>
@@ -89,7 +89,7 @@
                 </li>
                 @endif
                 <li>
-                    @if ($userType != 'salesman')
+                    @if ($userType != 'salesman' && $userType != 'post_sale' && $userType != 'reception')
                         <a href="javascript: void(0);" class="has-arrow waves-effect">
                             <i class="bx bx-store"></i>
                             <span key="t-ecommerce">Master</span>
@@ -161,114 +161,127 @@
                 </li>
                 @endif
 
-                @if (in_array('leads_management', $currentMenuAccess))
-                    <li>
-                        <a href="javascript: void(0);" class="has-arrow waves-effect">
-                            <i class="bx bx-bitcoin"></i>
-                            <span key="t-crypto">Leads Management</span>
-                        </a>
-                        <ul class="sub-menu" aria-expanded="false">
+                @php
+                    $dynamicLeadStatuses = DB::table('lead_statuses')
+                        ->where('is_active', 1)
+                        ->orderBy('seq', 'asc')
+                        ->get();
+
+                    $mainStatuses = [
+                        'NEW LEAD',
+                        'PENDING',
+                        'PROCESSING',
+                        'INTERESTED',
+                        'MEETING SCHEDULED',
+                        'CALL SCHEDULED',
+                        'VISIT SCHEDULED',
+                        'VISIT DONE',
+                        'BOOKED',
+                        'COMPLETED',
+                        'CANCELLED',
+                        'FUTURE LEAD',
+                    ];
+
+                    $otherStatuses = [
+                        'NOT REACHABLE',
+                        'WRONG NUMBER',
+                        'CHANNEL PARTNER',
+                        'NOT INTERESTED',
+                        'NOT PICKED',
+                        'LOST',
+                    ];
+                @endphp
+
+                @if (in_array('leads_management', $currentMenuAccess) && $userType != 'post_sale')
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <i class="bx bx-bitcoin"></i>
+                        <span key="t-crypto">Leads Management</span>
+                    </a>
+
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li>
+                            <a href="{{ route('lead.add') }}">
+                                Add Lead
+                            </a>
+                        </li>
+                        @if ($userType == 'admin' || $userType == 'team_manager')
                             <li>
-                                <a href="{{ route('lead.add') }}" key="t-wallet">Add Lead</a>
+                                <a href="{{ route('lead.allocate') }}">
+                                    Allocate Lead
+                                </a>
                             </li>
-                            @if ($userType == 'admin' || $userType == 'team_manager')
-                                <li>
-                                    <a href="{{ route('lead.allocate') }}" key="t-allocate">Allocate Lead</a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('lead.unallocated') }}" key="t-unallocated">Unallocated Lead</a>
-                                </li>
-                            @endif
+
                             <li>
-                                <a href="{{ route('lead.new') }}" key="t-new">New Lead</a>
+                                <a href="{{ route('lead.unallocated') }}">
+                                    Unallocated Lead
+                                </a>
                             </li>
+                        @endif
+
+                        @if($userType != 'reception')
                             <li>
-                                <a href="{{ route('transfer_list.lead') }}" key="t-kyc">Transfer Leads</a>
+                                <a href="{{ route('transfer_list.lead') }}">
+                                    Transfer Leads
+                                </a>
                             </li>
-                            <li>
-                                <a href="{{ route('lead.pending') }}" key="t-kyc">Pending Leads</a>
-                            </li>
-                            <li>
-                                <a href="{{ route('lead.processing') }}" key="t-ico">Processing Leads</a>
-                            </li>
-                            <li>
-                                <a href="{{ route('lead.interested') }}" key="t-ico">Interested Leads</a>
-                            </li>
-                            <li>
-                                <a href="{{ route('lead.meeting_scheduled') }}" key="t-ico">Meeting scheduled</a>
-                            </li>
-                            <li>
-                                <a href="{{ route('lead.call_scheduled') }}" key="t-ico">Call scheduled</a>
-                            </li>
-                            <li>
-                                <a href="{{ route('lead.visit_scheduled') }}" key="t-ico">Visit scheduled</a>
-                            </li>
-                            <li>
-                                <a href="{{ route('lead.visit_done') }}" key="t-ico">Visit Done</a>
-                            </li>
-                            <li>
-                                <a href="{{ route('lead.booked') }}" key="t-ico">Booked</a>
-                            </li>
-                            <li>
-                                <a href="{{ route('lead.completed') }}" key="t-ico">Completed</a>
-                            </li>
-                            <li>
-                                <a href="{{ route('lead.cancelled') }}" key="t-ico">Cancelled</a>
-                            </li>
+                            @foreach($dynamicLeadStatuses as $status)
+
+                                @php
+                                    $routeName = $status->route_name;
+                                    $displayName = strtoupper(trim($status->display_name));
+                                @endphp
+
+                                @if(
+                                    !empty($routeName) &&
+                                    in_array($displayName, $mainStatuses)
+                                )
+                                    <li>
+                                        <a href="{{ route($routeName) }}">
+                                            {{ ucwords(strtolower($status->display_name)) }}
+                                        </a>
+                                    </li>
+                                @endif
+                            @endforeach
                             <li>
                                 <a href="javascript: void(0);" class="has-arrow waves-effect">
-                                    <span key="t-crypto">Others Leads</span>
+                                    <span>Others Leads</span>
                                 </a>
                                 <ul class="sub-menu" aria-expanded="false">
-                                    <li>
-                                        <a href="{{ route('lead.not_reachable') }}" class="">
-                                            <span key="t-projects">Not Reachable</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="{{ route('lead.wrong_number') }}" class="">
-                                            <span key="t-projects">Wrong Number</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="{{ route('lead.channel_partner') }}" class="">
-                                            <span key="t-projects">Channel Partner</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="{{ route('lead.not_interested') }}" class="">
-                                            <span key="t-projects">Not Interested</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="{{ route('lead.not_picked') }}" class="">
-                                            <span key="t-projects">Not Picked</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="{{ route('lead.lost') }}" class="">
-                                            <span key="t-projects">Lost</span>
-                                        </a>
-                                    </li>
+                                    @foreach($dynamicLeadStatuses as $status)
+
+                                        @php
+                                            $routeName = $status->route_name;
+                                            $displayName = strtoupper(trim($status->display_name));
+                                        @endphp
+
+                                        @if(
+                                            !empty($routeName) &&
+                                            in_array($displayName, $otherStatuses)
+                                        )
+                                            <li>
+                                                <a href="{{ route($routeName) }}">
+                                                    {{ ucwords(strtolower($status->display_name)) }}
+                                                </a>
+                                            </li>
+                                        @endif
+                                    @endforeach
                                 </ul>
                             </li>
                             <li>
-                                <a href="{{ route('lead.all_lead') }}" class="">
-                                    <span key="t-invoices">All Lead</span>
+                                <a href="{{ route('lead.all_lead') }}">
+                                    All Lead
                                 </a>
                             </li>
-                            <li>
-                                <a href="{{ route('lead.future') }}" class="">
-                                    <span key="t-invoices">Future Lead</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
+                    </ul>
+                </li>
                 @endif
 
-                @if (in_array('transfer_leads', $currentMenuAccess) && ($userType == 'admin' || $userType == 'team_manager'))
+                @endif
+
+                @if (in_array('transfer_leads', $currentMenuAccess) && ($userType == 'admin' || $userType == 'team_manager' || $userType != 'post_sale') && $userType != 'reception')
                     <li>
-                        <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <a href="javascript:(0);" class="has-arrow waves-effect">
                             <i class='bx bx-transfer-alt'></i>
                             <span key="t-tasks">Transfer Leads</span>
                         </a>
@@ -289,7 +302,7 @@
 
                 @if (in_array('mis_management', $currentMenuAccess) &&
                         in_array('mis_management', $activeFeatures) &&
-                        ($userType == 'admin' || $userType == 'team_manager'))
+                        ($userType == 'admin' || $userType == 'team_manager' || $userType != 'post_sale') &&  $userType != 'reception')
                     <li>
                         <a href="javascript: void(0);" class="has-arrow waves-effect">
                             <i class='bx bx-line-chart'></i>
@@ -309,7 +322,7 @@
                     </li>
                 @endif
 
-                @if (in_array('task_management', $currentMenuAccess) && in_array('task_management', $activeFeatures))
+                @if (in_array('task_management', $currentMenuAccess) && in_array('task_management', $activeFeatures) && $userType != 'reception')
                     <li>
                         <a href="javascript: void(0);" class="has-arrow waves-effect">
                             <i class="bx bx-task"></i>
@@ -327,10 +340,7 @@
                 @endif
 
                 @if (in_array('data_center', $currentMenuAccess) &&
-                        ($userType == 'admin' ||
-                            $userType == 'salesman' ||
-                            $userType == 'team_manager' ||
-                            $softwareType == 'task_management'))
+                        ($userType != 'post_sale') && $userType != 'reception')
                     <li>
                         <a href="javascript: void(0);" class="has-arrow waves-effect">
                             <i class="bx bx-data"></i>
@@ -347,7 +357,7 @@
                     </li>
                 @endif
 
-                @if (in_array('inventory', $currentMenuAccess) && in_array('inventory_management', $activeFeatures))
+                @if (in_array('inventory', $currentMenuAccess) && in_array('inventory_management', $activeFeatures) && $userType != 'reception')
                     <li>
                         <a href="{{ route('inventory.index') }}" class="">
                             <i class='bx bx-box'></i>
@@ -356,7 +366,7 @@
                     </li>
                 @endif
 
-                @if (in_array('post_sale', $currentMenuAccess) && in_array('post_sale', $activeFeatures))
+                @if (in_array('post_sale', $currentMenuAccess) && in_array('post_sale', $activeFeatures) &&$userType != 'reception')
                     <li>
                         <a href="{{ route('post-sale.index') }}" class="">
                             <i class='bx bx-receipt'></i>
@@ -364,7 +374,7 @@
                         </a>
                     </li>
                 @endif
-                @if (in_array('post_sale', $currentMenuAccess) && in_array('exhibition', $activeFeatures))
+                @if (in_array('post_sale', $currentMenuAccess) && in_array('exhibition', $activeFeatures) && $userType != 'post_sale' && $userType != 'reception')
                     <li>
                         <a href="{{ route('exhibition.index') }}">
                             <i class="bx bx-group"></i>
@@ -372,7 +382,7 @@
                         </a>
                     </li>
                 @endif
-                @if (in_array('events', $currentMenuAccess))
+                @if (in_array('events', $currentMenuAccess) && $userType != 'post_sale' && $userType != 'reception')
                     <li>
                         <a href="{{ route('event.index') }}" class="">
                             <i class="bx bx-briefcase-alt"></i>
@@ -381,7 +391,7 @@
                     </li>
                 @endif
 
-                @if (in_array('attendance', $currentMenuAccess) && ($userType == 'admin' || $userType == 'team_manager'))
+                @if (in_array('attendance', $currentMenuAccess) && ($userType == 'admin' || $userType == 'team_manager' || $userType != 'reception'))
                     <li>
                         <a href="javascript: void(0);" class="has-arrow waves-effect">
                             <i class="bx bx-user-circle"></i>
@@ -400,7 +410,7 @@
 
                 @if (in_array('employee_track', $currentMenuAccess) &&
                         in_array('employee_tracking', $activeFeatures) &&
-                        ($userType == 'admin' || $userType == 'team_manager'))
+                        ($userType == 'admin' || $userType == 'team_manager' || $userType != 'post_sale') &&  $userType != 'reception')
                     <li>
                         <a href="javascript: void(0);" class="has-arrow waves-effect">
                             <i class="bx bx-file"></i>
@@ -417,7 +427,7 @@
                     </li>
                 @endif
 
-                @if (in_array('expense_management', $currentMenuAccess) && in_array('expense_management', $activeFeatures))
+                @if (in_array('expense_management', $currentMenuAccess) && in_array('expense_management', $activeFeatures) && $userType != 'reception')
                     <li>
                         <a href="{{ route('expense.index') }}" class="">
                             <i class="bx bx-tone"></i>
@@ -425,7 +435,7 @@
                         </a>
                     </li>
                 @endif
-                @if (in_array('reports', $currentMenuAccess))
+                @if (in_array('reports', $currentMenuAccess) && $userType != 'reception')
                     <li>
                         <a href="{{ route('reports') }}" class="">
                             <i class="bx bx-bar-chart"></i>
@@ -433,7 +443,7 @@
                         </a>
                     </li>
                 @endif
-                @if (in_array('settings', $currentMenuAccess))
+                @if (in_array('settings', $currentMenuAccess) && $userType != 'reception')
                     <li>
                         <a href="javascript: void(0);" class="has-arrow waves-effect">
                             <i class="bx bxs-bar-chart-alt-2"></i>
@@ -442,23 +452,9 @@
                         <ul class="sub-menu" aria-expanded="false">
                             @if ($userType == 'admin' || $userType == 'team_manager')
                                 <li>
-                                    <a href="{{ route('setting.logo') }}" key="t-apex-charts">Change Logo</a>
-                                </li>
-                                @if (in_array('integration', $activeFeatures))
-                                    <li>
-                                        <a href="{{ route('integrations.index') }}"
-                                            key="t-apex-charts">Integrations</a>
-                                    </li>
-                                @endif
-                                <li>
-                                    <a href="{{ route('setting.login_log') }}" key="t-e-charts">Login Logs</a>
+                                    <a href="{{ route('system-configuration.index') }}" key="t-apex-charts">System Confirguration</a>
                                 </li>
                             @endif
-                            <li>
-                                <a href="{{ route('settings.ratings') }}" key="t-ratings">
-                                    View Ratings
-                                </a>
-                            </li>
                             <li>
                                 <a href="{{ route('setting.profile') }}" key="t-chartjs-charts">Profile</a>
                             </li>

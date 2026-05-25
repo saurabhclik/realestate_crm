@@ -73,7 +73,7 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">MIS Summary Report</h3>
+                        <h4 class="mb-0">MIS Summary Report<div class="border-bottom border-3 border-primary mb-2 mt-1" style="width:15%;"></div></h4>
                     </div>
                     <div class="card-body">
                         @if($userType == 'admin' || $userType == 'team_manager')

@@ -4,7 +4,10 @@
     }
 </style>
 
-
+@php
+    $userType = Session::get('user_type');
+@endphp
+@if($userType != 'reception')
 <div class="floating-filter">
     <button type="button" class="btn btn-primary btn-floating" id="toggleDashboardFilter">
         <i class="fas fa-filter text-light"></i>
@@ -60,7 +63,7 @@
                     @php
                         $queryParams = request()->query();
                         $queryParams['source'] = $source;
-                        $url = route('leads.filter.leads') . '?' . http_build_query($queryParams);
+                        $url = route('lead.all_lead') . '?' . http_build_query($queryParams);
                     @endphp
                     <a href="{{ $url }}"
                         class="filter-option option-source {{ request('source') == $source ? 'active' : '' }}">
@@ -100,6 +103,7 @@
         <div id="calendarWidget"></div>
     </div>
 </div>
+@endif
 <div class="floating-chat-toggle {{ in_array('chat_bot', session('active_features', [])) ? '' : 'd-none' }}"
     id="chatToggle" title="CHATBOT Assistant" role="button" tabindex="0" aria-label="Open CHATBOT Assistant">
     <span class="chatbot-robot" aria-hidden="true">
@@ -708,6 +712,7 @@
             placeholder: 'Select',
             width: '100%'
         });
+        
         $('#sourcesTable').DataTable({
             paging: true,
             searching: true,
@@ -1033,7 +1038,9 @@
             $('#visitProjects').select2({
                 placeholder: 'Select Project(s) for Visit',
                 allowClear: true,
-                width: '100%'
+                width: '100%',
+                dropdownParent: $('#statusUpdateModal'),
+                minimumResultsForSearch: 0
             });
         }
 
@@ -1043,9 +1050,17 @@
         modal.show();
         setTimeout(function() {
             if ($.fn.select2) {
-                $('.select2').select2({
+                $('#statusUpdateModal .select2').select2({
                     placeholder: 'Select',
-                    width: '100%'
+                    width: '100%',
+                    dropdownParent: $('#statusUpdateModal'),
+                    minimumResultsForSearch: 0
+                });
+                $('#statusUpdateModal .select2StatusUpdate').select2({
+                    placeholder: 'Select',
+                    width: '100%',
+                    dropdownParent: $('#statusUpdateModal'),
+                    minimumResultsForSearch: 0
                 });
             }
         }, 500);
@@ -1057,10 +1072,13 @@
         var status = $('#newStatus').val();
         var conversionType = $('#conversionType').val();
 
-        if (status === 'CONVERTED' && conversionType === 'Completed') {
+        if (status === 'CONVERTED' && conversionType === 'Completed') 
+        {
             $('.applicant_div').show();
+            $('#postSaleOptionField').removeClass('d-none');
         } else {
             $('.applicant_div').hide();
+            $('#postSaleOptionField').addClass('d-none');
         }
     }
 
@@ -1183,7 +1201,8 @@
 
         $('#newStatus').on('change', function() {
             var status = $(this).val();
-            if (status === 'CONVERTED') {
+            if (status === 'CONVERTED') 
+            {
                 $('#conversionTypeField').show();
             } else if (status === 'LOST') {
                 $('#reminderFields').hide();
@@ -1224,6 +1243,7 @@
         const app_dob = $('#app_dob').val();
         const app_doa = $('#app_doa').val();
         const visitProjects = $('#visitProjects').val();
+        const post_sale = $('#createPostSale').val();
 
         if (!newStatus) {
             flasher.error('Please select a new status');
@@ -1277,7 +1297,8 @@
             app_contact: app_contact,
             app_city: app_city,
             app_dob: app_dob,
-            app_doa: app_doa
+            app_doa: app_doa,
+            create_post_sale: post_sale,
         };
         if (visitStatuses.includes(newStatus) && visitProjects && visitProjects.length > 0) {
             formData.visitProjects = visitProjects;
@@ -1529,7 +1550,7 @@
         //             labels: {
         //                 style: {
         //                     colors: '#6c757d',
-        //                     fontFamily: 'inherit'
+        //                     fontFamily: '#3762b8'
         //                 }
         //             }
         //         },
@@ -1537,7 +1558,7 @@
         //             labels: {
         //                 style: {
         //                     colors: '#6c757d',
-        //                     fontFamily: 'inherit'
+        //                     fontFamily: '#3762b8'
         //                 }
         //             },
         //             min: 0,
@@ -3443,6 +3464,13 @@
             placeholder: 'select',
             width: '100%',
             dropdownParent: $('#postSaleModal')
+        });
+    });
+    $('#statusUpdateModal').on('shown.bs.modal', function() {
+        $('#select2StatusUpdate').select2({
+            placeholder: 'Select',
+            width: '100%',
+            dropdownParent: $('#statusUpdateModal'),
         });
     });
 </script>

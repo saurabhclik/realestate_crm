@@ -6,7 +6,7 @@
         <div class="card">
             <div class="card-header">
                 <h4 class="mb-0">
-                    City-wise Reports
+                    City-wise Reports<div class="border-bottom border-3 border-primary mb-2 mt-1 w-75"></div>
                 </h4>
             </div>
             <div class="card-body">

@@ -7,7 +7,7 @@
             <div class="col-md-12">
                 <div class="card card-secondary">
                     <div class="card-header bg-gray">
-                        <h3 class="card-title">Logo Change</h3>
+                        <h4 class="mb-0">Logo Change<div class="border-bottom border-3 border-primary mb-2 mt-1" style="width:10%;"></div></h4>
                     </div>
                     
                     <div class="card-body bg-light-gray">

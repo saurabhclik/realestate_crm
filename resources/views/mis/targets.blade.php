@@ -137,7 +137,7 @@
             <div class="col-12">
                 <div class="page-title-box d-flex align-items-center justify-content-between">
                    <div class="d-flex align-items-center">
-                        <h4 class="mb-0">MIS Weekly Targets</h4>
+                        <h4 class="mb-0">MIS Weekly Targets<div class="border-bottom border-3 border-primary mb-2 mt-1 w-75"></div></h4>
                         <i class="fas fa-info-circle info-icon" 
                            data-bs-toggle="tooltip" 
                            title="Click for info about the MIS module" 

@@ -23,10 +23,10 @@ $activeFeatures = session('active_features', []);
 $softwareType = session('software_type', 'real_state');
 
 $softwareTypeAccess = [
-'real_state' => ['project_detail_page', 'search', 'attendance', 'settings', 'premium_features', 'notifications', 'integrations'],
-'lead_management' => ['project_detail_page', 'search', 'attendance', 'settings', 'notifications', 'integrations'],
-'task_management' => ['settings', 'notifications'],
-'mis_management' => ['settings', 'notifications']
+    'real_state' => ['project_detail_page', 'search', 'attendance', 'settings', 'premium_features', 'notifications', 'integrations'],
+    'lead_management' => ['project_detail_page', 'search', 'attendance', 'settings', 'notifications', 'integrations'],
+    'task_management' => ['settings', 'notifications'],
+    'mis_management' => ['settings', 'notifications']
 ];
 
 $currentAccess = $softwareTypeAccess[$softwareType] ?? $softwareTypeAccess['real_state'];
@@ -103,7 +103,7 @@ $currentAccess = $softwareTypeAccess[$softwareType] ?? $softwareTypeAccess['real
             </button>
 
             @if(in_array('search', $currentAccess))
-            <form class="app-search d-none d-lg-block" action="{{ route('search') }}" method="GET">
+            <form class="app-search d-none d-lg-block" action="{{ route('lead.all_lead') }}" method="GET">
                 <div class="position-relative">
                     <input type="text" name="q" class="form-control" placeholder="Search Leads..." value="{{ request('q') }}">
                     <span class="bx bx-search-alt"></span>
@@ -113,7 +113,7 @@ $currentAccess = $softwareTypeAccess[$softwareType] ?? $softwareTypeAccess['real
         </div>
 
         <div class="d-flex">
-            @if(in_array('project_detail_page', $currentAccess) && in_array('project_detail_page', $activeFeatures))
+            @if(in_array('project_detail_page', $currentAccess) && in_array('project_detail_page', $activeFeatures)  && $userType != 'reception')
             <div class="d-inline-block ms-2">
                 <a href="{{route('project-details.index')}}" class="btn header-item noti-icon waves-effect d-flex align-items-center">
                     <i class="fa-regular fa-building me-2"></i>
@@ -143,7 +143,7 @@ $currentAccess = $softwareTypeAccess[$softwareType] ?? $softwareTypeAccess['real
             </div>
             @endif
 
-            @if(in_array('search', $currentAccess))
+            @if(in_array('search', $currentAccess) && $userType != 'reception')
             <div class="dropdown d-inline-block d-lg-none ms-2">
                 <button type="button" class="btn header-item noti-icon waves-effect" id="page-header-search-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <i class="mdi mdi-magnify"></i>
@@ -163,7 +163,7 @@ $currentAccess = $softwareTypeAccess[$softwareType] ?? $softwareTypeAccess['real
             </div>
             @endif
 
-            @if(in_array('settings', $currentAccess) && $userType != 'salesman')
+            @if(in_array('settings', $currentAccess) && $userType != 'salesman' && $userType != 'reception')
             <div class="dropdown d-none d-lg-inline-block ms-1">
                 <button type="button"
                     class="btn header-item noti-icon waves-effect"
@@ -222,14 +222,15 @@ $currentAccess = $softwareTypeAccess[$softwareType] ?? $softwareTypeAccess['real
             @php
             $allFeatures = DB::table('software_features')->pluck('feature_name')->toArray();
             @endphp
+            @if($userType != 'reception')
             <div class="dropdown d-inline-block">
                 <a href="{{route('premium.features')}}" class="btn header-item noti-icon waves-effect premium-btn d-flex align-items-center">
                     <i class="fas fa-crown me-2 text-warning"></i> Premium Features
                     <span class="badge bg-warning ms-1 premium-badge">New</span>
                 </a>
             </div>
-
-            @if(in_array('notifications', $currentAccess))
+            @endif
+            @if(in_array('notifications', $currentAccess) && $userType != 'reception')
             <div class="dropdown d-inline-block">
                 <button type="button" class="btn header-item noti-icon waves-effect" id="page-header-notifications-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <i class="bx bx-bell bx-tada"></i>
@@ -284,16 +285,16 @@ $currentAccess = $softwareTypeAccess[$softwareType] ?? $softwareTypeAccess['real
                     <a class="dropdown-item" href="{{route('setting.profile')}}">
                         <i class="bx bx-user font-size-16 align-middle me-1"></i> <span key="t-profile">Profile</span>
                     </a>
-                    @if(in_array('settings', $currentAccess))
+                    @if(in_array('settings', $currentAccess) && $userType != 'reception')
                     <a class="dropdown-item" href="{{ route('support.index') }}">
                         <i class="bx bx-support font-size-16 align-middle me-1"></i> <span>Support Tickets</span>
                     </a>
                     @endif
                     @php
-                    $softwareInfo = Session::get('software_info');
+                        $softwareInfo = Session::get('software_info');
                     @endphp
 
-                    @if(!empty($softwareInfo?->apk))
+                    @if(!empty($softwareInfo?->apk) && $userType != 'reception')
                     <div class="dropdown-item position-relative">
                         <div class="d-flex align-items-center justify-content-between">
                             <a class="d-flex align-items-center text-decoration-none text-dark flex-grow-1"

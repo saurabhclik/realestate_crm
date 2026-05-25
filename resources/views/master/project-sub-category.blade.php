@@ -8,7 +8,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-flex align-items-center justify-content-between">
-                    <h4 class="mb-0">{{ session('software_type') === 'lead_management' ? 'Product Sub Category' : 'Project Sub Category' }}</h4>
+                    <h4 class="mb-0">{{ session('software_type') === 'lead_management' ? 'Product Sub Category' : 'Project Sub Category' }}<div class="border-bottom border-3 border-primary mb-2 mt-1 w-75"></div></h4>
                     <button class="btn btn-primary btn-small px-4 py-1 rounded-pill fw-bold text-white shadow-lg"
                         data-bs-toggle="modal"
                         data-bs-target="#editSubCategoryModal"

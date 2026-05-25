@@ -654,7 +654,7 @@
                                                                 $projectNames[] = $project->project_name;
                                                             }
                                                         }
-                                                        echo implode(', ', $projectNames);
+                                                        echo implode(', ', $projectNames) .','.$row->custom_project_name .'(Other)' ?? '';
                                                     } 
                                                     else 
                                                     {

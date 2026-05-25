@@ -114,7 +114,6 @@
                 </div>
 
                 <div id="rejectedFields" style="display:none;">
-                    <!-- Custom Comment Section for Rejected -->
                     <div class="mb-3">
                         <label for="rejectedComment" class="form-label">Rejection Comment / Reason</label>
                         <textarea class="form-control" id="rejectedComment" rows="3" placeholder="Add any additional comments..."></textarea>

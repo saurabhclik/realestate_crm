@@ -38,7 +38,7 @@
                         @if($notifications->count())
                             <div data-simplebar style="max-height: 500px;">
                                 @foreach($notifications as $noti)
-                                    <div class="d-flex p-3 border-bottom align-items-center {{ $noti->ack ? '' : 'bg-light' }}">
+                                    <div class="d-flex p-3 align-items-center {{ $noti->ack ? '' : 'bg-light' }}">
                                         <div class="flex-grow-1">
                                             <h6 class="mb-1">{{ $noti->notification_title }}</h6>
                                             <p class="mb-0 text-muted">{{ $noti->message }}</p>

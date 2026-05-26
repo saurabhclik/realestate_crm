@@ -1122,7 +1122,6 @@
                     });
 
                     $select.html(options);
-                    s
                     if ($.fn.select2) {
                         $select.select2({
                             placeholder: 'Select Project(s) for Visit',

@@ -1,10 +1,8 @@
 @extends('layouts.app')
 @section('title', 'Data Center | Pro-leadexpertz')
 @section('content')
-
     @include('modals.data-status-update')
     @include('modals.view-data-comment')
-
     <style>
         .nav-pills .nav-link {
             position: relative;
@@ -106,34 +104,25 @@
                                     @endif
                                 </div>
                             </div>
-
-                            <!-- TABS -->
                             <ul class="nav nav-pills mt-4 mb-4 gap-2" id="dataTabs" role="tablist">
-                                <!-- ALL DATA -->
                                 <li class="nav-item">
                                     <a class="nav-link {{ $activeTab === 'all' ? 'active-tab' : '' }}" 
                                        href="{{ request()->fullUrlWithQuery(['tab' => 'all', 'page' => 1]) }}">
                                         <i class="fas fa-list me-1"></i> All Data
                                     </a>
                                 </li>
-
-                                <!-- REJECTED -->
                                 <li class="nav-item">
                                     <a class="nav-link {{ $activeTab === 'rejected' ? 'active-tab' : '' }}" 
                                        href="{{ request()->fullUrlWithQuery(['tab' => 'rejected', 'page' => 1]) }}">
                                         <i class="fas fa-times-circle me-1"></i> Rejected
                                     </a>
                                 </li>
-
-                                <!-- SCHEDULE -->
                                 <li class="nav-item">
                                     <a class="nav-link {{ $activeTab === 'schedule' ? 'active-tab' : '' }}" 
                                        href="{{ request()->fullUrlWithQuery(['tab' => 'schedule', 'page' => 1]) }}">
                                         <i class="fas fa-calendar-alt me-1"></i> Schedule
                                     </a>
                                 </li>
-
-                                <!-- CONVERTED -->
                                 <li class="nav-item">
                                     <a class="nav-link {{ $activeTab === 'converted' ? 'active-tab' : '' }}" 
                                        href="{{ request()->fullUrlWithQuery(['tab' => 'converted', 'page' => 1]) }}">
@@ -141,11 +130,7 @@
                                     </a>
                                 </li>
                             </ul>
-
-                            <!-- TAB CONTENT -->
                             <div class="tab-content">
-
-                                <!-- ALL DATA -->
                                 <div class="tab-pane fade show active" id="allData">
 
                                     <div class="card p-3">

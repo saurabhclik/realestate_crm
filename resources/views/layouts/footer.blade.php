@@ -1050,18 +1050,22 @@
         modal.show();
         setTimeout(function() {
             if ($.fn.select2) {
-                $('#statusUpdateModal .select2').select2({
-                    placeholder: 'Select',
-                    width: '100%',
-                    dropdownParent: $('#statusUpdateModal'),
-                    minimumResultsForSearch: 0
-                });
-                $('#statusUpdateModal .select2StatusUpdate').select2({
-                    placeholder: 'Select',
-                    width: '100%',
-                    dropdownParent: $('#statusUpdateModal'),
-                    minimumResultsForSearch: 0
-                });
+                if (!$('#statusUpdateModal .select2').hasClass('select2-hidden-accessible')) {
+                    $('#statusUpdateModal .select2').select2({
+                        placeholder: 'Select',
+                        width: '100%',
+                        dropdownParent: $('#statusUpdateModal'),
+                        minimumResultsForSearch: 0
+                    });
+                }
+                if (!$('#statusUpdateModal .select2StatusUpdate').hasClass('select2-hidden-accessible')) {
+                    $('#statusUpdateModal .select2StatusUpdate').select2({
+                        placeholder: 'Select',
+                        width: '100%',
+                        dropdownParent: $('#statusUpdateModal'),
+                        minimumResultsForSearch: 0
+                    });
+                }
             }
         }, 500);
 
@@ -3493,11 +3497,13 @@
         });
     });
     $('#statusUpdateModal').on('shown.bs.modal', function() {
-        $('#select2StatusUpdate').select2({
-            placeholder: 'Select',
-            width: '100%',
-            dropdownParent: $('#statusUpdateModal'),
-        });
+        if (!$('#statusUpdateModal .select2StatusUpdate').hasClass('select2-hidden-accessible')) {
+            $('#statusUpdateModal .select2StatusUpdate').select2({
+                placeholder: 'Select',
+                width: '100%',
+                dropdownParent: $('#statusUpdateModal'),
+            });
+        }
     });
 </script>
 </div>

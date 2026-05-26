@@ -424,10 +424,10 @@ class LeadService
             $rules['otherProjectName'] = 'required|string|max:255';
         }
 
-        if ($request->newStatus === 'CONVERTED') 
+        if ($request->newStatus === 'CONVERTED' && $request->conversionType === 'Completed') 
         {
             $rules = array_merge($rules, [
-                'app_name' => 'required|string|max:255',
+                'app_name' => 'nullable|string|max:255',
                 'app_contact' => [
                     'required',
                     'regex:/^[0-9]{10}$/'
@@ -520,7 +520,7 @@ class LeadService
                     $projectName = $otherProjectName;
                 }
             }
-            if (empty($projectName) && !empty($request->prj_id) && $status !== 'CONVERTED') 
+            if (empty($projectName) && !empty($request->prj_id)) 
             {
                 if (is_array($request->prj_id)) 
                 {
@@ -604,7 +604,7 @@ class LeadService
                     'app_dob' => $request->app_dob,
                     'app_doa' => $request->app_doa,
                     'final_price' => $request->final_price,
-                    'project_id' => $finalProjectIds,
+                    'project_id' => $finalProjectIds ?: $lead->project_id,
                     'size' => $request->prop_size,
                 ]);
                 if ($isOtherProject) 

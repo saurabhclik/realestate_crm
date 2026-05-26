@@ -13,6 +13,7 @@
 
 @include('modals.view-comments')
 @include('modals.status-update', ['projects' => $projects])
+@include('modals.visit-done', ['projects' => $projects])
 @include('modals.duplicate-lead')
 @include('modals.share-lead')
 <style>
@@ -490,6 +491,11 @@
                                                         onclick="showStatusUpdateModal('{{ $row->id }}', '{{ $row->status }}')"
                                                         data-bs-toggle="tooltip" title="Update Status">
                                                         <i class="fas fa-sync-alt text-info"></i>
+                                                    </button>
+                                                    <button class="btn btn-xs btn-soft-light"
+                                                        onclick="showVisitDoneModal('{{ $row->id }}')"
+                                                        data-bs-toggle="tooltip" title="Visit Done">
+                                                        <i class="fas fa-check-double text-success"></i>
                                                     </button>
                                                     @endif
                                                     @if($lead_name === 'completed')

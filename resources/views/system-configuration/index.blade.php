@@ -82,34 +82,30 @@
             </div>
 
             <div class="col-xl-3 col-md-6">
-                <div class="card border-0 shadow-sm rounded-3 h-100 cursor-pointer"  onclick="window.location='{{ route('settings.ratings') }}'">
+                <div class="card border-0 shadow-sm rounded-3 h-100 cursor-pointer"  
+                    onclick="window.location='{{ route('integrations.index') }}'">
                     <div class="card-body p-3 d-flex flex-column">
                         <div class="d-flex align-items-center gap-2 mb-2">
                             <div class="bg-warning bg-opacity-10 text-warning rounded-3 d-flex align-items-center justify-content-center"
-                                 style="width:38px;height:38px;">
-                                <i class="fas fa-star fs-6"></i>
+                                style="width:38px;height:38px;">
+                                <i class="fas fa-plug fs-6"></i>
                             </div>
-                            <div class="fw-semibold fs-6">Ratings</div>
+                            <div class="fw-semibold fs-6">Integrations</div>
                         </div>
                         <div class="small text-muted flex-grow-1">
-                            View customer feedback and service performance ratings.
+                            Connect third-party services, APIs, WhatsApp, email systems and external CRM tools.
                         </div>
-
                         <div class="small mt-2 text-warning">
-                            <i class="fas fa-chart-line me-1"></i>
-                            Helps improve sales performance.
+                            <i class="fas fa-link me-1"></i>
+                            Manage external service connections.
                         </div>
-
                         <div class="mt-2 d-flex justify-content-between align-items-center border-top pt-2">
-                            <small class="text-muted">Analyze</small>
+                            <small class="text-muted">Configure</small>
                             <i class="fas fa-arrow-right text-warning small"></i>
                         </div>
-
                     </div>
                 </div>
             </div>
-
-            <!-- System Logs -->
             <div class="col-xl-3 col-md-6">
                 <div class="card border-0 shadow-sm rounded-3 h-100 cursor-pointer"
                     onclick="window.location='{{ route('setting.logo') }}'">

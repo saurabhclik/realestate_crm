@@ -286,7 +286,6 @@ class MasterController extends Controller
         }
 
         try {
-            //  Pagination + Sorting params
             $length = $request->query('length', 10);
             $search = $request->query('search');
             $sortColumn = $request->query('sort', 'id');
@@ -295,8 +294,6 @@ class MasterController extends Controller
             $allowedColumns = ['id', 'name', 'created_at'];
 
             $sortColumn = in_array($sortColumn, $allowedColumns) ? $sortColumn : 'id';
-
-            //  Main query
             $sources = DB::table('sources')
                 ->when($search, function ($query, $search) {
                     $query->where('name', 'LIKE', '%' . $search . '%');

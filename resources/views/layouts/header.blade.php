@@ -175,12 +175,12 @@ $currentAccess = $softwareTypeAccess[$softwareType] ?? $softwareTypeAccess['real
                     title="Settings & Tools">
                     <i class="bx bx-cog"></i>
                 </button>
-                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end" style="width:380px;">
                     <div class="px-lg-2">
                         <div class="dropdown-header py-2">
                             <h6 class="mb-0">Settings & Tools</h6>
                         </div>
-                        <div class="row g-0">
+                        <div class="row g-0 d-flex w-auto">
                             <div class="col text-center">
                                 <a class="dropdown-icon-item d-block p-3" href="{{ route('setting.logo') }}">
                                     <div class="icon-wrapper bg-light rounded-circle mx-auto mb-2">
@@ -195,6 +195,14 @@ $currentAccess = $softwareTypeAccess[$softwareType] ?? $softwareTypeAccess['real
                                         <i class="bx bx-history text-success fs-4"></i>
                                     </div>
                                     <span class="d-block small">Login Log</span>
+                                </a>
+                            </div>
+                            <div class="col text-center">
+                                <a class="dropdown-icon-item d-block p-3" href="{{ route('lead-status.index') }}">
+                                    <div class="icon-wrapper bg-light rounded-circle mx-auto mb-2">
+                                        <i class="bx bx-git-branch text-warning fs-4"></i>
+                                    </div>
+                                    <span class="d-block small">Lead Status</span>
                                 </a>
                             </div>
                             @if(in_array('integrations', $currentAccess))

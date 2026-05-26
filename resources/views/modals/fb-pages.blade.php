@@ -8,7 +8,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-0">
-                <div class="p-4 border-bottom">
+                <div class="p-4">
                     <div class="table-responsive" style="max-height: 400px;">
                         <table id="fbPagesTable" class="table table-hover mb-0">
                             <thead class="table-light sticky-top">

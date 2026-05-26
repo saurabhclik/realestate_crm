@@ -5,7 +5,7 @@
     <div class="container-fluid mt-4">
         <div class="card">
             <div class="card-header">
-                <h4 class="mb-0">State-wise Reports<div class="border-bottom border-3 border-primary mb-2 mt-1 w-75"></div></h4>
+                <h4 class="mb-0">State-wise Reports<div class="border-bottom border-3 border-primary mb-2 mt-1" style="width:15%;"></div></h4>
             </div>
             <div class="card-body">
                 <div class="d-flex gap-2 mb-3">
@@ -18,7 +18,7 @@
                     </button>
                 </div>
                 <div class="table table-bordered dt-responsive nowrap w-100">
-                    <table class="table table-bordered table-striped" id="table">
+                    <table class="table table-bordered dt-responsive nowrap w-100" id="table">
                         <thead class="table-light">
                             <tr>
                                 <th>#</th>
@@ -44,7 +44,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($reports as $index => $report)
+                            @foreach ($reports as $index => $report)
                             <tr>
                                 <td>{{ $reports->firstItem() + $index }}</td>
                                 <td>{{ $report->field2 }}</td>
@@ -67,11 +67,7 @@
                                 <td>{{ $report->not_picked }}</td>
                                 <td>{{ $report->lost }}</td>
                             </tr>
-                            @empty
-                            <tr>
-                                <td colspan="18" class="text-center">No records found</td>
-                            </tr>
-                            @endforelse
+                            @endforeach
                         </tbody>
                     </table>
                 </div>

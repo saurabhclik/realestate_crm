@@ -6,7 +6,7 @@
         <div class="card">
             <div class="card-header">
                 <h4 class="mb-0">
-                    City-wise Reports<div class="border-bottom border-3 border-primary mb-2 mt-1 w-75"></div>
+                    City-wise Reports<div class="border-bottom border-3 border-primary mb-2 mt-1" style="width:15%;"></div>
                 </h4>
             </div>
             <div class="card-body">
@@ -46,7 +46,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($reports as $index => $report)
+                            @foreach ($reports as $index => $report)
                             <tr>
                                 <td>{{ $reports->firstItem() + $index }}</td>
                                 <td>{{ $report->field1 }}</td>
@@ -69,11 +69,7 @@
                                 <td>{{ $report->not_picked }}</td>
                                 <td>{{ $report->lost }}</td>
                             </tr>
-                            @empty
-                            <tr>
-                                <td colspan="18" class="text-center">No records found</td>
-                            </tr>
-                            @endforelse
+                            @endforeach
                         </tbody>
                     </table>
                 </div>

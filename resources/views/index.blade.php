@@ -1,12 +1,17 @@
 @extends('layouts.app')
+
 @section('title', 'Dashboard | Pro-leadexpertz')
+
 @section('content')
+
 @include('modals.task-file')
 @include('modals.task-comment')
 @include('modals.view-comments')
 @include('modals.status-update')
 @include('modals.quick-lead')
+
 @php
+
     $leadStatuses = DB::table('lead_statuses')
         ->where('is_active', 1)
         ->where('id', '!=', 6)
@@ -22,42 +27,56 @@
 
     $leadCards = [];
     $othersLeadData = [];
-    $systemName = '';
 
-    $propertyMapping = [
-        'CALL SCHEDULED' => 'call_schedule',
-        'VISIT SCHEDULED' => 'visit_schedule',
-    ];
+    $leadStatsArray = (array) $leadStats;
+
     foreach ($leadStatuses as $status)
     {
         $systemNameUpper = strtoupper(trim($status->system_name));
-        if (isset($propertyMapping[$systemNameUpper])) 
-        {
-            $propertyName = $propertyMapping[$systemNameUpper];
-        } 
-        else 
-        {
-            $propertyName = strtolower(str_replace(' ', '_', $systemNameUpper));
-        }
-        
-        $title = ucwords(strtolower(trim($status->display_name ?? '')));
 
+        switch ($systemNameUpper)
+        {
+            case 'CALL SCHEDULED':
+                $propertyName = 'call_schedule';
+                break;
+
+            case 'VISIT SCHEDULED':
+                $propertyName = 'visit_schedule';
+                break;
+
+            case 'PENDING':
+            case 'PENDING LEAD':
+                $propertyName = 'pending_lead';
+                break;
+
+            default:
+                $propertyName = strtolower(
+                    str_replace(' ', '_', $systemNameUpper)
+                );
+                break;
+        }
+        $title = ucwords(
+            strtolower(
+                trim($status->display_name ?? '')
+            )
+        );
 
         $routeName = !empty($status->route_name)
             ? $status->route_name
             : null;
 
         $icon = !empty($status->icon)
-            ? (str_contains($status->icon, 'bx')
-                ? $status->icon
-                : 'bx ' . $status->icon)
+            ? (
+                str_contains($status->icon, 'bx')
+                    ? $status->icon
+                    : 'bx ' . $status->icon
+            )
             : 'bx bx-copy-alt';
-            
-        $leadStatsArray = (array) $leadStats;
-        $value = $propertyName && isset($leadStatsArray[$propertyName]) 
-            ? $leadStatsArray[$propertyName] 
+
+        $value = isset($leadStatsArray[$propertyName])
+            ? $leadStatsArray[$propertyName]
             : 0;
-        
+
         $card = [
             'route' => $routeName,
             'title' => $title,
@@ -90,7 +109,6 @@
             'icon'  => 'bx bx-user-x'
         ]
     ], $othersLeadData);
-    
     $mainLeadTotal = collect($leadCards)->sum('value');
 
     $leadCards[] = [
@@ -104,6 +122,7 @@
     ];
 
     $totalOthersLead = collect($othersLeadData)->sum('value');
+
 @endphp
 
 <style>

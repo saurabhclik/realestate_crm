@@ -1086,117 +1086,7 @@
         }
     }
 
-    function toggleProjectSelection() {
-        var status = $('#newStatus').val();
-        const visitStatuses = ['VISIT SCHEDULED', 'VISIT DONE'];
 
-        if (visitStatuses.includes(status)) {
-            $('#projectSelectionField').show();
-            $('#visitProjects').prop('required', true);
-            loadLeadProjects();
-        } else {
-            $('#projectSelectionField').hide();
-            $('#visitProjects').prop('required', false);
-            $('#selectedProjectsPreview').hide();
-        }
-    }
-
-    function loadLeadProjects() {
-        var leadId = $('#leadId').val();
-        var $select = $('#visitProjects');
-
-        if (!leadId) return;
-        var currentOptions = $select.html();
-
-        $select.html('<option value="">Loading projects...</option>');
-
-        $.ajax({
-            url: '{{ route('lead.get-lead-projects') }}',
-            type: 'POST',
-            data: {
-                lead_id: leadId,
-                _token: '{{ csrf_token() }}'
-            },
-            success: function(response) {
-                if (response.success && response.projects.length > 0) {
-                    var options = '<option value="">--- Select Project(s) for Visit ---</option>';
-                    response.projects.forEach(function(project) {
-                        options += '<option value="' + project.id + '">' + project.project_name +
-                            '</option>';
-                    });
-
-                    $select.html(options);
-                    s
-                    if ($.fn.select2) {
-                        $select.select2({
-                            placeholder: 'Select Project(s) for Visit',
-                            allowClear: true,
-                            width: '100%'
-                        });
-                    }
-
-                    updateSelectedProjectsPreview();
-                } else {
-                    $select.html(currentOptions);
-                }
-            },
-            error: function() {
-                $select.html(currentOptions);
-            }
-        });
-    }
-
-    function updateSelectedProjectsPreview() {
-        var selectedProjects = $('#visitProjects').val();
-        var previewContainer = $('#selectedProjectsPreview');
-        var projectsList = $('#selectedProjectsList');
-
-        projectsList.empty();
-
-        if (selectedProjects && selectedProjects.length > 0) {
-            previewContainer.show();
-            $.ajax({
-                url: '{{ route('lead.get-project-names') }}',
-                type: 'POST',
-                data: {
-                    project_ids: selectedProjects,
-                    _token: '{{ csrf_token() }}'
-                },
-                success: function(response) {
-                    if (response.success) {
-                        projectsList.empty();
-                        response.projectNames.forEach(function(projectName, index) {
-                            var projectId = selectedProjects[index];
-                            var badge = $('<span class="selected-project-badge"></span>');
-                            badge.html(projectName +
-                                '<button type="button" class="remove-btn" onclick="removeProjectFromSelection(\'' +
-                                projectId + '\')">×</button>');
-                            projectsList.append(badge);
-                        });
-                    }
-                },
-                error: function() {
-                    selectedProjects.forEach(function(projectId) {
-                        var badge = $('<span class="selected-project-badge"></span>');
-                        badge.html('Project ID: ' + projectId +
-                            '<button type="button" class="remove-btn" onclick="removeProjectFromSelection(\'' +
-                            projectId + '\')">×</button>');
-                        projectsList.append(badge);
-                    });
-                }
-            });
-        } else {
-            previewContainer.hide();
-        }
-    }
-
-    function removeProjectFromSelection(projectId) {
-        var currentValues = $('#visitProjects').val();
-        var updatedValues = currentValues.filter(function(id) {
-            return id !== projectId;
-        });
-        $('#visitProjects').val(updatedValues).trigger('change');
-    }
 
     $(document).ready(function() {
         $('.applicant_div').hide();
@@ -1218,16 +1108,11 @@
                 $('.applicant_div').hide();
                 $('.followUp').html('Follow Up Date');
             }
-            toggleProjectSelection();
             toggleApplicantFields();
         });
 
         $('#conversionType').on('change', function() {
             toggleApplicantFields();
-        });
-
-        $('#visitProjects').on('change', function() {
-            updateSelectedProjectsPreview();
         });
     });
 
@@ -1256,16 +1141,7 @@
             flasher.error('Please select a new status');
             return;
         }
-        
-        const visitStatuses = ['VISIT SCHEDULED', 'VISIT DONE'];
-        if (visitStatuses.includes(newStatus) && visitProjects && visitProjects.includes('others')) 
-        {
-            if (!otherProjectName || otherProjectName.trim() === '') 
-            {
-                flasher.error('Please enter the other project name');
-                return;
-            }
-        }
+
 
         if (newStatus === 'CONVERTED' && !conversionType) 
         {

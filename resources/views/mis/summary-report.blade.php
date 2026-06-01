@@ -70,11 +70,17 @@
 <div class="page-content">
     <div class="container-fluid">
         <div class="row">
+            <div class="col-12">
+                <div class="page-title-box d-flex align-items-center justify-content-between">
+                   <div class="d-flex align-items-center">
+                        <h4 class="mb-0">MIS Summary Report<div class="border-bottom border-3 border-primary mb-2 mt-1 w-75"></div></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header">
-                        <h4 class="mb-0">MIS Summary Report<div class="border-bottom border-3 border-primary mb-2 mt-1" style="width:15%;"></div></h4>
-                    </div>
                     <div class="card-body">
                         @if($userType == 'admin' || $userType == 'team_manager')
                         <form method="GET" action="{{ route('mis.summary-report') }}" class="mb-4">
@@ -257,7 +263,7 @@
         setTimeout(() => {
             const table = document.querySelector('#table');
             if (!table) {
-                toastr.error('Table not found!');
+                flasher.error('Table not found!');
                 btn.disabled = false;
                 text.classList.remove('d-none');
                 spinner.classList.add('d-none');

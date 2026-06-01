@@ -209,7 +209,7 @@
             
             if (selectedRating === 0) 
             {
-                toastr.error('Please select a rating by clicking on the stars');
+                flasher.error('Please select a rating by clicking on the stars');
                 return;
             }
             this.submit();

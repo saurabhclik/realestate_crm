@@ -691,14 +691,20 @@ class DashboardController extends Controller
     {
         $today = now()->format('Y-m-d');
         $tomorrow = now()->addDay()->format('Y-m-d');
+        $afterTomorrow = now()->addDays(2)->format('Y-m-d');
         $next7Days = now()->addDays(7)->format('Y-m-d');
+
         $userId = Session::get('user_id');
         $childIds = Session::get('child_ids');
         $childIds = $this->normalizeIdsService->normalize($childIds);
 
-        $dateRangeValid = !empty($dateRange) && isset($dateRange['start'], $dateRange['end']) && $dateRange['start'] && $dateRange['end'];
+        $dateRangeValid = !empty($dateRange) &&
+            isset($dateRange['start'], $dateRange['end']) &&
+            $dateRange['start'] &&
+            $dateRange['end'];
 
-        $baseQuery = function ($status = null, $remindDate = null, $typeLabel = null) use ($childIds, $dateRangeValid, $dateRange) {
+        $baseQuery = function ($status = null, $remindDate = null, $typeLabel = null) use ($childIds, $dateRangeValid, $dateRange)
+        {
             return DB::table('leads as a')
                 ->join('users as b', 'b.id', '=', 'a.user_id')
                 ->leftJoin('projects as c', 'c.id', '=', 'a.project_id')
@@ -723,79 +729,112 @@ class DashboardController extends Controller
                     'a.classification',
                     'a.last_comment'
                 )
-                // ->when($remindDate !== null, function ($q) use ($remindDate) {
-                //     if (is_array($remindDate)) {
-                //         [$operator, $value] = $remindDate;
-                //         return $q->whereDate('a.remind_date', $operator, $value);
-                //     } else {
-                //         return $q->whereDate('a.remind_date', $remindDate);
-                //     }
-                // })
-                ->when($remindDate !== null, function ($q) use ($remindDate) {
-
-                    if (is_array($remindDate)) {
+                ->when($remindDate !== null, function ($q) use ($remindDate)
+                {
+                    if (is_array($remindDate))
+                    {
                         [$operator, $value] = $remindDate;
-                        if ($operator === 'between') {
+
+                        if ($operator === 'between')
+                        {
                             return $q->whereBetween('a.remind_date', $value);
                         }
+
                         return $q->whereDate('a.remind_date', $operator, $value);
-                    } else {
+                    }
+                    else
+                    {
                         return $q->whereDate('a.remind_date', $remindDate);
                     }
                 })
                 ->when($status !== null, fn($q) => $q->where('a.status', $status))
                 ->when(!empty($childIds), fn($q) => $q->whereIn('a.user_id', $childIds))
-                ->when($dateRangeValid, fn($q) => $q->whereBetween('a.lead_date', [$dateRange['start'], $dateRange['end']]));
+                ->when($dateRangeValid, fn($q) =>
+                    $q->whereBetween('a.lead_date', [$dateRange['start'], $dateRange['end']]));
         };
 
         return [
-            'todayCalls' => $baseQuery('CALL SCHEDULED', $today, 'Call')->orderBy('a.remind_time')->get(),
-            'todayVisits' => $baseQuery('VISIT SCHEDULED', $today, 'Visit')->orderBy('a.remind_time')->get(),
+            'todayCalls' => $baseQuery('CALL SCHEDULED', $today, 'Call')
+                ->orderBy('a.remind_time')
+                ->get(),
+            'todayVisits' => $baseQuery('VISIT SCHEDULED', $today, 'Visit')
+                ->orderBy('a.remind_time')
+                ->get(),
+            'todayWhatsapp' => $baseQuery('WHATSAPP', $today, 'WhatsApp')
+                ->orderBy('a.remind_time')
+                ->get(),
+            'todayMeetings' => $baseQuery('MEETING SCHEDULED', $today, 'Meeting')
+                ->orderBy('a.remind_time')
+                ->get(),
             'missedFollowups' => $baseQuery(null, ['<', $today], 'Missed')
-                ->whereIn('a.status', ['CALL SCHEDULED', 'VISIT SCHEDULED', 'WHATSAPP', 'INTERESTED', 'MEETING SCHEDULED'])
-                ->orderBy('a.remind_date')->get(),
-            'interestedLeads' => $baseQuery('INTERESTED', null, 'Interested')->orderBy('a.remind_date')->get(),
-            'todayWhatsapp' => $baseQuery('WHATSAPP', $today, 'WhatsApp')->orderBy('a.remind_time')->get(),
-            'tomorrowCalls' => $baseQuery('CALL SCHEDULED', $tomorrow, 'Call')->orderBy('a.remind_time')->get(),
-            'tomorrowVisits' => $baseQuery('VISIT SCHEDULED', $tomorrow, 'Visit')->orderBy('a.remind_time')->get(),
-            'tomorrowWhatsapp' => $baseQuery('WHATSAPP', $tomorrow, 'WhatsApp')->orderBy('a.remind_time')->get(),
+                ->whereIn('a.status', [
+                    'CALL SCHEDULED',
+                    'VISIT SCHEDULED',
+                    'WHATSAPP',
+                    'INTERESTED',
+                    'MEETING SCHEDULED'
+                ])
+                ->orderBy('a.remind_date')
+                ->get(),
+            'interestedLeads' => $baseQuery('INTERESTED', null, 'Interested')
+                ->orderBy('a.remind_date')
+                ->get(),
+            'tomorrowCalls' => $baseQuery('CALL SCHEDULED', $tomorrow, 'Call')
+                ->orderBy('a.remind_time')
+                ->get(),
+
+            'tomorrowVisits' => $baseQuery('VISIT SCHEDULED', $tomorrow, 'Visit')
+                ->orderBy('a.remind_time')
+                ->get(),
+
+            'tomorrowWhatsapp' => $baseQuery('WHATSAPP', $tomorrow, 'WhatsApp')
+                ->orderBy('a.remind_time')
+                ->get(),
+            'tomorrowMeetings' => $baseQuery('MEETING SCHEDULED', $tomorrow, 'Meeting')
+                ->orderBy('a.remind_time')
+                ->get(),
             'next7daysCalls' => $baseQuery(
                 'CALL SCHEDULED',
-                ['between', [$tomorrow, $next7Days]],
+                ['between', [$afterTomorrow, $next7Days]],
                 'Call'
-            )->orderBy('a.remind_date')
+            )
+                ->orderBy('a.remind_date')
                 ->orderBy('a.remind_time')
                 ->get(),
 
             'next7daysVisits' => $baseQuery(
                 'VISIT SCHEDULED',
-                ['between', [$tomorrow, $next7Days]],
+                ['between', [$afterTomorrow, $next7Days]],
                 'Visit'
-            )->orderBy('a.remind_date')
+            )
+                ->orderBy('a.remind_date')
                 ->orderBy('a.remind_time')
                 ->get(),
 
             'next7daysWhatsapp' => $baseQuery(
                 'WHATSAPP',
-                ['between', [$tomorrow, $next7Days]],
+                ['between', [$afterTomorrow, $next7Days]],
                 'WhatsApp'
-            )->orderBy('a.remind_date')
+            )
+                ->orderBy('a.remind_date')
                 ->orderBy('a.remind_time')
                 ->get(),
 
             'next7daysMeetings' => $baseQuery(
                 'MEETING SCHEDULED',
-                ['between', [$tomorrow, $next7Days]],
+                ['between', [$afterTomorrow, $next7Days]],
                 'Meeting'
-            )->orderBy('a.remind_date')
+            )
+                ->orderBy('a.remind_date')
                 ->orderBy('a.remind_time')
                 ->get(),
 
             'interestedNext7Days' => $baseQuery(
                 'INTERESTED',
-                ['between', [$tomorrow, $next7Days]],
+                ['between', [$afterTomorrow, $next7Days]],
                 'Interested'
-            )->orderBy('a.remind_date')
+            )
+                ->orderBy('a.remind_date')
                 ->orderBy('a.remind_time')
                 ->get(),
         ];

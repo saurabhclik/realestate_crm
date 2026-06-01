@@ -417,7 +417,8 @@ Route::middleware(['check.login', 'reception.only'])->group(function () {
         });
     });
 
-    Route::middleware(['check.software.type:real_state_only'])->group(function () {
+    Route::middleware(['check.software.type:real_state_only'])->group(function () 
+    {
         Route::prefix('inventory')->group(function () {
             Route::get('/', [InventoryController::class, 'index'])->name('inventory.index');
             Route::post('/store', [InventoryController::class, 'store'])->name('inventory.store');

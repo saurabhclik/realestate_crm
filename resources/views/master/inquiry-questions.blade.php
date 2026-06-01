@@ -102,7 +102,7 @@
                     @csrf
                     <input type="hidden" name="id" id="inquiry-id" value="">
                     <div class="modal-content">
-                        <div class="modal-header">
+                        <div class="modal-header bg-primary text-light">
                             <h5 class="modal-title" id="ModalboxLabel">Add Inquiry Question</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>

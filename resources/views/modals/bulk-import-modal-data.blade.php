@@ -11,7 +11,6 @@
             
             <div class="modal-body p-4">
                 <div class="row g-4">
-
                     <div class="col-lg-6">
                         <div class="card h-100 border-0 shadow-sm">
                             <div class="card-header bg-light">
@@ -29,7 +28,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="col-lg-6">
                         <div class="card h-100 border-0 shadow-sm">
                             <div class="card-header bg-light">
@@ -57,7 +55,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="card mt-4 border-0 shadow-sm">
                     <div class="card-header bg-light">
                         <h6 class="mb-0 fw-bold">
@@ -150,9 +147,11 @@
     </div>
 </div>
 <script>
-    function previewDataCenterFile(input) {
+    function previewDataCenterFile(input) 
+    {
         var file = input.files[0];
-        if (!file) {
+        if (!file) 
+        {
             document.getElementById('dataCenterFilePreview').classList.add('d-none');
             return;
         }
@@ -162,7 +161,8 @@
         document.getElementById('dataCenterFilePreview').classList.remove('d-none');
     }
 
-    document.getElementById('dataCenterImportForm').addEventListener('submit', function() {
+    document.getElementById('dataCenterImportForm').addEventListener('submit', function() 
+    {
         var btn = document.getElementById('dataCenterSubmitBtn');
         var text = document.getElementById('dataCenterSubmitText');
         var spinner = document.getElementById('dataCenterSubmitSpinner');

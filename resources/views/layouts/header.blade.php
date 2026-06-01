@@ -1,35 +1,36 @@
 @php
-$userId = session('user_id');
-$userType = session('user_type');
-$notifications = DB::table('user_notification as a')
-->select(
-'a.*',
-DB::raw("
-CASE
-WHEN TIMESTAMPDIFF(DAY, a.CreatedDate, NOW()) >= 1
-THEN CONCAT(TIMESTAMPDIFF(DAY, a.CreatedDate, NOW()), ' Days')
-WHEN TIMESTAMPDIFF(MINUTE, a.CreatedDate, NOW()) >= 60
-THEN CONCAT(ROUND(TIMESTAMPDIFF(MINUTE, a.CreatedDate, NOW()) / 60, 0), ' Hours')
-ELSE CONCAT(TIMESTAMPDIFF(MINUTE, a.CreatedDate, NOW()), ' MiN')
-END as time_diff
-")
-)
-->where('a.ack', 0)
-->where('a.UserId', $userId)
-->orderByDesc('a.CreatedDate')
-->get();
+    $userId = session('user_id');
+    $userType = session('user_type');
+    $notifications = DB::table('user_notification as a')
+    ->select(
+        'a.*',
+        DB::raw("
+            CASE
+                WHEN TIMESTAMPDIFF(DAY, a.CreatedDate, NOW()) >= 1 
+                    THEN CONCAT(TIMESTAMPDIFF(DAY, a.CreatedDate, NOW()), ' Days')
 
-$activeFeatures = session('active_features', []);
-$softwareType = session('software_type', 'real_state');
+                WHEN TIMESTAMPDIFF(MINUTE, a.CreatedDate, NOW()) >= 60 
+                    THEN CONCAT(ROUND(TIMESTAMPDIFF(MINUTE, a.CreatedDate, NOW()) / 60, 0), ' Hours')
 
-$softwareTypeAccess = [
-    'real_state' => ['project_detail_page', 'search', 'attendance', 'settings', 'premium_features', 'notifications', 'integrations'],
-    'lead_management' => ['project_detail_page', 'search', 'attendance', 'settings', 'notifications', 'integrations'],
-    'task_management' => ['settings', 'notifications'],
-    'mis_management' => ['settings', 'notifications']
-];
+                ELSE CONCAT(TIMESTAMPDIFF(MINUTE, a.CreatedDate, NOW()), ' Min')
+            END as time_diff
+        ")
+    )
+    ->where('a.ack', 0)
+    ->where('a.UserId', $userId)
+    ->orderByDesc('a.CreatedDate')
+    ->get();
+    $activeFeatures = session('active_features', []);
+    $softwareType = session('software_type', 'real_state');
 
-$currentAccess = $softwareTypeAccess[$softwareType] ?? $softwareTypeAccess['real_state'];
+    $softwareTypeAccess = [
+        'real_state' => ['project_detail_page', 'search', 'attendance', 'settings', 'premium_features', 'notifications', 'integrations'],
+        'lead_management' => ['project_detail_page', 'search', 'attendance', 'settings', 'notifications', 'integrations'],
+        'task_management' => ['settings', 'notifications'],
+        'mis_management' => ['settings', 'notifications']
+    ];
+
+    $currentAccess = $softwareTypeAccess[$softwareType] ?? $softwareTypeAccess['real_state'];
 @endphp
 
 <header id="page-topbar">
@@ -37,50 +38,31 @@ $currentAccess = $softwareTypeAccess[$softwareType] ?? $softwareTypeAccess['real
         <div class="d-flex">
             <div class="navbar-brand-box">
                 <a href="index.html" class="logo logo-dark">
-                    <!-- <span class="logo-sm">
-                        <img src="{{ asset(Session::get('logo')) }}" alt="Logo" height="22">
-                    </span> -->
                     @php
-                    $logo = Session::get('logo');
+                        $logo = Session::get('logo');
                     @endphp
 
                     <span class="logo-sm">
                         <img
-                            src="{{ ($logo && file_exists(public_path($logo))) 
-                ? asset($logo) 
-                : asset('images/logo.png') }}"
+                            src="{{ ($logo && file_exists(public_path($logo))) ? asset($logo) : asset('images/logo.png') }}"
                             alt="Logo"
                             height="22">
                     </span>
-                    <!-- <span class="logo-lg">
-                        <img src="{{ asset(Session::get('logo')) }}" alt="Logo" height="17">
-                    </span> -->
                     <span class="logo-lg">
                         <img
-                            src="{{ ($logo && file_exists(public_path($logo))) 
-                ? asset($logo) 
-                : asset('images/logo.png') }}"
+                            src="{{ ($logo && file_exists(public_path($logo))) ? asset($logo) : asset('images/logo.png') }}"
                             alt="Logo"
                             height="17">
                     </span>
                 </a>
                 <a href="{{ $softwareType === 'task_management' ? route('task.list') : ($softwareType === 'mis_management' ? route('mis.summary-report') : route('dashboard')) }}" class="logo logo-light">
-                    <!-- <span class="logo-sm">
-                        <img src="{{ asset(Session::get('logo')) }}" alt="" height="22" width="45">
-                    </span>
-                    <span class="logo-lg">
-                        <img src="{{ asset(Session::get('logo')) }}" alt="" height="50" width="150">
-                    </span> -->
-
                     @php
-                    $logo = Session::get('logo');
+                        $logo = Session::get('logo');
                     @endphp
 
                     <span class="logo-sm">
                         <img
-                            src="{{ ($logo && file_exists(public_path($logo))) 
-                ? asset($logo) 
-                : asset('images/logo.png') }}"
+                            src="{{ ($logo && file_exists(public_path($logo))) ? asset($logo) : asset('images/logo.png') }}"
                             alt="Logo"
                             height="22"
                             width="45">
@@ -88,9 +70,7 @@ $currentAccess = $softwareTypeAccess[$softwareType] ?? $softwareTypeAccess['real
 
                     <span class="logo-lg">
                         <img
-                            src="{{ ($logo && file_exists(public_path($logo))) 
-                ? asset($logo) 
-                : asset('images/logo.png') }}"
+                            src="{{ ($logo && file_exists(public_path($logo))) ? asset($logo) : asset('images/logo.png') }}"
                             alt="Logo"
                             height="50"
                             width="150">
@@ -228,7 +208,7 @@ $currentAccess = $softwareTypeAccess[$softwareType] ?? $softwareTypeAccess['real
             </div>
 
             @php
-            $allFeatures = DB::table('software_features')->pluck('feature_name')->toArray();
+                $allFeatures = DB::table('software_features')->pluck('feature_name')->toArray();
             @endphp
             @if($userType != 'reception')
             <div class="dropdown d-inline-block">
@@ -364,7 +344,7 @@ $currentAccess = $softwareTypeAccess[$softwareType] ?? $softwareTypeAccess['real
                         <div class="card h-100 border-0 shadow-sm">
                             <div class="card-header bg-success text-white d-flex align-items-center py-3">
                                 <i class="fab fa-android fa-fw me-2 fs-5"></i>
-                                <h6 class="mb-0 fw-semibold">For Android Devices</h6>
+                                <h6 class="mb-0 fw-semibold text-light">For Android Devices</h6>
                             </div>
                             <div class="card-body d-flex flex-column p-4">
                                 <div class="alert alert-warning border-warning mb-4">

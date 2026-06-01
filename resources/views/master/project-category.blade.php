@@ -6,7 +6,6 @@
 @section('content')
 <div class="page-content">
     <div class="container-fluid">
-        <!-- Page Header -->
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-flex align-items-center justify-content-between">
@@ -81,7 +80,6 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @if($categories->count())
                                     @foreach($categories as $category)
                                     <tr>
                                         <td>{{ $loop->iteration + ($categories->currentPage()-1) * $categories->perPage() }}</td>
@@ -105,12 +103,9 @@
                                         </td>
                                     </tr>
                                     @endforeach
-                                    @endif
                                 </tbody>
                             </table>
                         </div>
-
-                        <!-- Pagination -->
                         <div class="d-flex justify-content-end mt-3">
                             {!! $categories->links('pagination::bootstrap-5') !!}
                         </div>
@@ -119,49 +114,29 @@
             </div>
         </div>
     </div>
-
     @include('modals.master')
 </div>
 <script>
-    document.getElementById('lengthSelect').addEventListener('change', function() {
+    document.getElementById('lengthSelect').addEventListener('change', function() 
+    {
         const url = new URL(window.location.href);
         url.searchParams.set('length', this.value);
         window.location.href = url.toString();
     });
-</script>
-
-<script>
-    // Edit Modal Data
-    $('.edit-btn').on('click', function() {
-
+    $('.edit-btn').on('click', function() 
+    {
         let id = $(this).data('id');
         let name = $(this).data('name');
         let categoryType = $(this).data('category-type');
         let action = $(this).data('action');
         let actionType = $(this).data('action-type');
-
-        // set hidden id
         $('#id').val(id);
-
-        // prefill category/project name
         $('#name').val(name);
-
-        // show category dropdown
         $('.cat-type').removeClass('d-none');
-
-        // prefill dropdown
         $('#cat_type').val(categoryType).trigger('change');
-
-        // form action
         $('#action').attr('action', action);
-
-        // button text
         $('#data-action-type').text(actionType);
-
-        // modal title
         $('#ModalboxLabel').text('Update Project Category');
-
-        // label name
         $('#modal-name').text('Project Category Name');
     });
 </script>

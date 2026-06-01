@@ -252,24 +252,30 @@
                 _token: '{{ csrf_token() }}',
                 id: currentPostSaleId
             },
-            success: function(response) {
-                if (response.link) {
+            success: function(response) 
+            {
+                if (response.link) 
+                {
                     $('#shareLink').val(response.link);
                     updateShareButtons(response.link);
-                    toastr.success('Share link generated! This link expires in 7 days.');
-                } else {
+                    flasher.success('Share link generated! This link expires in 7 days.');
+                } 
+                else 
+                {
                     $('#shareLink').val('Failed to generate link');
-                    toastr.error('Failed to generate share link');
+                    flasher.error('Failed to generate share link');
                 }
             },
-            error: function(xhr) {
+            error: function(xhr) 
+            {
                 $('#shareLink').val('Error generating link');
-                toastr.error('Error generating share link: ' + (xhr.responseJSON?.message || 'Unknown error'));
+                flasher.error('Error generating share link: ' + (xhr.responseJSON?.message || 'Unknown error'));
             }
         });
     }
 
-    function updateShareButtons(link) {
+    function updateShareButtons(link) 
+    {
         const encodedLink = encodeURIComponent(link);
         const text = encodeURIComponent('Please rate our service using this link');
 
@@ -281,22 +287,28 @@
         $('#shareTwitter').attr('href', `https://twitter.com/intent/tweet?url=${encodedLink}&text=${text}`);
     }
 
-    $('#copyLink').click(function() {
+    $('#copyLink').click(function() 
+    {
         const link = $('#shareLink').val();
-        navigator.clipboard.writeText(link).then(function() {
-            toastr.success('Link copied to clipboard!');
-        }).catch(function() {
+        navigator.clipboard.writeText(link).then(function() 
+        {
+            flasher.success('Link copied to clipboard!');
+        }).catch(function() 
+        {
             $('#shareLink').select();
             document.execCommand('copy');
-            toastr.success('Link copied to clipboard!');
+            flasher.success('Link copied to clipboard!');
         });
     });
 
-    function loadDocuments() {
-        $.get(`/post-sale/${currentPostSaleId}/documents`, function(res) {
+    function loadDocuments() 
+    {
+        $.get(`/post-sale/${currentPostSaleId}/documents`, function(res) 
+        {
             const list = $('#documentsList');
             list.empty();
-            if (res.data.length === 0) {
+            if (res.data.length === 0) 
+            {
                 list.append(`<tr><td colspan="4" class="text-center text-muted">No documents</td></tr>`);
                 return;
             }
@@ -321,7 +333,8 @@
         });
     }
 
-    $('#uploadForm').on('submit', function(e) {
+    $('#uploadForm').on('submit', function(e) 
+    {
         e.preventDefault();
         const formData = new FormData(this);
         $.ajax({
@@ -330,13 +343,15 @@
             data: formData,
             processData: false,
             contentType: false,
-            success: function(res) {
-                Swal.fire('Success', res.message, 'success');
+            success: function(res) 
+            {
+                flasher.success('Success', res.message, 'success');
                 $('#uploadForm')[0].reset();
                 loadDocuments();
             },
-            error: function(xhr) {
-                Swal.fire('Error', xhr.responseJSON?.message || 'Upload failed', 'error');
+            error: function(xhr) 
+            {
+                flasher.error('Error', xhr.responseJSON?.message || 'Upload failed', 'error');
             }
         });
     });
@@ -356,17 +371,17 @@
                         _token: '{{ csrf_token() }}'
                     },
                     success: () => {
-                        Swal.fire('Deleted!', '', 'success');
+                        flasher.success('Deleted!', '', 'success');
                         loadDocuments();
                     },
-                    error: () => Swal.fire('Error', 'Delete failed', 'error')
+                    error: () => flasher.error('Error', 'Delete failed', 'error')
                 });
             }
         });
     }
 
-    // open modal
-    $(document).on('click', '.delete-postsale-btn', function() {
+    $(document).on('click', '.delete-postsale-btn', function() 
+    {
         let id = $(this).data('id');
         let name = $(this).data('name');
 
@@ -377,14 +392,16 @@
         $('#deletePostSaleModal').modal('show');
     });
 
-    $('#deletePostSaleForm').on('submit', function(e) {
+    $('#deletePostSaleForm').on('submit', function(e) 
+    {
         e.preventDefault();
 
         let id = $('#deletePostSaleId').val();
         let password = $('#deletePassword').val();
 
-        if (!password) {
-            toastr.error('Enter password');
+        if (!password) 
+        {
+            flasher.error('Enter password');
             return;
         }
 
@@ -396,31 +413,33 @@
                 password: password
             },
 
-            success: function(res) {
-
-                if (res.status === 200) {
-                    toastr.success(res.message);
+            success: function(res) 
+            {
+                if (res.status === 200) 
+                {
+                    flasher.success(res.message);
                     $('#deletePostSaleModal').modal('hide');
 
                     $(`button[data-id="${res.id}"]`).closest('tr').remove();
-                } else if (res.status === 403) {
-                   
-                    toastr.error(res.message);
-
+                } 
+                else if (res.status === 403) 
+                {
+                    flasher.error(res.message);
                     $('#deleteSubmitBtn').prop('disabled', true);
                     $('#deleteSubmitText').text('Blocked for 1 day');
                     $('#deleteSubmitSpinner').addClass('d-none');
-                } else {
-                    
-                    toastr.error(res.message);
-
+                } 
+                else 
+                {
+                    flasher.error(res.message);
                     $('#deletePassword').val('');
                 }
             },
         });
     });
 
-    $('#deletePostSaleModal').on('hidden.bs.modal', function() {
+    $('#deletePostSaleModal').on('hidden.bs.modal', function() 
+    {
         $('#deletePassword').val('');
 
         $('#deleteSubmitBtn').prop('disabled', false);

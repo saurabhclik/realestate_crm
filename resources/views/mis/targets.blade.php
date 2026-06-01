@@ -521,7 +521,7 @@
                 } 
                 else 
                 {
-                    toastr.error("At least one task is required.");
+                    flasher.error("At least one task is required.");
                 }
             }
         });
@@ -583,7 +583,7 @@
             var team = $input.data('team');
             var year = $input.data('year');
             $input.val(prev);
-            toastr.info('Loading daily data...');
+            flasher.info('Loading daily data...');
             
             $.ajax({
                 url: "{{ route('mis.get.week.daily.data') }}",
@@ -603,13 +603,13 @@
                     } 
                     else 
                     {
-                        toastr.error('Error loading daily data: ' + (data.message || 'Unknown error'));
+                        flasher.error('Error loading daily data: ' + (data.message || 'Unknown error'));
                     }
                 },
                 error: function(xhr, status, error) 
                 {
                     console.error('AJAX Error:', error);
-                    toastr.error('Error loading daily data');
+                    flasher.error('Error loading daily data');
                 }
             });
         });
@@ -711,7 +711,7 @@
             var newValue = $(this).closest('tr').find('.daily-value-input').val();
             if (newValue === '' || parseInt(newValue) < 0) 
             {
-                toastr.error('Please enter a valid value');
+                flasher.error('Please enter a valid value');
                 return;
             }
             
@@ -728,13 +728,13 @@
             
             if (!date) 
             {
-                toastr.error('Please select a date');
+                flasher.error('Please select a date');
                 return;
             }
             
             if (value === '' || parseInt(value) < 0) 
             {
-                toastr.error('Please enter a valid value');
+                flasher.error('Please enter a valid value');
                 return;
             }
             
@@ -758,27 +758,27 @@
                 beforeSend: function() 
                 {
                     $('#dailyDataModal .btn').prop('disabled', true);
-                    toastr.info('Updating...');
+                    flasher.info('Updating...');
                 },
                 success: function(data) 
                 {
                     if (data.success) 
                         {
-                        toastr.success('Daily value updated successfully');
+                        flasher.success('Daily value updated successfully');
                         $('#dailyDataModal').modal('hide');
                         setTimeout(function() 
                         {
                             location.reload();
                         }, 1000);
                     } else {
-                        toastr.error(data.message || 'Failed to update daily value');
+                        flasher.error(data.message || 'Failed to update daily value');
                         $('#dailyDataModal .btn').prop('disabled', false);
                     }
                 },
                 error: function(xhr, status, error) 
                 {
                     console.error('Update error:', error);
-                    toastr.error('Error updating daily value');
+                    flasher.error('Error updating daily value');
                     $('#dailyDataModal .btn').prop('disabled', false);
                 }
             });
@@ -804,7 +804,7 @@
             
             if (newVal === '' || isNaN(newVal) || parseInt(newVal) < 0) 
             {
-                toastr.error('Please enter a valid positive number');
+                flasher.error('Please enter a valid positive number');
                 resetConfirmButton();
                 return;
             }
@@ -826,7 +826,7 @@
                 {
                     if (data.success) 
                     {
-                        toastr.success(type === 'target' ? 'Target updated successfully' : 'Achieved value updated successfully');
+                        flasher.success(type === 'target' ? 'Target updated successfully' : 'Achieved value updated successfully');
                         var selector = type === 'target' ? 
                             '.admin-edit[data-point="' + point + '"][data-week="' + week + '"]' :
                             '.admin-edit-achieved[data-point="' + point + '"][data-week="' + week + '"]';
@@ -840,14 +840,14 @@
                     } 
                     else 
                     {
-                        toastr.error(data.message || (type === 'target' ? 'Failed to update target' : 'Failed to update achieved value'));
+                        flasher.error(data.message || (type === 'target' ? 'Failed to update target' : 'Failed to update achieved value'));
                     }
                     $('#adminEditModal').modal('hide');
                     resetConfirmButton();
                 },
                 error: function(xhr, status, error) 
                 {
-                    toastr.error(type === 'target' ? 'Error updating target' : 'Error updating achieved value');
+                    flasher.error(type === 'target' ? 'Error updating target' : 'Error updating achieved value');
                     $('#adminEditModal').modal('hide');
                     resetConfirmButton();
                 }
@@ -882,7 +882,7 @@
 
         $('.all-input').on('click', function()
         {
-            toastr.error('Please select a team to access the input for editing');
+            flasher.error('Please select a team to access the input for editing');
         });
     });
 
@@ -968,7 +968,7 @@
         
         if (!entryDate) 
         {
-            toastr.error('Please select a date');
+            flasher.error('Please select a date');
             return;
         }
         var date = new Date(entryDate);
@@ -1014,7 +1014,7 @@
         
         if (!hasData) 
         {
-            toastr.error('Please enter at least one value');
+            flasher.error('Please enter at least one value');
             return;
         }
         $('#saveQuickEntryBtn').prop('disabled', true);
@@ -1040,7 +1040,7 @@
             {
                 if (response.success) 
                 {
-                    toastr.success('Daily entries saved successfully!');
+                    flasher.success('Daily entries saved successfully!');
                     $('#quickEntryModal').modal('hide');
                     setTimeout(function() 
                     {
@@ -1049,7 +1049,7 @@
                 } 
                 else 
                 {
-                    toastr.error(response.message || 'Failed to save entries');
+                    flasher.error(response.message || 'Failed to save entries');
                     resetQuickEntryButton();
                 }
             },
@@ -1060,7 +1060,7 @@
                 {
                     errorMessage = xhr.responseJSON.message;
                 }
-                toastr.error(errorMessage);
+                flasher.error(errorMessage);
                 resetQuickEntryButton();
             }
         });
@@ -1119,14 +1119,14 @@
                         {
                             $('.point-value-input[data-point="' + item.point + '"]').val(item.value);
                         });
-                        toastr.info('Loaded existing data for ' + entryDate);
+                        flasher.info('Loaded existing data for ' + entryDate);
                     }
                 }
                 calculateTotal();
             },
             error: function() 
             {
-                toastr.warning('Could not load existing data for this date');
+                flasher.warning('Could not load existing data for this date');
             },
             complete: function() 
             {
@@ -1177,7 +1177,7 @@ $('#quickEntryForm').submit(function(e) {
     var year = '{{ $yearFilter }}';
     
     if (!entryDate) {
-        toastr.error('Please select a date');
+        flasher.error('Please select a date');
         return;
     }
     
@@ -1204,7 +1204,7 @@ $('#quickEntryForm').submit(function(e) {
     });
     
     if (!hasData) {
-        toastr.error('Please enter at least one value');
+        flasher.error('Please enter at least one value');
         return;
     }
 
@@ -1217,7 +1217,7 @@ $('#quickEntryForm').submit(function(e) {
             saveDailyEntries(teamId, year, weekNumber, entries, entryDate);
         })
         .catch(function(error) {
-            toastr.error('Error: ' + error);
+            flasher.error('Error: ' + error);
             resetQuickEntryButton();
         });
 });

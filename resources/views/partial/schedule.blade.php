@@ -213,8 +213,6 @@
             </ul>
 
             <div class="tab-content" id="followupTabsContent">
-
-                {{-- ================= Today ================= --}}
                 <div class="tab-pane fade show active" id="today" role="tabpanel">
                     <div class="table-responsive">
                         <table class="table table-hover mb-0" id="today-table">
@@ -238,7 +236,8 @@
                                     @if (isset($followups[$key]) && $followups[$key]->isNotEmpty())
                                         @foreach ($followups[$key] as $item)
                                             @php
-                                                switch ($key) {
+                                                switch ($key) 
+                                                {
                                                     case 'todayCalls':
                                                         $type = 'Call';
                                                         $icon = 'mdi mdi-phone-outline';
@@ -251,7 +250,8 @@
                                                         break;
                                                     case 'todayMeetings':
                                                         $type = $item->type;
-                                                        switch ($item->type) {
+                                                        switch ($item->type) 
+                                                        {
                                                             case 'Processing':
                                                                 $icon = 'mdi mdi-progress-clock';
                                                                 $badgeColor = 'warning';
@@ -304,7 +304,6 @@
                                                 $diff_date_count = $createdDate->diffInDays($currentDate);
                                             @endphp
                                             <tr>
-                                                {{-- Type --}}
                                                 <td>
                                                     <span class="badge bg-{{ $badgeColor }} bg-soft text-light">
                                                         <i class="{{ $icon }}"></i> {{ $type }}
@@ -348,11 +347,15 @@
                                                                     class="rounded-pill px-3 py-1 bg-light border text-success fw-semibold small">
                                                                     <i class="fas fa-user-check me-1"></i> Visited
                                                                 </span>
+                                                            @else
+                                                                <button class="btn btn-xs btn-soft-light"
+                                                                    onclick="showVisitDoneModal('{{ $item->id }}')"
+                                                                    data-bs-toggle="tooltip" title="Visit Done">
+                                                                    <i class="fas fa-check-double text-success"></i>
+                                                                </button>
                                                             @endif
                                                         </div>
                                                 </td>
-
-                                                {{-- Lead Details --}}
                                                 <td>
                                                     <div class="d-flex flex-column">
                                                         <h6 class="mb-0">{{ $item->name }}</h6>
@@ -434,8 +437,6 @@
                         </table>
                     </div>
                 </div>
-
-                {{-- ================= Tomorrow ================= --}}
                 <div class="tab-pane fade" id="tomorrow" role="tabpanel">
                     <div class="table-responsive">
                         <table class="table table-hover mb-0" id="tomorrow-table">
@@ -459,7 +460,8 @@
                                     @if (isset($followups[$key]) && $followups[$key]->isNotEmpty())
                                         @foreach ($followups[$key] as $item)
                                             @php
-                                                switch ($key) {
+                                                switch ($key) 
+                                                {
                                                     case 'tomorrowCalls':
                                                         $type = 'Call';
                                                         $icon = 'mdi mdi-phone-outline';
@@ -472,7 +474,8 @@
                                                         break;
                                                     case 'tomorrowMeetings':
                                                         $type = $item->type;
-                                                        switch ($item->type) {
+                                                        switch ($item->type) 
+                                                        {
                                                             case 'Processing':
                                                                 $icon = 'mdi mdi-progress-clock';
                                                                 $badgeColor = 'warning';
@@ -516,7 +519,6 @@
                                                 $diff_date_count = $createdDate->diffInDays($currentDate);
                                             @endphp
                                             <tr>
-                                                {{-- Type --}}
                                                 <td>
                                                     <span class="badge bg-{{ $badgeColor }} bg-soft text-light">
                                                         <i class="{{ $icon }}"></i> {{ $type }}
@@ -562,11 +564,16 @@
                                                                     class="rounded-pill px-3 py-1 bg-light border text-success fw-semibold small">
                                                                     <i class="fas fa-user-check me-1"></i> Visited
                                                                 </span>
+                                                            @else
+                                                                <button class="btn btn-xs btn-soft-light"
+                                                                    onclick="showVisitDoneModal('{{ $item->id }}')"
+                                                                    data-bs-toggle="tooltip" title="Visit Done">
+                                                                    <i class="fas fa-check-double text-success"></i>
+                                                                </button>
                                                             @endif
                                                         </div>
                                                 </td>
 
-                                                {{-- Lead Details --}}
                                                 <td>
                                                     <div class="d-flex flex-column">
                                                         <h6 class="mb-0">{{ $item->name }}</h6>
@@ -591,8 +598,6 @@
                                                 <td>{{ $item->campaign }}</td>
                                                 <td>{{ \Carbon\Carbon::parse($item->datetime)->format('M d, Y h:i A') }}
                                                 </td>
-
-                                                {{-- Status Badge --}}
                                                 <td>
                                                     @if ($type == 'Call')
                                                         <span
@@ -614,8 +619,6 @@
                                                 </td>
                                                 <td>{{ \Carbon\Carbon::parse($item->remind_time)->format('h:i A') }}
                                                 </td>
-
-                                                {{-- Comment --}}
                                                 <td>
                                                     <div class="d-flex align-items-center">
                                                         <div class="flex-shrink-0 me-2">
@@ -642,8 +645,6 @@
                         </table>
                     </div>
                 </div>
-
-                {{-- ================= Next 7 Days ================= --}}
                 <div class="tab-pane fade" id="next7days" role="tabpanel">
                     <div class="table-responsive">
                         <table class="table table-hover mb-0" id="next7days-table">
@@ -680,7 +681,8 @@
                                                         break;
                                                     case 'next7daysMeetings':
                                                         $type = $item->type;
-                                                        switch ($item->type) {
+                                                        switch ($item->type) 
+                                                        {
                                                             case 'Processing':
                                                                 $icon = 'mdi mdi-progress-clock';
                                                                 $badgeColor = 'warning';
@@ -724,7 +726,6 @@
                                                 $diff_date_count = $createdDate->diffInDays($currentDate);
                                             @endphp
                                             <tr>
-                                                {{-- Type --}}
                                                 <td>
                                                     <span class="badge bg-{{ $badgeColor }} bg-soft text-light">
                                                         <i class="{{ $icon }}"></i> {{ $type }}
@@ -770,11 +771,16 @@
                                                                     class="rounded-pill px-3 py-1 bg-light border text-success fw-semibold small">
                                                                     <i class="fas fa-user-check me-1"></i> Visited
                                                                 </span>
+                                                            @else
+                                                                <button class="btn btn-xs btn-soft-light"
+                                                                    onclick="showVisitDoneModal('{{ $item->id }}')"
+                                                                    data-bs-toggle="tooltip" title="Visit Done">
+                                                                    <i class="fas fa-check-double text-success"></i>
+                                                                </button>
                                                             @endif
                                                         </div>
                                                 </td>
 
-                                                {{-- Lead Details --}}
                                                 <td>
                                                     <div class="d-flex flex-column">
                                                         <h6 class="mb-0">{{ $item->name }}</h6>
@@ -799,8 +805,6 @@
                                                 <td>{{ $item->campaign }}</td>
                                                 <td>{{ \Carbon\Carbon::parse($item->datetime)->format('M d, Y h:i A') }}
                                                 </td>
-
-                                                {{-- Status Badge --}}
                                                 <td>
                                                     @if ($type == 'Call')
                                                         <span
@@ -822,8 +826,6 @@
                                                 </td>
                                                 <td>{{ \Carbon\Carbon::parse($item->remind_time)->format('h:i A') }}
                                                 </td>
-
-                                                {{-- Comment --}}
                                                 <td>
                                                     <div class="d-flex align-items-center">
                                                         <div class="flex-shrink-0 me-2">
@@ -850,8 +852,6 @@
                         </table>
                     </div>
                 </div>
-
-                {{-- ================= Missed ================= --}}
                 <div class="tab-pane fade" id="missed" role="tabpanel">
                     <div class="table-responsive">
                         <table class="table table-hover mb-0" id="missed-table">
@@ -928,6 +928,12 @@
                                                             class="rounded-pill px-3 py-1 bg-light border text-success fw-semibold small">
                                                             <i class="fas fa-user-check me-1"></i> Visited
                                                         </span>
+                                                    @else
+                                                        <button class="btn btn-xs btn-soft-light"
+                                                            onclick="showVisitDoneModal('{{ $item->id }}')"
+                                                            data-bs-toggle="tooltip" title="Visit Done">
+                                                            <i class="fas fa-check-double text-success"></i>
+                                                        </button>
                                                     @endif
                                                 </div>
                                             </td>
@@ -956,8 +962,6 @@
                                             <td>{{ $item->campaign }}</td>
                                             <td>{{ \Carbon\Carbon::parse($item->datetime)->format('M d, Y h:i A') }}
                                             </td>
-
-                                            {{-- Status Badge --}}
                                             <td>
                                                 @if ($type == 'Call')
                                                     <span class="badge bg-primary bg-opacity-10 text-light">Call</span>
@@ -976,8 +980,6 @@
                                             <td>{{ $item->classification ?? '-' }}</td>
                                             <td>{{ \Carbon\Carbon::parse($item->remind_date)->format('d M Y') }}</td>
                                             <td>{{ \Carbon\Carbon::parse($item->remind_time)->format('h:i A') }}</td>
-
-                                            {{-- Comment --}}
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     <div class="flex-shrink-0 me-2">
@@ -1008,7 +1010,8 @@
     </div>
 </div>
 <script>
-    $(document).ready(function() {
+    $(document).ready(function() 
+    {
         var todayTable = $('#today-table').DataTable({
             scrollX: true,
             scrollY: '400px',
@@ -1033,7 +1036,7 @@
             }
         });
 
-         var next7daysTable = $('#next7days-table').DataTable({
+        var next7daysTable = $('#next7days-table').DataTable({
             scrollX: true,
             scrollY: '400px',
             scrollCollapse: true,
@@ -1057,7 +1060,8 @@
             }
         });
 
-        $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
+        $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) 
+        {
             var target = $(e.target).attr("data-bs-target");
             if (target === '#today') todayTable.columns.adjust();
             if (target === '#tomorrow') tomorrowTable.columns.adjust();

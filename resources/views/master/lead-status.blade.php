@@ -313,7 +313,7 @@
         let name = $('#rename_name').val();
         if(name == '')
         {
-            toastr.error('Please enter status name');
+            flasher.error('Please enter status name');
             return;
         }
         startButtonLoader('renameBtn');
@@ -330,7 +330,7 @@
                 stopButtonLoader('renameBtn');
                 if (response.success) 
                 {
-                    toastr.success('Status renamed successfully');
+                    flasher.success('Status renamed successfully');
                     setTimeout(function () 
                     {
                         location.reload();
@@ -341,7 +341,7 @@
             error: function (xhr) 
             {
                 stopButtonLoader('renameBtn');
-                toastr.error(
+                flasher.error(
                     xhr.responseJSON?.error || 'Something went wrong'
                 );
             }
@@ -366,7 +366,7 @@
                 stopButtonLoader('sequenceBtn');
                 if (response.success) 
                 {
-                    toastr.success('Sequence updated successfully');
+                    flasher.success('Sequence updated successfully');
                     setTimeout(function () 
                     {
                         location.reload();
@@ -376,7 +376,7 @@
             error: function (xhr) 
             {
                 stopButtonLoader('sequenceBtn');
-                toastr.error(
+                flasher.error(
                     xhr.responseJSON?.error || 'Something went wrong'
                 );
 

@@ -419,13 +419,13 @@
                                 $statusCell.find('.badge.bg-info').remove();
                             }
 
-                            toastr.success(response.message);
+                            flasher.success(response.message);
                         } else {
-                            toastr.error(response.message);
+                            flasher.error(response.message);
                         }
                     },
                     error: function(xhr) {
-                        toastr.error('Failed to update auto welcome setting');
+                        flasher.error('Failed to update auto welcome setting');
                     }
                 });
             }
@@ -457,7 +457,7 @@
         $(document).on('click', '.copy-share-link', function() {
             const link = $(this).data('link');
             navigator.clipboard.writeText(link).then(function() {
-                toastr.success('Share link copied to clipboard!');
+                flasher.success('Share link copied to clipboard!');
             });
         });
     });
@@ -484,7 +484,7 @@
         let password = $('#deleteLeadPassword').val();
 
         if (!password) {
-            toastr.error('Enter password');
+            flasher.error('Enter password');
             return;
         }
 
@@ -499,15 +499,15 @@
             success: function(res) {
 
                 if (res.status === 200) {
-                    toastr.success(res.message);
+                    flasher.success(res.message);
                     $('#deleteLeadModal').modal('hide');
 
                     $(`button[data-id="${res.id}"]`).closest('tr').remove();
 
                 } else if (res.status === 403) {
-                    toastr.error(res.message);
+                    flasher.error(res.message);
                 } else {
-                    toastr.error(res.message);
+                    flasher.error(res.message);
                     $('#deleteLeadPassword').val('');
                 }
             }

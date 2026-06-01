@@ -18,8 +18,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Table -->
         <div class="row">
             <div class="col-12">
                 <div class="card">
@@ -28,7 +26,6 @@
                             <h4 class="card-title mb-0">Source Platform</h4>
                         </div>
 
-                        <!-- Length Dropdown -->
                         <div class="mb-0">
                             <label>
                                 Show
@@ -72,8 +69,6 @@
                                 </tbody>
                             </table>
                         </div>
-
-                        <!-- Pagination -->
                         <div class="d-flex justify-content-end mt-3">
                             {!! $sources->links('pagination::bootstrap-5') !!}
                         </div>
@@ -81,7 +76,6 @@
                 </div>
             </div>
         </div>
-
     </div>
     @include('modals.master');
 </div>

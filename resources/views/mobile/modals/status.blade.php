@@ -50,7 +50,6 @@
 </style> --}}
 
 <style>
-    /* ===== Modal Overlay ===== */
     .modal-overlay {
         position: fixed;
         inset: 0;
@@ -58,7 +57,7 @@
         backdrop-filter: blur(4px);
         z-index: 1050;
         overflow-y: auto;
-        padding: 20px;
+        padding: 10px;
         display: none;
         animation: fadeIn 0.25s ease;
     }
@@ -113,7 +112,7 @@
         content: "";
         width: 60px;
         height: 4px;
-        background: linear-gradient(90deg, #2563eb, #60a5fa);
+        background: #3762b8;
         display: block;
         margin: 10px auto 0;
         border-radius: 20px;
@@ -223,11 +222,6 @@
         transform: translateY(-1px);
     }
 
-    .btn-primary {
-        background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
-        color: white !important;
-    }
-
     .btn-primary:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
@@ -272,14 +266,13 @@
         }
     }
 
-    /* FORM SCROLL */
     #statusUpdateForm {
         flex: 1;
         overflow-y: auto;
         overflow-x: hidden;
         padding-right: 20px;
         padding-top: 15px;
-        padding-left: 35px;
+        /* padding-left: 35px; */
 
     }
 
@@ -326,7 +319,7 @@
                     <option value="">Select new status</option>
                         @foreach($lead_statuses as $status)
                         @if($status->system_name !== 'Completed' && $status->system_name !=='BOOKED' && $status->system_name!=='Cancelled' )
-                            <option value="{{ $status->display_name }}"
+                            <option value="{{ $status->system_name }}"
                                 data-system="{{ $status->system_name }}">
                                 {{ $status->display_name }}
                             </option>

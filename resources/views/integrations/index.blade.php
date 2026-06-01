@@ -461,19 +461,19 @@
                     this.disabled = false;
                     if (data.success) 
                     {
-                        toastr.success(data.message);
+                        flasher.success(data.message);
                     } 
                     else 
                     {
                         this.checked = !originalState;
-                        toastr.error(data.message);
+                        flasher.error(data.message);
                     }
                 })
                 .catch(error => {
                     // console.error('Error:', error);
                     this.disabled = false;
                     this.checked = !originalState;
-                    toastr.error('An error occurred while updating auto sync setting');
+                    flasher.error('An error occurred while updating auto sync setting');
                 });
             });
         });
@@ -603,7 +603,7 @@
 
         if (!shortTokenInput) 
         {
-            toastr.error("Short token input not found");
+            flasher.error("Short token input not found");
             return;
         }
 
@@ -711,7 +711,7 @@
                 error: function(xhr, status, error) 
                 {
                     tbody.html(`<tr><td colspan="5" class="text-center text-danger py-4">Failed to load pages.</td></tr>`);
-                    toastr.error("Error loading pages: " + error);
+                    flasher.error("Error loading pages: " + error);
                 }
             });
         });
@@ -788,7 +788,7 @@
                 error: function(xhr, status, error) 
                 {
                     tbody.html(`<tr><td colspan="6" class="text-center text-danger py-4">Failed to load ad accounts.</td></tr>`);
-                    toastr.error("Error loading ad accounts");
+                    flasher.error("Error loading ad accounts");
                 }
             });
         });

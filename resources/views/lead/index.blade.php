@@ -131,7 +131,7 @@ $users = DB::table('users')
                     <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
-                                <div class="modal-header">
+                                <div class="modal-header bg-primary text-light">
                                     <h5 class="modal-title" id="shareModalLabel">Share Lead Form</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
@@ -601,7 +601,7 @@ $users = DB::table('users')
                 },
                 error: function(xhr, status, error) {
                     $('#category').empty().append('<option value="">Error loading categories</option>');
-                    toastr.error('Failed to load categories');
+                    flasher.error('Failed to load categories');
                 }
             });
         }
@@ -630,7 +630,7 @@ $users = DB::table('users')
                 },
                 error: function(xhr, status, error) {
                     $('#sub_category').empty().append('<option value="">Error loading subcategories</option>');
-                    toastr.error('Failed to load subcategories');
+                    flasher.error('Failed to load subcategories');
                 }
             });
         }
@@ -656,7 +656,7 @@ $users = DB::table('users')
                         }
                     },
                     error: function(xhr, status, error) {
-                        toastr.error('Failed to load cities');
+                        flasher.error('Failed to load cities');
                     }
                 });
             } else {
@@ -702,11 +702,11 @@ $users = DB::table('users')
                         $('#shareLinkedIn').attr('href', 'https://www.linkedin.com/shareArticle?mini=true&url=' + encodeURIComponent(link) + '&title=' + encodeURIComponent('Submit a Lead'));
                         $('#shareTwitter').attr('href', 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent('Submit a lead using this link'));
                     } else {
-                        toastr.error('Failed to generate share link: ' + response.message);
+                        flasher.error('Failed to generate share link: ' + response.message);
                     }
                 },
                 error: function() {
-                    toastr.error('Error generating share link.');
+                    flasher.error('Error generating share link.');
                 }
             });
         });
@@ -714,9 +714,9 @@ $users = DB::table('users')
         $('#copyLink').click(function() {
             var link = $('#shareLink').val();
             navigator.clipboard.writeText(link).then(function() {
-                toastr.success('Link copied to clipboard!');
+                flasher.success('Link copied to clipboard!');
             }, function() {
-                toastr.error('Failed to copy link.');
+                flasher.error('Failed to copy link.');
             });
         });
     });

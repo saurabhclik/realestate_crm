@@ -154,10 +154,10 @@
                                 <table class="table table-hover table-bordered">
                                     <thead class="table-light">
                                         <tr>
-                                            <th class="text-nowrap">Source <span class="text-danger">*</span></th>
-                                            <th class="text-nowrap">Campaign <span class="text-danger">*</span></th>
-                                            <th class="text-nowrap">Name</th>
-                                            <th class="text-nowrap">Phone No.</th>
+                                            <th class="text-nowrap">Source</th>
+                                            <th class="text-nowrap">Campaign </th>
+                                            <th class="text-nowrap">Name <span class="text-danger">*</span></th>
+                                            <th class="text-nowrap">Phone No.<span class="text-danger">*</span></th>
                                             <th class="text-nowrap">E-mail</th>
                                             <th class="text-nowrap">Alternative No.</th>
                                             <th class="text-nowrap">Address</th>
@@ -254,6 +254,7 @@
                         </div>
                     </div>
                 </div>
+            </div>
             <div class="modal-footer bg-light">
                 <button type="button" class="btn btn-outline-secondary" onclick="backToUpload()" id="backBtn">
                     <i class="bi bi-arrow-left me-2"></i> Back
@@ -300,7 +301,7 @@
         
         if (!file) 
         {
-            toastr.error('Please select a CSV file first');
+            flasher.error('Please select a CSV file first');
             return;
         }
         
@@ -335,13 +336,13 @@
                 } 
                 else 
                 {
-                    toastr.error(response.message);
+                    flasher.error(response.message);
                 }
             },
             error: function(xhr) 
             {
                 Swal.close();
-                toastr.error('Error processing file: ' + (xhr.responseJSON?.message || 'Unknown error'));
+                flasher.error('Error processing file: ' + (xhr.responseJSON?.message || 'Unknown error'));
             }
         });
     }
@@ -434,7 +435,7 @@
     function confirmImport() 
     {
         if (selectedRows.length === 0) {
-            toastr.warning('Please select at least one record to import');
+            flasher.warning('Please select at least one record to import');
             return;
         }
         

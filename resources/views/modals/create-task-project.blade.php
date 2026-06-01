@@ -2,8 +2,8 @@
     <div class="modal-dialog modal-lg">
         <form method="POST" action="{{ route('task.project.store') }}">
             @csrf
-            <div class="modal-content border-0 shadow-lg rounded-4">
-                <div class="modal-header bg-primary text-white rounded-top-4">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title fw-semibold" id="createProjectModalLabel">
                         <i class="fas fa-folder-plus me-2"></i> Create New Project
                     </h5>

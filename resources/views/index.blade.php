@@ -9,6 +9,7 @@
 @include('modals.view-comments')
 @include('modals.status-update')
 @include('modals.quick-lead')
+@include('modals.visit-done')
 
 @php
 

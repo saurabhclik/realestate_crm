@@ -292,43 +292,51 @@ class InventoryController extends Controller
 
     public function downloadTemplate()
     {
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="inventory_data.csv"',
-        ];
-
-        $callback = function () {
-
-            $file = fopen('php://output', 'w');
-
-            //  HEADER
-            fputcsv($file, ['project_name', 'property_type', 'location', 'unit_no', 'size']);
-
-            //  FETCH REAL DATA
-            $data = DB::table('inventory_det as i')
-                ->join('projects as p', 'i.inventory_id', '=', 'p.id')
-                ->select(
-                    'p.project_name',
-                    'i.property_type',
-                    'i.location',
-                    'i.unit_no',
-                    'i.size'
-                )
-                ->get();
-
-            foreach ($data as $row) {
+        try 
+        {
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename="inventory_data.csv"',
+            ];
+            $callback = function () 
+            {
+                $file = fopen('php://output', 'w');
                 fputcsv($file, [
-                    $row->project_name,
-                    $row->property_type,
-                    $row->location,
-                    $row->unit_no,
-                    $row->size
+                    'project_name',
+                    'property_type',
+                    'location',
+                    'unit_no',
+                    'size'
                 ]);
-            }
 
-            fclose($file);
-        };
+                $data = DB::table('inventory_det as i')
+                    ->leftJoin('projects as p', 'p.id', '=', 'i.project_id')
+                    ->select(
+                        'p.project_name',
+                        'i.property_type',
+                        'i.location',
+                        'i.unit_no',
+                        'i.size'
+                    )
+                    ->get();
 
-        return response()->stream($callback, 200, $headers);
+                foreach ($data as $row) 
+                {
+                    fputcsv($file, [
+                        $row->project_name ?? '',
+                        $row->property_type ?? '',
+                        $row->location ?? '',
+                        $row->unit_no ?? '',
+                        $row->size ?? ''
+                    ]);
+                }
+                fclose($file);
+            };
+            return response()->stream($callback, 200, $headers);
+        } 
+        catch (\Exception $e) 
+        {
+            dd($e->getMessage());
+        }
     }
 }

@@ -243,17 +243,17 @@ function deleteTemplate()
         .then(data => {
             if (data.success) 
             {
-                alert(data.message);
+                flasher.success(data.message);
                 window.location.href = '{{ route('messaging.index') }}';
             } 
             else 
             {
-                alert(data.message || 'Error deleting template');
+                flasher.error(data.message || 'Error deleting template');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error deleting template');
+            flasher.error('Error deleting template');
         });
     }
 }

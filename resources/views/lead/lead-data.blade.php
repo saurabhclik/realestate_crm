@@ -17,100 +17,118 @@
 @include('modals.duplicate-lead')
 @include('modals.share-lead')
 <style>
-    .add-project-btn {
+    .add-project-btn 
+    {
         padding: 2px 6px;
         font-size: 0.7rem;
         border: 1px solid #0d6efd;
     }
 
-    .add-project-btn:hover {
+    .add-project-btn:hover 
+    {
         background-color: #0d6efd;
         color: white;
     }
 
-    #currentProjects .badge {
+    #currentProjects .badge
+    {
         font-size: 0.75rem;
         padding: 4px 8px;
     }
 
-    .cust-badge {
+    .cust-badge 
+    {
         white-space: normal;
         padding: 6px 10px;
         font-size: 0.9rem;
         line-height: 1.4;
     }
 
-    .dataTables_scroll {
+    .dataTables_scroll 
+    {
         overflow: auto;
     }
 
-    .dataTables_scrollHead {
+    .dataTables_scrollHead 
+    {
         position: sticky;
         top: 0;
         z-index: 10;
         background: white;
     }
 
-    .dataTables_scrollBody {
+    .dataTables_scrollBody 
+    {
         max-height: 100% !important;
     }
 
-    #table_filter {
+    #table_filter 
+    {
         margin: 10px;
     }
 
-    .applicant-modal .modal-dialog {
+    .applicant-modal .modal-dialog 
+    {
         max-width: 500px;
     }
 
-    .applicant-modal .modal-header {
+    .applicant-modal .modal-header 
+    {
         background: #4b6cb7;
         color: white;
         border-bottom: none;
         border-radius: 5px 5px 0 0;
     }
 
-    .applicant-modal .modal-title {
+    .applicant-modal .modal-title 
+    {
         font-weight: 600;
         font-size: 1.2rem;
     }
 
-    .applicant-modal .modal-body {
+    .applicant-modal .modal-body 
+    {
         padding: 20px;
     }
 
-    .applicant-detail {
+    .applicant-detail 
+    {
         display: flex;
         margin-bottom: 12px;
         align-items: flex-start;
     }
 
-    .applicant-label {
+    .applicant-label 
+    {
         font-weight: 600;
         color: #495057;
         width: 140px;
         flex-shrink: 0;
     }
 
-    .applicant-value {
+    .applicant-value 
+    {
         color: #6c757d;
         flex-grow: 1;
         word-break: break-word;
     }
 
-    .applicant-section {
+    .applicant-section 
+    {
         margin-bottom: 20px;
         padding-bottom: 15px;
         border-bottom: 1px solid #eee;
     }
 
-    .applicant-section:last-child {
+    .applicant-section:last-child 
+    {
         border-bottom: none;
         margin-bottom: 0;
         padding-bottom: 0;
     }
 
-    .applicant-section-title {
+    .applicant-section-title 
+    {
         font-weight: 600;
         color: #4b6cb7;
         margin-bottom: 15px;
@@ -119,39 +137,47 @@
         border-bottom: 1px solid #e9ecef;
     }
 
-    .eye-btn {
+    .eye-btn 
+    {
         color: #17a2b8;
         transition: all 0.3s;
     }
 
-    .eye-btn:hover {
+    .eye-btn:hover 
+    {
         color: #138496;
         transform: scale(1.1);
     }
 
-    .duplicate-item {
+    .duplicate-item 
+    {
         color: #fd7e14;
     }
 
-    .share-item {
+    .share-item 
+    {
         color: #20c997;
     }
 
-    .pin-item {
+    .pin-item 
+    {
         color: #ffc107;
         cursor: pointer;
         transition: all 0.3s;
     }
 
-    .pin-item.pinned {
+    .pin-item.pinned 
+    {
         color: #fd7e14;
     }
 
-    .pin-item:hover {
+    .pin-item:hover 
+    {
         transform: scale(1.1);
     }
 
-    .pinned-badge {
+    .pinned-badge 
+    {
         background: linear-gradient(45deg, #fd7e14, #ffc107);
         color: white;
         font-size: 0.7rem;
@@ -270,7 +296,7 @@
                                 Cancelled
 
                             @else
-                            {{ optional($leads->first())->status_display_name ?? '' }}
+                                {{ optional($leads->first())->status_display_name ?? '' }}
                             @endif
                             <div class="border-bottom border-3 border-primary mb-2 mt-1 w-75"></div>
                         </h4>
@@ -480,9 +506,6 @@
                                                     <a href="https://wa.me/91{{ $phone }}" target="_blank" class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip" title="WhatsApp">
                                                         <i class="fab fa-whatsapp text-success"></i>
                                                     </a>
-                                                    <!-- <a href="{{ route('lead.edit', $row->id) }}" class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip" title="Edit">
-                                                        <i class="fas fa-edit text-warning"></i>
-                                                    </a> -->
                                                     <a href="{{ route('lead.edit', ['id' => $row->id] + request()->query()) }}" class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip" title="Edit">
                                                         <i class="fas fa-edit text-warning"></i>
                                                     </a>
@@ -492,11 +515,13 @@
                                                         data-bs-toggle="tooltip" title="Update Status">
                                                         <i class="fas fa-sync-alt text-info"></i>
                                                     </button>
-                                                    <button class="btn btn-xs btn-soft-light"
-                                                        onclick="showVisitDoneModal('{{ $row->id }}')"
-                                                        data-bs-toggle="tooltip" title="Visit Done">
-                                                        <i class="fas fa-check-double text-success"></i>
-                                                    </button>
+                                                    @if($lead_name != 'allocate' && $lead_name != 'unallocated' && $row->visited_on != 1)
+                                                        <button class="btn btn-xs btn-soft-light"
+                                                            onclick="showVisitDoneModal('{{ $row->id }}')"
+                                                            data-bs-toggle="tooltip" title="Visit Done">
+                                                            <i class="fas fa-check-double text-success"></i>
+                                                        </button>
+                                                    @endif
                                                     @endif
                                                     @if($lead_name === 'completed')
                                                     <button class="btn btn-xs btn-soft-light view-applicant-btn"
@@ -575,7 +600,6 @@
                                                     }
                                                 }
                                             @endphp
-                                            
                                             @if(count($sharedUsers) > 0)
                                                 <div class="d-flex flex-wrap gap-1">
                                                     @foreach($sharedUsers as $sharedUser)
@@ -607,13 +631,16 @@
                                         <span class="cust-badge bg-soft-info text-info">
                                             @php
                                                 $sourceName = $row->source;
-                                                if (is_numeric($row->source)) {
+                                                if (is_numeric($row->source)) 
+                                                {
                                                     $sourceObj = \Illuminate\Support\Facades\DB::table('sources')->where('id', $row->source)->first();
-                                                    if ($sourceObj) {
+                                                    if ($sourceObj) 
+                                                    {
                                                         $sourceName = $sourceObj->name;
                                                     }
                                                 }
-                                                if (empty($sourceName) || trim($sourceName) === '-') {
+                                                if (empty($sourceName) || trim($sourceName) === '-') 
+                                                {
                                                     $sourceName = 'Data Center';
                                                 }
                                                 $icon = $sourceName == 'Website' ? 'globe' : ($sourceName == 'Referral' ? 'user-friends' : 'ad');
@@ -1119,13 +1146,13 @@
 
         if (!leadId) 
         {
-            toastr.error('Lead ID is missing. Please try again.');
+            flasher.error('Lead ID is missing. Please try again.');
             return;
         }
 
         if (!selectedProjects || selectedProjects.length === 0) 
         {
-            toastr.error('Please select at least one project');
+            flasher.error('Please select at least one project');
             return;
         }
         submitText.addClass('d-none');
@@ -1144,7 +1171,7 @@
             {
                 if (response.success) 
                 {
-                    toastr.success(response.message);
+                    flasher.success(response.message);
                     $('#addProjectModal').modal('hide');
                     setTimeout(() => {
                         location.reload();
@@ -1152,13 +1179,13 @@
                 } 
                 else 
                 {
-                    toastr.error(response.message);
+                    flasher.error(response.message);
                 }
             },
             error: function(xhr) 
             {
                 const errorMessage = xhr.responseJSON?.message || 'Unknown error occurred';
-                toastr.error('Error adding projects: ' + errorMessage);
+                flasher.error('Error adding projects: ' + errorMessage);
             },
             complete: function() 
             {
@@ -1181,7 +1208,7 @@
         const leadId = $(this).data('lead-id');
         if (!leadId) 
         {
-            toastr.error('Could not find lead ID. Please try again.');
+            flasher.error('Could not find lead ID. Please try again.');
             return;
         }
 
@@ -1387,29 +1414,33 @@
             {
                 if (response.status === 200) 
                 {
-                    toastr.success(response.message);
+                    flasher.success(response.message);
                     $('#deleteLeadModal').modal('hide');
                     $(`button[data-lead-id="${response.lead_id}"]`).closest('tr').fadeOut(300, function() 
                     {
                         $(this).remove();
                     });
                 } 
-                else if (response.status === 403) {
-                    toastr.error(response.message);
+                else if (response.status === 403) 
+                {
+                    flasher.error(response.message);
                     submitBtn.prop('disabled', true);
                     submitText.text('Blocked for 1 day').removeClass('d-none');
                     submitSpinner.addClass('d-none');
-                } else {
-                    toastr.error(response.message);
+                } 
+                else 
+                {
+                    flasher.error(response.message);
                     submitBtn.prop('disabled', false);
                     submitText.removeClass('d-none');
                     submitSpinner.addClass('d-none');
                     $('#deletePassword').val('');
                 }
             },
-            error: function(xhr) {
+            error: function(xhr) 
+            {
                 const errorMessage = xhr.responseJSON?.message || 'An error occurred';
-                toastr.error(errorMessage);
+                flasher.error(errorMessage);
                 submitBtn.prop('disabled', false);
                 submitText.removeClass('d-none');
                 submitSpinner.addClass('d-none');
@@ -1417,18 +1448,21 @@
         });
     });
 
-    $('#deleteLeadModal').on('hidden.bs.modal', function() {
+    $('#deleteLeadModal').on('hidden.bs.modal', function() 
+    {
         $('#deletePassword').val('');
         $('#deleteSubmitBtn').prop('disabled', false);
         $('#deleteSubmitText').removeClass('d-none');
         $('#deleteSubmitSpinner').addClass('d-none');
     });
 
-    $(document).on('click', '.matching-projects-btn', function() {
+    $(document).on('click', '.matching-projects-btn', function() 
+    {
         const leadId = $(this).data('lead-id');
         const leadPhone = $(this).data('lead-phone');
-        if (!leadId) {
-            toastr.error('Lead ID not found');
+        if (!leadId) 
+        {
+            flasher.error('Lead ID not found');
             return;
         }
 
@@ -1445,8 +1479,10 @@
         $.ajax({
             url: `/lead/${leadId}/matching-properties`,
             type: 'GET',
-            success: function(response) {
-                if (response.data && response.data.length > 0) {
+            success: function(response) 
+            {
+                if (response.data && response.data.length > 0) 
+                {
                     let html = '<div class="row g-2">';
                     response.data.forEach(property => {
                         let scoreColor = 'secondary';
@@ -1516,7 +1552,9 @@
 
                     html += '</div>'
                     $('#matchingProjectsContent').html(html);
-                } else {
+                } 
+                else 
+                {
                     $('#matchingProjectsContent').html(`
                         <div class="text-center py-4">
                             <i class="fas fa-building fa-3x text-muted mb-2"></i>
@@ -1525,7 +1563,8 @@
                     `);
                 }
             },
-            error: function() {
+            error: function() 
+            {
                 $('#matchingProjectsContent').html(`
                     <div class="text-center py-4">
                         <i class="fas fa-exclamation-triangle fa-3x text-danger mb-2"></i>
@@ -1536,14 +1575,16 @@
         });
     });
 
-    $(document).on('click', '.share-whatsapp-btn', function() {
+    $(document).on('click', '.share-whatsapp-btn', function() 
+    {
         const propertyId = $(this).data('property-id');
         const leadId = $(this).data('lead-id');
         const phone = $(this).data('lead-phone');
         const button = $(this);
 
-        if (!propertyId || !leadId || !phone) {
-            toastr.error('Missing data for WhatsApp share');
+        if (!propertyId || !leadId || !phone) 
+        {
+            flasher.error('Missing data for WhatsApp share');
             return;
         }
 
@@ -1560,41 +1601,52 @@
                 lead_id: leadId,
                 phone: phone
             },
-            success: function(response) {
-                if (response.status === 200 && response.data) {
-                    if (typeof response.data === 'object' && response.data.whatsapp_url) {
+            success: function(response) 
+            {
+                if (response.status === 200 && response.data) 
+                {
+                    if (typeof response.data === 'object' && response.data.whatsapp_url) 
+                    {
                         window.open(response.data.whatsapp_url, '_blank');
-                    } else if (typeof response.data === 'string') {
+                    } 
+                    else if (typeof response.data === 'string') 
+                    {
                         window.open(response.data, '_blank');
-                    } else {
-                        console.error('Unexpected response format:', response.data);
-                        toastr.error('Invalid response format');
+                    } 
+                    else 
+                    {
+                        flasher.error('Invalid response format', response.data);
                     }
-                    toastr.success('WhatsApp link generated successfully!');
-                } else {
-                    toastr.error(response.message || 'Failed to generate WhatsApp link');
+                    flasher.success('WhatsApp link generated successfully!');
+                } 
+                else 
+                {
+                    flasher.error(response.message || 'Failed to generate WhatsApp link');
                 }
             },
-            error: function(xhr) {
+            error: function(xhr) 
+            {
                 let errorMessage = 'Error generating WhatsApp link';
-                if (xhr.status === 419) {
+                if (xhr.status === 419) 
+                {
                     errorMessage = 'Session expired. Please refresh the page and try again.';
-                } else if (xhr.responseJSON?.message) {
+                } 
+                else if (xhr.responseJSON?.message) 
+                {
                     errorMessage = xhr.responseJSON.message;
                 }
-
-                toastr.error(errorMessage);
-                console.error('AJAX Error:', xhr.responseText);
+                flasher.error(errorMessage);
             },
-            complete: function() {
+            complete: function() 
+            {
                 button.prop('disabled', false);
                 button.html('<i class="bi bi-whatsapp"></i> Share');
             }
         });
     });
-    $(document).on('click', '.view-post-sale-btn', function() {
+    $(document).on('click', '.view-post-sale-btn', function() 
+    {
         var leadId = $(this).data('lead-id');
-        
         $('#postSaleContent').html(`
             <div class="text-center py-4">
                 <div class="spinner-border text-info" role="status">
@@ -1607,8 +1659,10 @@
         $.ajax({
             url: '/post-sale/lead/' + leadId,
             type: 'GET',
-            success: function(response) {
-                if (response.success && response.data) {
+            success: function(response) 
+            {
+                if (response.success && response.data) 
+                {
                     var data = response.data;
                     var html = `
                         <div class="row">
@@ -1651,7 +1705,9 @@
                         </div>
                     `;
                     $('#postSaleContent').html(html);
-                } else {
+                } 
+                else 
+                {
                     $('#postSaleContent').html(`
                         <div class="alert alert-warning">
                             <i class="fas fa-exclamation-triangle me-2"></i>
@@ -1660,7 +1716,8 @@
                     `);
                 }
             },
-            error: function() {
+            error: function() 
+            {
                 $('#postSaleContent').html(`
                     <div class="alert alert-danger">
                         <i class="fas fa-exclamation-triangle me-2"></i>

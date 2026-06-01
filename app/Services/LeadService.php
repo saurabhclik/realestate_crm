@@ -15,15 +15,22 @@ class LeadService
         $user_type = Session::get('user_type');
         $allocated_to = $request->input('allocated_lead');
 
-        if ($allocated_to) {
+        if ($allocated_to) 
+        {
             $user_id = $allocated_to;
-        } else {
-            if ($user_type === 'reception') {
+        } 
+        else 
+        {
+            if ($user_type === 'reception') 
+            {
                 $admin = DB::table('users')->where('role', 'admin')->first();
-                if ($admin) {
+                if ($admin) 
+                {
                     $user_id = $admin->id;
                 }
-            } else {
+            } 
+            else 
+            {
                 $user_id = $current_user_id;
             }
         }
@@ -53,20 +60,24 @@ class LeadService
 
         $validator = Validator::make($request->all(), $rules);
 
-        $validator->after(function ($validator) use ($request) {
+        $validator->after(function ($validator) use ($request) 
+        {
             $duplicate = DB::table('leads')
                 ->join('users', 'leads.user_id', '=', 'users.id')
                 ->where('leads.phone', $request->phone)
                 ->select('leads.id', 'users.name')
                 ->first();
 
-            if ($duplicate) {
+            if ($duplicate) 
+            {
                 $validator->errors()->add('phone', 'Duplicate Lead ID: ' . $duplicate->id . ' User: ' . $duplicate->name);
             }
         });
        $unallocate_lead = '';
-        if ($validator->fails()) {
-            foreach ($validator->errors()->all() as $error) {
+        if ($validator->fails()) 
+        {
+            foreach ($validator->errors()->all() as $error) 
+            {
                 Flasher::addError($error);
             }
             return [
@@ -75,33 +86,40 @@ class LeadService
                 'redirect' => $isMobile ? route('mobile.leads.create') : route('lead.add')
             ];
         }
-        if ($allocated_to) {
+        if ($allocated_to) 
+        {
             $allocatedUser = DB::table('users')->where('id', $allocated_to)->first();
-            if (in_array($allocatedUser->role, ['admin', 'team_manager'])) {
+            if (in_array($allocatedUser->role, ['admin', 'team_manager'])) 
+            {
                 $status = 'allocated_lead';
-                 $unallocate_lead = 1;
-               
-            } else {
+                $unallocate_lead = 1;
+            } 
+            else 
+            {
                 $status = 'NEW LEAD';
-                 $unallocate_lead = 0;
-               
+                $unallocate_lead = 0;
             }
-        } else {
-            if (in_array($user_type, ['admin', 'team_manager'])) {
+        } 
+        else 
+        {
+            if (in_array($user_type, ['admin', 'team_manager'])) 
+            {
                 $status = 'allocated_lead';
-                 $unallocate_lead = 1;
-            } else {
+                $unallocate_lead = 1;
+            } 
+            else 
+            {
                 $status = 'NEW LEAD';
-                 $unallocate_lead = 0;
+                $unallocate_lead = 0;
             }
         }
-
         $now = now();
-
-        try {
+        try 
+        {
             DB::beginTransaction();
             $projectIds = '';
-            if ($request->projects) {
+            if ($request->projects) 
+            {
                 $projectIds = implode(',', $request->projects);
             }
 
@@ -136,11 +154,14 @@ class LeadService
                 'updated_date' => $now,
             ];
 
-            if ($allocated_to && $allocated_to != $current_user_id) {
+            if ($allocated_to && $allocated_to != $current_user_id) 
+            {
                 $leadData['is_allocated'] = $current_user_id;
                 $leadData['allocated_date'] = $now;
 
-            } else {
+            } 
+            else 
+            {
                 $leadData['is_allocated'] = 0;
 
             }
@@ -148,7 +169,8 @@ class LeadService
             $leadId = DB::table('leads')->insertGetId($leadData);
             $commentText = $request->comment ?? 'Lead Added';
 
-            if ($allocated_to && $allocated_to != $current_user_id) {
+            if ($allocated_to && $allocated_to != $current_user_id) 
+            {
                 $allocatedUserName = DB::table('users')->where('id', $allocated_to)->value('name');
                 $allocatedUserRole = DB::table('users')->where('id', $allocated_to)->value('role');
                 $statusText = in_array($allocatedUserRole, ['admin', 'team_manager']) ? 'allocated_lead' : 'NEW LEAD';
@@ -173,7 +195,9 @@ class LeadService
                 'success' => true,
                 'redirect' => $isMobile ? route('mobile.leads.create') : route('lead.add')
             ];
-        } catch (\Exception $e) {
+        } 
+        catch (\Exception $e) 
+        {
             DB::rollBack();
             Flasher::addError('Error saving lead: ' . $e->getMessage());
             return [
@@ -188,7 +212,8 @@ class LeadService
     {
         $lead = DB::table('leads')->where('id', $id)->first();
 
-        if (!$lead) {
+        if (!$lead) 
+        {
             Flasher::addError('Lead not found');
             return [
                 'success' => false,
@@ -257,8 +282,10 @@ class LeadService
 
         $validator = Validator::make($request->all(), $rules);
 
-        if ($validator->fails()) {
-            foreach ($validator->errors()->all() as $error) {
+        if ($validator->fails()) 
+        {
+            foreach ($validator->errors()->all() as $error) 
+            {
                 Flasher::addError($error);
             }
             return [
@@ -268,7 +295,8 @@ class LeadService
             ];
         }
 
-        try {
+        try 
+        {
             DB::beginTransaction();
 
             $lead = DB::table('leads')->where('id', $id)->first();
@@ -418,12 +446,10 @@ class LeadService
             'comment' => 'nullable|string|max:500',
             'remindDate' => 'required_if:newStatus,CALL SCHEDULED,VISIT SCHEDULED,MEETING SCHEDULED,INTERESTED|nullable|date',
             'remindTime' => 'required_if:newStatus,CALL SCHEDULED,VISIT SCHEDULED,MEETING SCHEDULED,INTERESTED|nullable',
+            'hasOtherProject' => 'nullable|in:true,false,1,0',
+            'otherProjectName' => 'required_if:hasOtherProject,true|nullable|string|max:255',
         ];
-        if ($request->has('visitProjects') && is_array($request->visitProjects) && in_array('others', $request->visitProjects)) 
-        {
-            $rules['otherProjectName'] = 'required|string|max:255';
-        }
-
+        
         if ($request->newStatus === 'CONVERTED' && $request->conversionType === 'Completed') 
         {
             $rules = array_merge($rules, [
@@ -451,7 +477,7 @@ class LeadService
                 'status' => 422
             ];
         }
-
+        
         try 
         {
             DB::beginTransaction();
@@ -469,82 +495,48 @@ class LeadService
             }
             
             $status = strtoupper(trim($request->newStatus));
-            $projectIds = $request->prj_id;
-            $visitProjects = $request->visitProjects ?? [];
-            $hasOthers = is_array($visitProjects) && in_array('others', $visitProjects);
-            $otherProjectName = $hasOthers ? $request->otherProjectName : null;
-            $regularProjects = is_array($visitProjects) ? array_filter($visitProjects, function($item) 
-            {
-                return $item !== 'others';
-            }) : [];
-            
-            $finalProjectIds = $projectIds;
-            $projectName = null;
-            $isOtherProject = false;
+            $projectIdsString = '';
             $customProjectName = null;
             
-            if ($status === 'VISIT SCHEDULED' || $status === 'VISIT DONE') 
+            if ($request->has('project_ids') && !empty($request->project_ids)) 
             {
-                if ($hasOthers) 
+                $projectIdsString = $request->project_ids;
+            } 
+            else if ($request->has('visitProjects') && is_array($request->visitProjects)) 
+            {
+                $numericProjectIds = array_filter($request->visitProjects, function($id) 
                 {
-                    $isOtherProject = true;
-                    $customProjectName = $otherProjectName;
-                    $finalProjectIds = 'others';
-                    $projectName = $otherProjectName;
-                }
-                
-                if (!empty($regularProjects)) 
-                {
-                    if ($hasOthers) 
-                    {
-                        $regularProjectIds = implode(',', $regularProjects);
-                        $regularProjectNames = DB::table('projects')
-                            ->whereIn('id', $regularProjects)
-                            ->pluck('project_name')
-                            ->toArray();
-                        $projectName = implode(', ', $regularProjectNames) . ' + Others: ' . $otherProjectName;
-                        $finalProjectIds = $regularProjectIds . ',others';
-                    } 
-                    else 
-                    {
-                        $finalProjectIds = implode(',', $regularProjects);
-                        $projectNames = DB::table('projects')
-                            ->whereIn('id', $regularProjects)
-                            ->pluck('project_name')
-                            ->toArray();
-                        $projectName = implode(', ', $projectNames);
-                    }
-                } 
-                else if ($hasOthers) 
-                {
-                    $projectName = $otherProjectName;
-                }
+                    return is_numeric($id);
+                });
+                $projectIdsString = implode(',', $numericProjectIds);
             }
-            if (empty($projectName) && !empty($request->prj_id)) 
+            if ($request->hasOtherProject && !empty($request->otherProjectName)) 
             {
-                if (is_array($request->prj_id)) 
+                $customProjectName = $request->otherProjectName;
+            }
+            $projectName = '';
+            if (!empty($projectIdsString)) 
+            {
+                $projectIdsArray = explode(',', $projectIdsString);
+                $projectNames = DB::table('projects')
+                    ->whereIn('id', $projectIdsArray)
+                    ->pluck('project_name')
+                    ->toArray();
+                $projectName = implode(', ', $projectNames);
+            }
+            
+            if ($customProjectName) 
+            {
+                if (!empty($projectName)) 
                 {
-                    $projectIdsArray = array_filter($request->prj_id);
-                    $projectIdsString = implode(',', $projectIdsArray);
-                    $projectNames = DB::table('projects')
-                        ->whereIn('id', $projectIdsArray)
-                        ->pluck('project_name')
-                        ->toArray();
-                    $projectName = implode(', ', $projectNames);
-                    $finalProjectIds = $projectIdsString;
+                    $projectName .= ' + Others: ' . $customProjectName;
                 } 
                 else 
                 {
-                    $finalProjectIds = $request->prj_id;
-                    if (!empty($request->prj_id)) 
-                    {
-                        $projectName = DB::table('projects')
-                            ->where('id', $request->prj_id)
-                            ->value('project_name');
-                    }
+                    $projectName = 'Others: ' . $customProjectName;
                 }
-            }
-            if (empty($projectName) && !empty($lead->project_id) && $lead->project_id !== 'others') 
+            } 
+            else if (empty($projectName) && !empty($lead->project_id) && $lead->project_id !== 'others') 
             {
                 $existingProjects = explode(',', $lead->project_id);
                 $projectNames = DB::table('projects')
@@ -559,14 +551,7 @@ class LeadService
             
             if (in_array($status, ['VISIT SCHEDULED', 'VISIT DONE']) && !empty($projectName)) 
             {
-                if ($isOtherProject) 
-                {
-                    $commentText .= ' | Custom Project: ' . $projectName;
-                } 
-                else 
-                {
-                    $commentText .= ' | Project: ' . $projectName;
-                }
+                $commentText .= ' | Project: ' . $projectName;
             }
             
             $updateData = [
@@ -576,24 +561,18 @@ class LeadService
                 'remind_time' => $request->remindTime,
                 'last_comment' => $commentText,
             ];
+            
             if ($status === 'VISIT SCHEDULED' || $status === 'VISIT DONE') 
             {
-                $updateData['project_id'] = $finalProjectIds;
-                if ($isOtherProject) 
-                {
-                    $updateData['custom_project_name'] = $customProjectName;
-                }
-                else 
-                {
-                    $updateData['custom_project_name'] = null;
-                }
+                $updateData['project_id'] = $projectIdsString;
+                $updateData['custom_project_name'] = $customProjectName;
             }
             
             if ($status === 'VISIT DONE') 
             {
                 $updateData['visited_on'] = 1;
             }
-
+            
             if ($status === 'CONVERTED') 
             {
                 $updateData = array_merge($updateData, [
@@ -604,14 +583,10 @@ class LeadService
                     'app_dob' => $request->app_dob,
                     'app_doa' => $request->app_doa,
                     'final_price' => $request->final_price,
-                    'project_id' => $finalProjectIds ?: $lead->project_id,
+                    'project_id' => $projectIdsString ?: $lead->project_id,
                     'size' => $request->prop_size,
+                    'custom_project_name' => $customProjectName ?: ($request->hasOtherProject ? $request->otherProjectName : null),
                 ]);
-                if ($isOtherProject) 
-                {
-                    $projectName = $otherProjectName;
-                    $updateData['custom_project_name'] = $otherProjectName;
-                }
                 
                 if ($request->conversionType === 'Completed' && $request->create_post_sale == 1) 
                 {
@@ -632,20 +607,20 @@ class LeadService
                         'updated_at' => now(),
                     ];
                     
-                    if ($isOtherProject) 
+                    if ($customProjectName) 
                     {
                         $postSaleData['is_custom_project'] = 1;
-                        $postSaleData['custom_project_name'] = $otherProjectName;
+                        $postSaleData['custom_project_name'] = $customProjectName;
                     }
                     
                     DB::table('post_sales')->insert($postSaleData);
                 }
             }
-
+            
             DB::table('leads')
                 ->where('id', $request->leadId)
                 ->update($updateData);
-
+            
             DB::table('lead_comments')->insert([
                 'lead_id' => $request->leadId,
                 'user_id' => $user_id,
@@ -663,9 +638,9 @@ class LeadService
                 'message' => 'Status updated successfully',
                 'status' => 200,
                 'post_sale_created' => ($request->conversionType === 'Completed' && $request->create_post_sale == 1),
-                'is_other_project' => $isOtherProject
+                'has_other_project' => !empty($customProjectName)
             ];
-
+            
         } 
         catch (\Exception $e) 
         {
@@ -685,14 +660,16 @@ class LeadService
             'phone' => 'required|digits:10',
         ]);
 
-        if ($validator->fails()) {
+        if ($validator->fails()) 
+        {
             return [
                 'success' => false,
                 'message' => $validator->errors()->first()
             ];
         }
 
-        try {
+        try 
+        {
             $userId = Session::get('user_id');
             $userType = Session::get('user_type');
             $phone = $request->phone;
@@ -701,7 +678,8 @@ class LeadService
                 ->where('phone', $phone)
                 ->first();
 
-            if ($existingLead) {
+            if ($existingLead) 
+            {
                 return [
                     'success' => false,
                     'message' => "This phone number already exists (Lead ID: {$existingLead->id})"
@@ -736,7 +714,9 @@ class LeadService
                 'success' => true,
                 'message' => 'Lead added successfully!'
             ];
-        } catch (\Exception $error) {
+        } 
+        catch (\Exception $error) 
+        {
             return [
                 'success' => false,
                 'message' => 'Something went wrong. Please try again.'
@@ -750,30 +730,40 @@ class LeadService
 
         $query = DB::table('leads');
 
-        if ($user_type != 'admin') {
-            $query->where(function ($q) use ($userId, $childIds) {
+        if ($user_type != 'admin') 
+        {
+            $query->where(function ($q) use ($userId, $childIds) 
+            {
                 $q->where('user_id', $userId);
-
-                if (!empty($childIds)) {
+                if (!empty($childIds)) 
+                {
                     $q->orWhereIn('user_id', $childIds);
                 }
                 $q->orWhereRaw("FIND_IN_SET(?, lead_shared_with)", [$userId]);
             });
-        } else {
-            if (!empty($childIds)) {
-                $query->where(function ($q) use ($childIds, $userId) {
+        } 
+        else 
+        {
+            if (!empty($childIds)) 
+            {
+                $query->where(function ($q) use ($childIds, $userId) 
+                {
                     $q->whereIn('user_id', $childIds)
                         ->orWhereRaw("FIND_IN_SET(?, lead_shared_with)", [$userId]);
                 });
-            } else {
-                $query->where(function ($q) use ($userId) {
+            } 
+            else 
+            {
+                $query->where(function ($q) use ($userId) 
+                {
                     $q->whereNotNull('user_id')
                         ->orWhereRaw("lead_shared_with IS NOT NULL AND lead_shared_with != ''");
                 });
             }
         }
 
-        if (!empty($dateRange['start']) && !empty($dateRange['end'])) {
+        if (!empty($dateRange['start']) && !empty($dateRange['end'])) 
+        {
             $query->whereBetween('lead_date', [$dateRange['start'], $dateRange['end']]);
         }
 

@@ -14,13 +14,13 @@ use Illuminate\Validation\Rule;
 
 class StaffManagementController extends Controller
 {
-
     public function index(Request $request)
     {
         $user_role = session()->get('user_type');
         $user_id = session()->get('user_id');
 
-        if ($user_role !== 'admin' && $user_role !== 'team_manager') {
+        if ($user_role !== 'admin' && $user_role !== 'team_manager') 
+        {
             abort(404);
         }
 
@@ -31,7 +31,8 @@ class StaffManagementController extends Controller
             ->get();
 
         $teamLeads = DB::table('users')
-            ->whereIn('role', function ($query) {
+            ->whereIn('role', function ($query) 
+            {
                 $query->select('role_name')
                     ->from('role_mst')
                     ->where('manager_rights', 1);
@@ -48,29 +49,37 @@ class StaffManagementController extends Controller
                 'designation.designation as designation_name'
             );
 
-        if ($user_role == 'admin') {
+        if ($user_role == 'admin') 
+        {
             $query->where('users.role', '!=', 'admin');
-        } else {
+        } 
+        else 
+        {
             $query->where('users.tm_id', $user_id);
         }
 
-        if ($request->filled('status')) {
+        if ($request->filled('status')) 
+        {
             $query->where('users.is_active', $request->status);
         }
 
-        if ($request->filled('role')) {
+        if ($request->filled('role')) 
+        {
             $query->where('users.role', $request->role);
         }
 
-        if ($request->filled('team_lead')) {
+        if ($request->filled('team_lead')) 
+        {
             $query->where('users.tm_id', $request->team_lead);
         }
 
-        if ($request->filled('name')) {
+        if ($request->filled('name')) 
+        {
             $query->where('users.name', 'like', '%' . $request->name . '%');
         }
 
-        if ($request->filled('date')) {
+        if ($request->filled('date')) 
+        {
             $date = Carbon::createFromFormat('d-m-Y', $request->date)->format('Y-m-d');
             $query->whereDate('users.created_date', $date);
         }
@@ -80,13 +89,14 @@ class StaffManagementController extends Controller
 
         $validSortColumns = ['name', 'email', 'role', 'team_lead_name', 'created_date'];
 
-        if (in_array($sort, $validSortColumns)) {
+        if (in_array($sort, $validSortColumns)) 
+        {
             $query->orderBy($sort, $direction);
-        } else {
+        } 
+        else 
+        {
             $query->orderBy('users.id', 'desc');
         }
-
-        //USE $length HERE
         $users = $query->paginate($length)
             ->appends($request->query());
 
@@ -102,13 +112,17 @@ class StaffManagementController extends Controller
     {
         $user_role = session()->get('user_type');
 
-        if ($user_role !== 'admin' && $user_role !== 'team_manager') {
+        if ($user_role !== 'admin' && $user_role !== 'team_manager') 
+        {
             abort(404);
         }
 
-        if ($user_role === 'admin') {
+        if ($user_role === 'admin') 
+        {
             $roles = DB::select("SELECT * FROM `role_mst` WHERE `role_name` != 'admin'");
-        } else {
+        } 
+        else 
+        {
             $roles = DB::select("SELECT * FROM `role_mst` WHERE `role_name` != 'admin' AND `role_name` != 'postsale' AND `manager_rights` = 0");
         }
 
@@ -140,28 +154,34 @@ class StaffManagementController extends Controller
             'reporting_manager' => 'nullable',
         ]);
 
-        if ($validator->fails()) {
-            foreach ($validator->errors()->all() as $error) {
+        if ($validator->fails()) 
+        {
+            foreach ($validator->errors()->all() as $error) 
+            {
                 Flasher::addError($error);
             }
             return redirect()->route('users.create')->withInput();
         }
 
-        try {
+        try 
+        {
             $software = DB::table('software_details')
                 ->where('status', 'active')
                 ->first();
 
-            if (!$software || empty($software->user_limit)) {
+            if (!$software || empty($software->user_limit)) 
+            {
                 Flasher::addError('User limit not configured. Please contact admin.');
                 return redirect()->route('users.create')->withInput();
             }
 
-            if ($software->user_limit !== 'all') {
+            if ($software->user_limit !== 'all') 
+            {
                 $limit = (int) $software->user_limit;
                 $totalUsers = DB::table('users')->count();
 
-                if ($totalUsers >= $limit) {
+                if ($totalUsers >= $limit) 
+                {
                     Flasher::addError(
                         "User limit reached ({$limit}). Please contact Clikzop innovation."
                     );
@@ -182,7 +202,9 @@ class StaffManagementController extends Controller
 
             Flasher::addSuccess('User created successfully.');
             return redirect()->route('users.index');
-        } catch (Exception $e) {
+        } 
+        catch (Exception $e) 
+        {
             Flasher::addError('Something went wrong: ' . $e->getMessage());
             return redirect()->route('users.create')->withInput();
         }
@@ -190,28 +212,34 @@ class StaffManagementController extends Controller
 
     public function show($id)
     {
-        if (!$id) {
+        if (!$id) 
+        {
             Flasher::addError('Invalid Action!');
             return redirect()->route('users.index');
         }
 
         $user_role = session()->get('user_type');
-        if ($user_role !== 'admin' && $user_role !== 'team_manager') {
+        if ($user_role !== 'admin' && $user_role !== 'team_manager') 
+        {
             abort(404);
         }
-        try {
+        try 
+        {
             $user = DB::table('users')->where('id', $id)->first();
-
-            if (!$user) {
+            if (!$user) 
+            {
                 Flasher::addError('User Not Found!');
                 return redirect()->route('users.index');
             }
 
-            if ($user_role === 'admin') {
+            if ($user_role === 'admin') 
+            {
                 $roles = DB::table('role_mst')
                     ->where('role_name', '!=', 'admin')
                     ->get();
-            } else {
+            } 
+            else 
+            {
                 $roles = DB::table('role_mst')
                     ->where('role_name', '!=', 'admin')
                     ->where('role_name', '!=', 'postsale')

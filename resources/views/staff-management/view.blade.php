@@ -4,19 +4,23 @@
 @section('content')
 <style>
     .dataTables_info,
-    .dataTables_filter {
+    .dataTables_filter 
+    {
         display: none !important;
     }
 
-    #table_length {
+    #table_length 
+    {
         display: none !important;
     }
 
-    .datepicker {
+    .datepicker 
+    {
         border: 1px solid #d1d1d1 !important;
     }
 
-    .form-check-input:checked {
+    .form-check-input:checked 
+    {
         background-color: #28a745;
         border-color: #28a745;
     }
@@ -49,8 +53,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Length Dropdown -->
         <div class="mb-0">
             <label>
                 Show
@@ -198,22 +200,9 @@
                                 </tbody>
                             </table>
                         </div>
-
-                        <!-- Pagination -->
                         <div class="d-flex justify-content-end mt-3">
                             {!! $users->links('pagination::bootstrap-5') !!}
                         </div>
-
-                        <!-- <div class="d-flex justify-content-between align-items-center mt-3">
-                                <div class="text-muted">
-                                    Showing <span class="fw-bold">{{ $users->firstItem() }}</span> to 
-                                    <span class="fw-bold">{{ $users->lastItem() }}</span> of 
-                                    <span class="fw-bold">{{ $users->total() }}</span> entries
-                                </div>
-                                <div>
-                                    {{ $users->appends(request()->query())->links('vendor.pagination.bootstrap-5') }}
-                                </div>
-                            </div> -->
                     </div>
                 </div>
             </div>
@@ -223,7 +212,8 @@
 <script>
     $(document).ready(function() {
         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(function(tooltipTriggerEl) {
+        tooltipTriggerList.map(function(tooltipTriggerEl) 
+        {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
         $('#dateFilter').datepicker({
@@ -263,14 +253,14 @@
                     if (response.success) {
                         $label.text(isActive ? 'Active' : 'Inactive');
                         $label.toggleClass('status-active status-inactive');
-                        toastr.success('User status updated successfully');
+                        flasher.success('User status updated successfully');
                     } else {
-                        toastr.error(response.message || 'Failed to update status');
+                        flasher.error(response.message || 'Failed to update status');
                         $toggle.prop('checked', !isActive);
                     }
                 },
                 error: function(xhr) {
-                    toastr.error('Error updating status');
+                    flasher.error('Error updating status');
                     $toggle.prop('checked', !isActive);
                 },
                 complete: function() {

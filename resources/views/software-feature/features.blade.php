@@ -376,21 +376,21 @@
                     button.classList.remove('feature-request-btn');
                     button.classList.add('btn-success');
                     button.disabled = true;
-                    toastr.success(`Feature access requested successfully. Please contact Clikzop to complete your request`);
+                    flasher.success(`Feature access requested successfully. Please contact Clikzop to complete your request`);
                 } 
                 else 
                 {
                     submitText.classList.remove('d-none');
                     submitSpinner.classList.add('d-none');
                     button.disabled = false;
-                    toastr.error('Error sending request. Please try again.', 'error');
+                    flasher.error('Error sending request. Please try again.', 'error');
                 }
             })
             .catch(error => {
                 submitText.classList.remove('d-none');
                 submitSpinner.classList.add('d-none');
                 button.disabled = false;
-                toastr.error('Error sending request. Please try again.', 'error');
+                flasher.error('Error sending request. Please try again.', 'error');
             });
         }
 

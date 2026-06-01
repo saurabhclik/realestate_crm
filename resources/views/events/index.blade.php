@@ -260,7 +260,7 @@
                 },
                 error: function(data) 
                 {
-                    toastr.error('Error loading comments');
+                    flasher.error('Error loading comments');
                 }
             });
         }

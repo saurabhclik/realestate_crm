@@ -18,12 +18,12 @@
 
         <div class="row mb-4">
             @php
-            $statuses = [
-            'pending' => ['color' => 'info', 'icon' => 'fas fa-clock'],
-            'cancel' => ['color' => 'danger', 'icon' => 'fas fa-times-circle'],
-            'hold' => ['color' => 'warning', 'icon' => 'fas fa-pause-circle'],
-            'sold' => ['color' => 'success', 'icon' => 'fas fa-check-circle']
-            ];
+                $statuses = [
+                    'pending' => ['color' => 'info', 'icon' => 'fas fa-clock'],
+                    'cancel' => ['color' => 'danger', 'icon' => 'fas fa-times-circle'],
+                    'hold' => ['color' => 'warning', 'icon' => 'fas fa-pause-circle'],
+                    'sold' => ['color' => 'success', 'icon' => 'fas fa-check-circle']
+                ];
             @endphp
 
             @foreach ($statuses as $key => $data)
@@ -84,13 +84,14 @@
         <div class="row g-3">
             @foreach ($inventoryDetails as $unit)
             @php
-            $color = match($unit->status) {
-            'pending' => 'info',
-            'sold' => 'success',
-            'hold' => 'warning',
-            'cancel' => 'danger',
-            default => 'secondary'
-            };
+                $color = match($unit->status) 
+                {
+                    'pending' => 'info',
+                    'sold' => 'success',
+                    'hold' => 'warning',
+                    'cancel' => 'danger',
+                    default => 'secondary'
+                };
             @endphp
 
             <div class="col-xxl-1 col-xl-2 col-lg-3 col-md-4 col-sm-6 col-xs-12">
@@ -151,8 +152,10 @@
 </div>
 
 <script>
-    $(document).ready(function() {
-        $('.sale-btn').on('click', function() {
+    $(document).ready(function() 
+    {
+        $('.sale-btn').on('click', function() 
+        {
             $('#sale_id').val($(this).data('id'));
             $('#name').val($(this).data('name'));
             $('#email').val($(this).data('email'));
@@ -164,7 +167,8 @@
             saleModal.show();
         });
 
-        $('.history-btn').on('click', function() {
+        $('.history-btn').on('click', function() 
+        {
             const id = $(this).data('id');
             $.ajax({
                 url: "{{ route('inventory.saleHistory') }}",
@@ -173,10 +177,12 @@
                     id: id,
                     _token: '{{ csrf_token() }}'
                 },
-                success: function(response) {
+                success: function(response) 
+                {
                     let html = '';
 
-                    if (response.length > 0) {
+                    if (response.length > 0) 
+                    {
                         response.forEach((row, index) => {
                             html += `
                                 <tr>
@@ -194,7 +200,9 @@
                                 </tr>
                             `;
                         });
-                    } else {
+                    } 
+                    else 
+                    {
                         html = `
                             <tr>
                                 <td colspan="7" class="text-center py-4 text-muted">
@@ -208,15 +216,17 @@
                     var historyModal = new bootstrap.Modal(document.getElementById('saleHistoryModal'));
                     historyModal.show();
                 },
-                error: function(xhr) {
-                    console.error(xhr);
-                    alert('An error occurred while loading history.');
+                error: function(xhr) 
+                {
+                    flasher.error('An error occurred while loading history.');
                 }
             });
         });
 
-        function getStatusColor(status) {
-            switch (status) {
+        function getStatusColor(status) 
+        {
+            switch (status) 
+            {
                 case 'pending':
                     return 'info';
                 case 'sold':
@@ -229,12 +239,14 @@
                     return 'secondary';
             }
         }
-        $('#SubmitBtn').closest('form').on('submit', function() {
+        $('#SubmitBtn').closest('form').on('submit', function() 
+        {
             $('#SubmitBtn').prop('disabled', true);
             $('#SubmitText').addClass('d-none');
             $('#SubmitSpinner').removeClass('d-none');
         });
-        $('#SubmitBtnBulk').closest('form').on('submit', function() {
+        $('#SubmitBtnBulk').closest('form').on('submit', function() 
+        {
             $('#SubmitBtnBulk').prop('disabled', true);
             $('#SubmitTextBulk').addClass('d-none');
             $('#SubmitSpinnerBulk').removeClass('d-none');

@@ -6,11 +6,17 @@
 <div class="page-content">
     <div class="container-fluid">
         <div class="row">
+            <div class="col-12">
+                <div class="page-title-box d-flex align-items-center justify-content-between">
+                   <div class="d-flex align-items-center">
+                        <h4 class="mb-0">MIS Daily Report<div class="border-bottom border-3 border-primary mb-2 mt-1 w-75"></div></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header">
-                        <h4 class="mb-0">MIS Daily Report<div class="border-bottom border-3 border-primary mb-2 mt-1" style="width:10%;"></div></h4>
-                    </div>
                     <div class="card-body">
                         <form method="GET" action="{{ route('mis.daily-report') }}" class="mb-4">
                             <div class="row">
@@ -145,7 +151,7 @@
             const table = document.getElementById('dailyReportTable');
             if (!table) 
             {
-                toastr.error('No table found to export!');
+                flasher.error('No table found to export!');
                 btn.disabled = false;
                 text.classList.remove('d-none');
                 spinner.classList.add('d-none');

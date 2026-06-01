@@ -725,7 +725,7 @@ $(document).ready(function()
         $('#clearAttachmentsBtn').show();
         if (files.length > 10) 
         {
-            toastr.warning('Maximum 10 files allowed. Only first 10 files will be uploaded.');
+            flasher.warning('Maximum 10 files allowed. Only first 10 files will be uploaded.');
             files = Array.from(files).slice(0, 10);
         }
         let hasLargeFile = false;
@@ -740,7 +740,7 @@ $(document).ready(function()
         
         if (hasLargeFile) 
         {
-            toastr.error('Maximum file size is 10MB. Please reduce file sizes.');
+            flasher.error('Maximum file size is 10MB. Please reduce file sizes.');
             $('#fileUpload').val('');
             previewContainer.empty();
             $('#clearAttachmentsBtn').hide();
@@ -907,7 +907,7 @@ $(document).ready(function()
         
         if (selectedRecipients.length === 0) 
         {
-            toastr.error('Please select at least one recipient');
+            flasher.error('Please select at least one recipient');
             return;
         }
 
@@ -916,7 +916,7 @@ $(document).ready(function()
             const invalidRecipients = selectedRecipients.filter(r => !r.phone || r.phone === 'N/A');
             if (invalidRecipients.length > 0) 
             {
-                toastr.error('Some selected recipients don\'t have phone numbers for WhatsApp');
+                flasher.error('Some selected recipients don\'t have phone numbers for WhatsApp');
                 return;
             }
         } 
@@ -924,23 +924,23 @@ $(document).ready(function()
         {
             const invalidRecipients = selectedRecipients.filter(r => !r.email || r.email === 'N/A');
             if (invalidRecipients.length > 0) {
-                toastr.error('Some selected recipients don\'t have email addresses');
+                flasher.error('Some selected recipients don\'t have email addresses');
                 return;
             }
         }
         if (messageType === 'template' && !$('#templateSelect').val()) 
         {
-            toastr.error('Please select a template');
+            flasher.error('Please select a template');
             return;
         }
 
         if (messageType === 'custom' && !$('#customMessage').val().trim()) {
-            toastr.error('Please enter a message');
+            flasher.error('Please enter a message');
             return;
         }
 
         if (currentChannel === 'email' && !$('#emailSubject').val().trim()) {
-            toastr.error('Please enter an email subject');
+            flasher.error('Please enter an email subject');
             return;
         }
         
@@ -1034,7 +1034,7 @@ $(document).ready(function()
 
     function sendMessage() {
     if (selectedRecipients.length === 0) {
-        toastr.error('Please select at least one recipient');
+        flasher.error('Please select at least one recipient');
         return;
     }
 
@@ -1069,7 +1069,7 @@ $(document).ready(function()
         contentType: false,
         success: function(response) {
             if (response.success) {
-                toastr.success(response.message);
+                flasher.success(response.message);
                 
                 // Show detailed results
                 if (response.detailed_results) {
@@ -1099,17 +1099,17 @@ $(document).ready(function()
                 updateSelectedRecipients();
                 
             } else {
-                toastr.error(response.message || 'Failed to send messages');
+                flasher.error(response.message || 'Failed to send messages');
             }
         },
         error: function(xhr) {
             const errors = xhr.responseJSON?.errors;
             if (errors) {
                 Object.values(errors).forEach(function(error) {
-                    toastr.error(error[0]);
+                    flasher.error(error[0]);
                 });
             } else {
-                toastr.error('An error occurred while sending messages');
+                flasher.error('An error occurred while sending messages');
             }
         },
         complete: function() {
@@ -1167,7 +1167,7 @@ document.addEventListener('removeRecipient', function(e) {
 $('#editTemplateBtn').click(function() {
     const templateId = $('#templateSelect').val();
     if (!templateId) {
-        toastr.error('Please select a template to edit');
+        flasher.error('Please select a template to edit');
         return;
     }
     
@@ -1182,7 +1182,7 @@ $('#editTemplateBtn').click(function() {
 $('#editTemplateBtn').click(function() {
     const templateId = $('#templateSelect').val();
     if (!templateId) {
-        toastr.error('Please select a template to edit');
+        flasher.error('Please select a template to edit');
         return;
     }
     

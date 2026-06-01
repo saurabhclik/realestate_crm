@@ -611,8 +611,8 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
 
             if (selectedLeads.length === 0) {
-                if(typeof toastr !== 'undefined') {
-                    toastr.error('Please select at least one lead');
+                if(typeof flasher !== 'undefined') {
+                    flasher.error('Please select at least one lead');
                 } else {
                     alert('Please select at least one lead');
                 }
@@ -669,8 +669,8 @@ $(document).ready(function() {
             },
             success: function(res) {
                 if (res.status === 200) {
-                    if(typeof toastr !== 'undefined') {
-                        toastr.success(res.message);
+                    if(typeof flasher !== 'undefined') {
+                        flasher.success(res.message);
                     } else {
                         alert(res.message);
                     }
@@ -681,8 +681,8 @@ $(document).ready(function() {
                         $(this).remove();
                     });
                 } else {
-                    if(typeof toastr !== 'undefined') {
-                        toastr.error(res.message);
+                    if(typeof flasher !== 'undefined') {
+                        flasher.error(res.message);
                     } else {
                         alert(res.message);
                     }
@@ -693,8 +693,8 @@ $(document).ready(function() {
                 if (xhr.responseJSON && xhr.responseJSON.message) {
                     errorMessage = xhr.responseJSON.message;
                 }
-                if(typeof toastr !== 'undefined') {
-                    toastr.error(errorMessage);
+                if(typeof flasher !== 'undefined') {
+                    flasher.error(errorMessage);
                 } else {
                     alert(errorMessage);
                 }

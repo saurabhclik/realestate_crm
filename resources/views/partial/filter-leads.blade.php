@@ -323,12 +323,12 @@
             const bulkCount = $('#transferForm').find('input[name="all_lead_ids[]"]').length;
 
             if(checkedCount === 0 && bulkCount === 0) {
-                toastr.error('Please select at least one lead to transfer');
+                flasher.error('Please select at least one lead to transfer');
                 return;
             }
 
             if(!$('#to_user').val()) {
-                toastr.error('Please select a user to transfer to');
+                flasher.error('Please select a user to transfer to');
                 return;
             }
 

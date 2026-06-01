@@ -151,7 +151,7 @@
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@flasher/flasher@1.2.4/dist/flasher.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@flasher/flasher-toastr@1.2.4/dist/flasher-toastr.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@flasher/flasher-flasher@1.2.4/dist/flasher-flasher.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/fixedcolumns/4.3.0/js/dataTables.fixedColumns.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@flasher/flasher@1.2.4/dist/flasher.min.js"></script>
@@ -797,7 +797,7 @@
                         },
                         success: function(response) {
                             if (response.success) {
-                                toastr.success('User deleted successfully');
+                                flasher.success('User deleted successfully');
                                 setTimeout(() => location.reload(), 1500);
                             } else if (response.hasLeads) {
                                 Swal.fire({
@@ -815,28 +815,32 @@
                                     }
                                 });
                             } else {
-                                toastr.error(response.message ||
+                                flasher.error(response.message ||
                                     'Failed to delete user');
                             }
                         },
                         error: function(xhr) {
-                            toastr.error('Error deleting user');
+                            flasher.error('Error deleting user');
                         }
                     });
                 }
             });
         });
 
-        $('.edit-btn').on('click', function() {
+        $('.edit-btn').on('click', function() 
+        {
             let id = $(this).data('id');
             let name = $(this).data('name');
             let type = $(this).data('type');
             let action = $(this).data('action');
             let modal = $(this).data('modal');
-
-            if (modal == 'Checklist') {
+            // console.log(modal);
+            if (modal == 'Checklist') 
+            {
                 $('.type-field').addClass('d-none');
-            } else if (modal == 'Category') {
+            } 
+            else if (modal == 'Category') 
+            {
                 $('.cat-type').removeClass('d-none');
             }
             $('#id').val(id);
@@ -848,19 +852,24 @@
             $('#ModalboxLabel').html(modal + ' ' + type);
             $('#type').val(type);
             $('#cat_type').val(type);
-            if ($('#action').find('input[name="_method"]').length === 0) {
+            if ($('#action').find('input[name="_method"]').length === 0) 
+            {
                 $('#action').append('<input type="hidden" name="_method" value="PUT">');
             }
         });
 
-        $('.add-project').on('click', function() {
+        $('.add-project').on('click', function() 
+        {
             let action = $(this).data('action');
             $("#action")[0].reset();
             let type = $(this).data('type');
             let modal = $(this).data('modal');
-            if (modal == 'Checklist') {
+            if (modal == 'Checklist') 
+            {
                 $('.type-field').addClass('d-none');
-            } else if (modal == 'Category') {
+            } 
+            else if (modal == 'Category') 
+            {
                 $('.cat-type').removeClass('d-none');
             }
             $('#id').val('');
@@ -875,7 +884,8 @@
         let isProcessing = false;
         let originalState = $('#attendanceToggle').prop('checked');
 
-        $('#attendanceToggle').on('change', function() {
+        $('#attendanceToggle').on('change', function() 
+        {
             if (isProcessing) return;
             const newState = this.checked;
             const action = newState ? 'start' : 'end';
@@ -1193,15 +1203,6 @@
             create_post_sale: post_sale,
         };
         
-        if (visitStatuses.includes(newStatus) && visitProjects && visitProjects.length > 0) 
-        {
-            formData.visitProjects = visitProjects;
-            if (visitProjects.includes('others')) 
-            {
-                formData.otherProjectName = otherProjectName;
-            }
-        }
-        
         $.ajax({
             url: '{{ route('lead.updateStatus') }}',
             type: 'POST',
@@ -1239,7 +1240,8 @@
         });
     }
 
-    function formatDateDMY(dateStr) {
+    function formatDateDMY(dateStr) 
+    {
         const date = new Date(dateStr);
         const day = String(date.getDate()).padStart(2, '0');
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -1250,80 +1252,88 @@
         return `${day}-${month}-${year}`;
     }
 
-    function showComment(leadId) {
+    function showComment(leadId) 
+    {
         var commentsModal = new bootstrap.Modal(document.getElementById('commentsModal'));
         commentsModal.show();
-
         $.ajax({
             url: '/lead/' + leadId + '/comments',
             type: 'GET',
             dataType: 'json',
-            success: function(response) {
+            success: function(response) 
+            {
                 var html = '';
-                if (response.comments.length > 0) {
+                if (response.comments.length > 0) 
+                {
                     html += `
-                                    <div class="table-responsive">
-                                    <table class="table table-borderless table-hover align-middle">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th class="py-2">#</th>
-                                                <th class="py-2">Comment</th>
-                                                <th class="py-2">Status</th>
-                                                <th class="py-2">Reminder</th>
-                                                <th class="py-2">Agent</th>
-                                                <th class="py-2">Date</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                `;
+                        <div class="table-responsive">
+                        <table class="table table-borderless table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="py-2">#</th>
+                                    <th class="py-2">Comment</th>
+                                    <th class="py-2">Status</th>
+                                    <th class="py-2">Reminder</th>
+                                    <th class="py-2">Agent</th>
+                                    <th class="py-2">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                        `;
 
-                    response.comments.forEach(function(comment, index) {
+                    response.comments.forEach(function(comment, index) 
+                    {
                         html += `
-                                        <tr>
-                                            <td class="py-2">${index + 1}</td>
-                                            <td class="py-2">${comment.comment}</td>
-                                            <td class="py-2"><span class="cust-badge bg-${comment.status === 'Positive' ? 'success' : (comment.status === 'Negative' ? 'danger' : 'info')}">${comment.status || '-'}</span></td>
-                                            <td class="py-2">${comment.remind_date ? formatDateDMY(comment.remind_date) : '-'}</td>
-                                            <td class="py-2">${comment.user_name || 'System'}</td>
-                                            <td class="py-2">${formatDateDMY(comment.created_date)}</td>
-                                        </tr>
-                                    `;
+                            <tr>
+                                <td class="py-2">${index + 1}</td>
+                                <td class="py-2">${comment.comment}</td>
+                                <td class="py-2"><span class="cust-badge bg-${comment.status === 'Positive' ? 'success' : (comment.status === 'Negative' ? 'danger' : 'info')}">${comment.status || '-'}</span></td>
+                                <td class="py-2">${comment.remind_date ? formatDateDMY(comment.remind_date) : '-'}</td>
+                                <td class="py-2">${comment.user_name || 'System'}</td>
+                                <td class="py-2">${formatDateDMY(comment.created_date)}</td>
+                            </tr>
+                        `;
                     });
 
                     html += `
-                                        </tbody>
-                                    </table>
-                                    </div>
-                                `;
-                } else {
+                            </tbody>
+                        </table>
+                        </div>
+                    `;
+                } 
+                else 
+                {
                     html = `
-                                    <div class="text-center py-4">
-                                        <h5 class="mb-1">No comments found</h5>
-                                        <p class="text-muted">This lead doesn't have any comments yet.</p>
-                                    </div>
-                                `;
+                        <div class="text-center py-4">
+                            <h5 class="mb-1">No comments found</h5>
+                            <p class="text-muted">This lead doesn't have any comments yet.</p>
+                        </div>
+                    `;
                 }
 
                 $('#commentsModalBody').html(html);
             },
-            error: function() {
+            error: function() 
+            {
                 $('#commentsModalBody').html(`
-                                <div class="text-center py-4">
-                                    <h5 class="mb-1">Error loading comments</h5>
-                                    <p class="text-muted">Please try again later.</p>
-                                    <button class="btn btn-primary" onclick="showComment(${leadId})">
-                                        <i class="fas fa-sync-alt me-1"></i> Retry
-                                    </button>
-                                </div>
-                            `);
+                    <div class="text-center py-4">
+                        <h5 class="mb-1">Error loading comments</h5>
+                        <p class="text-muted">Please try again later.</p>
+                        <button class="btn btn-primary" onclick="showComment(${leadId})">
+                            <i class="fas fa-sync-alt me-1"></i> Retry
+                        </button>
+                    </div>
+                `);
             }
         });
     }
 
-    $(function() {
+    $(function() 
+    {
         $('[data-bs-toggle="tooltip"]').tooltip();
     });
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() 
+    {
         let chart;
         // const currentYear = document.getElementById('year-filter').value;
         // initChart(currentYear);   
@@ -1334,8 +1344,10 @@
 
         const yearFilter = document.getElementById('year-filter');
 
-        if (yearFilter) {
-            yearFilter.addEventListener('change', function() {
+        if (yearFilter) 
+        {
+            yearFilter.addEventListener('change', function() 
+            {
                 initChart(this.value);
             });
         }
@@ -1536,7 +1548,7 @@
     });
     $(document).ready(function() {
         $('.no-editDelete-right').click(function() {
-            toastr.error("You don’t have permission to edit or delete this task");
+            flasher.error("You don’t have permission to edit or delete this task");
         });
 
         function updateFormProgress() {
@@ -2519,17 +2531,17 @@
                         button.next('.pinned-badge').remove();
                     }
 
-                    toastr.success(data.message);
+                    flasher.success(data.message);
                     setTimeout(() => {
                         location.reload();
                     }, 800);
                 } else {
-                    toastr.error(data.message);
+                    flasher.error(data.message);
                     button.html(originalHTML);
                 }
             },
             error: function(xhr, status, error) {
-                toastr.error('An error occurred while updating pin status');
+                flasher.error('An error occurred while updating pin status');
                 button.html(originalHTML);
             },
             complete: function() {
@@ -2688,7 +2700,7 @@
                         row.remove();
                         updateTaskOptions();
                     } else {
-                        toastr.error("At least one task is required.");
+                        flasher.error("At least one task is required.");
                     }
                 }
             });
@@ -2726,7 +2738,7 @@
 <script>
     $(document).ready(function() {
         const csrfToken = $('meta[name="csrf-token"]').attr('content');
-        toastr.options = {
+        flasher.options = {
             "closeButton": true,
             "debug": false,
             "newestOnTop": true,
@@ -2744,7 +2756,8 @@
             "hideMethod": "fadeOut"
         };
 
-        function setDefaultDates() {
+        function setDefaultDates() 
+        {
             const now = new Date();
             const tomorrow = new Date(now);
             tomorrow.setDate(tomorrow.getDate() + 1);
@@ -2753,7 +2766,8 @@
             $('#end_date').val(tomorrow.toISOString().slice(0, 16));
         }
 
-        function resetForm() {
+        function resetForm() 
+        {
             $('#exhibitionForm')[0].reset();
             $('#exhibition_id').val('');
             $('#_method').val('POST');
@@ -2766,12 +2780,14 @@
             setDefaultDates();
         }
 
-        $('#createExhibitionBtn').click(function() {
+        $('#createExhibitionBtn').click(function() 
+        {
             resetForm();
             $('#exhibitionModal').modal('show');
         });
 
-        $(document).on('click', '.edit-exhibition', function() {
+        $(document).on('click', '.edit-exhibition', function() 
+        {
             const id = $(this).data('id');
             const name = $(this).data('name');
             const description = $(this).data('description');
@@ -2795,7 +2811,8 @@
             $('#exhibitionModal').modal('show');
         });
 
-        $('#exhibitionForm').submit(function(e) {
+        $('#exhibitionForm').submit(function(e) 
+        {
             e.preventDefault();
 
             const formData = $(this).serialize();
@@ -2803,7 +2820,8 @@
             const method = $('#_method').val();
 
             let url = '/exhibitions';
-            if (method === 'PUT' && id) {
+            if (method === 'PUT' && id) 
+            {
                 url = '/exhibitions/' + id;
             }
             $('.form-control').removeClass('is-invalid');
@@ -2833,7 +2851,7 @@
                 success: function(response) {
                     // console.log(response);
                     if (response.success) {
-                        toastr.success(response.message ||
+                        flasher.success(response.message ||
                             'Operation completed successfully!');
                         $('#exhibitionModal').modal('hide');
                         setTimeout(function() {
@@ -2846,7 +2864,7 @@
                                 $('#' + key + '-error').text(value[0]);
                             });
                         } else {
-                            toastr.error(response.message || 'Operation failed!');
+                            flasher.error(response.message || 'Operation failed!');
                         }
                     }
                 },
@@ -2858,12 +2876,12 @@
                             $('#' + key + '-error').text(value[0]);
                         });
                     } else if (xhr.status === 419) {
-                        toastr.error('Session expired. Please refresh the page.');
+                        flasher.error('Session expired. Please refresh the page.');
                         setTimeout(function() {
                             location.reload();
                         }, 2000);
                     } else {
-                        toastr.error('An error occurred. Please try again.');
+                        flasher.error('An error occurred. Please try again.');
                     }
                 },
                 complete: function() {
@@ -2905,25 +2923,25 @@
                         },
                         success: function(response) {
                             if (response.success) {
-                                toastr.success(response.message ||
+                                flasher.success(response.message ||
                                     'Exhibition activated successfully!');
                                 setTimeout(function() {
                                     location.reload();
                                 }, 1500);
                             } else {
-                                toastr.error(response.message ||
+                                flasher.error(response.message ||
                                     'Failed to activate exhibition.');
                             }
                         },
                         error: function(xhr) {
                             if (xhr.status === 419) {
-                                toastr.error(
+                                flasher.error(
                                     'Session expired. Please refresh the page.');
                                 setTimeout(function() {
                                     location.reload();
                                 }, 2000);
                             } else {
-                                toastr.error(xhr.responseJSON?.message ||
+                                flasher.error(xhr.responseJSON?.message ||
                                     'Failed to activate exhibition.');
                             }
                             $('.activate-exhibition[data-id="' + id + '"]')
@@ -2981,25 +2999,30 @@
                 },
                 allowOutsideClick: () => !Swal.isLoading()
             }).then((result) => {
-                if (result.isConfirmed) {
-                    $('#exhibition-row-' + id).fadeOut(300, function() {
+                if (result.isConfirmed) 
+                {
+                    $('#exhibition-row-' + id).fadeOut(300, function() 
+                    {
                         $(this).remove();
                     });
 
-                    toastr.success('Exhibition deleted successfully!');
+                    flasher.success('Exhibition deleted successfully!');
 
-                    setTimeout(function() {
+                    setTimeout(function() 
+                    {
                         location.reload();
                     }, 2000);
                 }
             }).catch((error) => {
-                if (error) {
-                    Swal.fire('Error!', error, 'error');
+                if (error) 
+                {
+                    flasher.error('Error!', error, 'error');
                 }
             });
         });
 
-        $('#exhibitionModal').on('hidden.bs.modal', function() {
+        $('#exhibitionModal').on('hidden.bs.modal', function() 
+        {
             resetForm();
         });
 
@@ -3017,21 +3040,28 @@
     });
 </script>
 <script>
-    $(document).ready(function() {
+    $(document).ready(function() 
+    {
         $('[title]').tooltip();
-        $('#selectAllLeads').on('change', function() {
+        $('#selectAllLeads').on('change', function() 
+        {
             $('.lead-checkbox').prop('checked', this.checked);
         });
 
-        $('.lead-checkbox').on('change', function() {
-            if ($('.lead-checkbox:checked').length === $('.lead-checkbox').length) {
+        $('.lead-checkbox').on('change', function() 
+        {
+            if ($('.lead-checkbox:checked').length === $('.lead-checkbox').length) 
+            {
                 $('#selectAllLeads').prop('checked', true);
-            } else {
+            } 
+            else 
+            {
                 $('#selectAllLeads').prop('checked', false);
             }
         });
 
-        $(document).on('click', '.edit-lead-btn', function() {
+        $(document).on('click', '.edit-lead-btn', function() 
+        {
             const leadId = $(this).data('id');
             $('#editLeadForm').attr('action', `/exhibitions/leads/${leadId}`);
             $('#edit_lead_id').val(leadId);
@@ -3049,23 +3079,32 @@
             $('#edit_remarks').val($(this).data('remarks'));
             const operatingCountry = $(this).data('operating-country');
             const type = $(this).data('type');
-            if (operatingCountry) {
-                try {
+            if (operatingCountry) 
+            {
+                try 
+                {
                     const parsed = JSON.parse(operatingCountry);
                     $('#edit_operating_country').val(JSON.stringify(parsed, null, 2));
-                } catch (e) {
+                } 
+                catch (e) 
+                {
                     $('#edit_operating_country').val(operatingCountry);
                 }
-            } else {
+            } 
+            else 
+            {
                 $('#edit_operating_country').val('');
             }
 
             const reminderDate = $(this).data('reminder-date');
-            if (reminderDate && reminderDate !== 'N/A') {
+            if (reminderDate && reminderDate !== 'N/A') 
+            {
                 const date = new Date(reminderDate);
                 const formattedDate = date.toISOString().slice(0, 16);
                 $('#edit_reminder_date').val(formattedDate);
-            } else {
+            } 
+            else 
+            {
                 $('#edit_reminder_date').val('');
             }
 
@@ -3073,24 +3112,26 @@
             const currentVisitCardDiv = $('#current_visit_card');
             currentVisitCardDiv.empty();
 
-            if (visitCard) {
+            if (visitCard) 
+            {
                 let imageUrl = visitCard;
-                if (!visitCard.startsWith('http')) {
+                if (!visitCard.startsWith('http')) 
+                {
                     imageUrl = `/storage/${visitCard}`;
                 }
                 currentVisitCardDiv.html(`
-                                <p class="mb-1"><strong>Current Visit Card:</strong></p>
-                                <a href="${imageUrl}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-eye"></i> View Current
-                                </a>
-                            `);
+                    <p class="mb-1"><strong>Current Visit Card:</strong></p>
+                    <a href="${imageUrl}" target="_blank" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-eye"></i> View Current
+                    </a>
+                `);
             }
         });
 
-        $(document).on('click', '.convert-lead-btn', function() {
+        $(document).on('click', '.convert-lead-btn', function() 
+        {
             const leadId = $(this).data('id');
             const leadName = $(this).data('name');
-
             Swal.fire({
                 title: 'Convert Lead to CRM?',
                 html: `Are you sure you want to convert <strong>"${leadName}"</strong> to CRM Lead?`,
@@ -3116,8 +3157,10 @@
                     });
                 }
             }).then((result) => {
-                if (result.isConfirmed) {
-                    if (result.value.success) {
+                if (result.isConfirmed) 
+                {
+                    if (result.value.success) 
+                    {
                         Swal.fire({
                             title: 'Success!',
                             text: result.value.message,
@@ -3126,7 +3169,9 @@
                         }).then(() => {
                             window.location.reload();
                         });
-                    } else {
+                    } 
+                    else 
+                    {
                         Swal.fire({
                             title: 'Error!',
                             text: result.value.message,
@@ -3138,13 +3183,16 @@
             });
         });
 
-        $('#confirmConvertMultiple').on('click', function() {
+        $('#confirmConvertMultiple').on('click', function() 
+        {
             const selectedLeads = [];
-            $('.lead-checkbox:checked').each(function() {
+            $('.lead-checkbox:checked').each(function() 
+            {
                 selectedLeads.push($(this).val());
             });
 
-            if (selectedLeads.length === 0) {
+            if (selectedLeads.length === 0) 
+            {
                 Swal.fire({
                     title: 'No Leads Selected',
                     text: 'Please select at least one lead to convert.',
@@ -3180,8 +3228,10 @@
                     });
                 }
             }).then((result) => {
-                if (result.isConfirmed) {
-                    if (result.value.success) {
+                if (result.isConfirmed) 
+                {
+                    if (result.value.success) 
+                    {
                         Swal.fire({
                             title: 'Success!',
                             html: result.value.message +
@@ -3191,7 +3241,9 @@
                         }).then(() => {
                             window.location.reload();
                         });
-                    } else {
+                    } 
+                    else 
+                    {
                         Swal.fire({
                             title: 'Error!',
                             text: result.value.message,
@@ -3203,49 +3255,8 @@
             });
         });
 
-        // $(document).on('click', '.delete-lead-btn', function() 
-        // {
-        //     const leadId = $(this).data('id');
-        //     const deviceId = $(this).data('device-id');
-        //     const exhibitionId = $(this).data('exhibition-id');
-        //     const leadName = $(this).data('name');
-
-        //     Swal.fire({
-        //         title: 'Delete Lead?',
-        //         html: `Are you sure you want to delete <strong>"${leadName}"</strong>?<br>
-        //             <small class="text-danger">This action cannot be undone.</small>`,
-        //         icon: 'warning',
-        //         showCancelButton: true,
-        //         confirmButtonColor: '#d33',
-        //         cancelButtonColor: '#3085d6',
-        //         confirmButtonText: 'Yes, delete it!',
-        //         cancelButtonText: 'Cancel',
-        //         showLoaderOnConfirm: true,
-        //         preConfirm: () => {
-        //             return $.ajax({
-        //                 url: `/exhibitions/${leadId}/${exhibitionId}`,
-        //                 type: 'DELETE',
-        //                 data: {
-        //                     _token: '{{ csrf_token() }}'
-        //                 },
-        //                 dataType: 'json'
-        //             }).catch(error => {
-        //                 Swal.showValidationMessage(
-        //                     error.responseJSON?.message || 'Delete failed'
-        //                 );
-        //             });
-        //         }
-        //     }).then((result) => {
-        //         if (result.isConfirmed && result.value?.status === 200) 
-        //         {
-        //             Swal.fire('Deleted!', result.value.message, 'success')
-        //                 .then(() => location.reload());
-        //         }
-        //     });
-        // });
-
-
-        $('#editLeadForm').on('submit', function(e) {
+        $('#editLeadForm').on('submit', function(e) 
+        {
             e.preventDefault();
 
             Swal.fire({
@@ -3266,7 +3277,8 @@
                 headers: {
                     'X-HTTP-Method-Override': 'PUT'
                 },
-                success: function(response) {
+                success: function(response) 
+                {
                     Swal.close();
                     Swal.fire({
                         title: 'Success!',
@@ -3275,13 +3287,17 @@
                         confirmButtonText: 'OK'
                     }).then(() => location.reload());
                 },
-                error: function(xhr) {
+                error: function(xhr) 
+                {
                     Swal.close();
                     let errorMessage = 'Failed to update lead.';
-                    if (xhr.responseJSON && xhr.responseJSON.errors) {
+                    if (xhr.responseJSON && xhr.responseJSON.errors) 
+                    {
                         errorMessage = Object.values(xhr.responseJSON.errors).flat().join(
                             '<br>');
-                    } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                    } 
+                    else if (xhr.responseJSON && xhr.responseJSON.message) 
+                    {
                         errorMessage = xhr.responseJSON.message;
                     }
                     Swal.fire({
@@ -3294,7 +3310,8 @@
             });
         });
 
-        $(document).on('click', '.share-exhibition', function() {
+        $(document).on('click', '.share-exhibition', function() 
+        {
             const exhibitionId = $(this).data('id');
             const name = $(this).data('name');
 
@@ -3303,7 +3320,8 @@
             $('#shareExhibitionModal').modal('show');
         });
 
-        $('#generateShareLinkBtn').on('click', function() {
+        $('#generateShareLinkBtn').on('click', function() 
+        {
             const exhibitionId = $('#shareExhibitionId').val();
             const csrfToken = $('meta[name="csrf-token"]').attr('content');
 
@@ -3317,56 +3335,64 @@
                     _token: csrfToken,
                 },
                 dataType: 'json',
-                success: function(response) {
-                    if (response.success) {
+                success: function(response) 
+                {
+                    if (response.success) 
+                    {
                         $('#share_link_input').val(response.data.share_link);
-                        toastr.success(response.message);
-                    } else {
-                        toastr.error(response.message || 'Failed to generate link');
+                        flasher.success(response.message);
+                    } 
+                    else 
+                    {
+                        flasher.error(response.message || 'Failed to generate link');
                     }
                 },
-                error: function(xhr) {
-                    toastr.error(xhr.responseJSON?.message || 'Something went wrong');
+                error: function(xhr) 
+                {
+                    flasher.error(xhr.responseJSON?.message || 'Something went wrong');
                 },
-                complete: function() {
+                complete: function() 
+                {
                     $('#generateShareLinkBtn').prop('disabled', false).html(
                         '<i class="fas fa-link me-1"></i> Generate Share Link');
                 }
             });
         });
     });
-</script>
-
-<script>
-    $('#postSaleModal').on('shown.bs.modal', function() {
+    $('#postSaleModal').on('shown.bs.modal', function() 
+    {
         $('.selectPostSale').select2({
             placeholder: 'Select',
             width: '100%',
             dropdownParent: $('#postSaleModal')
         });
     });
-    $('#postSaleModal').on('shown.bs.modal', function() {
+    $('#postSaleModal').on('shown.bs.modal', function() 
+    {
         $('.selectSalesPerson').select2({
             placeholder: 'Select',
             width: '100%',
             dropdownParent: $('#postSaleModal')
         });
     });
-    $('#postSaleModal').on('shown.bs.modal', function() {
+    $('#postSaleModal').on('shown.bs.modal', function() 
+    {
         $('.selectProjectCat').select2({
             placeholder: 'Select',
             width: '100%',
             dropdownParent: $('#postSaleModal')
         });
     });
-    $('#postSaleModal').on('shown.bs.modal', function() {
+    $('#postSaleModal').on('shown.bs.modal', function() 
+    {
         $('.selectPostSubCat').select2({
             placeholder: 'Select',
             width: '100%',
             dropdownParent: $('#postSaleModal')
         });
     });
-    $('#postSaleModal').on('shown.bs.modal', function() {
+    $('#postSaleModal').on('shown.bs.modal', function() 
+    {
         $('.selectProject').select2({
             placeholder: 'select',
             width: '100%',
@@ -3382,6 +3408,109 @@
             });
         }
     });
+
+    function showVisitDoneModal(leadId) 
+    {
+        $('#vd_leadId').val(leadId);
+        $('#visitDoneModal').modal('show');
+    }
+
+    $(document).ready(function() 
+    {
+        $('#vd_visitProjects').on('change', function() 
+        {
+            var selectedValues = $(this).val() || [];
+            var hasOthers = selectedValues.includes('others');
+            
+            if (hasOthers) 
+            {
+                $('#vd_otherProjectField').show();
+                $('#vd_otherProjectName').prop('required', true);
+            } 
+            else 
+            {
+                $('#vd_otherProjectField').hide();
+                $('#vd_otherProjectName').prop('required', false);
+                $('#vd_otherProjectName').val('');
+            }
+        });
+    });
+
+    function submitVisitDone() 
+    {
+        const selectedProjects = $('#vd_visitProjects').val();
+        const otherProjectName = $('#vd_otherProjectName').val().trim();
+        let numericProjectIds = [];
+        let hasOtherProject = false;
+        
+        if (selectedProjects && selectedProjects.length > 0) 
+        {
+            numericProjectIds = selectedProjects.filter(id => id !== 'others');
+            hasOtherProject = selectedProjects.includes('others');
+        }
+        
+        if (numericProjectIds.length === 0 && !hasOtherProject) 
+        {
+            flasher.error('Please select at least one project.');
+            return;
+        }
+        
+        if (hasOtherProject && !otherProjectName) 
+        {
+            flasher.error('Please enter the other project name.');
+            return;
+        }
+        
+        const btn = $('#btnSubmitVisitDone');
+        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Saving...');
+        const projectIdsString = numericProjectIds.join(',');
+        
+        const formData = {
+            _token: '{{ csrf_token() }}',
+            leadId: $('#vd_leadId').val(),
+            newStatus: 'VISIT DONE',
+            visitProjects: numericProjectIds,
+            hasOtherProject: hasOtherProject,
+            otherProjectName: otherProjectName,
+            remindDate: $('#vd_remindDate').val(),
+            remindTime: $('#vd_remindTime').val(),
+            comment: $('#vd_comment').val(),
+            project_ids: projectIdsString
+        };
+        
+        $.ajax({
+            url: '{{ route('lead.updateStatus') }}',
+            type: 'POST',
+            data: formData,
+            success: function(response) 
+            {
+                if (response.success) 
+                {
+                    flasher.success('Visit marked as done successfully!');
+                    setTimeout(() => location.reload(), 1000);
+                } 
+                else 
+                {
+                    flasher.error(response.message);
+                    btn.prop('disabled', false).html('Save');
+                }
+            },
+            error: function(xhr) 
+            {
+                let errorMsg = 'An error occurred';
+                if (xhr.responseJSON && xhr.responseJSON.message) 
+                {
+                    errorMsg = xhr.responseJSON.message;
+                } 
+                else if (xhr.responseJSON && xhr.responseJSON.errors) 
+                {
+                    errorMsg = Object.values(xhr.responseJSON.errors)[0][0];
+                }
+                flasher.error(errorMsg);
+                btn.prop('disabled', false).html('Save');
+            }
+        });
+    }
 </script>
 </div>
 </body>

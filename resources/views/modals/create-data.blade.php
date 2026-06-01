@@ -1,12 +1,7 @@
-<!-- ADD DATA MODAL -->
 <div class="modal fade" id="addDataModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow-lg">
-
-            <!-- HEADER -->
-            <div class="modal-header border-0 text-white"
-                style="background: linear-gradient(135deg,#556ee6,#556ee6);">
-
+            <div class="modal-header border-0 text-white bg-primary">
                 <div>
                     <h4 class="modal-title fw-bold mb-1">
                         <i class="fas fa-plus-circle me-2"></i>
@@ -17,13 +12,9 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal">
                 </button>
             </div>
-
-            <!-- BODY -->
             <div class="modal-body p-4">
                 <form method="POST" action="{{ route('data-center.store') }}" class="needs-validation" novalidate>
                     @csrf
-
-                    <!-- BASIC DETAILS -->
                     <div class="card border-0 shadow-sm mb-4">
                         <div class="card-header bg-light">
                             <h5 class="mb-0 fw-bold">
@@ -47,15 +38,11 @@
                                         @enderror
                                     </div>
                                 </div>
-
-                                <!-- EMAIL -->
                                 <div class="col-md-4 mb-3">
                                     <label for="email">Email</label>
                                     <input type="email" class="form-control" name="email" id="email"
                                         value="{{ old('email') }}">
                                 </div>
-
-                                <!-- PHONE -->
                                 <div class="col-md-4 mb-3">
                                     <label for="phone">Phone No <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control @error('phone') is-invalid @enderror"
@@ -68,15 +55,11 @@
                                         @enderror
                                     </div>
                                 </div>
-
-                                <!-- ALT NUMBER -->
                                 <div class="col-md-4 mb-3">
                                     <label for="alternative phone">Alternative Number</label>
                                     <input type="text" class="form-control" name="alternative_number"
                                         id="alternative_number" value="{{ old('alternative_number') }}">
                                 </div>
-
-                                <!-- STATE -->
                                 <div class="col-md-4 mb-3">
                                     <label for="state">State</label>
                                     <select class="select2 dropdown-in-modal" name="state" id="state">
@@ -88,8 +71,6 @@
                                         @endforeach
                                     </select>
                                 </div>
-
-                                <!-- CITY -->
                                 <div class="col-md-4 mb-3">
                                     <label for="city">City</label>
                                     <select class="select2 dropdown-in-modal" name="city" id="city">
@@ -104,8 +85,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- REQUIREMENTS -->
                     <div class="card border-0 shadow-sm mb-4">
                         <div class="card-header bg-light">
                             <h5 class="mb-0 fw-bold">
@@ -116,8 +95,6 @@
 
                         <div class="card-body">
                             <div class="row">
-
-                                <!-- PROPERTY TYPE -->
                                 <div class="col-md-4 mb-3">
                                     <label for="property_type">Property Type</label>
                                     <select class="form-select select2 dropdown-in-modal" name="property_type" id="property_type">
@@ -129,8 +106,6 @@
                                         @endforeach
                                     </select>
                                 </div>
-
-                                <!-- PROPERTY CATEGORY -->
                                 <div class="col-md-4 mb-3">
                                     <label for="property_category">Property Category</label>
                                     <select class="select2 dropdown-in-modal" name="property_category" id="property_category">
@@ -142,8 +117,6 @@
                                         @endforeach
                                     </select>
                                 </div>
-
-                                <!-- SUB CATEGORY -->
                                 <div class="col-md-4 mb-3">
                                     <label for="property_sub_category">Property Sub Category</label>
                                     <select class="select2 dropdown-in-modal" name="property_sub_category" id="property_sub_category">
@@ -155,8 +128,6 @@
                                         @endforeach
                                     </select>
                                 </div>
-
-                                <!-- PROJECT -->
                                 <div class="col-md-4 mb-3">
                                     <label for="projects">Projects</label>
                                     <select class="select2 dropdown-in-modal" name="project_name[]" id="projects" multiple>
@@ -168,8 +139,6 @@
                                         @endforeach
                                     </select>
                                 </div>
-
-                                <!-- BUDGET -->
                                 <div class="col-md-4 mb-3">
                                     <label for="budget">Budget</label>
                                     <select class="select2 dropdown-in-modal" name="budget" id="budget">
@@ -221,8 +190,6 @@
                                         </option>
                                     </select>
                                 </div>
-
-                                <!-- SOURCE -->
                                 <div class="col-md-4 mb-3">
                                     <label for="source">Source</label>
                                     <select class="select2 dropdown-in-modal" name="source" id="source">
@@ -234,8 +201,6 @@
                                         @endforeach
                                     </select>
                                 </div>
-
-                                <!-- CAMPAIGN -->
                                 <div class="col-md-4 mb-3">
                                     <label for="campaign">Campaign</label>
                                     <select class="select2 dropdown-in-modal" name="campaign" id="campaign">
@@ -247,8 +212,6 @@
                                         @endforeach
                                     </select>
                                 </div>
-
-                                <!-- COMMENT -->
                                 <div class="col-md-12 mb-3">
                                     <label for="comment">Comment:</label>
                                     <textarea id="comment" name="comment" rows="3" placeholder="Type your comment here..."
@@ -258,16 +221,12 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- FOOTER -->
-                    <div class="d-flex justify-content-end gap-2">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">
-                            Cancel
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle me-2"></i> Cancel
                         </button>
-
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i>
-                            Save Data
+                            <span id="dataCenterSubmitText">Save Data</span>
                         </button>
                     </div>
                 </form>
@@ -283,98 +242,123 @@
     var oldPropertyCategory = <?php echo json_encode(old('property_category')); ?>;
     var oldPropertySubCategory = <?php echo json_encode(old('property_sub_category')); ?>;
 
-    function updatePropertyCategoryOptions(selectedType) {
+    function updatePropertyCategoryOptions(selectedType) 
+    {
         var options = '<option value="">-- Select Property Category --</option>';
         var categories = selectedType ? propertyCategoryMap[selectedType] || [] : allPropertyCategories;
 
-        categories.forEach(function(category) {
+        categories.forEach(function(category) 
+        {
             options += '<option value="' + category.id + '">' + category.name + '</option>';
         });
 
         $('#property_category').html(options).trigger('change');
 
-        if (oldPropertyCategory) {
+        if (oldPropertyCategory) 
+        {
             $('#property_category').val(oldPropertyCategory).trigger('change');
             oldPropertyCategory = null;
         }
 
-        if (!oldPropertyCategory && categories.length === 1) {
+        if (!oldPropertyCategory && categories.length === 1) 
+        {
             $('#property_category').val(categories[0].id).trigger('change');
         }
     }
 
-    function updatePropertySubCategoryOptions(categoryId) {
+    function updatePropertySubCategoryOptions(categoryId) 
+    {
         var options = '<option value="">-- Select Property Sub Category --</option>';
         var subCategories = categoryId ? propertySubCategoryMap[categoryId] || [] : [];
 
-        if (subCategories.length > 0) {
-            subCategories.forEach(function(sub) {
+        if (subCategories.length > 0) 
+        {
+            subCategories.forEach(function(sub) 
+            {
                 options += '<option value="' + sub.id + '">' + sub.name + '</option>';
             });
         }
 
         $('#property_sub_category').html(options).trigger('change');
 
-        if (oldPropertySubCategory && categoryId) {
+        if (oldPropertySubCategory && categoryId) 
+        {
             $('#property_sub_category').val(oldPropertySubCategory).trigger('change');
             oldPropertySubCategory = null;
         }
     }
 
-    $(document).ready(function() {
+    $(document).ready(function() 
+    {
         $('.dropdown-in-modal').select2({
             dropdownParent: $('#addDataModal'),
-            placeholder: function() {
+            placeholder: function() 
+            {
                 return $(this).data('placeholder') || 'Select an option';
             },
             allowClear: true
         });
 
-        $('#property_type').on('change', function() {
+        $('#property_type').on('change', function() 
+        {
             updatePropertyCategoryOptions($(this).val());
         });
 
-        $('#property_category').on('change', function() {
+        $('#property_category').on('change', function() 
+        {
             updatePropertySubCategoryOptions($(this).val());
         });
 
         updatePropertyCategoryOptions($('#property_type').val());
     });
 
-    $('#state').on('change', function() {
+    $('#state').on('change', function() 
+    {
         var selectedState = $(this).val();
-
-        if (selectedState) {
+        if (selectedState) 
+        {
             $('#city').html('<option value="">-- Select City --</option>').trigger('change');
             $.ajax({
                 url: '/lead/get-cities/' + encodeURIComponent(selectedState),
                 type: 'GET',
-                success: function(response) {
-                    if (response && response.length > 0) {
+                success: function(response) 
+                {
+                    if (response && response.length > 0) 
+                    {
                         var options = '<option value="">-- Select City --</option>';
-                        response.forEach(function(city) {
+                        response.forEach(function(city) 
+                        {
                             options += '<option value="' + city.District + '">' + city.District + '</option>';
                         });
                         $('#city').html(options).trigger('change');
-                    } else {
+                    } 
+                    else 
+                    {
                         $('#city').html('<option value="">No cities found</option>').trigger('change');
                     }
                 },
-                error: function(xhr, status, error) {
-                    console.error('Error loading cities:', error);
+                error: function(xhr, status, error) 
+                {
+                    // console.error('Error loading cities:', error);
                     $('#city').html('<option value="">Error loading cities</option>').trigger('change');
                 }
             });
-        } else {
+        } 
+        else 
+        {
             $('#city').html('<option value="">-- Select City --</option>').trigger('change');
         }
     });
 
-    window.addEventListener('load', function() {
+    window.addEventListener('load', function() 
+    {
         var forms = document.getElementsByClassName('needs-validation');
-        Array.prototype.filter.call(forms, function(form) {
-            form.addEventListener('submit', function(event) {
-                if (!form.checkValidity()) {
+        Array.prototype.filter.call(forms, function(form) 
+        {
+            form.addEventListener('submit', function(event) 
+            {
+                if (!form.checkValidity()) 
+                {
                     event.preventDefault();
                     event.stopPropagation();
                 }

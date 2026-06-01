@@ -13,10 +13,13 @@ class MasterController extends Controller
 {
     public function form_field()
     {
-        try {
+        try 
+        {
             $settings = DB::table('settings')->where('id', 1)->first();
             return view('master.form-field', compact('settings'));
-        } catch (\Exception $e) {
+        } 
+        catch (\Exception $e) 
+        {
             Flasher::addError('Failed to load form field settings: ' . $e->getMessage());
             return back();
         }

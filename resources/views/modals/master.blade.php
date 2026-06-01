@@ -1,4 +1,3 @@
-
 <div class="modal fade" id="Modalbox" tabindex="-1" aria-labelledby="ModalboxLabel" aria-hidden="true">
     <div class="modal-dialog">
         <form method="POST" id="action" action="">
@@ -37,23 +36,3 @@
         </form>
     </div>
 </div>
-
-<script>
-$('.edit-btn').on('click', function () {
-
-    $('#id').val($(this).data('id'));
-    $('#name').val($(this).data('name'));
-
-    // show dropdown on edit
-    $('.cat-type').removeClass('d-none');
-
-    // set selected value
-    $('#cat_type').val($(this).data('category-type')).trigger('change');
-
-    // button text
-    $('#data-action-type').text($(this).data('action-type'));
-
-    // form action
-    $('#action').attr('action', $(this).data('action'));
-});
-</script>

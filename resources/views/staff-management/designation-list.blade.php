@@ -22,8 +22,6 @@
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h4 class="card-title mb-0">Designation List</h4>
                         </div>
-
-                        <!-- Length Dropdown -->
                         <div class="mb-0">
                             <label>
                                 Show
@@ -81,48 +79,30 @@
     </div>
 </div>
 
-<div class="modal fade" id="designationModal" tabindex="-1" aria-labelledby="designationModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <form method="POST" id="designationForm">
-            @csrf
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="designationModalLabel">Add Designation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="designationInput" class="form-label">Designation</label>
-                        <input type="text" class="form-control" id="designationInput" name="designation" required maxlength="255">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary" id="submitBtn">Save Designation</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
+@include('modals.designation')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() 
+    {
         var modal = document.getElementById('designationModal');
         var form = document.getElementById('designationForm');
         var modalTitle = document.getElementById('designationModalLabel');
         var designationInput = document.getElementById('designationInput');
         var submitBtn = document.getElementById('submitBtn');
 
-        modal.addEventListener('show.bs.modal', function(event) {
+        modal.addEventListener('show.bs.modal', function(event) 
+        {
             var button = event.relatedTarget;
             var mode = button.getAttribute('data-mode');
 
-            if (mode === 'create') {
+            if (mode === 'create') 
+            {
                 modalTitle.textContent = 'Add Designation';
                 form.action = '{{ route("designation.store") }}';
                 designationInput.value = '';
                 submitBtn.textContent = 'Create Designation';
-            } else if (mode === 'edit') {
+            } 
+            else if (mode === 'edit') 
+            {
                 var id = button.getAttribute('data-id');
                 var designation = button.getAttribute('data-designation');
 

@@ -119,7 +119,10 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('property.name') }}" key="t-property">
+                                    <a href="{{route('channel.partner.platform')}}" key="t-channel-partner">Channel Partner Platform</a>
+                                </li>
+                                <li>
+                                    <a href="{{route('property.name')}}" key="t-property">
                                         Property Details
                                     </a>
                                 </li>

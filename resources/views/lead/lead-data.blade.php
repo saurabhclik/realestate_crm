@@ -2,133 +2,115 @@
 @section('title', 'leads | Pro-leadexpertz')
 @section('content')
 @php
-    $softwareType = session('software_type', 'real_state');
-    $isLeadManagement = $softwareType === 'lead_management';
+$softwareType = session('software_type', 'real_state');
+$isLeadManagement = $softwareType === 'lead_management';
 @endphp
 
+
 @php
-    $userType = session('user_type');
-    $isSalesman = ($userType == 'salesman');
+$userType = session('user_type');
+$isSalesman = ($userType == 'salesman');
 @endphp
 
 @include('modals.view-comments')
 @include('modals.status-update', ['projects' => $projects])
-@include('modals.visit-done', ['projects' => $projects])
 @include('modals.duplicate-lead')
 @include('modals.share-lead')
 <style>
-    .add-project-btn 
-    {
+    .add-project-btn {
         padding: 2px 6px;
         font-size: 0.7rem;
         border: 1px solid #0d6efd;
     }
 
-    .add-project-btn:hover 
-    {
+    .add-project-btn:hover {
         background-color: #0d6efd;
         color: white;
     }
 
-    #currentProjects .badge
-    {
+    #currentProjects .badge {
         font-size: 0.75rem;
         padding: 4px 8px;
     }
 
-    .cust-badge 
-    {
+    .cust-badge {
         white-space: normal;
         padding: 6px 10px;
         font-size: 0.9rem;
         line-height: 1.4;
     }
 
-    .dataTables_scroll 
-    {
+    .dataTables_scroll {
         overflow: auto;
     }
 
-    .dataTables_scrollHead 
-    {
+    .dataTables_scrollHead {
         position: sticky;
         top: 0;
         z-index: 10;
         background: white;
     }
 
-    .dataTables_scrollBody 
-    {
+    .dataTables_scrollBody {
         max-height: 100% !important;
     }
 
-    #table_filter 
-    {
+    #table_filter {
         margin: 10px;
     }
 
-    .applicant-modal .modal-dialog 
-    {
+    .applicant-modal .modal-dialog {
         max-width: 500px;
     }
 
-    .applicant-modal .modal-header 
-    {
+    .applicant-modal .modal-header {
         background: #4b6cb7;
         color: white;
         border-bottom: none;
         border-radius: 5px 5px 0 0;
     }
 
-    .applicant-modal .modal-title 
-    {
+    .applicant-modal .modal-title {
         font-weight: 600;
         font-size: 1.2rem;
     }
 
-    .applicant-modal .modal-body 
-    {
+    .applicant-modal .modal-body {
         padding: 20px;
     }
 
-    .applicant-detail 
-    {
+    .applicant-detail {
         display: flex;
         margin-bottom: 12px;
         align-items: flex-start;
     }
 
-    .applicant-label 
-    {
+    .applicant-label {
         font-weight: 600;
         color: #495057;
         width: 140px;
         flex-shrink: 0;
     }
 
-    .applicant-value 
-    {
+    .applicant-value {
         color: #6c757d;
         flex-grow: 1;
         word-break: break-word;
     }
 
-    .applicant-section 
-    {
+    .applicant-section {
         margin-bottom: 20px;
         padding-bottom: 15px;
         border-bottom: 1px solid #eee;
     }
 
-    .applicant-section:last-child 
-    {
+    .applicant-section:last-child {
         border-bottom: none;
         margin-bottom: 0;
         padding-bottom: 0;
     }
 
-    .applicant-section-title 
-    {
+    .applicant-section-title {
         font-weight: 600;
         color: #4b6cb7;
         margin-bottom: 15px;
@@ -137,47 +119,39 @@
         border-bottom: 1px solid #e9ecef;
     }
 
-    .eye-btn 
-    {
+    .eye-btn {
         color: #17a2b8;
         transition: all 0.3s;
     }
 
-    .eye-btn:hover 
-    {
+    .eye-btn:hover {
         color: #138496;
         transform: scale(1.1);
     }
 
-    .duplicate-item 
-    {
+    .duplicate-item {
         color: #fd7e14;
     }
 
-    .share-item 
-    {
+    .share-item {
         color: #20c997;
     }
 
-    .pin-item 
-    {
+    .pin-item {
         color: #ffc107;
         cursor: pointer;
         transition: all 0.3s;
     }
 
-    .pin-item.pinned 
-    {
+    .pin-item.pinned {
         color: #fd7e14;
     }
 
-    .pin-item:hover 
-    {
+    .pin-item:hover {
         transform: scale(1.1);
     }
 
-    .pinned-badge 
-    {
+    .pinned-badge {
         background: linear-gradient(45deg, #fd7e14, #ffc107);
         color: white;
         font-size: 0.7rem;
@@ -252,23 +226,13 @@
         max-width: 1000px;
     }
 
-    #matchingProjectsModal .modal-body {
+    #matchingProjectsModal .modal-body 
+    {
         max-height: 70vh;
         overflow-y: auto;
         padding: 1rem;
     }
-    .freeze-checkbox {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-    .freeze-checkbox input {
-        cursor: not-allowed;
-    }
-    .freeze-label {
-        color: #6c757d;
-    }
 </style>
-
 <div class="page-content">
     <div class="container-fluid">
         <div class="row">
@@ -412,24 +376,24 @@
                             <tbody>
                                 @foreach($leads as $row)
                                 @php
-                                    $createdDate = \Carbon\Carbon::parse($row->created_at);
-                                    $currentDate = \Carbon\Carbon::now();
-                                    $diff_date_count = $createdDate->diffInDays($currentDate);
-                                    $excludedLeadNames = [
-                                        'completed',
-                                        'cancelled',
-                                        'not_picked',
-                                        'not_interested',
-                                        'lost',
-                                        'wrong_number',
-                                        'transfer',
-                                        'not_reachable'
-                                    ];
-                                    $phone = preg_replace('/\D/', '', $row->phone);
-                                    if (substr($phone, 0, 2) == '91')
-                                    {
-                                        $phone = substr($phone, 2);
-                                    }
+                                $createdDate = \Carbon\Carbon::parse($row->created_at);
+                                $currentDate = \Carbon\Carbon::now();
+                                $diff_date_count = $createdDate->diffInDays($currentDate);
+                                $excludedLeadNames = [
+                                'completed',
+                                'cancelled',
+                                'not_picked',
+                                'not_interested',
+                                'lost',
+                                'wrong_number',
+                                'transfer',
+                                'not_reachable'
+                                ];
+                                $phone = preg_replace('/\D/', '', $row->phone);
+                                if (substr($phone, 0, 2) == '91')
+                                {
+                                $phone = substr($phone, 2);
+                                }
                                 @endphp
                                 <tr>
                                     @if($lead_name == 'allocate' || $lead_name == 'transfer')
@@ -506,6 +470,9 @@
                                                     <a href="https://wa.me/91{{ $phone }}" target="_blank" class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip" title="WhatsApp">
                                                         <i class="fab fa-whatsapp text-success"></i>
                                                     </a>
+                                                    <!-- <a href="{{ route('lead.edit', $row->id) }}" class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip" title="Edit">
+                                                        <i class="fas fa-edit text-warning"></i>
+                                                    </a> -->
                                                     <a href="{{ route('lead.edit', ['id' => $row->id] + request()->query()) }}" class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip" title="Edit">
                                                         <i class="fas fa-edit text-warning"></i>
                                                     </a>
@@ -515,13 +482,6 @@
                                                         data-bs-toggle="tooltip" title="Update Status">
                                                         <i class="fas fa-sync-alt text-info"></i>
                                                     </button>
-                                                    @if($lead_name != 'allocate' && $lead_name != 'unallocated' && $row->visited_on != 1)
-                                                        <button class="btn btn-xs btn-soft-light"
-                                                            onclick="showVisitDoneModal('{{ $row->id }}')"
-                                                            data-bs-toggle="tooltip" title="Visit Done">
-                                                            <i class="fas fa-check-double text-success"></i>
-                                                        </button>
-                                                    @endif
                                                     @endif
                                                     @if($lead_name === 'completed')
                                                     <button class="btn btn-xs btn-soft-light view-applicant-btn"
@@ -555,15 +515,6 @@
                                                         title="Matching Projects">
                                                         <i class="fas fa-building text-info"></i>
                                                     </button>
-                                                    @if($row->conversion_type === 'Completed')
-                                                    <button class="btn btn-xs btn-soft-light view-post-sale-btn"
-                                                        data-lead-id="{{ $row->id }}"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#viewPostSaleModal"
-                                                        title="View Post Sale Details">
-                                                        <i class="fas fa-file-alt text-info"></i>
-                                                    </button>
-                                                    @endif
                                                 </div>
                                             </div>
                                             <div class="d-block">
@@ -589,38 +540,20 @@
                                         @if(!empty($row->lead_shared_with))
                                         <div class="shared-users">
                                             @php
-                                                $sharedIds = explode(',', $row->lead_shared_with);
-                                                $sharedUsers = [];
-                                                foreach($sharedIds as $id) 
-                                                {
-                                                    $user = collect($users)->firstWhere('id', $id);
-                                                    if($user) 
-                                                    {
-                                                        $sharedUsers[] = $user;
-                                                    }
-                                                }
+                                            $sharedIds = explode(',', $row->lead_shared_with);
+                                            $sharedUsers = [];
+                                            foreach($sharedIds as $id) {
+                                            $user = collect($users)->firstWhere('id', $id);
+                                            if($user) {
+                                            $sharedUsers[] = $user->name;
+                                            }
+                                            }
                                             @endphp
                                             @if(count($sharedUsers) > 0)
-                                                <div class="d-flex flex-wrap gap-1">
-                                                    @foreach($sharedUsers as $sharedUser)
-                                                    <span class="badge bg-success me-1 d-inline-flex align-items-center gap-1">
-                                                        {{ $sharedUser->name }}
-                                                        <button type="button" 
-                                                            class="btn-close btn-close-white revoke-share-btn" 
-                                                            style="font-size: 0.5rem; width: 0.5rem; height: 0.5rem; opacity: 0.8;"
-                                                            data-lead-id="{{ $row->id }}"
-                                                            data-user-id="{{ $sharedUser->id }}"
-                                                            data-user-name="{{ $sharedUser->name }}"
-                                                            data-bs-toggle="tooltip" 
-                                                            title="Revoke access for {{ $sharedUser->name }}"
-                                                            aria-label="Remove">
-                                                        </button>
-                                                    </span>
-                                                    @endforeach
-                                                </div>
-                                                <small class="text-muted d-block mt-1">
-                                                    Click × to remove access
-                                                </small>
+                                            <span class="badge bg-success me-1">Shared</span>
+                                            <small class="text-muted d-block mt-1">
+                                                With: {{ implode(', ', $sharedUsers) }}
+                                            </small>
                                             @endif
                                         </div>
                                         @else
@@ -629,24 +562,8 @@
                                     </td>
                                     <td>
                                         <span class="cust-badge bg-soft-info text-info">
-                                            @php
-                                                $sourceName = $row->source;
-                                                if (is_numeric($row->source)) 
-                                                {
-                                                    $sourceObj = \Illuminate\Support\Facades\DB::table('sources')->where('id', $row->source)->first();
-                                                    if ($sourceObj) 
-                                                    {
-                                                        $sourceName = $sourceObj->name;
-                                                    }
-                                                }
-                                                if (empty($sourceName) || trim($sourceName) === '-') 
-                                                {
-                                                    $sourceName = 'Data Center';
-                                                }
-                                                $icon = $sourceName == 'Website' ? 'globe' : ($sourceName == 'Referral' ? 'user-friends' : 'ad');
-                                            @endphp
-                                            <i class="fas fa-{{ $icon }} me-1"></i>
-                                            {{ $sourceName }}
+                                            <i class="fas fa-{{ $row->source == 'Website' ? 'globe' : ($row->source == 'Referral' ? 'user-friends' : 'ad') }} me-1"></i>
+                                            {{ $row->source }}
                                         </span>
                                     </td>
                                     <td>{{ $row->campaign }}</td>
@@ -665,7 +582,7 @@
                                     @endif
                                     <td>
                                         <span class="cust-badge text-dark">
-                                            {{ $row->status_display_name ?? ucfirst(str_replace('_', ' ', $row->status)) }}
+                                            {{ $row->status }}
                                         </span>
                                     </td>
                                     <td>
@@ -675,24 +592,19 @@
                                         <div class="d-flex align-items-center justify-content-between">
                                             <div class="flex-grow-1">
                                                 @php
-                                                    if (strpos($row->project_id, ',') !== false) 
-                                                    {
-                                                        $projectIds = explode(',', $row->project_id);
-                                                        $projectNames = [];
-                                                        foreach($projectIds as $projectId) 
-                                                        {
-                                                            $project = DB::table('projects')->where('id', trim($projectId))->first();
-                                                            if($project) 
-                                                            {
-                                                                $projectNames[] = $project->project_name;
-                                                            }
-                                                        }
-                                                        echo implode(', ', $projectNames) .','.$row->custom_project_name .'(Other)' ?? '';
-                                                    } 
-                                                    else 
-                                                    {
-                                                        echo $row->project_name ?? $row->custom_project_name;
-                                                    }
+                                                if (strpos($row->project_id, ',') !== false) {
+                                                $projectIds = explode(',', $row->project_id);
+                                                $projectNames = [];
+                                                foreach($projectIds as $projectId) {
+                                                $project = DB::table('projects')->where('id', trim($projectId))->first();
+                                                if($project) {
+                                                $projectNames[] = $project->project_name;
+                                                }
+                                                }
+                                                echo implode(', ', $projectNames);
+                                                } else {
+                                                echo $row->project_name ?? '-';
+                                                }
                                                 @endphp
                                             </div>
                                         </div>
@@ -721,13 +633,14 @@
                                             <div class="flex-grow-1">
                                                 @php
                                                 $userType = session('user_type');
+
                                                 $comment = strtolower(trim(strip_tags($row->last_comment ?? '')));
-                                                if ($userType === 'salesman') 
-                                                {
-                                                    if (str_contains($comment, 'transfer') || str_contains($comment, 'allocated')) 
-                                                    {
-                                                        $comment = '';
-                                                    }
+
+
+                                                if ($userType === 'salesman') {
+                                                if (str_contains($comment, 'transfer') || str_contains($comment, 'allocated')) {
+                                                $comment = '';
+                                                }
                                                 }
 
                                                 $short = \Illuminate\Support\Str::limit($comment, 30);
@@ -896,31 +809,6 @@
     </div>
 </div>
 
-<div class="modal fade" id="viewPostSaleModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-info text-white">
-                <h5 class="modal-title">Post Sale Details</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div id="postSaleContent">
-                    <div class="text-center py-4">
-                        <div class="spinner-border text-info" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="mt-2">Loading post sale details...</p>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
 <div class="modal fade" id="deleteLeadModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -964,14 +852,177 @@
     </div>
 </div>
 
+<div class="modal fade" id="whatsappShareModal" tabindex="-1" aria-labelledby="whatsappShareModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="whatsappShareModalLabel">
+                    <i class="bi bi-whatsapp me-2"></i>Share Property on WhatsApp
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="whatsappSharePropertyId">
+                <input type="hidden" id="whatsappShareLeadId">
+                <input type="hidden" id="whatsappShareLeadPhone">
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input whatsapp-section" type="checkbox" value="image" id="shareSectionImage" checked>
+                            <label class="form-check-label" for="shareSectionImage">Image</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input whatsapp-section" type="checkbox" value="highlights" id="shareSectionHighlights" checked>
+                            <label class="form-check-label" for="shareSectionHighlights">Highlights</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input whatsapp-section" type="checkbox" value="location" id="shareSectionLocation" checked>
+                            <label class="form-check-label" for="shareSectionLocation">Location</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input whatsapp-section" type="checkbox" value="pricing" id="shareSectionPricing" checked>
+                            <label class="form-check-label" for="shareSectionPricing">Pricing & Status</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input whatsapp-section" type="checkbox" value="amenities" id="shareSectionAmenities" checked>
+                            <label class="form-check-label" for="shareSectionAmenities">Amenities</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input whatsapp-section" type="checkbox" value="contact" id="shareSectionContact" checked>
+                            <label class="form-check-label" for="shareSectionContact">Admin Contact</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input whatsapp-section" type="checkbox" value="cta" id="shareSectionCta" checked>
+                            <label class="form-check-label" for="shareSectionCta">Call To Action</label>
+                        </div>
+                    </div>
+                </div>
+
+                <label for="whatsappShareMessage" class="form-label fw-semibold">Message</label>
+                <textarea class="form-control" id="whatsappShareMessage" rows="14"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="sendWhatsappShareBtn">
+                    <i class="bi bi-whatsapp me-1"></i>Open WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    function showShareModal(leadId, sharedUsers = '') 
-    {
+    let whatsappShareContext = null;
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function getSelectedWhatsAppSections() {
+        return $('.whatsapp-section:checked').map(function() {
+            return this.value;
+        }).get();
+    }
+
+    function propertyShareUrl(property) {
+        if (property && property.share_url) {
+            return property.share_url;
+        }
+
+        if (property && property.id) {
+            return `${window.location.origin}/property-share/${property.id}`;
+        }
+
+        return '';
+    }
+
+    function buildWhatsAppMessage(property, adminPhone, selectedSections) {
+        const sections = selectedSections || getSelectedWhatsAppSections();
+        let message = '*EXCLUSIVE PROPERTY DETAILS*\n\n';
+        const shareUrl = propertyShareUrl(property);
+
+        if (sections.includes('image') && shareUrl) {
+            message += `*View Property Photos:*\n${shareUrl}\n\n`;
+        }
+
+        if (sections.includes('highlights')) {
+            message += '*PROJECT HIGHLIGHTS*\n';
+            message += `Project: ${property.property_name || '-'}\n`;
+            message += `Type: ${property.property_type || '-'}\n`;
+            message += `Category: ${property.property_category || '-'}\n`;
+            message += `Sub Category: ${property.property_sub_category || '-'}\n\n`;
+        }
+
+        if (sections.includes('location')) {
+            message += '*LOCATION*\n';
+            message += `City: ${property.city || '-'}\n`;
+            message += `State: ${property.state || '-'}\n`;
+            if (property.address) {
+                message += `Address: ${property.address}\n`;
+            }
+            message += '\n';
+        }
+
+        if (sections.includes('pricing')) {
+            message += '*PRICING & STATUS*\n';
+            message += `Budget: ${property.budget_price || '-'}\n`;
+            message += `Status: ${property.property_status || '-'}\n`;
+            if (property.property_size) {
+                message += `Size: ${property.property_size}\n`;
+            }
+            message += '\n';
+        }
+
+        if (sections.includes('amenities') && property.amenities) {
+            try {
+                const amenities = Array.isArray(property.amenities) ? property.amenities : JSON.parse(property.amenities);
+                if (amenities && amenities.length) {
+                    message += '*AMENITIES*\n';
+                    amenities.slice(0, 5).forEach(function(amenity) {
+                        message += `- ${amenity}\n`;
+                    });
+                    if (amenities.length > 5) {
+                        message += `- + ${amenities.length - 5} more amenities\n`;
+                    }
+                    message += '\n';
+                }
+            } catch (e) {}
+        }
+
+        if (sections.includes('contact') && adminPhone) {
+            message += `*Phone:* ${adminPhone}\n\n`;
+        }
+
+        if (sections.includes('cta')) {
+            message += "*Schedule a visit today!*\nReply 'YES' to book a site visit.";
+        }
+
+        return message.trim();
+    }
+
+    function showShareModal(leadId, sharedUsers = '') {
         $('#shareLeadId').val(leadId);
         $('#share_users').val(null).trigger('change');
 
-        if (sharedUsers != '') 
-        {
+        if (sharedUsers != '') {
             let userArray = sharedUsers.split(',');
             $('#share_users').val(userArray).trigger('change');
         }
@@ -979,28 +1030,24 @@
     }
 
 
-    $('#all-check').on('change', function() 
-    {
+    $('#all-check').on('change', function() {
         const isChecked = $(this).is(':checked');
         $('.checked').prop('checked', isChecked);
     });
 
-    function showDuplicateModal(leadId) 
-    {
+    function showDuplicateModal(leadId) {
         document.getElementById('duplicateLeadId').value = leadId;
         const modal = new bootstrap.Modal(document.getElementById('duplicateLeadModal'));
         modal.show();
     }
 
-    function showShareModal(leadId) 
-    {
+    function showShareModal(leadId) {
         document.getElementById('shareLeadId').value = leadId;
         const modal = new bootstrap.Modal(document.getElementById('shareLeadModal'));
         modal.show();
     }
 
-    $('#applicantModal').on('show.bs.modal', function(event) 
-    {
+    $('#applicantModal').on('show.bs.modal', function(event) {
         var button = $(event.relatedTarget);
         var appCity = button.data('app-city');
         var appContact = button.data('app-contact');
@@ -1024,104 +1071,77 @@
         $('#modal-final-price').text(formattedPrice);
         $('#modal-size').text(size || '-');
 
-        if (projectId) 
-        {
+        if (projectId) {
             $.ajax({
                 url: '/get-project-name/' + projectId,
                 type: 'GET',
-                success: function(response) 
-                {
-                    if (response.success) 
-                    {
+                success: function(response) {
+                    if (response.success) {
                         $('#modal-project-name').text(response.projectName);
-                    } 
-                    else 
-                    {
+                    } else {
                         $('#modal-project-name').text('{{ $isLeadManagement ? "Product" : "Project" }} ID: ' + projectId);
                     }
                 },
-                error: function() 
-                {
+                error: function() {
                     $('#modal-project-name').text('{{ $isLeadManagement ? "Product" : "Project" }} ID: ' + projectId);
                 }
             });
-        } 
-        else 
-        {
+        } else {
             $('#modal-project-name').text('-');
         }
     });
 
-    $('#ShareSubmitBtn').closest('form').on('submit', function() 
-    {
+    $('#ShareSubmitBtn').closest('form').on('submit', function() {
         $('#ShareSubmitBtn').prop('disabled', true);
         $('#ShareSubmitText').addClass('d-none');
         $('#ShareSubmitSpinner').removeClass('d-none');
     });
 
-    $('#DuplicateSubmitBtn').closest('form').on('submit', function() 
-    {
+    $('#DuplicateSubmitBtn').closest('form').on('submit', function() {
         $('#DuplicateSubmitBtn').prop('disabled', true);
         $('#DuplicateSubmitText').addClass('d-none');
         $('#DuplicateSubmitSpinner').removeClass('d-none');
     });
 
-    $(document).on('click', '.add-project-btn', function() 
-    {
+    $(document).on('click', '.add-project-btn', function() {
         const leadId = $(this).data('lead-id');
         const currentProjects = $(this).data('current-projects');
         showAddProjectModal(leadId, currentProjects);
     });
 
-    $(document).on('click', '.add-project-btn', function() 
-    {
+    $(document).on('click', '.add-project-btn', function() {
         const leadId = $(this).data('lead-id');
         const currentProjects = $(this).data('current-projects');
         showAddProjectModal(leadId, currentProjects);
     });
 
-    function showAddProjectModal(leadId, currentProjects) 
-    {
+    function showAddProjectModal(leadId, currentProjects) {
         $('#leadId').val(leadId);
         let currentProjectsHtml = '<div class="d-flex flex-wrap gap-1">';
 
-        if (currentProjects) 
-        {
+        if (currentProjects) {
             let projectIds = [];
-            if (typeof currentProjects === 'string') 
-            {
+            if (typeof currentProjects === 'string') {
                 projectIds = currentProjects.split(',');
-            } 
-            else if (Array.isArray(currentProjects)) 
-            {
+            } else if (Array.isArray(currentProjects)) {
                 projectIds = currentProjects;
-            } 
-            else if (typeof currentProjects === 'number') 
-            {
+            } else if (typeof currentProjects === 'number') {
                 projectIds = [currentProjects.toString()];
-            } 
-            else 
-            {
+            } else {
                 projectIds = String(currentProjects).split(',');
             }
             projectIds = projectIds.filter(id => id && id.toString().trim() !== '');
-            if (projectIds.length > 0) 
-            {
+            if (projectIds.length > 0) {
                 projectIds.forEach(projectId => {
                     const trimmedId = projectId.toString().trim();
-                    if (trimmedId) 
-                    {
+                    if (trimmedId) {
                         currentProjectsHtml += `<span class="badge bg-primary me-1 mb-1">Project ID: ${trimmedId}</span>`;
                     }
                 });
-            } 
-            else 
-            {
+            } else {
                 currentProjectsHtml += '<span class="text-muted">No projects assigned</span>';
             }
-        } 
-        else 
-        {
+        } else {
             currentProjectsHtml += '<span class="text-muted">No projects assigned</span>';
         }
 
@@ -1135,8 +1155,7 @@
         }, 100);
     }
 
-    $('#saveProjectsBtn').on('click', function() 
-    {
+    $('#saveProjectsBtn').on('click', function() {
         const btn = $(this);
         const submitText = btn.find('.submit-text');
         const spinner = btn.find('.spinner-border');
@@ -1144,15 +1163,13 @@
         const selectedProjects = $('#newProjects').val();
         const notes = $('#addProjectNotes').val();
 
-        if (!leadId) 
-        {
-            flasher.error('Lead ID is missing. Please try again.');
+        if (!leadId) {
+            toastr.error('Lead ID is missing. Please try again.');
             return;
         }
 
-        if (!selectedProjects || selectedProjects.length === 0) 
-        {
-            flasher.error('Please select at least one project');
+        if (!selectedProjects || selectedProjects.length === 0) {
+            toastr.error('Please select at least one project');
             return;
         }
         submitText.addClass('d-none');
@@ -1167,28 +1184,22 @@
                 projects: selectedProjects,
                 notes: notes
             },
-            success: function(response) 
-            {
-                if (response.success) 
-                {
-                    flasher.success(response.message);
+            success: function(response) {
+                if (response.success) {
+                    toastr.success(response.message);
                     $('#addProjectModal').modal('hide');
                     setTimeout(() => {
                         location.reload();
                     }, 1000);
-                } 
-                else 
-                {
-                    flasher.error(response.message);
+                } else {
+                    toastr.error(response.message);
                 }
             },
-            error: function(xhr) 
-            {
+            error: function(xhr) {
                 const errorMessage = xhr.responseJSON?.message || 'Unknown error occurred';
-                flasher.error('Error adding projects: ' + errorMessage);
+                toastr.error('Error adding projects: ' + errorMessage);
             },
-            complete: function() 
-            {
+            complete: function() {
                 submitText.removeClass('d-none');
                 spinner.addClass('d-none');
                 btn.prop('disabled', false);
@@ -1196,27 +1207,23 @@
         });
     });
 
-    $('#addProjectModal').on('hidden.bs.modal', function() 
-    {
+    $('#addProjectModal').on('hidden.bs.modal', function() {
         $('#leadId').val('');
         $('#newProjects').val(null);
         $('#addProjectNotes').val('');
     });
 
-    $(document).on('click', '.visited-history-btn', function() 
-    {
+    $(document).on('click', '.visited-history-btn', function() {
         const leadId = $(this).data('lead-id');
-        if (!leadId) 
-        {
-            flasher.error('Could not find lead ID. Please try again.');
+        if (!leadId) {
+            toastr.error('Could not find lead ID. Please try again.');
             return;
         }
 
         showVisitedHistory(leadId);
     });
 
-    function showVisitedHistory(leadId) 
-    {
+    function showVisitedHistory(leadId) {
         $('#visitedHistoryModal').modal('show');
         $('#visitedHistoryContent').html(`
             <div class="text-center py-4">
@@ -1232,22 +1239,16 @@
             data: {
                 lead_id: leadId
             },
-            success: function(response) 
-            {
-                if (response.success && response.projectVisits && response.projectVisits.length > 0) 
-                {
+            success: function(response) {
+                if (response.success && response.projectVisits && response.projectVisits.length > 0) {
                     renderVisitedHistoryTable(response.projectVisits);
-                } 
-                else 
-                {
+                } else {
                     showNoVisitsMessage();
                 }
             },
-            error: function(xhr, status, error) 
-            {
+            error: function(xhr, status, error) {
                 let errorMessage = 'Error loading visit history';
-                if (xhr.responseJSON && xhr.responseJSON.message) 
-                {
+                if (xhr.responseJSON && xhr.responseJSON.message) {
                     errorMessage = xhr.responseJSON.message;
                 }
 
@@ -1263,8 +1264,7 @@
         });
     }
 
-    function renderVisitedHistoryTable(projectVisits) 
-    {
+    function renderVisitedHistoryTable(projectVisits) {
         let tableHtml = `
             <div class="table-responsive">
                 <table class="table table-bordered visited-history-table">
@@ -1316,8 +1316,7 @@
         $('#visitedHistoryContent').html(tableHtml);
     }
 
-    function showNoVisitsMessage() 
-    {
+    function showNoVisitsMessage() {
         $('#visitedHistoryContent').html(`
             <div class="no-visits-message">
                 <i class="fas fa-calendar-times"></i>
@@ -1327,8 +1326,7 @@
         `);
     }
 
-    function getStatusBadgeClass(status) 
-    {
+    function getStatusBadgeClass(status) {
         const statusClasses = {
             'SITE_VISIT': 'bg-primary',
             'SITE_VISIT_DONE': 'bg-success',
@@ -1341,8 +1339,7 @@
         return statusClasses[status] || 'bg-secondary';
     }
 
-    function formatDate(dateString) 
-    {
+    function formatDate(dateString) {
         if (!dateString) return 'N/A';
         const date = new Date(dateString);
         return date.toLocaleDateString('en-IN', {
@@ -1352,8 +1349,7 @@
         });
     }
 
-    function formatTime(timeString) 
-    {
+    function formatTime(timeString) {
         if (!timeString) return 'N/A';
         const time = new Date(`2000-01-01T${timeString}`);
         return time.toLocaleTimeString('en-IN', {
@@ -1363,8 +1359,7 @@
         });
     }
 
-    function formatDateTime(dateTimeString) 
-    {
+    function formatDateTime(dateTimeString) {
         if (!dateTimeString) return 'N/A';
         const date = new Date(dateTimeString);
         return date.toLocaleDateString('en-IN', {
@@ -1378,8 +1373,7 @@
         });
     }
 
-    $(document).on('click', '.delete-lead-btn', function() 
-    {
+    $(document).on('click', '.delete-lead-btn', function() {
         const leadId = $(this).data('lead-id');
         const leadName = $(this).data('lead-name');
 
@@ -1392,8 +1386,7 @@
         deleteModal.show();
     });
 
-    $('#deleteLeadForm').on('submit', function(e) 
-    {
+    $('#deleteLeadForm').on('submit', function(e) {
         e.preventDefault();
 
         const form = $(this);
@@ -1410,37 +1403,29 @@
             method: 'DELETE',
             data: form.serialize(),
             dataType: 'json',
-            success: function(response) 
-            {
-                if (response.status === 200) 
-                {
-                    flasher.success(response.message);
+            success: function(response) {
+                if (response.status === 200) {
+                    toastr.success(response.message);
                     $('#deleteLeadModal').modal('hide');
-                    $(`button[data-lead-id="${response.lead_id}"]`).closest('tr').fadeOut(300, function() 
-                    {
+                    $(`button[data-lead-id="${response.lead_id}"]`).closest('tr').fadeOut(300, function() {
                         $(this).remove();
                     });
-                } 
-                else if (response.status === 403) 
-                {
-                    flasher.error(response.message);
+                } else if (response.status === 403) {
+                    toastr.error(response.message);
                     submitBtn.prop('disabled', true);
                     submitText.text('Blocked for 1 day').removeClass('d-none');
                     submitSpinner.addClass('d-none');
-                } 
-                else 
-                {
-                    flasher.error(response.message);
+                } else {
+                    toastr.error(response.message);
                     submitBtn.prop('disabled', false);
                     submitText.removeClass('d-none');
                     submitSpinner.addClass('d-none');
                     $('#deletePassword').val('');
                 }
             },
-            error: function(xhr) 
-            {
+            error: function(xhr) {
                 const errorMessage = xhr.responseJSON?.message || 'An error occurred';
-                flasher.error(errorMessage);
+                toastr.error(errorMessage);
                 submitBtn.prop('disabled', false);
                 submitText.removeClass('d-none');
                 submitSpinner.addClass('d-none');
@@ -1448,21 +1433,19 @@
         });
     });
 
-    $('#deleteLeadModal').on('hidden.bs.modal', function() 
-    {
+    $('#deleteLeadModal').on('hidden.bs.modal', function() {
         $('#deletePassword').val('');
         $('#deleteSubmitBtn').prop('disabled', false);
         $('#deleteSubmitText').removeClass('d-none');
         $('#deleteSubmitSpinner').addClass('d-none');
     });
 
-    $(document).on('click', '.matching-projects-btn', function() 
-    {
+    $(document).on('click', '.matching-projects-btn', function() {
         const leadId = $(this).data('lead-id');
         const leadPhone = $(this).data('lead-phone');
-        if (!leadId) 
-        {
-            flasher.error('Lead ID not found');
+        const adminPhone = $(this).data('admin-phone');
+        if (!leadId) {
+            toastr.error('Lead ID not found');
             return;
         }
 
@@ -1479,11 +1462,10 @@
         $.ajax({
             url: `/lead/${leadId}/matching-properties`,
             type: 'GET',
-            success: function(response) 
-            {
-                if (response.data && response.data.length > 0) 
-                {
+            success: function(response) {
+                if (response.data && response.data.length > 0) {
                     let html = '<div class="row g-2">';
+                    const adminPhone = response.adminPhone && response.adminPhone.mobile ? response.adminPhone.mobile : '';
                     response.data.forEach(property => {
                         let scoreColor = 'secondary';
                         if (property.match_score >= 70) scoreColor = 'success';
@@ -1541,7 +1523,9 @@
                                         <button class="btn btn-success btn-xs share-whatsapp-btn w-100 py-0" style="font-size: 0.7rem;"
                                             data-property-id="${property.id}"
                                             data-lead-id="${leadId}"
-                                            data-lead-phone="${leadPhone}">
+                                            data-lead-phone="${escapeHtml(leadPhone)}"
+                                            data-admin-phone="${escapeHtml(adminPhone)}"
+                                            data-property="${encodeURIComponent(JSON.stringify(property))}">
                                             <i class="bi bi-whatsapp"></i> Share
                                         </button>
                                     </div>
@@ -1575,22 +1559,67 @@
         });
     });
 
-    $(document).on('click', '.share-whatsapp-btn', function() 
-    {
+    $(document).on('click', '.share-whatsapp-btn', function() {
         const propertyId = $(this).data('property-id');
         const leadId = $(this).data('lead-id');
         const phone = $(this).data('lead-phone');
-        const button = $(this);
+        const adminPhone = $(this).data('admin-phone');
+        let property = null;
 
-        if (!propertyId || !leadId || !phone) 
-        {
-            flasher.error('Missing data for WhatsApp share');
+        if (!propertyId || !leadId || !phone) {
+            toastr.error('Missing data for WhatsApp share');
             return;
         }
 
+        try {
+            property = JSON.parse(decodeURIComponent($(this).attr('data-property')));
+        } catch (e) {
+            toastr.error('Could not load property details for sharing');
+            return;
+        }
+
+        whatsappShareContext = {
+            property: property,
+            adminPhone: adminPhone || '',
+            button: $(this)
+        };
+
+        $('#whatsappSharePropertyId').val(propertyId);
+        $('#whatsappShareLeadId').val(leadId);
+        $('#whatsappShareLeadPhone').val(phone);
+        $('.whatsapp-section').prop('checked', true);
+        $('#whatsappShareMessage').val(buildWhatsAppMessage(property, adminPhone));
+        $('#whatsappShareModal').modal('show');
+    });
+
+    $('.whatsapp-section').on('change', function() {
+        if (!whatsappShareContext) return;
+        $('#whatsappShareMessage').val(
+            buildWhatsAppMessage(
+                whatsappShareContext.property,
+                whatsappShareContext.adminPhone,
+                getSelectedWhatsAppSections()
+            )
+        );
+    });
+
+    $('#sendWhatsappShareBtn').on('click', function() {
+        if (!whatsappShareContext) {
+            toastr.error('Missing WhatsApp share details');
+            return;
+        }
+
+        const propertyId = $('#whatsappSharePropertyId').val();
+        const leadId = $('#whatsappShareLeadId').val();
+        const phone = $('#whatsappShareLeadPhone').val();
+        const message = $('#whatsappShareMessage').val();
+        const button = whatsappShareContext.button;
+        const sendButton = $(this);
+        const shareUrl = '/property/share-whatsapp';
+
+        sendButton.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Opening...');
         button.prop('disabled', true);
         button.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending...');
-        const shareUrl = '/property/share-whatsapp';
 
         $.ajax({
             url: shareUrl,
@@ -1599,302 +1628,43 @@
                 _token: '{{ csrf_token() }}',
                 property_id: propertyId,
                 lead_id: leadId,
-                phone: phone
+                phone: phone,
+                custom_message: message,
+                sections: getSelectedWhatsAppSections()
             },
-            success: function(response) 
-            {
-                if (response.status === 200 && response.data) 
-                {
-                    if (typeof response.data === 'object' && response.data.whatsapp_url) 
-                    {
+            success: function(response) {
+                if (response.status === 200 && response.data) {
+                    if (typeof response.data === 'object' && response.data.whatsapp_url) {
                         window.open(response.data.whatsapp_url, '_blank');
-                    } 
-                    else if (typeof response.data === 'string') 
-                    {
+                    } else if (typeof response.data === 'string') {
                         window.open(response.data, '_blank');
-                    } 
-                    else 
-                    {
-                        flasher.error('Invalid response format', response.data);
+                    } else {
+                        console.error('Unexpected response format:', response.data);
+                        toastr.error('Invalid response format');
                     }
-                    flasher.success('WhatsApp link generated successfully!');
-                } 
-                else 
-                {
-                    flasher.error(response.message || 'Failed to generate WhatsApp link');
+                    $('#whatsappShareModal').modal('hide');
+                    toastr.success('WhatsApp link generated successfully!');
+                } else {
+                    toastr.error(response.message || 'Failed to generate WhatsApp link');
                 }
             },
-            error: function(xhr) 
-            {
+            error: function(xhr) {
                 let errorMessage = 'Error generating WhatsApp link';
-                if (xhr.status === 419) 
-                {
+                if (xhr.status === 419) {
                     errorMessage = 'Session expired. Please refresh the page and try again.';
-                } 
-                else if (xhr.responseJSON?.message) 
-                {
+                } else if (xhr.responseJSON?.message) {
                     errorMessage = xhr.responseJSON.message;
                 }
-                flasher.error(errorMessage);
+
+                toastr.error(errorMessage);
+                console.error('AJAX Error:', xhr.responseText);
             },
-            complete: function() 
-            {
+            complete: function() {
+                sendButton.prop('disabled', false).html('<i class="bi bi-whatsapp me-1"></i>Open WhatsApp');
                 button.prop('disabled', false);
                 button.html('<i class="bi bi-whatsapp"></i> Share');
             }
         });
-    });
-    $(document).on('click', '.view-post-sale-btn', function() 
-    {
-        var leadId = $(this).data('lead-id');
-        $('#postSaleContent').html(`
-            <div class="text-center py-4">
-                <div class="spinner-border text-info" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <p class="mt-2">Loading post sale details...</p>
-            </div>
-        `);
-        
-        $.ajax({
-            url: '/post-sale/lead/' + leadId,
-            type: 'GET',
-            success: function(response) 
-            {
-                if (response.success && response.data) 
-                {
-                    var data = response.data;
-                    var html = `
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <strong>Applicant Name:</strong>
-                                    <p>${data.applicant_name || '-'}</p>
-                                </div>
-                                <div class="mb-3">
-                                    <strong>Applicant Contact:</strong>
-                                    <p>${data.applicant_number || '-'}</p>
-                                </div>
-                                <div class="mb-3">
-                                    <strong>Project Name:</strong>
-                                    <p>${data.project_name || '-'}</p>
-                                </div>
-                                <div class="mb-3">
-                                    <strong>Unit Number:</strong>
-                                    <p>${data.unit_number || '-'}</p>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <strong>Date of Birth:</strong>
-                                    <p>${data.dob || '-'}</p>
-                                </div>
-                                <div class="mb-3">
-                                    <strong>Date of Anniversary:</strong>
-                                    <p>${data.doa || '-'}</p>
-                                </div>
-                                <div class="mb-3">
-                                    <strong>Email:</strong>
-                                    <p>${data.email || '-'}</p>
-                                </div>
-                                <div class="mb-3">
-                                    <strong>Created At:</strong>
-                                    <p>${new Date(data.created_at).toLocaleString()}</p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    $('#postSaleContent').html(html);
-                } 
-                else 
-                {
-                    $('#postSaleContent').html(`
-                        <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            No post sale record found for this lead.
-                        </div>
-                    `);
-                }
-            },
-            error: function() 
-            {
-                $('#postSaleContent').html(`
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Error loading post sale details.
-                    </div>
-                `);
-            }
-        });
-        $(document).on('click', '.revoke-share-btn', function(e) 
-        {
-            e.preventDefault();
-            e.stopPropagation();
-            const button = $(this);
-            const leadId = button.data('lead-id');
-            const userId = button.data('user-id');
-            const userName = button.data('user-name');
-            Swal.fire({
-                title: 'Revoke Share Access?',
-                html: `Are you sure you want to remove <strong>${userName}</strong>'s access to this lead?`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Yes, revoke access',
-                cancelButtonText: 'Cancel'
-            }).then((result) => {
-                if (result.isConfirmed) 
-                {
-                    revokeShareAccess(leadId, [userId], userName);
-                }
-            });
-        });
-    });
-    $(document).on('click', '.revoke-share-btn', function(e) 
-    {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const button = $(this);
-        const leadId = button.data('lead-id');
-        const userId = button.data('user-id');
-        const userName = button.data('user-name');
-        Swal.fire({
-            title: 'Revoke Share Access?',
-            html: `Are you sure you want to remove <strong>${userName}</strong>'s access to this lead?`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, revoke access',
-            cancelButtonText: 'Cancel'
-        }).then((result) => {
-            if (result.isConfirmed) 
-            {
-                revokeShareAccess(leadId, [userId], userName);
-            }
-        });
-    });
-
-    function revokeShareAccess(leadId, userIds, userName = null) 
-    {
-        const loadingSwal = Swal.fire({
-            title: 'Revoking Access...',
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
-        
-        $.ajax({
-            url: '{{ route("lead.revoke-share") }}',
-            type: 'POST',
-            data: {
-                _token: '{{ csrf_token() }}',
-                lead_id: leadId,
-                user_ids: userIds
-            },
-            success: function(response) 
-            {
-                if (response.success) 
-                {
-                    loadingSwal.close();
-                    Swal.fire({
-                        title: 'Access Revoked!',
-                        text: response.message,
-                        icon: 'success',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                    setTimeout(() => {
-                        location.reload();
-                    }, 2000);
-                } 
-                else 
-                {
-                    loadingSwal.close();
-                    Swal.fire({
-                        title: 'Error',
-                        text: response.message,
-                        icon: 'error'
-                    });
-                }
-            },
-            error: function(xhr) 
-            {
-                loadingSwal.close();
-                const errorMessage = xhr.responseJSON?.message || 'Error revoking share access';
-                Swal.fire({
-                    title: 'Error',
-                    text: errorMessage,
-                    icon: 'error'
-                });
-            }
-        });
-    }
-    function checkUserTypeAndToggleCheckbox() 
-    {
-        const userId = $('#user').val();
-        const checkbox = $('#sendToNewLead');
-        const checkboxLabel = $('label[for="sendToNewLead"]');
-        const checkboxContainer = $('.form-check');
-        
-        if (!userId) 
-        {
-            checkbox.prop('disabled', false);
-            checkboxContainer.removeClass('freeze-checkbox');
-            checkboxLabel.removeClass('freeze-label');
-            return;
-        }
-        $.ajax({
-            url: '{{ route("user.check-type") }}',
-            type: 'POST',
-            data: {
-                _token: '{{ csrf_token() }}',
-                user_id: userId
-            },
-            success: function(response) 
-            {
-                if (response.user_type === 'salesman') 
-                {
-                    checkbox.prop('checked', true);
-                    checkbox.prop('disabled', true);
-                    checkboxContainer.addClass('freeze-checkbox');
-                    checkboxLabel.addClass('freeze-label');
-                    checkboxLabel.find('small').text('(Default: Lead goes to NEW LEAD when assigned to salesperson)');
-                } 
-                else 
-                {
-                    checkbox.prop('disabled', false);
-                    checkbox.prop('checked', false);
-                    checkboxContainer.removeClass('freeze-checkbox');
-                    checkboxLabel.removeClass('freeze-label');
-                    checkboxLabel.find('small').text('If checked, lead goes to NEW LEAD status');
-                }
-            },
-            error: function() 
-            {
-                checkbox.prop('disabled', false);
-                checkboxContainer.removeClass('freeze-checkbox');
-                checkboxLabel.removeClass('freeze-label');
-            }
-        });
-    }
-    $(document).ready(function() 
-    {
-        if (typeof $('[data-bs-toggle="tooltip"]').tooltip === 'function') 
-        {
-            $('[data-bs-toggle="tooltip"]').tooltip();
-        }
-        $('#user').on('change', function() 
-        {
-            checkUserTypeAndToggleCheckbox();
-        });
-        if ($('#user').val()) 
-        {
-            checkUserTypeAndToggleCheckbox();
-        }
     });
 </script>
 @endsection

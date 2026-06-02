@@ -194,6 +194,12 @@ Route::middleware(['check.login', 'reception.only'])->group(function () {
         Route::post('inquiry-question/store', [MasterController::class, 'inquiry_question_store'])->name('inquiry-question.store');
         Route::post('inquiry-question/update', [MasterController::class, 'inquiry_question_update'])->name('inquiry-question.update');
 
+        Route::get('/channel-partner/platform', [MasterController::class, 'channel_partner_platform'])->name('channel.partner.platform');
+
+        Route::post('/channel-partner/store', [MasterController::class, 'channel_partner_create'])->name('channel.partner.store');
+
+        Route::put('/channel-partner/update/{id}', [MasterController::class, 'channel_partner_update'])->name('channel.partner.update');
+
         Route::get('/integration-settings', [MasterController::class, 'integration_settings'])->name('integration.settings');
         Route::post('/integration-settings', [MasterController::class, 'integration_store'])->name('integration.store');
         Route::put('/integration-settings/{id}', [MasterController::class, 'integration_update'])->name('integration.update');
@@ -503,8 +509,6 @@ Route::middleware(['check.login', 'reception.only'])->group(function () {
         Route::delete('/{template}', [UnifiedMessagingController::class, 'destroy'])->name('messaging.templates.destroy');
     });
 
-
-    // datacenter routes
     Route::prefix('data-center')->controller(DataCenterController::class)->group(function () {
         Route::get('/data', 'index')->name('data-center.index');
         Route::get('/create', 'create')->name('data-center.create');
@@ -516,21 +520,6 @@ Route::middleware(['check.login', 'reception.only'])->group(function () {
         Route::delete('/{id}', 'destroy')->name('data-center.destroy');
         Route::get('/comments/{id}', 'getComments')->name('data-center.comments');
         Route::post('/comments/{id}', 'addComment')->name('data-center.add-comment');
-        // Route::get('/converted/leads', 'getConvertedLeads')->name('data-center.converted-leads');
-        // Route::get('/pending', 'pending')->name('data-center.pending');
-        // Route::get('/processing', 'processing')->name('data-center.processing');
-        // Route::get('/interested', 'interested')->name('data-center.interested');
-        // Route::get('/call-scheduled', 'call_scheduled')->name('data-center.call_scheduled');
-        // Route::get('/meeting-scheduled', 'meeting_scheduled')->name('data-center.meeting_scheduled');
-        // Route::get('/visit-scheduled', 'visit_scheduled')->name('data-center.visit_scheduled');
-        // Route::get('/visited', 'visit_done')->name('data-center.visited'); 
-        // Route::get('/future', 'future_leads')->name('lead.future');
-        // Route::get('/channel-partner', 'channel_partner')->name('lead.channel_partner');
-        // Route::get('/not-interested', 'not_interested')->name('lead.not_interested');
-        // Route::get('/not-picked', 'not_picked')->name('lead.not_picked');
-        // Route::get('/lost', 'lost')->name('lead.lost');
-        // Route::get('/wrong-number', 'wrong_number')->name('lead.wrong_number');
-        // Route::get('/not-reachable', 'not_reachable')->name('lead.not_reachable');
     });
 
     Route::post('/exhibitions/{id}/toggle-auto-welcome', [WebExhibitionController::class, 'toggleAutoWelcome'])->name('exhibitions.toggle-auto-welcome');
@@ -544,9 +533,17 @@ Route::middleware(['check.login', 'reception.only'])->group(function () {
     Route::post('/property/share-whatsapp', [LeadController::class, 'sharePropertyOnWhatsApp'])->name('property.share-whatsapp');
     Route::get('/property/{id}/details', [LeadController::class, 'getPropertyDetails'])->name('property.details');
     Route::get('/lead/{id}/details', [LeadController::class, 'getDetails'])->name('lead.details');
-    Route::get('/properties', [MasterController::class, 'property_name'])->name('property.name');
-    Route::post('/properties/store', [MasterController::class, 'store_property'])->name('property.store');
-    Route::put('/properties/{id}', [MasterController::class, 'update_property'])->name('property.update');
+    Route::prefix('properties')->group(function () 
+    {
+        Route::get('/', [MasterController::class, 'property_name'])->name('property.name');
+        Route::post('/store', [MasterController::class, 'store_property'])->name('property.store');
+        Route::post('/update', [MasterController::class, 'update_property'])->name('property.update');
+        Route::post('/assign-cp', [MasterController::class, 'assign_cp']);
+        Route::post('/remove-cp', [MasterController::class, 'remove_cp']);
+        Route::get('/get-assigned-cps/{propertyId}', [MasterController::class, 'get_assigned_cps']);
+        Route::post('/add-comment', [MasterController::class, 'add_property_comment']);
+        Route::get('/get-comments/{propertyId}', [MasterController::class, 'get_property_comments']);
+    });
     
 });
 

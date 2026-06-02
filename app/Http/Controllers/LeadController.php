@@ -111,14 +111,17 @@ class LeadController extends Controller
 
             foreach ($records as $index => $row) {
                 $rowNumber = $index + 2;
-                try {
-                    if (empty(array_filter($row))) {
+                try 
+                {
+                    if (empty(array_filter($row))) 
+                    {
                         $validationErrors[] = "Row $rowNumber: Empty row skipped";
                         continue;
                     }
 
                     $phone = '';
-                    foreach ($row as $key => $value) {
+                    foreach ($row as $key => $value) 
+                    {
                         $keyLower = strtolower($key);
                         if (in_array($keyLower, ['phone no.', 'phone', 'phone no', 'phone number'])) {
                             $phone = trim($value);
@@ -126,7 +129,8 @@ class LeadController extends Controller
                         }
                     }
 
-                    if (empty($phone)) {
+                    if (empty($phone)) 
+                    {
                         $validationErrors[] = "Row $rowNumber: Phone number is missing or empty";
                         continue;
                     }
@@ -134,42 +138,51 @@ class LeadController extends Controller
                     $originalPhone = $phone;
                     $phone = preg_replace('/\D/', '', $phone);
 
-                    if (strlen($phone) == 12 && substr($phone, 0, 2) == '91') {
+                    if (strlen($phone) == 12 && substr($phone, 0, 2) == '91') 
+                    {
                         $phone = substr($phone, 2);
                     }
 
-                    if (!$phone || !preg_match('/^[6-9]\d{9}$/', $phone)) {
+                    if (!$phone || !preg_match('/^[6-9]\d{9}$/', $phone)) 
+                    {
                         $validationErrors[] = "Row $rowNumber: Invalid phone number '$originalPhone'. Must be 10 digits starting with 6-9";
                         continue;
                     }
 
                     $email = '';
-                    foreach ($row as $key => $value) {
+                    foreach ($row as $key => $value) 
+                    {
                         $keyLower = strtolower($key);
-                        if (in_array($keyLower, ['e-mail', 'email', 'mail'])) {
+                        if (in_array($keyLower, ['e-mail', 'email', 'mail'])) 
+                        {
                             $email = trim($value);
                             break;
                         }
                     }
 
-                    if (!empty($email)) {
+                    if (!empty($email)) 
+                    {
                         $email = filter_var($email, FILTER_SANITIZE_EMAIL);
-                        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) 
+                        {
                             $validationErrors[] = "Row $rowNumber: Invalid email format '$email'";
                             continue;
                         }
                     }
 
                     $name = '';
-                    foreach ($row as $key => $value) {
+                    foreach ($row as $key => $value) 
+                    {
                         $keyLower = strtolower($key);
-                        if (in_array($keyLower, ['name', 'full name', 'customer name'])) {
+                        if (in_array($keyLower, ['name', 'full name', 'customer name'])) 
+                        {
                             $name = trim($value);
                             break;
                         }
                     }
 
-                    if (empty($name)) {
+                    if (empty($name)) 
+                    {
                         $validationErrors[] = "Row $rowNumber: Name is required";
                         continue;
                     }
@@ -2540,64 +2553,91 @@ class LeadController extends Controller
 
     public function getMatchingProperties($id)
     {
-        try {
+        try 
+        {
             $lead = DB::table('leads')->where('id', $id)->first();
-            if (!$lead) {
+            $adminPhone = DB::table('users')
+                ->select('mobile')
+                ->where('id', 1)
+                ->orWhere('role', 'admin')
+                ->first();
+    
+            if (!$lead) 
+            {
                 return response()->json([
                     'status' => 404,
                     'message' => 'Lead not found',
-                    'data' => []
+                    'data' => [],
+                    'adminPhone' => $adminPhone
                 ]);
             }
+    
             $category = null;
             $subCategory = null;
-
-            if (!empty($lead->catg_id)) {
+    
+            if (!empty($lead->catg_id)) 
+            {
                 $category = DB::table('inv_catg')->where('id', $lead->catg_id)->first();
             }
-
-            if (!empty($lead->sub_catg_id)) {
+    
+            if (!empty($lead->sub_catg_id)) 
+            {
                 $subCategory = DB::table('inv_subcatg')->where('id', $lead->sub_catg_id)->first();
             }
-
+    
             $budgetRange = $this->parseBudgetRange($lead->budget);
+    
             $query = DB::table('properties')
                 ->where('property_status', '!=', 'Sold')
                 ->where('property_status', '!=', 'Hold');
+    
             $properties = $query->get();
-
+    
             $matchedProperties = [];
-
-            foreach ($properties as $property) {
+    
+            foreach ($properties as $property) 
+            {
                 $score = $this->calculateMatchScore($lead, $property, $category, $subCategory);
-                if ($score > 0) {
+    
+                if ($score > 0) 
+                {
                     $property->match_score = $score;
                     $property->match_reasons = $this->getMatchReasons($lead, $property, $category, $subCategory);
+                    $property->share_url = $this->getPropertyShareUrl($property->id);
+    
                     $matchedProperties[] = $property;
                 }
             }
-            usort($matchedProperties, function ($a, $b) {
+    
+            usort($matchedProperties, function ($a, $b) 
+            {
                 return $b->match_score <=> $a->match_score;
             });
-
-            if (empty($matchedProperties)) {
+    
+            if (empty($matchedProperties)) 
+            {
                 return response()->json([
                     'status' => 200,
                     'data' => [],
+                    'adminPhone' => $adminPhone,
                     'message' => 'No matching properties found'
                 ]);
             }
-
+    
             return response()->json([
                 'status' => 200,
                 'data' => $matchedProperties,
+                'adminPhone' => $adminPhone,
                 'message' => 'Properties retrieved successfully'
             ]);
-        } catch (\Exception $e) {
+        } 
+        catch (\Exception $e) 
+        {
             return response()->json([
                 'status' => 500,
                 'message' => 'Error fetching matching properties: ' . $e->getMessage(),
-                'data' => []
+                'data' => [],
+                'adminPhone' => null
             ]);
         }
     }
@@ -2790,7 +2830,9 @@ class LeadController extends Controller
         $validator = Validator::make($request->all(), [
             'property_id' => 'required|exists:properties,id',
             'lead_id' => 'required|exists:leads,id',
-            'phone' => 'required'
+            'phone' => 'required',
+            'custom_message' => 'nullable|string',
+            'sections' => 'nullable|array'
         ]);
 
         if ($validator->fails()) {
@@ -2821,26 +2863,17 @@ class LeadController extends Controller
                 ]);
             }
 
-            $imageUrl = '';
-
-            if (!empty($property->gallery_images)) {
-
-                $galleryImages = json_decode($property->gallery_images, true);
-
-                if (!empty($galleryImages) && isset($galleryImages[0])) {
-
-                    $imagePath = $galleryImages[0];
-
-                    $imageUrl = asset($imagePath);
-                }
-            }
+            $admin = DB::table('users')
+                ->select('mobile')
+                ->where('id', 1)
+                ->orWhere('role', 'admin')
+                ->first();
+            $adminPhone = $admin->mobile ?? '';
+            $propertyShareUrl = $this->getPropertyShareUrl($property->id);
             $message = "🏠 *EXCLUSIVE PROPERTY DETAILS* 🏠\n\n";
 
-            if (!empty($imageUrl)) {
-
-                $message .= "📸 *Project Image:* \n";
-                $message .= $imageUrl . "\n\n";
-            }
+            $message .= "📸 *View Property Photos:* \n";
+            $message .= $propertyShareUrl . "\n\n";
             $message .= "📍 *PROJECT HIGHLIGHTS*\n";
             $message .= "┌─────────────────────\n";
             $message .= "│ 🏢 *Project:* {$property->property_name}\n";
@@ -2852,7 +2885,8 @@ class LeadController extends Controller
             $message .= "┌─────────────────────\n";
             $message .= "│ 🏙️ *City:* {$property->city}\n";
             $message .= "│ 🗺️ *State:* {$property->state}\n";
-            if (!empty($property->address)) {
+            if (!empty($property->address)) 
+            {
                 $message .= "│ 📍 *Address:* {$property->address}\n";
             }
             $message .= "└─────────────────────\n\n";
@@ -2860,38 +2894,57 @@ class LeadController extends Controller
             $message .= "┌─────────────────────\n";
             $message .= "│ 💵 *Budget:* {$property->budget_price}\n";
             $message .= "│ 📈 *Status:* {$property->property_status}\n";
-            if (!empty($property->size_sqft)) {
+            if (!empty($property->size_sqft)) 
+            {
                 $message .= "│ 📐 *Size:* {$property->size_sqft} sq.ft\n";
             }
             $message .= "└─────────────────────\n\n";
-            if (!empty($property->amenities)) {
+            if (!empty($property->amenities)) 
+            {
                 $amenities = is_string($property->amenities) ? json_decode($property->amenities, true) : $property->amenities;
-                if (!empty($amenities) && is_array($amenities)) {
+                if (!empty($amenities) && is_array($amenities)) 
+                {
                     $message .= "✨ *AMENITIES*\n";
                     $message .= "┌─────────────────────\n";
-                    foreach (array_slice($amenities, 0, 5) as $amenity) {
+                    foreach (array_slice($amenities, 0, 5) as $amenity) 
+                    {
                         $message .= "│ • {$amenity}\n";
                     }
-                    if (count($amenities) > 5) {
+                    if (count($amenities) > 5) 
+                    {
                         $message .= "│ • + " . (count($amenities) - 5) . " more amenities\n";
                     }
                     $message .= "└─────────────────────\n\n";
                 }
             }
-            if (!empty($lead->phone)) {
-                $message .= "📞 *Phone:* {$lead->phone}\n";
+            if (!empty($adminPhone)) 
+            {
+                $message .= "📞 *Phone:* {$adminPhone}\n";
             }
             $message .= "━━━━━━━━━━━━━━━━━━━\n\n";
 
             $message .= "🕐 *Schedule a visit today!*\n";
             $message .= "Reply 'YES' to book a site visit.";
-            if (strlen($phone) == 10) {
-                $phone = '91' . $phone;
+            if ($request->filled('custom_message')) 
+            {
+                $message = $request->custom_message;
+
+                $sections = $request->input('sections', []);
+                $shouldIncludeImage = empty($sections) || in_array('image', $sections);
+
+                $message = $this->removePropertyShareLinkFromMessage($message);
+                if ($shouldIncludeImage) {
+                    $message = "*View Property Photos:*\n{$propertyShareUrl}\n\n" . ltrim($message);
+                }
             }
+            $phone = $this->formatWhatsAppPhone($request->phone);
+            // echo '<pre>'; print_r($phone); exit;
             $propertyLink = url("/property/{$property->id}");
             $whatsappUrl = "https://wa.me/{$phone}?text=" . urlencode($message);
-            try {
-                if (Schema::hasTable('property_shares')) {
+            try 
+            {
+                if (Schema::hasTable('property_shares'))
+                {
                     DB::table('property_shares')->insert([
                         'property_id' => $property->id,
                         'lead_id' => $lead->id,
@@ -2900,7 +2953,9 @@ class LeadController extends Controller
                         'shared_at' => now()
                     ]);
                 }
-            } catch (\Exception $logError) {
+            } 
+            catch (\Exception $logError) 
+            {
             }
 
             return response()->json([
@@ -2908,7 +2963,9 @@ class LeadController extends Controller
                 'data' => $whatsappUrl,
                 'message' => 'Professional WhatsApp link generated successfully'
             ]);
-        } catch (\Exception $e) {
+        } 
+        catch (\Exception $e) 
+        {
             return response()->json([
                 'status' => 500,
                 'message' => 'Error generating WhatsApp link: ' . $e->getMessage(),
@@ -2917,13 +2974,140 @@ class LeadController extends Controller
         }
     }
 
+    private function formatWhatsAppPhone($phone)
+    {
+        $phone = preg_replace('/[^0-9]/', '', (string) $phone);
+
+        if (strpos($phone, '00') === 0) 
+        {
+            $phone = substr($phone, 2);
+        }
+
+        if (strlen($phone) === 11 && strpos($phone, '0') === 0) 
+        {
+            $phone = substr($phone, 1);
+        }
+
+        if (strpos($phone, '91') !== 0) 
+        {
+            $phone = '91' . $phone;
+        }
+
+        return $phone;
+    }
+
+    private function getPropertyShareUrl($propertyId)
+    {
+        return $this->publicUrl('/property-share/' . $propertyId);
+    }
+
+    private function getPropertyImageUrls($property)
+    {
+        if (empty($property->gallery_images)) 
+        {
+            return [];
+        }
+
+        $galleryImages = json_decode($property->gallery_images, true);
+        if (json_last_error() !== JSON_ERROR_NONE) 
+        {
+            $galleryImages = array_filter(array_map('trim', explode(',', $property->gallery_images)));
+        }
+
+        if (is_string($galleryImages)) 
+        {
+            $galleryImages = [$galleryImages];
+        }
+
+        if (empty($galleryImages) || !is_array($galleryImages)) 
+        {
+            return [];
+        }
+
+        return array_values(array_filter(array_map(function ($imagePath) 
+        {
+            if (is_array($imagePath)) 
+            {
+                $imagePath = $imagePath['image_path'] ?? $imagePath['path'] ?? $imagePath['url'] ?? '';
+            }
+
+            $imagePath = trim((string) $imagePath);
+            if ($imagePath === '') 
+            {
+                return null;
+            }
+            if (preg_match('/^https?:\/\//i', $imagePath)) 
+            {
+                return $imagePath;
+            }
+            return $this->publicAssetUrl($imagePath);
+        }, $galleryImages)));
+    }
+
+    private function publicAssetUrl($path)
+    {
+        return $this->publicUrl('/' . ltrim($path, '/'));
+    }
+
+    private function publicUrl($path)
+    {
+        $path = '/' . ltrim($path, '/');
+        $baseUrl = config('app.whatsapp_asset_url')
+            ?: config('app.asset_url')
+            ?: config('app.url')
+            ?: request()->getSchemeAndHttpHost();
+
+        if (empty($baseUrl) || stripos($baseUrl, 'localhost') !== false || stripos($baseUrl, '127.0.0.1') !== false) {
+            $baseUrl = request()->getSchemeAndHttpHost();
+        }
+
+        return rtrim($baseUrl, '/') . $path;
+    }
+
+    private function removePropertyShareLinkFromMessage($message)
+    {
+        $lines = preg_split('/\R/', (string) $message);
+        $cleanLines = [];
+        $skipShareUrl = false;
+
+        foreach ($lines as $line) {
+            if (stripos($line, 'Project Image') !== false || stripos($line, 'View Property Photos') !== false) {
+                $skipShareUrl = true;
+                continue;
+            }
+
+            if ($skipShareUrl && preg_match('/^https?:\/\/\S+/i', trim($line))) {
+                $skipShareUrl = false;
+                continue;
+            }
+
+            $skipShareUrl = false;
+            $cleanLines[] = $line;
+        }
+
+        return trim(implode("\n", $cleanLines));
+    }
+
+    public function showPropertySharePage($id)
+    {
+        $property = DB::table('properties')->where('id', $id)->first();
+
+        if (!$property) {
+            abort(404);
+        }
+
+        $property->image_urls = $this->getPropertyImageUrls($property);
+        $property->first_image_url = $property->image_urls[0] ?? null;
+        $property->share_url = $this->getPropertyShareUrl($property->id);
+
+        return view('property.share-page', compact('property'));
+    }
+
     public function getPropertyDetails($id)
     {
-        try 
-        {
+        try {
             $property = DB::table('projects')->where('id', $id)->first();
-            if (!$property) 
-            {
+            if (!$property) {
                 return response()->json([
                     'status' => 404,
                     'message' => 'Property not found',
@@ -2939,9 +3123,7 @@ class LeadController extends Controller
                 'data' => $property,
                 'message' => 'Image Retreive Successfully'
             ]);
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => 500,
                 'message' => 'Error fetching property details: ' . $e->getMessage(),

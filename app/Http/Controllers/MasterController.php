@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Flasher\Laravel\Facade\Flasher;
 use Illuminate\Validation\Rule;
-
+use Illuminate\Support\Facades\Schema;
 class MasterController extends Controller
 {
     public function form_field()
@@ -1313,231 +1313,669 @@ class MasterController extends Controller
 
     public function property_name(Request $request)
     {
-        try {
+        try 
+        {
             $length = $request->query('length', 10);
             $search = $request->query('search');
             $sortColumn = $request->query('sort', 'id');
             $sortDirection = $request->query('direction', 'desc');
+    
             $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'desc';
-
-            $allowedColumns = ['id', 'property_category', 'created_at'];
+    
+            $allowedColumns = ['id', 'property_name', 'created_date', 'property_category', 'house_number'];
             $sortColumn = in_array($sortColumn, $allowedColumns) ? $sortColumn : 'id';
+    
+            $fromDate = $request->query('from_date');
+            $toDate = $request->query('to_date');
+            $size = $request->query('size');
+            $houseNumber = $request->query('house_number');
+    
             $properties = DB::table("properties as p")
                 ->select('p.*')
-                ->selectSub(function ($query) {
+                ->selectRaw('(SELECT GROUP_CONCAT(channel_partner_id) FROM property_channel_partners WHERE property_id = p.id) as channel_partner_ids')
+                ->selectRaw('(SELECT GROUP_CONCAT(cp.name SEPARATOR ", ") FROM property_channel_partners pcp JOIN channel_partners cp ON pcp.channel_partner_id = cp.id WHERE pcp.property_id = p.id) as channel_partner_names')
+                ->selectSub(function ($query) 
+                {
                     $currentUserId = session()->get('user_id');
                     $childIds = session()->get('child_ids', []);
-
-                    if (is_string($childIds)) {
+    
+                    if (is_string($childIds)) 
+                    {
                         $childIds = array_map('trim', explode(',', $childIds));
                     }
-
+    
                     $userIds = array_merge([$currentUserId], $childIds);
-
+    
                     $query->from('leads as l')
                         ->selectRaw('COUNT(*)')
                         ->where('l.status', '!=', 'allocated_lead')
                         ->whereIn('l.user_id', $userIds)
                         ->whereRaw('LOWER(TRIM(l.type)) = LOWER(TRIM(p.property_type))');
                 }, 'leads_count')
-
-                ->when($search, function ($query, $search) {
-                    $query->where(function ($q) use ($search) {
-                        $q->where('p.property_name', 'LIKE', "%$search%")
-                            ->orWhere('p.property_category', 'LIKE', "%$search%")
-                            ->orWhere('p.property_type', 'LIKE', "%$search%");
-                    });
+    
+                ->when($search, function ($q) use ($search) 
+                {
+                    $q->where('p.property_name', 'LIKE', "%$search%")
+                    ->orWhere('p.property_category', 'LIKE', "%$search%")
+                    ->orWhere('p.property_type', 'LIKE', "%$search%")
+                    ->orWhere('p.house_number', 'LIKE', "%$search%");
                 })
+    
+                ->when($fromDate && $toDate, function ($q) use ($fromDate, $toDate) 
+                {
+                    $q->whereBetween('p.created_date', [$fromDate, $toDate]);
+                })
+    
+                ->when($size, function ($q) use ($size) 
+                {
+                    $q->where('p.property_size', $size);
+                })
+    
+                ->when($houseNumber, function ($q) use ($houseNumber) 
+                {
+                    $q->where('p.house_number', 'LIKE', "%$houseNumber%");
+                })
+    
                 ->orderBy($sortColumn, $sortDirection)
                 ->paginate((int)$length)
-                ->appends([
-                    'sort' => $sortColumn,
-                    'direction' => $sortDirection,
-                    'length' => $length,
-                    'search' => $search
-                ]);
-            $categoryMap = DB::table('inv_catg')
-                ->pluck('id', 'name');
-
-            foreach ($properties as $property) {
+                ->appends($request->all());
+    
+            $categoryMap = DB::table('inv_catg')->pluck('id', 'name');
+    
+            foreach ($properties as $property) 
+            {
                 $property->category_id = $categoryMap[$property->property_category] ?? null;
             }
-
+    
             $categoryList = DB::table('category')->select('id', 'name')->get();
             $invCatg = DB::table('inv_catg')->select('id', 'type', 'name')->get();
+            $channelPartners = DB::table('channel_partners')->select('id', 'name', 'company_name')->get();
+    
             return view('master.property', compact(
                 'properties',
                 'categoryList',
                 'invCatg',
+                'channelPartners',
                 'length',
                 'sortColumn',
                 'sortDirection'
             ));
-        } catch (\Exception $e) {
-            //    dd($e->getMessage(), $e->getFile(), $e->getLine());
+    
+        } 
+        catch (\Exception $e) 
+        {
+            return back()->with('error', $e->getMessage());
         }
     }
 
     public function store_property(Request $request)
     {
         DB::beginTransaction();
-        try {
-            $rules = [
+        try 
+        {
+            $request->validate([
                 'name' => [
                     'required',
                     'string',
-                    'max:255',
-                    Rule::unique('properties', 'property_name')
-                ]
-            ];
-
-            if (session('software_type') !== 'lead_management') {
-                $rules['property_type'] = 'nullable|string|max:100';
-                $rules['property_category'] = 'nullable|exists:inv_catg,id';
-                $rules['property_sub_category'] = 'nullable|string|max:255';
-                $rules['state'] = 'nullable|string|max:100';
-                $rules['city'] = 'nullable|string|max:100';
-                $rules['address'] = 'nullable|string';
-                $rules['budget_price'] = 'nullable|string|max:100';
-                $rules['property_status'] = 'nullable|in:Available,Hold,Procession,Sold';
-                $rules['gallery_images.*'] = 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048';
+                    'max:255'
+                ],
+                'channel_partner_id' => 'required|array|min:1',
+                'channel_partner_id.*' => 'distinct|exists:channel_partners,id'
+            ]);
+            
+            $channelPartnerIds = array_unique($request->channel_partner_id);
+            $duplicateExists = DB::table('properties as p')
+                ->join('property_channel_partners as pcp', 'p.id', '=', 'pcp.property_id')
+                ->where('p.property_name', $request->name)
+                ->whereIn('pcp.channel_partner_id', $channelPartnerIds)
+                ->exists();
+    
+            if ($duplicateExists) {
+                return back()
+                    ->with('error', 'This property name and channel partner combination already exists.')
+                    ->withInput();
             }
-
-            $validator = Validator::make($request->all(), $rules);
-            if ($validator->fails()) {
-                foreach ($validator->errors()->all() as $error) {
-                    Flasher::addError($error);
-                }
-                return redirect()->back()->withInput();
-            }
-
+    
             $data = [
                 'property_name' => $request->name,
-                'created_date' => now()
+                'created_date'  => now()
             ];
 
-            if (session('software_type') !== 'lead_management') {
-                if ($request->hasFile('gallery_images')) {
-                    $images = [];
-
-                    foreach ($request->file('gallery_images') as $key => $image) {
-                        $imageName = time() . '_' . $key . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-                        $image->move(public_path('property_images'), $imageName);
-                        $images[] = '/property_images/' . $imageName;
-                    }
-                    $data['gallery_images'] = json_encode($images);
-                }
-                $categoryName = null;
-                if ($request->property_category) {
-                    $category = DB::table('inv_catg')->find($request->property_category);
-                    $categoryName = $category->name ?? null;
-                }
-
+            if (Schema::hasColumn('properties', 'initial_date')) {
+                $data['initial_date'] = $request->initial_date;
+            }
+    
+            if (session('software_type') !== 'lead_management') 
+            {
                 $data['property_type'] = $request->property_type;
-                $data['property_category'] = $categoryName;
+                $data['property_category'] = $request->property_category;
                 $data['property_sub_category'] = $request->property_sub_category;
+                $data['property_size'] = $request->property_size;
                 $data['state'] = $request->state;
                 $data['city'] = $request->city;
                 $data['address'] = $request->address;
                 $data['budget_price'] = $request->budget_price;
                 $data['property_status'] = $request->property_status ?? 'Available';
+                $data['house_number'] = $request->house_number ?? ''; // House number here
+    
+                if ($request->hasFile('gallery_images')) 
+                {
+                    $images = [];
+    
+                    foreach ($request->file('gallery_images') as $image) 
+                    {
+                        $path = $image->store('property-gallery', 'public');
+                        $images[] = '/storage/' . $path;
+                    }
+    
+                    $data['gallery_images'] = json_encode($images);
+                }
             }
-
-            DB::table('properties')->insert($data);
+    
+            $propertyId = DB::table('properties')->insertGetId($data);
+            
+            if ($request->channel_partner_id) 
+            {
+                $channelPartnerIds = array_unique($request->channel_partner_id);
+                foreach ($channelPartnerIds as $cpId) 
+                {
+                    $exists = DB::table('property_channel_partners')
+                        ->where('property_id', $propertyId)
+                        ->where('channel_partner_id', $cpId)
+                        ->exists();
+    
+                    if (!$exists) 
+                    {
+                        DB::table('property_channel_partners')->insert([
+                            'property_id' => $propertyId,
+                            'channel_partner_id' => $cpId,
+                            'assigned_by' => session('user_id'),
+                            'created_at' => now()
+                        ]);
+                    }
+                }
+            }
+    
             DB::commit();
-
-            Flasher::addSuccess('Property created successfully.');
-            return redirect()->route('property.name');
-        } catch (\Exception $e) {
+    
+            return redirect()->route('property.name')
+                ->with('success', 'Property created successfully.');
+    
+        } 
+        catch (\Exception $e) 
+        {
             DB::rollBack();
-            Flasher::addError('Failed to create: ' . $e->getMessage());
-            return redirect()->back()->withInput();
+            return back()->with('error', $e->getMessage())->withInput();
         }
     }
 
-    public function update_property(Request $request, $id)
+    public function update_property(Request $request) 
     {
         DB::beginTransaction();
-        try {
-            $rules = [
+        try 
+        {
+            $request->validate([
+                'id' => 'required|exists:properties,id',
                 'name' => [
                     'required',
                     'string',
-                    'max:255',
-                    Rule::unique('properties', 'property_name')->ignore($id)
-                ]
-            ];
+                    'max:255'
+                ],
+                'channel_partner_id' => 'required|array|min:1',
+                'channel_partner_id.*' => 'distinct|exists:channel_partners,id'
+            ]);
+            
+            $id = $request->id;  
+            $channelPartnerIds = array_unique($request->channel_partner_id);
+            $duplicateExists = DB::table('properties as p')
+                ->join('property_channel_partners as pcp', 'p.id', '=', 'pcp.property_id')
+                ->where('p.property_name', $request->name)
+                ->where('p.id', '!=', $id)
+                ->whereIn('pcp.channel_partner_id', $channelPartnerIds)
+                ->exists();
 
-            if (session('software_type') !== 'lead_management') {
-                $rules['property_type'] = 'nullable|string|max:100';
-                $rules['property_category'] = 'nullable|exists:inv_catg,id';
-                $rules['property_sub_category'] = 'nullable|string|max:255';
-                $rules['state'] = 'nullable|string|max:100';
-                $rules['city'] = 'nullable|string|max:100';
-                $rules['address'] = 'nullable|string';
-                $rules['budget_price'] = 'nullable|string|max:100';
-                $rules['property_status'] = 'nullable|in:Available,Hold,Procession,Sold';
-                $rules['gallery_images.*'] = 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048';
-            }
-
-            $validator = Validator::make($request->all(), $rules);
-            if ($validator->fails()) {
-                foreach ($validator->errors()->all() as $error) {
-                    Flasher::addError($error);
-                }
-                return redirect()->back()->withInput();
+            if ($duplicateExists) {
+                return back()
+                    ->with('error', 'Another property with this name and one of these channel partners already exists.')
+                    ->withInput();
             }
 
             $data = [
                 'property_name' => $request->name,
-                'updated_date' => now()
+                'updated_date'  => now()
             ];
 
-            if (session('software_type') !== 'lead_management') {
-                if ($request->hasFile('gallery_images')) {
-                    $oldProperty = DB::table('properties')->where('id', $id)->first();
-                    if ($oldProperty && $oldProperty->gallery_images) {
-                        $oldImages = json_decode($oldProperty->gallery_images);
-                        foreach ($oldImages as $oldImage) {
-                            $path = str_replace('/storage/', '', $oldImage);
-                            Storage::disk('public')->delete($path);
-                        }
-                    }
+            if (Schema::hasColumn('properties', 'initial_date')) {
+                $data['initial_date'] = $request->initial_date;
+            }
 
-                    $images = [];
-                    foreach ($request->file('gallery_images') as $image) {
-                        $path = $image->store('property-gallery', 'public');
-                        $images[] = '/storage/' . $path;
-                    }
-                    $data['gallery_images'] = json_encode($images);
-                }
-
-                $categoryName = null;
-                if ($request->property_category) {
-                    $category = DB::table('inv_catg')->find($request->property_category);
-                    $categoryName = $category->name ?? null;
-                }
-
+            if (session('software_type') !== 'lead_management') 
+            {
                 $data['property_type'] = $request->property_type;
-                $data['property_category'] = $categoryName;
+                $data['property_category'] = $request->property_category;
                 $data['property_sub_category'] = $request->property_sub_category;
+                $data['property_size'] = $request->property_size;
                 $data['state'] = $request->state;
                 $data['city'] = $request->city;
                 $data['address'] = $request->address;
                 $data['budget_price'] = $request->budget_price;
                 $data['property_status'] = $request->property_status;
-            }
+                $data['house_number'] = $request->house_number ?? '';
+                
+                if ($request->hasFile('gallery_images')) 
+                {
+                    $oldProperty = DB::table('properties')->where('id', $id)->first();
+                    if ($oldProperty && $oldProperty->gallery_images) 
+                    {
+                        $oldImages = json_decode($oldProperty->gallery_images);
+                        foreach ($oldImages as $oldImage) 
+                        {
+                            $path = str_replace('/storage/', '', $oldImage);
+                            Storage::disk('public')->delete($path);
+                        }
+                    }
+                    $images = [];
+                    foreach ($request->file('gallery_images') as $image) 
+                    {
+                        $path = $image->store('property-gallery', 'public');
+                        $images[] = '/storage/' . $path;
+                    }
 
+                    $data['gallery_images'] = json_encode($images);
+                }
+            }
+            
             DB::table('properties')
                 ->where('id', $id)
                 ->update($data);
+                
+            DB::table('property_channel_partners')
+                ->where('property_id', $id)
+                ->delete();
+                
+            if ($request->channel_partner_id) 
+            {
+                $channelPartnerIds = array_unique($request->channel_partner_id);
+                foreach ($channelPartnerIds as $cpId) 
+                {
+                    $exists = DB::table('property_channel_partners')
+                        ->where('property_id', $id)
+                        ->where('channel_partner_id', $cpId)
+                        ->exists();
+
+                    if (!$exists) 
+                    {
+                        DB::table('property_channel_partners')->insert([
+                            'property_id' => $id,
+                            'channel_partner_id' => $cpId,
+                            'assigned_by' => session('user_id'),
+                            'created_at' => now()
+                        ]);
+                    }
+                }
+            }
 
             DB::commit();
-            Flasher::addSuccess('Property updated successfully.');
-            return redirect()->route('property.name');
-        } catch (\Exception $e) {
+
+            return redirect()->route('property.name')
+                ->with('success', 'Property updated successfully.');
+
+        } 
+        catch (\Exception $e) 
+        {
             DB::rollBack();
-            Flasher::addError('Failed to update: ' . $e->getMessage());
+            return back()->with('error', $e->getMessage())->withInput();
+        }
+    }
+
+    public function assign_cp(Request $request)
+    {
+        try 
+        {
+            $request->validate([
+                'property_id' => 'required|exists:properties,id',
+                'channel_partner_id' => 'required|exists:channel_partners,id'
+            ]);
+            $exists = DB::table('property_channel_partners')
+                ->where('property_id', $request->property_id)
+                ->where('channel_partner_id', $request->channel_partner_id)
+                ->exists();
+
+            if ($exists) 
+            {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This channel partner is already assigned to this property'
+                ]);
+            }
+
+            DB::table('property_channel_partners')->insert([
+                'property_id' => $request->property_id,
+                'channel_partner_id' => $request->channel_partner_id,
+                'assigned_by' => session('user_id'),
+                'created_at' => now()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Channel Partner assigned successfully'
+            ]);
+        } 
+        catch (\Exception $e) 
+        {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to assign: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function remove_cp(Request $request)
+    {
+        try 
+        {
+            $request->validate([
+                'property_id' => 'required',
+                'channel_partner_id' => 'required'
+            ]);
+
+            DB::table('property_channel_partners')
+                ->where('property_id', $request->property_id)
+                ->where('channel_partner_id', $request->channel_partner_id)
+                ->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Channel Partner removed successfully'
+            ]);
+        } 
+        catch (\Exception $e) 
+        {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to remove: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function get_assigned_cps($propertyId)
+    {
+        $assignedCPs = DB::table('property_channel_partners as pcp')
+            ->join('channel_partners as cp', 'pcp.channel_partner_id', '=', 'cp.id')
+            ->join('users as u', 'pcp.assigned_by', '=', 'u.id')
+            ->select('cp.id as channel_partner_id', 'cp.name', 'cp.company_name', 'u.name as assigned_by_name', 'pcp.created_at')
+            ->where('pcp.property_id', $propertyId)
+            ->get();
+
+        return response()->json($assignedCPs);
+    }
+
+    public function add_property_comment(Request $request)
+    {
+        try 
+        {
+            $request->validate([
+                'property_id' => 'required|exists:properties,id',
+                'channel_partner_id' => 'required|exists:channel_partners,id',
+                'platform' => 'required|string|max:50',
+                'comment' => 'required|string'
+            ]);
+
+            DB::table('property_promoted_comments')->insert([
+                'property_id' => $request->property_id,
+                'channel_partner_id' => $request->channel_partner_id,
+                'platform' => $request->platform,
+                'comment' => $request->comment,
+                'created_by' => session('user_id'),
+                'created_at' => now()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Promoted comment added successfully'
+            ]);
+        } 
+        catch (\Exception $e) 
+        {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to add comment: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function get_property_comments($propertyId, Request $request)
+    {
+        $platform = $request->query('platform');
+        $cpId = $request->query('cp_id');
+
+        $query = DB::table('property_promoted_comments as ppc')
+            ->join('channel_partners as cp', 'ppc.channel_partner_id', '=', 'cp.id')
+            ->join('users as u', 'ppc.created_by', '=', 'u.id')
+            ->select('ppc.*', 'cp.name as cp_name', 'u.name as created_by_name')
+            ->where('ppc.property_id', $propertyId)
+            ->orderBy('ppc.created_at', 'desc');
+
+        if ($platform) {
+            $query->where('ppc.platform', $platform);
+        }
+
+        if ($cpId) {
+            $query->where('ppc.channel_partner_id', $cpId);
+        }
+
+        $comments = $query->get();
+
+        return response()->json($comments);
+    }
+
+    public function channel_partner_platform(Request $request)
+    {
+        $user_role = session()->get('user_type');
+
+        if ($user_role !== 'admin' && $user_role !== 'team_manager') 
+        {
+            abort(404);
+        }
+
+        try 
+        {
+            $length = $request->query('length', 10);
+            $search = $request->query('search');
+            $sortColumn = $request->query('sort', 'id');
+            $sortDirection = $request->query('direction', 'desc');
+            $sortDirection = in_array($sortDirection, ['asc', 'desc']) 
+                ? $sortDirection 
+                : 'desc';
+            $allowedColumns = [
+                'id',
+                'name',
+                'email',
+                'phone',
+                'company_name',
+                'status',
+                'created_at'
+            ];
+
+            $sortColumn = in_array($sortColumn, $allowedColumns)
+                ? $sortColumn
+                : 'id';
+
+            $channelPartners = DB::table('channel_partners')
+                ->when($search, function ($query, $search) 
+                {
+                    $query->where('name', 'LIKE', '%' . $search . '%')
+                        ->orWhere('email', 'LIKE', '%' . $search . '%')
+                        ->orWhere('phone', 'LIKE', '%' . $search . '%')
+                        ->orWhere('company_name', 'LIKE', '%' . $search . '%');
+                })
+                ->orderBy($sortColumn, $sortDirection)
+                ->paginate((int)$length)
+                ->appends([
+                    'search' => $search,
+                    'length' => $length,
+                    'sort' => $sortColumn,
+                    'direction' => $sortDirection
+                ]);
+
+            return view(
+                'master.channel-partner',
+                compact(
+                    'channelPartners',
+                    'length',
+                    'sortColumn',
+                    'sortDirection'
+                )
+            );
+
+        } 
+        catch (\Exception $e) 
+        {
+            Flasher::addError('Failed to load channel partners : ' . $e->getMessage());
+            return back();
+        }
+    }
+
+    public function channel_partner_create(Request $request)
+    {
+        DB::beginTransaction();
+        try 
+        {
+            $validator = Validator::make($request->all(), [
+
+                'name' => 'required|string|max:255',
+
+                'email' => [
+                    'nullable',
+                    'email',
+                    Rule::unique('channel_partners', 'email')
+                ],
+
+                'phone' => [
+                    'nullable',
+                    'max:20',
+                    Rule::unique('channel_partners', 'phone')
+                ],
+
+                'company_name' => 'nullable|string|max:255',
+
+                'address' => 'nullable|string',
+
+                'gst_number' => 'nullable|string|max:100',
+
+                'pan_number' => 'nullable|string|max:100',
+
+                'status' => 'required|in:active,inactive',
+
+            ]);
+
+            if ($validator->fails()) 
+            {
+                foreach ($validator->errors()->all() as $error) 
+                {
+                    Flasher::addError($error);
+                }
+
+                return redirect()->back()->withInput();
+            }
+
+            DB::table('channel_partners')->insert([
+
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'company_name' => $request->company_name,
+                'address' => $request->address,
+                'gst_number' => $request->gst_number,
+                'pan_number' => $request->pan_number,
+                'status' => $request->status,
+                'created_at' => now(),
+                'updated_at' => now(),
+
+            ]);
+
+            DB::commit();
+
+            Flasher::addSuccess('Channel Partner created successfully.');
+
+            return redirect()->route('channel.partner.platform');
+
+        } 
+        catch (\Exception $e) 
+        {
+
+            DB::rollBack();
+
+            Flasher::addError('Failed to create channel partner : ' . $e->getMessage());
+
+            return redirect()->back()->withInput();
+        }
+    }
+
+    public function channel_partner_update(Request $request, $id)
+    {
+        DB::beginTransaction();
+        try 
+        {
+            $validator = Validator::make($request->all(), [
+
+                'name' => 'required|string|max:255',
+
+                'email' => [
+                    'nullable',
+                    'email',
+                    Rule::unique('channel_partners', 'email')->ignore($id)
+                ],
+
+                'phone' => [
+                    'nullable',
+                    'max:20',
+                    Rule::unique('channel_partners', 'phone')->ignore($id)
+                ],
+
+                'company_name' => 'nullable|string|max:255',
+
+                'address' => 'nullable|string',
+
+                'gst_number' => 'nullable|string|max:100',
+
+                'pan_number' => 'nullable|string|max:100',
+
+                'status' => 'required|in:active,inactive',
+
+            ]);
+
+            if ($validator->fails()) 
+            {
+                foreach ($validator->errors()->all() as $error) 
+                {
+                    Flasher::addError($error);
+                }
+
+                return redirect()->back()->withInput();
+            }
+
+            DB::table('channel_partners')
+                ->where('id', $id)
+                ->update([
+                    'name' => $request->name,
+                    'email' => $request->email,
+                    'phone' => $request->phone,
+                    'company_name' => $request->company_name,
+                    'address' => $request->address,
+                    'gst_number' => $request->gst_number,
+                    'pan_number' => $request->pan_number,
+                    'status' => $request->status,
+                    'updated_at' => now(),
+                ]);
+            DB::commit();
+            Flasher::addSuccess('Channel Partner updated successfully.');
+            return redirect()->route('channel.partner.platform');
+        } 
+        catch (\Exception $e) 
+        {
+            DB::rollBack();
+            Flasher::addError('Failed to update channel partner : ' . $e->getMessage());
             return redirect()->back()->withInput();
         }
     }

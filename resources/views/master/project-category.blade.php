@@ -10,7 +10,7 @@
             <div class="col-12">
                 <div class="page-title-box d-flex align-items-center justify-content-between">
                     <h4 class="mb-0">{{ session('software_type') === 'lead_management' ? 'Product Category' : 'Project Category' }}<div class="border-bottom border-3 border-primary mb-2 mt-1 w-75"></div></h4>
-                    <button class="btn btn-primary btn-small px-4 py-1 rounded-pill fw-bold text-white shadow-lg add-project"
+                    <button class="btn btn-primary btn-small px-4 py-1 rounded-pill fw-bold text-white shadow-lg project-category-add-btn"
                         data-bs-toggle="modal"
                         data-bs-target="#Modalbox"
                         data-action="{{ route('project_category.store') }}"
@@ -88,14 +88,14 @@
                                         <td>
                                             <div class="d-flex gap-2">
                                                 <button
-                                                    class="btn btn-sm btn-outline-primary edit-btn"
+                                                    class="btn btn-sm btn-outline-primary category-edit-btn"
                                                     data-id="{{ $category->id }}"
                                                     data-category-type="{{ $category->type }}"
                                                     data-name="{{ $category->name }}"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#Modalbox"
-                                                    data-action="{{ url('project-category/update') }}"
-                                                    data-action-type="save"
+                                                    data-action="{{ route('category.update', $category->id) }}"
+                                                    data-action-type="Update"
                                                     data-modal="Project">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
@@ -123,7 +123,20 @@
         url.searchParams.set('length', this.value);
         window.location.href = url.toString();
     });
-    $('.edit-btn').on('click', function() 
+    $('.project-category-add-btn').on('click', function()
+    {
+        $('#action')[0].reset();
+        $('#id').val('');
+        $('#action').attr('action', $(this).data('action'));
+        $('#action input[name="_method"]').remove();
+        $('#data-action-type').text('Create');
+        $('#ModalboxLabel').text('Create Project Category');
+        $('#modal-name').text('Project Category Name');
+        $('.cat-type').removeClass('d-none');
+        $('#cat_type').val('').trigger('change');
+    });
+
+    $('.category-edit-btn').on('click', function()
     {
         let id = $(this).data('id');
         let name = $(this).data('name');
@@ -135,6 +148,11 @@
         $('.cat-type').removeClass('d-none');
         $('#cat_type').val(categoryType).trigger('change');
         $('#action').attr('action', action);
+        if ($('#action input[name="_method"]').length === 0) {
+            $('#action').append('<input type="hidden" name="_method" value="PUT">');
+        } else {
+            $('#action input[name="_method"]').val('PUT');
+        }
         $('#data-action-type').text(actionType);
         $('#ModalboxLabel').text('Update Project Category');
         $('#modal-name').text('Project Category Name');

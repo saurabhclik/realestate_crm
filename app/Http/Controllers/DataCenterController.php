@@ -378,7 +378,7 @@ class DataCenterController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Data created successfully.');
-           
+
     }
 
     public function edit($id)
@@ -429,7 +429,7 @@ class DataCenterController extends Controller
         if ($request->filled('budget')) $updateData['budget'] = $request->input('budget');
         if ($request->filled('comment')) $updateData['comment'] = $request->input('comment');
         if ($request->filled('status')) $updateData['status'] = $request->input('status');
-       
+
         // Check if there's anything to update
         if (empty($updateData)) {
             if ($request->expectsJson()) {
@@ -530,7 +530,7 @@ class DataCenterController extends Controller
 
             // Extract phone
             $phone = $cleanRow['phone no.'] ?? $cleanRow['phone'] ?? $cleanRow['phone no'] ?? $cleanRow['phone number'] ?? '';
-            
+
             if (empty($phone)) {
                 $validationErrors[] = "Row $rowNumber: Phone number is required.";
                 continue;
@@ -638,7 +638,7 @@ class DataCenterController extends Controller
         foreach ($validationErrors as $message) {
             $allMessages[] = "error <small>❌ $message</small>";
         }
-        
+
         if (!empty($validationErrors)) {
             if (empty($summaryMessage)) {
                 $summaryMessage = "❌ Found " . count($validationErrors) . " validation error(s). ";
@@ -650,7 +650,7 @@ class DataCenterController extends Controller
         foreach ($errors as $message) {
             $allMessages[] = "error <small>❌ $message</small>";
         }
-        
+
         if (!empty($errors)) {
             if (empty($summaryMessage)) {
                 $summaryMessage = "❌ Found " . count($errors) . " database error(s). ";
@@ -763,7 +763,7 @@ class DataCenterController extends Controller
                     ->exists();
 
                 if ($alreadyConverted) {
-                    DB::rollBack(); 
+                    DB::rollBack();
                     return response()->json([
                         'success' => false,
                         'message' => 'Already converted'
@@ -776,7 +776,20 @@ class DataCenterController extends Controller
                     throw new \Exception('Record not found');
                 }
 
-                $userId = session('user_id') ?? 1;
+                $currentUserId = session('user_id') ?? 1;
+                $userId = $currentUserId;
+                $leadSharedWith = null;
+
+                if (session('user_type') === 'reception')
+                {
+                    $managerId = DB::table('users')->where('id', $currentUserId)->value('tm_id')
+                        ?? DB::table('users')->where('role', 'admin')->value('id');
+                    if ($managerId)
+                    {
+                        $userId = $managerId;
+                        $leadSharedWith = (string) $currentUserId;
+                    }
+                }
 
                 DB::table('leads')->insert([
                     'name' => $data->name ?? '',
@@ -799,6 +812,7 @@ class DataCenterController extends Controller
 
                     'status' => strtoupper($request->status),
                     'user_id' => $userId,
+                    'lead_shared_with' => $leadSharedWith,
 
                     'created_at' => now(),
                     'updated_at' => now(),

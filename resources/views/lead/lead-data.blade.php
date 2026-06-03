@@ -2,18 +2,18 @@
 @section('title', 'leads | Pro-leadexpertz')
 @section('content')
 @php
-$softwareType = session('software_type', 'real_state');
-$isLeadManagement = $softwareType === 'lead_management';
+    $softwareType = session('software_type', 'real_state');
+    $isLeadManagement = $softwareType === 'lead_management';
 @endphp
 
-
 @php
-$userType = session('user_type');
-$isSalesman = ($userType == 'salesman');
+    $userType = session('user_type');
+    $isSalesman = ($userType == 'salesman');
 @endphp
 
 @include('modals.view-comments')
 @include('modals.status-update', ['projects' => $projects])
+@include('modals.visit-done', ['projects' => $projects])
 @include('modals.duplicate-lead')
 @include('modals.share-lead')
 <style>
@@ -231,6 +231,19 @@ $isSalesman = ($userType == 'salesman');
         max-height: 70vh;
         overflow-y: auto;
         padding: 1rem;
+    }
+
+    .freeze-checkbox {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .freeze-checkbox input {
+        cursor: not-allowed;
+    }
+
+    .freeze-label {
+        color: #6c757d;
     }
 </style>
 <div class="page-content">
@@ -482,6 +495,11 @@ $isSalesman = ($userType == 'salesman');
                                                         data-bs-toggle="tooltip" title="Update Status">
                                                         <i class="fas fa-sync-alt text-info"></i>
                                                     </button>
+                                                    <button class="btn btn-xs btn-soft-light"
+                                                        onclick="showVisitDoneModal('{{ $row->id }}')"
+                                                        data-bs-toggle="tooltip" title="Visit Done">
+                                                        <i class="fas fa-check-double text-success"></i>
+                                                    </button>
                                                     @endif
                                                     @if($lead_name === 'completed')
                                                     <button class="btn btn-xs btn-soft-light view-applicant-btn"
@@ -515,6 +533,15 @@ $isSalesman = ($userType == 'salesman');
                                                         title="Matching Projects">
                                                         <i class="fas fa-building text-info"></i>
                                                     </button>
+                                                    @if($row->conversion_type === 'Completed')
+                                                    <button class="btn btn-xs btn-soft-light view-post-sale-btn"
+                                                        data-lead-id="{{ $row->id }}"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#viewPostSaleModal"
+                                                        title="View Post Sale Details">
+                                                        <i class="fas fa-file-alt text-info"></i>
+                                                    </button>
+                                                    @endif
                                                 </div>
                                             </div>
                                             <div class="d-block">
@@ -545,14 +572,30 @@ $isSalesman = ($userType == 'salesman');
                                             foreach($sharedIds as $id) {
                                             $user = collect($users)->firstWhere('id', $id);
                                             if($user) {
-                                            $sharedUsers[] = $user->name;
+                                            $sharedUsers[] = $user;
                                             }
                                             }
                                             @endphp
                                             @if(count($sharedUsers) > 0)
-                                            <span class="badge bg-success me-1">Shared</span>
+                                            <div class="d-flex flex-wrap gap-1">
+                                                @foreach($sharedUsers as $sharedUser)
+                                                <span class="badge bg-success me-1 d-inline-flex align-items-center gap-1">
+                                                    {{ $sharedUser->name }}
+                                                    <button type="button"
+                                                        class="btn-close btn-close-white revoke-share-btn"
+                                                        style="font-size: 0.5rem; width: 0.5rem; height: 0.5rem; opacity: 0.8;"
+                                                        data-lead-id="{{ $row->id }}"
+                                                        data-user-id="{{ $sharedUser->id }}"
+                                                        data-user-name="{{ $sharedUser->name }}"
+                                                        data-bs-toggle="tooltip"
+                                                        title="Revoke access for {{ $sharedUser->name }}"
+                                                        aria-label="Remove">
+                                                    </button>
+                                                </span>
+                                                @endforeach
+                                            </div>
                                             <small class="text-muted d-block mt-1">
-                                                With: {{ implode(', ', $sharedUsers) }}
+                                                Click x to remove access
                                             </small>
                                             @endif
                                         </div>
@@ -562,8 +605,21 @@ $isSalesman = ($userType == 'salesman');
                                     </td>
                                     <td>
                                         <span class="cust-badge bg-soft-info text-info">
-                                            <i class="fas fa-{{ $row->source == 'Website' ? 'globe' : ($row->source == 'Referral' ? 'user-friends' : 'ad') }} me-1"></i>
-                                            {{ $row->source }}
+                                            @php
+                                            $sourceName = $row->source;
+                                            if (is_numeric($row->source)) {
+                                                $sourceObj = \Illuminate\Support\Facades\DB::table('sources')->where('id', $row->source)->first();
+                                                if ($sourceObj) {
+                                                    $sourceName = $sourceObj->name;
+                                                }
+                                            }
+                                            if (empty($sourceName) || trim($sourceName) === '-') {
+                                                $sourceName = 'Data Center';
+                                            }
+                                            $icon = $sourceName == 'Website' ? 'globe' : ($sourceName == 'Referral' ? 'user-friends' : 'ad');
+                                            @endphp
+                                            <i class="fas fa-{{ $icon }} me-1"></i>
+                                            {{ $sourceName }}
                                         </span>
                                     </td>
                                     <td>{{ $row->campaign }}</td>
@@ -582,7 +638,7 @@ $isSalesman = ($userType == 'salesman');
                                     @endif
                                     <td>
                                         <span class="cust-badge text-dark">
-                                            {{ $row->status }}
+                                            {{ $row->status_display_name ?? ucfirst(str_replace('_', ' ', $row->status)) }}
                                         </span>
                                     </td>
                                     <td>
@@ -601,9 +657,13 @@ $isSalesman = ($userType == 'salesman');
                                                 $projectNames[] = $project->project_name;
                                                 }
                                                 }
-                                                echo implode(', ', $projectNames);
+                                                $projectText = implode(', ', $projectNames);
+                                                if (!empty($row->custom_project_name)) {
+                                                    $projectText .= ($projectText ? ', ' : '') . $row->custom_project_name . ' (Other)';
+                                                }
+                                                echo $projectText ?: '-';
                                                 } else {
-                                                echo $row->project_name ?? '-';
+                                                echo $row->project_name ?? $row->custom_project_name ?? '-';
                                                 }
                                                 @endphp
                                             </div>
@@ -799,6 +859,30 @@ $isSalesman = ($userType == 'salesman');
                             <span class="visually-hidden">Loading...</span>
                         </div>
                         <p class="mt-2">Loading visit history...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="viewPostSaleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">Post Sale Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="postSaleContent">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-info" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading post sale details...</p>
                     </div>
                 </div>
             </div>
@@ -1665,6 +1749,232 @@ $isSalesman = ($userType == 'salesman');
                 button.html('<i class="bi bi-whatsapp"></i> Share');
             }
         });
+    });
+
+    $(document).on('click', '.view-post-sale-btn', function() {
+        const leadId = $(this).data('lead-id');
+
+        $('#postSaleContent').html(`
+            <div class="text-center py-4">
+                <div class="spinner-border text-info" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading post sale details...</p>
+            </div>
+        `);
+
+        $.ajax({
+            url: '/post-sale/lead/' + leadId,
+            type: 'GET',
+            success: function(response) {
+                if (response.success && response.data) {
+                    const data = response.data;
+                    const createdAt = data.created_at ? new Date(data.created_at).toLocaleString() : '-';
+                    const html = `
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <strong>Applicant Name:</strong>
+                                    <p>${escapeHtml(data.applicant_name || '-')}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Applicant Contact:</strong>
+                                    <p>${escapeHtml(data.applicant_number || '-')}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Project Name:</strong>
+                                    <p>${escapeHtml(data.project_name || '-')}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Unit Number:</strong>
+                                    <p>${escapeHtml(data.unit_number || '-')}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <strong>Date of Birth:</strong>
+                                    <p>${escapeHtml(data.dob || '-')}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Date of Anniversary:</strong>
+                                    <p>${escapeHtml(data.doa || '-')}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Email:</strong>
+                                    <p>${escapeHtml(data.email || '-')}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Created At:</strong>
+                                    <p>${escapeHtml(createdAt)}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    $('#postSaleContent').html(html);
+                } else {
+                    $('#postSaleContent').html(`
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            No post sale record found for this lead.
+                        </div>
+                    `);
+                }
+            },
+            error: function() {
+                $('#postSaleContent').html(`
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error loading post sale details.
+                    </div>
+                `);
+            }
+        });
+    });
+
+    $(document).on('click', '.revoke-share-btn', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const button = $(this);
+        const leadId = button.data('lead-id');
+        const userId = button.data('user-id');
+        const userName = button.data('user-name');
+
+        Swal.fire({
+            title: 'Revoke Share Access?',
+            html: `Are you sure you want to remove <strong>${escapeHtml(userName)}</strong>'s access to this lead?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, revoke access',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                revokeShareAccess(leadId, [userId]);
+            }
+        });
+    });
+
+    function revokeShareAccess(leadId, userIds) {
+        const loadingSwal = Swal.fire({
+            title: 'Revoking Access...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        $.ajax({
+            url: '{{ route("lead.revoke-share") }}',
+            type: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}',
+                lead_id: leadId,
+                user_ids: userIds
+            },
+            success: function(response) {
+                loadingSwal.close();
+
+                if (response.success) {
+                    Swal.fire({
+                        title: 'Access Revoked!',
+                        text: response.message,
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: response.message,
+                        icon: 'error'
+                    });
+                }
+            },
+            error: function(xhr) {
+                loadingSwal.close();
+                const errorMessage = xhr.responseJSON?.message || 'Error revoking share access';
+                Swal.fire({
+                    title: 'Error',
+                    text: errorMessage,
+                    icon: 'error'
+                });
+            }
+        });
+    }
+
+    function checkUserTypeAndToggleCheckbox() {
+        const userId = $('#user').val();
+        const checkbox = $('#sendToNewLead');
+        const checkboxLabel = $('label[for="sendToNewLead"]');
+        const checkboxContainer = checkbox.closest('.form-check');
+
+        if (!checkbox.length) {
+            return;
+        }
+
+        if (!userId) {
+            checkbox.prop('disabled', false);
+            checkboxContainer.removeClass('freeze-checkbox');
+            checkboxLabel.removeClass('freeze-label');
+            checkboxLabel.find('small').text('If checked, lead goes to NEW LEAD status');
+            return;
+        }
+
+        $.ajax({
+            url: '{{ route("user.check-type") }}',
+            type: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}',
+                user_id: userId
+            },
+            success: function(response) {
+                if (response.user_type === 'salesman') {
+                    checkbox.prop('checked', true);
+                    checkbox.prop('disabled', true);
+                    checkboxContainer.addClass('freeze-checkbox');
+                    checkboxLabel.addClass('freeze-label');
+                    checkboxLabel.find('small').text('(Default: Lead goes to NEW LEAD when assigned to salesperson)');
+                } else {
+                    checkbox.prop('disabled', false);
+                    checkbox.prop('checked', false);
+                    checkboxContainer.removeClass('freeze-checkbox');
+                    checkboxLabel.removeClass('freeze-label');
+                    checkboxLabel.find('small').text('If checked, lead goes to NEW LEAD status');
+                }
+            },
+            error: function() {
+                checkbox.prop('disabled', false);
+                checkboxContainer.removeClass('freeze-checkbox');
+                checkboxLabel.removeClass('freeze-label');
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        if (typeof $('[data-bs-toggle="tooltip"]').tooltip === 'function') {
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        }
+
+        $('#user').on('change', function() {
+            checkUserTypeAndToggleCheckbox();
+        });
+
+        $('.lead-allocate-form').on('submit', function() {
+            const checkbox = $('#sendToNewLead');
+            if (checkbox.is(':checked')) {
+                checkbox.prop('disabled', false);
+            }
+        });
+
+        if ($('#user').val()) {
+            checkUserTypeAndToggleCheckbox();
+        }
     });
 </script>
 @endsection

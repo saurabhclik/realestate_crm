@@ -45,13 +45,14 @@
     ];
 
     $currentMenuAccess = $menuAccess[$softwareType] ?? $menuAccess['real_state'];
+    $isReception = $userType === 'reception';
 @endphp
 
 <div class="vertical-menu">
     <div data-simplebar="" class="h-100">
         <div id="sidebar-menu">
             <ul class="metismenu list-unstyled" id="side-menu">
-                @if (in_array('dashboard', $currentMenuAccess))
+                @if (in_array('dashboard', $currentMenuAccess) && !$isReception)
                     <li>
                         <a
                             href="{{ $softwareType === 'task_management' ? route('task.list') : ($softwareType === 'mis_management' ? route('mis.summary-report') : route('dashboard')) }}">
@@ -140,12 +141,6 @@
                                 @if (in_array('project_detail_page', $activeFeatures))
                                     <li>
                                         <a href="{{ route('inquiry_question') }}" key="t-shops">Inquiry Question</a>
-                                    </li>
-                                @endif
-                                @if ($userType == 'admin')
-                                    <li>
-                                        <a href="{{ route('integration.settings') }}" key="t-shops">API
-                                            Integrations</a>
                                     </li>
                                 @endif
                             @endif
@@ -277,13 +272,19 @@
                                     All Lead
                                 </a>
                             </li>
+                        @else
+                            <li>
+                                <a href="{{ route('lead.all_lead') }}">
+                                    All Lead
+                                </a>
+                            </li>
+                        @endif
                     </ul>
                 </li>
                 @endif
 
-                @endif
-
                 @if (in_array('transfer_leads', $currentMenuAccess) && ($userType == 'admin' || $userType == 'team_manager' || $userType != 'post_sale') && $userType != 'reception')
+
                     <li>
                         <a href="javascript:(0);" class="has-arrow waves-effect">
                             <i class='bx bx-transfer-alt'></i>
@@ -326,7 +327,7 @@
                     </li>
                 @endif
 
-                @if (in_array('task_management', $currentMenuAccess) && in_array('task_management', $activeFeatures) && $userType != 'reception')
+                @if (in_array('task_management', $currentMenuAccess) && (in_array('task_management', $activeFeatures) || $isReception))
                     <li>
                         <a href="javascript: void(0);" class="has-arrow waves-effect">
                             <i class="bx bx-task"></i>
@@ -437,7 +438,7 @@
                         </a>
                     </li>
                 @endif
-                @if (in_array('settings', $currentMenuAccess) && $userType != 'reception')
+                @if (in_array('settings', $currentMenuAccess))
                     <li>
                         <a href="javascript: void(0);" class="has-arrow waves-effect">
                             <i class="bx bxs-bar-chart-alt-2"></i>

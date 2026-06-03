@@ -16,6 +16,7 @@
                         </select>
                     </div>
                     <div class="mb-3 cat-type d-none">
+                        <label for="cat_type" class="form-label">Type</label>
                         <select class="form-control select2" name="cat_type" id="cat_type">
                             <option value="">-- Select Type --</option>
                             @foreach($categoryList as $cat)

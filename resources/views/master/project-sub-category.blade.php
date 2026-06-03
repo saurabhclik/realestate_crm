@@ -116,7 +116,7 @@
             $('#subCategoryForm').find('input[name="_method"]').remove();
             $('#id').val('');
             $('#name').val('');
-            $('#category').val('');
+            $('#category').val('').trigger('change');
         });
         $('.edit-btn').on('click', function() {
             $('#editSubCategoryModalLabel').text('Edit Sub Category');
@@ -134,7 +134,7 @@
 
             $('#id').val(id);
             $('#name').val(name);
-            $('#category').val(category);
+            $('#category').val(String(category)).trigger('change');
         });
     });
 </script>

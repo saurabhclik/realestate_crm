@@ -3,6 +3,46 @@
 @section('title', session('software_type') === 'lead_management' ? 'Product Name | Pro-leadexpertz' : 'Property Master | Pro-leadexpertz')
 
 @section('content')
+@php
+    $normalizeGalleryImages = function ($galleryImages) {
+        if (empty($galleryImages)) {
+            return [];
+        }
+
+        $images = json_decode($galleryImages, true);
+        if (!is_array($images)) {
+            $images = array_filter(array_map('trim', explode(',', $galleryImages)));
+        }
+
+        return array_values(array_filter($images));
+    };
+
+    $propertyImageUrl = function ($image) {
+        $image = trim(str_replace('\\', '/', (string) $image));
+
+        if ($image === '') {
+            return '';
+        }
+
+        if (preg_match('#^(https?:)?//#', $image) || str_starts_with($image, 'data:')) {
+            return $image;
+        }
+
+        if (str_starts_with($image, '/storage/')) {
+            return asset(ltrim($image, '/'));
+        }
+
+        if (str_starts_with($image, 'storage/')) {
+            return asset($image);
+        }
+
+        if (str_starts_with($image, '/')) {
+            return url($image);
+        }
+
+        return asset('storage/' . ltrim($image, '/'));
+    };
+@endphp
 <div class="page-content">
     <div class="container-fluid">
         <div class="row">
@@ -125,6 +165,10 @@
                                 </thead>
                                 <tbody>
                                     @foreach($properties as $property)
+                                    @php
+                                        $galleryImages = $normalizeGalleryImages($property->gallery_images);
+                                        $galleryImageUrls = array_map($propertyImageUrl, $galleryImages);
+                                    @endphp
                                     <tr>
                                         <td>
                                             {{ $loop->iteration }}
@@ -195,16 +239,13 @@
                                             </button>
                                         </td>
                                         <td>
-                                            @if($property->gallery_images)
-                                            @php
-                                                $images = json_decode($property->gallery_images, true);
-                                            @endphp
+                                            @if(count($galleryImageUrls))
                                             <div class="d-flex flex-wrap gap-1">
-                                                @foreach(array_slice($images, 0, 3) as $image)
-                                                <img src="{{ url($image) }}" alt="Gallery Image" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                                @foreach(array_slice($galleryImageUrls, 0, 3) as $image)
+                                                <img src="{{ $image }}" alt="Gallery Image" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
                                                 @endforeach
-                                                @if(count($images) > 3)
-                                                <span class="badge bg-secondary">+{{ count($images)-3 }}</span>
+                                                @if(count($galleryImageUrls) > 3)
+                                                <span class="badge bg-secondary">+{{ count($galleryImageUrls)-3 }}</span>
                                                 @endif
                                             </div>
                                             @else
@@ -228,6 +269,7 @@
                                                     data-property_status="{{ $property->property_status ?? '' }}"
                                                     data-initial_date="{{ $property->initial_date ?? '' }}"
                                                     data-channel-partner-ids="{{ $property->channel_partner_ids ?? '' }}"
+                                                    data-gallery-images='@json($galleryImageUrls)'
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#Modalbox"
                                                     data-type="Update"
@@ -609,6 +651,19 @@
                 var ids = cpIds.toString().split(',');
                 $('#property_channel_partner_id').val(ids).trigger('change');
             }
+
+            var galleryImages = btn.attr('data-gallery-images');
+            if (galleryImages)
+            {
+                try
+                {
+                    renderExistingImages(JSON.parse(galleryImages));
+                }
+                catch (error)
+                {
+                    renderExistingImages([]);
+                }
+            }
             
             $('#modalTitleText').text('Update ' + btn.data('modal'));
             $('#modal-type span').text('Update ' + btn.data('modal'));
@@ -919,6 +974,31 @@
         {
             $('#imagePreviewContainer').hide();
         }
+    }
+
+    function renderExistingImages(images)
+    {
+        var preview = $('#imagePreview');
+        preview.empty();
+
+        if (!Array.isArray(images) || images.length === 0)
+        {
+            $('#imagePreviewContainer').hide();
+            return;
+        }
+
+        $('#imagePreviewContainer').show();
+        images.forEach(function(image)
+        {
+            preview.append(
+                '<div class="col-md-3 mb-2">' +
+                '<div class="position-relative">' +
+                '<img src="' + image + '" class="img-fluid rounded" style="height: 100px; width: 100%; object-fit: cover; border: 1px solid #dee2e6;">' +
+                '<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-info">Existing</span>' +
+                '</div>' +
+                '</div>'
+            );
+        });
     }
 
     function loadAssignedCPs(propertyId) 

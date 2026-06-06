@@ -18,8 +18,14 @@ class StaffManagementController extends Controller
     {
         $user_role = session()->get('user_type');
         $user_id = session()->get('user_id');
+        $isSpecial = DB::table('users')
+            ->where('id', $user_id)
+            ->value('is_special');
 
-        if ($user_role !== 'admin' && $user_role !== 'team_manager') {
+        if (
+            $user_role !== 'admin'  &&
+            $isSpecial != 1
+        ) {
             abort(404);
         }
 
@@ -98,8 +104,11 @@ class StaffManagementController extends Controller
     public function create()
     {
         $user_role = session()->get('user_type');
-
-        if ($user_role !== 'admin' && $user_role !== 'team_manager') {
+        $user_id = session()->get('user_id');
+        $isSpecial = DB::table('users')
+            ->where('id', $user_id)
+            ->value('is_special');
+        if ($user_role !== 'admin' && $isSpecial != 1) {
             abort(404);
         }
 
@@ -195,9 +204,12 @@ class StaffManagementController extends Controller
             Flasher::addError('Invalid Action!');
             return redirect()->route('users.index');
         }
-
+        $user_id = session()->get('user_id');
+        $isSpecial = DB::table('users')
+            ->where('id', $user_id)
+            ->value('is_special');
         $user_role = session()->get('user_type');
-        if ($user_role !== 'admin' && $user_role !== 'team_manager') {
+        if ($user_role !== 'admin' && $isSpecial != 1) {
             abort(404);
         }
         try {
@@ -410,8 +422,11 @@ class StaffManagementController extends Controller
     public function promote_list(Request $request)
     {
         $user_role = session()->get('user_type');
-
-        if ($user_role !== 'admin' && $user_role !== 'team_manager') {
+        $user_id = session()->get('user_id');
+        $isSpecial = DB::table('users')
+            ->where('id', $user_id)
+            ->value('is_special');
+        if ($user_role !== 'admin' && $isSpecial != 1) {
             abort(404);
         }
 
@@ -469,8 +484,11 @@ class StaffManagementController extends Controller
     public function designation_list(Request $request)
     {
         $user_role = session()->get('user_type');
-
-        if ($user_role !== 'admin') {
+        $user_id = session()->get('user_id');
+        $isSpecial = DB::table('users')
+            ->where('id', $user_id)
+            ->value('is_special');
+        if ($user_role !== 'admin' && $isSpecial != 1) {
             abort(404);
         }
 
@@ -534,7 +552,11 @@ class StaffManagementController extends Controller
     {
 
         $user_role = session()->get('user_type');
-        if ($user_role !== 'admin' && $user_role !== 'team_manager') {
+        $user_id = session()->get('user_id');
+        $isSpecial = DB::table('users')
+            ->where('id', $user_id)
+            ->value('is_special');
+        if ($user_role !== 'admin' && $isSpecial != 1) {
             abort(404);
         }
         $users = DB::table('users as a')

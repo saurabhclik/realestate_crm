@@ -8,101 +8,100 @@
     $userType = Session::get('user_type');
 @endphp
 @if($userType != 'reception')
-<div class="floating-filter">
-    <button type="button" class="btn btn-primary btn-floating" id="toggleDashboardFilter">
-        <i class="fas fa-filter text-light"></i>
-    </button>
-
-    <div class="floating-box" id="filterDashboardBox">
-        <div class="filter-header d-flex justify-content-between align-items-center">
-            <span>Filters</span>
-            <button type="button" class="btn-close btn-close-white btn-sm" id="closeDashboardFilter"></button>
-        </div>
-
-        <div class="filter-section w-100">
-            <h6>Classification</h6>
-            <div class="d-flex flex-wrap gap-2">
-                @php
-                    $leadClassifications = \DB::table('leads')
-                        ->whereNotNull('classification')
-                        ->where('classification', '!=', '')
-                        ->distinct()
-                        ->pluck('classification');
-
-                    $leadSources = \DB::table('leads')
-                        ->whereNotNull('source')
-                        ->where('source', '!=', '')
-                        ->distinct()
-                        ->pluck('source');
-
-                    $leadCampaigns = \DB::table('leads')
-                        ->whereNotNull('campaign')
-                        ->where('campaign', '!=', '')
-                        ->distinct()
-                        ->pluck('campaign');
-                @endphp
-
-                @foreach ($leadClassifications as $classification)
-                    @php
-                        $queryParams = request()->query();
-                        $queryParams['classification'] = $classification;
-                        $url = route('leads.filter.leads') . '?' . http_build_query($queryParams);
-                    @endphp
-                    <a href="{{ $url }}"
-                        class="filter-option option-classification {{ request('classification') == $classification ? 'active' : '' }}">
-                        {{ $classification }}
-                    </a>
-                @endforeach
-            </div>
-        </div>
-
-        <div class="filter-section mt-3 w-100">
-            <h6>Source</h6>
-            <div class="d-flex flex-wrap gap-2">
-                @foreach ($leadSources as $source)
-                    @php
-                        $queryParams = request()->query();
-                        $queryParams['source'] = $source;
-                        $url = route('lead.all_lead') . '?' . http_build_query($queryParams);
-                    @endphp
-                    <a href="{{ $url }}"
-                        class="filter-option option-source {{ request('source') == $source ? 'active' : '' }}">
-                        {{ $source }}
-                    </a>
-                @endforeach
-            </div>
-        </div>
-
-        <div class="filter-section mt-3 w-100">
-            <h6>Campaign</h6>
-            <select id="campaignFilter" class="form-control select2">
-                <option value="">-- Select Campaign --</option>
-                @foreach ($leadCampaigns as $campaign)
-                    <option value="{{ $campaign }}" {{ request('campaign') == $campaign ? 'selected' : '' }}>
-                        {{ $campaign }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-    </div>
-</div>
-<div class="floating-calendar-toggle" id="calendarToggle">
-    <i class="fas fa-calendar-alt"></i>
-</div>
-
-<div class="floating-calendar" id="floatingCalendar">
-    <div class="floating-calendar-header">
-        <div class="floating-calendar-title">
-            <i class="fas fa-calendar-day me-2"></i>Schedule Calendar
-        </div>
-        <button class="floating-calendar-close" id="closeCalendar">
-            <i class="fas fa-times"></i>
+    <div class="floating-filter">
+        <button type="button" class="btn btn-primary btn-floating" id="toggleDashboardFilter">
+            <i class="fas fa-filter text-light"></i>
         </button>
+
+        <div class="floating-box" id="filterDashboardBox">
+            <div class="filter-header d-flex justify-content-between align-items-center">
+                <span>Filters</span>
+                <button type="button" class="btn-close btn-close-white btn-sm" id="closeDashboardFilter"></button>
+            </div>
+
+            <div class="filter-section w-100">
+                <h6>Classification</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    @php
+                        $leadClassifications = \DB::table('leads')
+                            ->whereNotNull('classification')
+                            ->where('classification', '!=', '')
+                            ->distinct()
+                            ->pluck('classification');
+
+                        $leadSources = \DB::table('leads')
+                            ->whereNotNull('source')
+                            ->where('source', '!=', '')
+                            ->distinct()
+                            ->pluck('source');
+
+                        $leadCampaigns = \DB::table('leads')
+                            ->whereNotNull('campaign')
+                            ->where('campaign', '!=', '')
+                            ->distinct()
+                            ->pluck('campaign');
+                    @endphp
+
+                    @foreach ($leadClassifications as $classification)
+                        @php
+                            $queryParams = request()->query();
+                            $queryParams['classification'] = $classification;
+                            $url = route('leads.filter.leads') . '?' . http_build_query($queryParams);
+                        @endphp
+                        <a href="{{ $url }}"
+                            class="filter-option option-classification {{ request('classification') == $classification ? 'active' : '' }}">
+                            {{ $classification }}
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="filter-section mt-3 w-100">
+                <h6>Source</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    @foreach ($leadSources as $source)
+                        @php
+                            $queryParams = request()->query();
+                            $queryParams['source'] = $source;
+                            $url = route('lead.all_lead') . '?' . http_build_query($queryParams);
+                        @endphp
+                        <a href="{{ $url }}"
+                            class="filter-option option-source {{ request('source') == $source ? 'active' : '' }}">
+                            {{ $source }}
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="filter-section mt-3 w-100">
+                <h6>Campaign</h6>
+                <select id="campaignFilter" class="form-control select2">
+                    <option value="">-- Select Campaign --</option>
+                    @foreach ($leadCampaigns as $campaign)
+                        <option value="{{ $campaign }}" {{ request('campaign') == $campaign ? 'selected' : '' }}>
+                            {{ $campaign }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
     </div>
-    <div class="floating-calendar-body">
-        <div id="calendarWidget"></div>
+    <div class="floating-calendar-toggle ddd" id="calendarToggle">
+        <i class="fas fa-calendar-alt"></i>
     </div>
-</div>
+    <div class="floating-calendar" id="floatingCalendar">
+        <div class="floating-calendar-header">
+            <div class="floating-calendar-title">
+                <i class="fas fa-calendar-day me-2"></i>Schedule Calendar
+            </div>
+            <button class="floating-calendar-close" id="closeCalendar">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="floating-calendar-body">
+            <div id="calendarWidget"></div>
+        </div>
+    </div>
 @endif
 <div class="floating-chat-toggle {{ in_array('chat_bot', session('active_features', [])) ? 'd-none' : '' }}"
     id="chatToggle" title="CHATBOT Assistant" role="button" tabindex="0" aria-label="Open CHATBOT Assistant">
@@ -160,9 +159,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         let isChatVisible = false;
-        $('#chatToggle').off('click').on('click', function(e) {
+        $('#chatToggle').off('click').on('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
             if ($('#floatingChat').is(':visible')) {
@@ -174,14 +173,14 @@
             }
         });
 
-        $('#chatToggle').off('keydown').on('keydown', function(e) {
+        $('#chatToggle').off('keydown').on('keydown', function (e) {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 $(this).trigger('click');
             }
         });
 
-        $('#closeChat').off('click').on('click', function(e) {
+        $('#closeChat').off('click').on('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
             $('#floatingChat').fadeOut(200);
@@ -197,23 +196,23 @@
             $('#chatWidget').scrollTop($('#chatWidget')[0].scrollHeight);
         }
 
-        $('#sendChat').on('click', function() {
+        $('#sendChat').on('click', function () {
             const v = $('#chatText').val().trim();
             if (!v) return;
             appendChat(v, 'user');
             $('#chatText').val('');
-            setTimeout(function() {
+            setTimeout(function () {
                 appendChat('Thanks - I\'ll look into that and get back to you.', 'ai');
             }, 800);
         });
 
-        $('#chatText').on('keydown', function(e) {
+        $('#chatText').on('keydown', function (e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 $('#sendChat').click();
             }
         });
-        $(document).on('click', function(e) {
+        $(document).on('click', function (e) {
             if (!$(e.target).closest('#floatingChat').length && !$(e.target).closest('#chatToggle')
                 .length) {
                 if ($('#floatingChat').is(':visible')) {
@@ -222,7 +221,7 @@
             }
         });
     });
-    $(document).ready(function() {
+    $(document).ready(function () {
         let currentSelectedDate = null;
         let isCalendarVisible = false;
         $('#floatingCalendar').addClass('floating-calendar');
@@ -240,14 +239,14 @@
             'box-shadow': '0 4px 12px rgba(55, 98, 184, 0.3)',
             'transition': 'all 0.3s'
         }).hover(
-            function() {
+            function () {
                 $(this).css('transform', 'scale(1.1)');
             },
-            function() {
+            function () {
                 $(this).css('transform', 'scale(1)');
             }
         );
-        $('#calendarToggle').off('click').on('click', function(e) {
+        $('#calendarToggle').off('click').on('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
 
@@ -261,7 +260,7 @@
             }
         });
 
-        $('#closeCalendar').off('click').on('click', function(e) {
+        $('#closeCalendar').off('click').on('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
             $('#floatingCalendar').fadeOut(200);
@@ -352,7 +351,7 @@
             html += '</div>';
 
             $('#floatingCalendar .floating-calendar-body').html(html);
-            $('.prev-month').off('click').on('click', function(e) {
+            $('.prev-month').off('click').on('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 let newMonth = month - 1;
@@ -364,7 +363,7 @@
                 renderMonth(newYear, newMonth);
             });
 
-            $('.next-month').off('click').on('click', function(e) {
+            $('.next-month').off('click').on('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 let newMonth = month + 1;
@@ -384,7 +383,7 @@
         }
     });
 
-    window.handleDateClick = function(dateStr) {
+    window.handleDateClick = function (dateStr) {
         const events = window.calendarEvents[dateStr] || [];
 
         if (events.length === 0) {
@@ -393,7 +392,7 @@
         showDayEvents(dateStr);
     };
 
-    window.showDayEvents = function(dateStr) {
+    window.showDayEvents = function (dateStr) {
         const events = window.calendarEvents[dateStr] || [];
         const date = new Date(dateStr);
         const formattedDate = date.toLocaleDateString('en-US', {
@@ -452,7 +451,7 @@
         $('#dayEventsModal').modal('show');
     };
 
-    window.showEventDetails = function(id, type, status) {
+    window.showEventDetails = function (id, type, status) {
         $('#dayEventsModal').modal('hide');
 
         if (type === 'lead' && id && status) {
@@ -463,7 +462,7 @@
             $.ajax({
                 url: '/task/' + id + '/details?type=task',
                 type: 'GET',
-                success: function(response) {
+                success: function (response) {
                     let content = '<div class="container-fluid p-3">';
                     content += '<h5>' + (response.title || response.name || 'Details') + '</h5>';
                     content += '<hr>';
@@ -487,7 +486,7 @@
                     content += '</div>';
                     $('#calendarEventModalBody').html(content);
                 },
-                error: function() {
+                error: function () {
                     $('#calendarEventModalBody').html(
                         '<div class="alert alert-danger">Error loading details</div>');
                 }
@@ -542,7 +541,7 @@
         $.ajax({
             url: '/lead/' + leadId + '/details?type=lead',
             type: 'GET',
-            success: function(response) {
+            success: function (response) {
                 let content = '<div class="container-fluid p-3">';
                 content += '<h5>' + (response.name || 'Lead Details') + '</h5>';
                 content += '<hr>';
@@ -572,7 +571,7 @@
                 content += '</div>';
                 $('#calendarEventModalBody').html(content);
             },
-            error: function() {
+            error: function () {
                 $('#calendarEventModalBody').html(
                     '<div class="alert alert-danger">Error loading lead details</div>');
             }
@@ -582,22 +581,22 @@
 </script>
 
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         const $filterBtn = $('#toggleDashboardFilter');
         const $filterBox = $('#filterDashboardBox');
         const $closeBtn = $('#closeDashboardFilter');
-        $filterBtn.on('click', function(e) {
+        $filterBtn.on('click', function (e) {
             e.stopPropagation();
             $filterBox.toggle();
         });
-        $closeBtn.on('click', function(e) {
+        $closeBtn.on('click', function (e) {
             e.stopPropagation();
             $filterBox.hide();
         });
-        $filterBox.on('click', function(e) {
+        $filterBox.on('click', function (e) {
             e.stopPropagation();
         });
-        $(document).on('click', function() {
+        $(document).on('click', function () {
             $filterBox.hide();
         });
     });
@@ -625,7 +624,7 @@
                             offsetY: 76,
                             fontSize: '22px',
                             color: undefined,
-                            formatter: function(val) {
+                            formatter: function (val) {
                                 return val + "%";
                             }
                         }
@@ -696,7 +695,7 @@
             },
             tooltip: {
                 y: {
-                    formatter: function(val) {
+                    formatter: function (val) {
                         return val + " leads";
                     }
                 }
@@ -707,12 +706,12 @@
     }
 </script>
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         $('.select2').select2({
             placeholder: 'Select',
             width: '100%'
         });
-        
+
         $('#sourcesTable').DataTable({
             paging: true,
             searching: true,
@@ -758,17 +757,17 @@
             autoWidth: false,
             dom: '<"top"lf>rt<"bottom"ip>',
             columnDefs: [{
-                    width: "20%",
-                    targets: 0
-                },
-                {
-                    width: "15%",
-                    targets: 1
-                }
+                width: "20%",
+                targets: 0
+            },
+            {
+                width: "15%",
+                targets: 1
+            }
             ]
         });
 
-        $('#togglePassword').on('click', function() {
+        $('#togglePassword').on('click', function () {
             const $password = $('#password');
             const type = $password.attr('type') === 'password' ? 'text' : 'password';
             $password.attr('type', type);
@@ -776,7 +775,7 @@
             $icon.toggleClass('fa-eye fa-eye-slash');
         });
 
-        $('.delete-user-btn').click(function() {
+        $('.delete-user-btn').click(function () {
             const userId = $(this).data('user-id');
 
             Swal.fire({
@@ -795,7 +794,7 @@
                         data: {
                             _token: "{{ csrf_token() }}"
                         },
-                        success: function(response) {
+                        success: function (response) {
                             if (response.success) {
                                 flasher.success('User deleted successfully');
                                 setTimeout(() => location.reload(), 1500);
@@ -819,7 +818,7 @@
                                     'Failed to delete user');
                             }
                         },
-                        error: function(xhr) {
+                        error: function (xhr) {
                             flasher.error('Error deleting user');
                         }
                     });
@@ -827,20 +826,17 @@
             });
         });
 
-        $('.edit-btn').on('click', function() 
-        {
+        $('.edit-btn').on('click', function () {
             let id = $(this).data('id');
             let name = $(this).data('name');
             let type = $(this).data('type');
             let action = $(this).data('action');
             let modal = $(this).data('modal');
             // console.log(modal);
-            if (modal == 'Checklist') 
-            {
+            if (modal == 'Checklist') {
                 $('.type-field').addClass('d-none');
-            } 
-            else if (modal == 'Category') 
-            {
+            }
+            else if (modal == 'Category') {
                 $('.cat-type').removeClass('d-none');
             }
             $('#id').val(id);
@@ -852,24 +848,20 @@
             $('#ModalboxLabel').html(modal + ' ' + type);
             $('#type').val(type);
             $('#cat_type').val(type);
-            if ($('#action').find('input[name="_method"]').length === 0) 
-            {
+            if ($('#action').find('input[name="_method"]').length === 0) {
                 $('#action').append('<input type="hidden" name="_method" value="PUT">');
             }
         });
 
-        $('.add-project').on('click', function() 
-        {
+        $('.add-project').on('click', function () {
             let action = $(this).data('action');
             $("#action")[0].reset();
             let type = $(this).data('type');
             let modal = $(this).data('modal');
-            if (modal == 'Checklist') 
-            {
+            if (modal == 'Checklist') {
                 $('.type-field').addClass('d-none');
-            } 
-            else if (modal == 'Category') 
-            {
+            }
+            else if (modal == 'Category') {
                 $('.cat-type').removeClass('d-none');
             }
             $('#id').val('');
@@ -884,8 +876,7 @@
         let isProcessing = false;
         let originalState = $('#attendanceToggle').prop('checked');
 
-        $('#attendanceToggle').on('change', function() 
-        {
+        $('#attendanceToggle').on('change', function () {
             if (isProcessing) return;
             const newState = this.checked;
             const action = newState ? 'start' : 'end';
@@ -943,7 +934,7 @@
                 'transition': 'all 0.5s ease'
             });
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
+                navigator.geolocation.getCurrentPosition(function (position) {
                     const latitude = position.coords.latitude;
                     const longitude = position.coords.longitude;
                     $.ajax({
@@ -978,7 +969,7 @@
                         }
                     });
 
-                }, function(error) {
+                }, function (error) {
                     showErrorAlert(
                         'Unable to access location. Please allow location access and try again.');
                     updateToggleVisuals(originalState);
@@ -1024,7 +1015,7 @@
                 confirmButtonColor: '#ff7675'
             });
         }
-        $(document).on('submit', '.lead-allocate-form', function() {
+        $(document).on('submit', '.lead-allocate-form', function () {
             $('.submit-btn').prop('disabled', true);
             $('.submit-text').addClass('d-none');
             $('#SubmitSpinner').removeClass('d-none');
@@ -1058,7 +1049,7 @@
 
         var modal = new bootstrap.Modal(document.getElementById('statusUpdateModal'));
         modal.show();
-        setTimeout(function() {
+        setTimeout(function () {
             if ($.fn.select2) {
                 if (!$('#statusUpdateModal .select2').hasClass('select2-hidden-accessible')) {
                     $('#statusUpdateModal .select2').select2({
@@ -1086,8 +1077,7 @@
         var status = $('#newStatus').val();
         var conversionType = $('#conversionType').val();
 
-        if (status === 'CONVERTED' && conversionType === 'Completed') 
-        {
+        if (status === 'CONVERTED' && conversionType === 'Completed') {
             $('.applicant_div').show();
             $('#postSaleOptionField').removeClass('d-none');
         } else {
@@ -1098,15 +1088,14 @@
 
 
 
-    $(document).ready(function() {
+    $(document).ready(function () {
         $('.applicant_div').hide();
         $('#conversionTypeField').hide();
         $('#projectSelectionField').hide();
 
-        $('#newStatus').on('change', function() {
+        $('#newStatus').on('change', function () {
             var status = $(this).val();
-            if (status === 'CONVERTED') 
-            {
+            if (status === 'CONVERTED') {
                 $('#conversionTypeField').show();
             } else if (status === 'LOST') {
                 $('#reminderFields').hide();
@@ -1121,13 +1110,12 @@
             toggleApplicantFields();
         });
 
-        $('#conversionType').on('change', function() {
+        $('#conversionType').on('change', function () {
             toggleApplicantFields();
         });
     });
 
-    function updateLeadStatus()
-    {
+    function updateLeadStatus() {
         const leadId = $('#leadId').val();
         const newStatus = $('#newStatus').val();
         const conversionType = $('#conversionType').val();
@@ -1146,40 +1134,34 @@
         const post_sale = $('#createPostSale').val();
         const otherProjectName = $('#otherProjectName').val();
 
-        if (!newStatus) 
-        {
+        if (!newStatus) {
             flasher.error('Please select a new status');
             return;
         }
 
 
-        if (newStatus === 'CONVERTED' && !conversionType) 
-        {
+        if (newStatus === 'CONVERTED' && !conversionType) {
             flasher.error('Please select a conversion type');
             return;
         }
 
-        if (['CALL SCHEDULED', 'VISIT SCHEDULED', 'INTERESTED'].includes(newStatus)) 
-        {
-            if (!remindDate) 
-            {
+        if (['CALL SCHEDULED', 'VISIT SCHEDULED', 'INTERESTED'].includes(newStatus)) {
+            if (!remindDate) {
                 flasher.error('Please select a reminder date');
                 return;
             }
-            if (!remindTime) 
-            {
+            if (!remindTime) {
                 flasher.error('Please select a reminder time');
                 return;
             }
 
             const reminderDateTime = new Date(`${remindDate}T${remindTime}`);
-            if (reminderDateTime < new Date()) 
-            {
+            if (reminderDateTime < new Date()) {
                 flasher.error('Reminder date/time cannot be in the past');
                 return;
             }
         }
-        
+
         const submitBtn = $('#statusUpdateModal').find('.btn-primary');
         submitBtn.prop('disabled', true).html(
             '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...');
@@ -1202,36 +1184,30 @@
             app_doa: app_doa,
             create_post_sale: post_sale,
         };
-        
+
         $.ajax({
             url: '{{ route('lead.updateStatus') }}',
             type: 'POST',
             data: formData,
-            success: function(response) 
-            {
-                if (response.success) 
-                {
+            success: function (response) {
+                if (response.success) {
                     flasher.success(response.message);
                     setTimeout(() => {
                         $('#statusUpdateModal').modal('hide');
                         location.reload();
                     }, 1000);
-                } 
-                else 
-                {
+                }
+                else {
                     flasher.error(response.message);
                     submitBtn.prop('disabled', false).text('Update Status');
                 }
             },
-            error: function(xhr) 
-            {
+            error: function (xhr) {
                 let errorMessage = 'Error updating status';
-                if (xhr.responseJSON && xhr.responseJSON.message) 
-                {
+                if (xhr.responseJSON && xhr.responseJSON.message) {
                     errorMessage = xhr.responseJSON.message;
-                } 
-                else if (xhr.statusText) 
-                {
+                }
+                else if (xhr.statusText) {
                     errorMessage += `: ${xhr.statusText}`;
                 }
                 flasher.error(errorMessage);
@@ -1240,8 +1216,7 @@
         });
     }
 
-    function formatDateDMY(dateStr) 
-    {
+    function formatDateDMY(dateStr) {
         const date = new Date(dateStr);
         const day = String(date.getDate()).padStart(2, '0');
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -1252,19 +1227,16 @@
         return `${day}-${month}-${year}`;
     }
 
-    function showComment(leadId) 
-    {
+    function showComment(leadId) {
         var commentsModal = new bootstrap.Modal(document.getElementById('commentsModal'));
         commentsModal.show();
         $.ajax({
             url: '/lead/' + leadId + '/comments',
             type: 'GET',
             dataType: 'json',
-            success: function(response) 
-            {
+            success: function (response) {
                 var html = '';
-                if (response.comments.length > 0) 
-                {
+                if (response.comments.length > 0) {
                     html += `
                         <div class="table-responsive">
                         <table class="table table-borderless table-hover align-middle">
@@ -1281,8 +1253,7 @@
                             <tbody>
                         `;
 
-                    response.comments.forEach(function(comment, index) 
-                    {
+                    response.comments.forEach(function (comment, index) {
                         html += `
                             <tr>
                                 <td class="py-2">${index + 1}</td>
@@ -1300,9 +1271,8 @@
                         </table>
                         </div>
                     `;
-                } 
-                else 
-                {
+                }
+                else {
                     html = `
                         <div class="text-center py-4">
                             <h5 class="mb-1">No comments found</h5>
@@ -1313,8 +1283,7 @@
 
                 $('#commentsModalBody').html(html);
             },
-            error: function() 
-            {
+            error: function () {
                 $('#commentsModalBody').html(`
                     <div class="text-center py-4">
                         <h5 class="mb-1">Error loading comments</h5>
@@ -1328,12 +1297,10 @@
         });
     }
 
-    $(function() 
-    {
+    $(function () {
         $('[data-bs-toggle="tooltip"]').tooltip();
     });
-    document.addEventListener('DOMContentLoaded', function() 
-    {
+    document.addEventListener('DOMContentLoaded', function () {
         let chart;
         // const currentYear = document.getElementById('year-filter').value;
         // initChart(currentYear);   
@@ -1344,15 +1311,13 @@
 
         const yearFilter = document.getElementById('year-filter');
 
-        if (yearFilter) 
-        {
-            yearFilter.addEventListener('change', function() 
-            {
+        if (yearFilter) {
+            yearFilter.addEventListener('change', function () {
                 initChart(this.value);
             });
         }
         document.querySelectorAll('.time-period-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 document.querySelectorAll('.time-period-btn').forEach(b => {
                     b.classList.remove('active', 'btn-primary');
                     b.classList.add('btn-outline-light', 'text-dark');
@@ -1364,7 +1329,7 @@
         });
 
         document.querySelectorAll('.export-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.addEventListener('click', function (e) {
                 e.preventDefault();
                 const type = this.getAttribute('data-type');
                 const year = document.getElementById('year-filter').value;
@@ -1546,8 +1511,8 @@
             }
         }
     });
-    $(document).ready(function() {
-        $('.no-editDelete-right').click(function() {
+    $(document).ready(function () {
+        $('.no-editDelete-right').click(function () {
             flasher.error("You don’t have permission to edit or delete this task");
         });
 
@@ -1556,7 +1521,7 @@
             const totalRequired = requiredFields.length;
             let completed = 0;
 
-            requiredFields.each(function() {
+            requiredFields.each(function () {
                 if ($(this).val() && $(this).val().toString().trim() !== '') {
                     completed++;
                 }
@@ -1573,7 +1538,7 @@
                 const tabFields = $(`#${tab}-info`).find('[required]');
                 let tabCompleted = 0;
 
-                tabFields.each(function() {
+                tabFields.each(function () {
                     if ($(this).val() && $(this).val().toString().trim() !== '') {
                         tabCompleted++;
                     }
@@ -1589,11 +1554,11 @@
             });
         }
 
-        $('#projectForm').on('change keyup', 'input, select, textarea', function() {
+        $('#projectForm').on('change keyup', 'input, select, textarea', function () {
             updateFormProgress();
         });
 
-        $('#projectModal').on('shown.bs.modal', function() {
+        $('#projectModal').on('shown.bs.modal', function () {
             updateFormProgress();
         });
 
@@ -1605,7 +1570,7 @@
                 console.warn(" Element not found:", inputId, previewId);
                 return;
             }
-            input.addEventListener('change', function(e) {
+            input.addEventListener('change', function (e) {
 
                 preview.innerHTML = '';
 
@@ -1617,7 +1582,7 @@
                         const file = input.files[i];
                         const reader = new FileReader();
 
-                        reader.onload = function(event) {
+                        reader.onload = function (event) {
                             const div = document.createElement('div');
                             div.className = 'uploaded-image';
                             div.innerHTML = `
@@ -1635,7 +1600,7 @@
                     const file = input.files[0];
                     const reader = new FileReader();
 
-                    reader.onload = function(e) {
+                    reader.onload = function (e) {
                         if (file.type.match('image.*')) {
                             preview.innerHTML = `
                                             <div class="position-relative">
@@ -1680,7 +1645,7 @@
             });
 
 
-            preview.addEventListener('click', function(e) {
+            preview.addEventListener('click', function (e) {
                 if (e.target.closest('.remove-file') || e.target.closest('.remove-image')) {
                     e.preventDefault();
                     input.value = '';
@@ -1701,7 +1666,7 @@
         setupFilePreview('price_list', 'priceListPreview');
         setupFilePreview('brochure', 'brochurePreview');
         setupFilePreview('gallery_images', 'galleryPreviews', true);
-        $('#addCustomAmenity').click(function() {
+        $('#addCustomAmenity').click(function () {
             const amenity = $('#customAmenityInput').val().trim();
             if (amenity) {
                 const badge = $(`
@@ -1717,13 +1682,13 @@
                 $('#customAmenitiesContainer').append(badge);
                 $('#customAmenityInput').val('');
 
-                badge.find('.remove-amenity').click(function() {
+                badge.find('.remove-amenity').click(function () {
                     badge.remove();
                 });
             }
         });
 
-        $('#customAmenityInput').keypress(function(e) {
+        $('#customAmenityInput').keypress(function (e) {
             if (e.which === 13) {
                 $('#addCustomAmenity').click();
                 return false;
@@ -1770,8 +1735,8 @@
         buttons.forEach(btn => {
             btn.style.borderRadius =
                 styles.button_style === 'pill' ? '50px' :
-                styles.button_style === 'square' ? '0' :
-                'var(--border-radius)';
+                    styles.button_style === 'square' ? '0' :
+                        'var(--border-radius)';
         });
         const navbar = document.querySelector('.navbar');
         if (navbar) {
@@ -1794,7 +1759,7 @@
     var form = document.getElementById('projectForm');
     // document.getElementById('projectForm').addEventListener('submit', function(e) {
     if (form) {
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', function (e) {
             e.preventDefault();
             const formData = {
                 primary_color: this.elements.primary_color.value,
@@ -1852,8 +1817,8 @@
                         
                         /* Apply thumbnail cropping */
                         .card-img-top {
-                            object-fit: ${settings.thumb_crop === 'fill' ? 'cover' : 
-                                        settings.thumb_crop === 'fit' ? 'contain' : 'cover'};
+                            object-fit: ${settings.thumb_crop === 'fill' ? 'cover' :
+                settings.thumb_crop === 'fit' ? 'contain' : 'cover'};
                         }
                     `;
         document.head.appendChild(style);
@@ -1862,7 +1827,7 @@
     var form = document.getElementById('projectForm');
     if (form) {
         // document.getElementById('projectForm').addEventListener('submit', function(e) {
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', function (e) {
             e.preventDefault();
 
             const formData = {
@@ -1899,7 +1864,7 @@
 </script> -->
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
 
         const loader = document.getElementById('page-loader');
 
@@ -1914,7 +1879,7 @@
         const lengthSelect = document.getElementById('lengthSelect');
 
         if (lengthSelect) {
-            lengthSelect.addEventListener('change', function() {
+            lengthSelect.addEventListener('change', function () {
                 const length = this.value;
                 const url = new URL(window.location.href);
                 url.searchParams.set('length', length);
@@ -1926,8 +1891,8 @@
 </script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        $(document).on("select2:select select2:clear change", "#campaignFilter", function() {
+    document.addEventListener("DOMContentLoaded", function () {
+        $(document).on("select2:select select2:clear change", "#campaignFilter", function () {
             let campaign = $(this).val();
             let queryParams = new URLSearchParams(window.location.search);
             if (campaign) {
@@ -1948,9 +1913,9 @@
     //     url.searchParams.set('page', 1);
     //     window.location.href = url.toString();
     // });
-    $(document).ready(function() {
+    $(document).ready(function () {
         $('#table_filter input').attr('placeholder', 'Enter search term');
-        $('#table_filter input').on('keypress', function(e) {
+        $('#table_filter input').on('keypress', function (e) {
             if (e.which === 13) {
                 const searchValue = $(this).val();
                 const url = new URL(window.location.href);
@@ -1959,7 +1924,7 @@
                 window.location.href = url.toString();
             }
         });
-        $('#table_filter input').on('input', function() {
+        $('#table_filter input').on('input', function () {
             if ($(this).val() === '') {
                 window.location.href = '/lead/all-lead';
             }
@@ -1971,18 +1936,18 @@
         }
     });
 
-    $('#btnExportExcel').on('click', function() {
+    $('#btnExportExcel').on('click', function () {
         var $btn = $(this);
         var originalHtml = $btn.html();
         $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Please wait...');
 
-        setTimeout(function() {
+        setTimeout(function () {
             var exportTable = document.createElement('table');
             var thead = document.createElement('thead');
             var tbody = document.createElement('tbody');
             var headerRow = document.createElement('tr');
 
-            $('#table thead th').each(function(index) {
+            $('#table thead th').each(function (index) {
                 var thText = $(this).text().trim();
                 if (!$(this).hasClass('no-sort')) {
                     var th = document.createElement('th');
@@ -1993,9 +1958,9 @@
             thead.appendChild(headerRow);
             exportTable.appendChild(thead);
 
-            $('#table tbody tr').each(function() {
+            $('#table tbody tr').each(function () {
                 var tr = document.createElement('tr');
-                $(this).find('td').each(function(index) {
+                $(this).find('td').each(function (index) {
                     if ((index > 0 || !$(this).find('input[type="checkbox"]').length)) {
                         var td = document.createElement('td');
                         if ($(this).find('.comment-text').length) {
@@ -2012,7 +1977,7 @@
                             text = text.replace(/View more/ig, '').trim();
                             td.textContent = text;
                         } else if ($(this).find('a').length && $(this).find('a').attr(
-                                'href')?.startsWith('mailto:')) {
+                            'href')?.startsWith('mailto:')) {
                             let text = $(this).find('a').text().trim();
                             text = text.replace(/View more/ig, '').trim();
                             td.textContent = text;
@@ -2061,13 +2026,13 @@
         }, 100);
     });
 
-    $('#btnExportPDF').on('click', function() {
+    $('#btnExportPDF').on('click', function () {
         var $btn = $(this);
         var originalHtml = $btn.html();
         $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Please wait...');
 
 
-        setTimeout(function() {
+        setTimeout(function () {
             var {
                 jsPDF
             } = window.jspdf;
@@ -2079,16 +2044,16 @@
 
 
             var headers = [];
-            $('#table thead th').each(function() {
+            $('#table thead th').each(function () {
                 var thText = $(this).text().trim();
                 if (!$(this).hasClass('no-sort')) headers.push(thText);
             });
 
 
             var data = [];
-            $('#table tbody tr').each(function() {
+            $('#table tbody tr').each(function () {
                 var row = [];
-                $(this).find('td').each(function(index) {
+                $(this).find('td').each(function (index) {
                     if ((index > 0 || !$(this).find('input[type="checkbox"]').length)) {
                         let text = '';
 
@@ -2101,7 +2066,7 @@
                         } else if ($(this).find('.cust-badge').length) {
                             text = $(this).find('.cust-badge').text().trim();
                         } else if ($(this).find('a').length && $(this).find('a').attr(
-                                'href')?.startsWith('mailto:')) {
+                            'href')?.startsWith('mailto:')) {
                             text = $(this).find('a').text().trim();
                         } else {
                             text = $(this).text().trim();
@@ -2158,20 +2123,20 @@
     }
 </script>
 <script>
-    $(document).ready(function() {
-        $('.ReportbtnExportExcel').on('click', function() {
+    $(document).ready(function () {
+        $('.ReportbtnExportExcel').on('click', function () {
             var $btn = $(this);
             var originalHtml = $btn.html();
             $btn.prop('disabled', true).html(
                 '<i class="fas fa-spinner fa-spin me-2"></i> Please wait...');
 
-            setTimeout(function() {
+            setTimeout(function () {
                 var exportTable = document.createElement('table');
                 var thead = document.createElement('thead');
                 var tbody = document.createElement('tbody');
                 var headerRow = document.createElement('tr');
 
-                $('#table thead th').each(function(index) {
+                $('#table thead th').each(function (index) {
                     var thText = $(this).text().trim();
                     var th = document.createElement('th');
                     th.textContent = thText;
@@ -2180,9 +2145,9 @@
                 thead.appendChild(headerRow);
                 exportTable.appendChild(thead);
 
-                $('#table tbody tr').each(function() {
+                $('#table tbody tr').each(function () {
                     var tr = document.createElement('tr');
-                    $(this).find('td').each(function(index) {
+                    $(this).find('td').each(function (index) {
                         var td = document.createElement('td');
                         td.textContent = $(this).text().trim();
                         tr.appendChild(td);
@@ -2200,13 +2165,13 @@
             }, 100);
         });
 
-        $('.ReportbtnExportPDF').on('click', function() {
+        $('.ReportbtnExportPDF').on('click', function () {
             var $btn = $(this);
             var originalHtml = $btn.html();
             $btn.prop('disabled', true).html(
                 '<i class="fas fa-spinner fa-spin me-2"></i> Please wait...');
 
-            setTimeout(function() {
+            setTimeout(function () {
                 var {
                     jsPDF
                 } = window.jspdf;
@@ -2217,14 +2182,14 @@
                 doc.text("Generated on: " + new Date().toLocaleString(), 40, 60);
 
                 var headers = [];
-                $('#table thead th').each(function() {
+                $('#table thead th').each(function () {
                     headers.push($(this).text().trim());
                 });
 
                 var data = [];
-                $('#table tbody tr').each(function() {
+                $('#table tbody tr').each(function () {
                     var row = [];
-                    $(this).find('td').each(function(index) {
+                    $(this).find('td').each(function (index) {
                         row.push($(this).text().trim());
                     });
                     data.push(row);
@@ -2253,7 +2218,7 @@
             closeOnSelect: false
         });
     });
-    $(document).ready(function() {
+    $(document).ready(function () {
         let selectedTaskId = null;
         let selectedStatus = null;
 
@@ -2269,7 +2234,7 @@
             }
         }
 
-        $(document).on('click', '.status-option', function() {
+        $(document).on('click', '.status-option', function () {
             selectedStatus = $(this).data('status');
             const dropdown = $(this).closest('.dropdown');
             selectedTaskId = dropdown.find('.status-btn').data('task-id');
@@ -2284,7 +2249,7 @@
             $('#statusCommentModal').modal('show');
         });
 
-        $(document).on('click', '.update-project-status', function(e) {
+        $(document).on('click', '.update-project-status', function (e) {
             e.preventDefault();
             const projectId = $(this).data('project-id');
             const status = $(this).data('status');
@@ -2296,7 +2261,7 @@
                     _token: '{{ csrf_token() }}',
                     status: status
                 },
-                success: function(response) {
+                success: function (response) {
                     if (response.status === 200) {
                         flasher.success(response.message);
                         setTimeout(() => location.reload(), 1000);
@@ -2305,13 +2270,13 @@
                             'Failed to update project status');
                     }
                 },
-                error: function() {
+                error: function () {
                     flasher.error('Error', 'Failed to update project status');
                 }
             });
         });
 
-        $(document).on('click', '.delete-project', function(e) {
+        $(document).on('click', '.delete-project', function (e) {
             e.preventDefault();
             const projectId = $(this).data('project-id');
             const projectName = $(this).data('project-name');
@@ -2333,7 +2298,7 @@
                         data: {
                             _token: '{{ csrf_token() }}'
                         },
-                        success: function(response) {
+                        success: function (response) {
                             if (response.status === 200) {
                                 flasher.success(response.message);
                                 $(`.project-row[data-project-id="${projectId}"]`)
@@ -2343,7 +2308,7 @@
                                     'Failed to delete project');
                             }
                         },
-                        error: function(xhr) {
+                        error: function (xhr) {
                             flasher.error('Error', 'Failed to delete project');
                         }
                     });
@@ -2351,7 +2316,7 @@
             });
         });
 
-        $('.filter-task-btn').click(function() {
+        $('.filter-task-btn').click(function () {
             $('.filter-task-btn').removeClass('filter-btn-active');
             $(this).addClass('filter-btn-active');
 
@@ -2373,14 +2338,14 @@
                 $('.project-task').hide();
             } else if (filter === 'today') {
                 const today = new Date().toDateString();
-                $('.task-row').each(function() {
+                $('.task-row').each(function () {
                     const dueDate = new Date($(this).find('td:eq(4) span').text())
                         .toDateString();
                     if (dueDate !== today) $(this).hide();
                 });
             } else if (filter === 'overdue') {
                 const today = new Date();
-                $('.task-row').each(function() {
+                $('.task-row').each(function () {
                     const dueDate = new Date($(this).find('td:eq(4) span').text());
                     const taskStatus = $(this).data('task-status');
                     if (dueDate >= today || taskStatus === 'completed') {
@@ -2388,21 +2353,21 @@
                     }
                 });
             } else if (filter === 'pending') {
-                $('.task-row').each(function() {
+                $('.task-row').each(function () {
                     const taskStatus = $(this).data('task-status');
                     if (taskStatus !== 'pending') {
                         $(this).hide();
                     }
                 });
             } else if (filter === 'processing') {
-                $('.task-row').each(function() {
+                $('.task-row').each(function () {
                     const taskStatus = $(this).data('task-status');
                     if (taskStatus !== 'in_progress') {
                         $(this).hide();
                     }
                 });
             } else if (filter === 'completed') {
-                $('.task-row').each(function() {
+                $('.task-row').each(function () {
                     const taskStatus = $(this).data('task-status');
                     if (taskStatus !== 'completed') {
                         $(this).hide();
@@ -2411,7 +2376,7 @@
             }
         });
 
-        $('#projectTaskFilter').change(function() {
+        $('#projectTaskFilter').change(function () {
             const projectId = $(this).val();
 
             if (projectId === 'all') {
@@ -2425,22 +2390,22 @@
             }
         });
 
-        $('.task-search').on('keyup', function() {
+        $('.task-search').on('keyup', function () {
             const value = $(this).val().toLowerCase();
-            $('.task-row').filter(function() {
+            $('.task-row').filter(function () {
                 $(this).toggle($(this).find('.task-name').text().toLowerCase().indexOf(value) >
                     -1);
             });
         });
 
-        $('.project-search').on('keyup', function() {
+        $('.project-search').on('keyup', function () {
             const value = $(this).val().toLowerCase();
-            $('.project-row').filter(function() {
+            $('.project-row').filter(function () {
                 $(this).toggle($(this).find('strong').text().toLowerCase().indexOf(value) > -1);
             });
         });
 
-        $(document).on('click', '.view-project-tasks', function(e) {
+        $(document).on('click', '.view-project-tasks', function (e) {
             e.preventDefault();
             const projectId = $(this).data('project-id');
             const projectName = $(this).closest('tr').find('strong').text().trim();
@@ -2449,7 +2414,7 @@
             filterTasksByProject(projectId);
         });
 
-        $(document).on('click', '.edit-project', function(e) {
+        $(document).on('click', '.edit-project', function (e) {
             e.preventDefault();
             const projectId = $(this).data('project-id');
             const projectName = $(this).data('project-name');
@@ -2466,7 +2431,7 @@
             $('#editProjectModal').modal('show');
         });
 
-        $('#editProjectForm').on('submit', function(e) {
+        $('#editProjectForm').on('submit', function (e) {
             e.preventDefault();
             const formData = $(this).serialize();
             const projectId = $('#edit_project_id').val();
@@ -2474,10 +2439,10 @@
                 url: `/task/project/update/${projectId}`,
                 type: 'POST',
                 data: formData,
-                beforeSend: function() {
+                beforeSend: function () {
                     $('#editProjectModal').modal('hide');
                 },
-                success: function(response) {
+                success: function (response) {
                     if (response.status === 200) {
                         flasher.success(response.message);
                         setTimeout(() => location.reload(), 1000);
@@ -2486,7 +2451,7 @@
                             'Failed to update project');
                     }
                 },
-                error: function(xhr) {
+                error: function (xhr) {
                     flasher.error('Error', 'Failed to update project');
                 }
             });
@@ -2495,7 +2460,7 @@
 </script>
 <script>
     function togglePin(leadId, pinStatus) {
-        let button = $('.pin-item').filter(function() {
+        let button = $('.pin-item').filter(function () {
             return $(this).closest('tr').find('td:eq(1)').text().trim() == leadId;
         }).first();
 
@@ -2517,7 +2482,7 @@
                 _token: '{{ csrf_token() }}'
             },
             dataType: 'json',
-            success: function(data) {
+            success: function (data) {
                 if (data.status === 200) {
                     button.toggleClass('pinned', isPinning);
                     button.attr('title', isPinning ? 'Unpin Lead' : 'Pin Lead');
@@ -2540,18 +2505,18 @@
                     button.html(originalHTML);
                 }
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
                 flasher.error('An error occurred while updating pin status');
                 button.html(originalHTML);
             },
-            complete: function() {
+            complete: function () {
                 button.css('pointer-events', 'auto');
             }
         });
     }
 
     function setupPinHandlers() {
-        $(document).on('click', '.pin-item', function() {
+        $(document).on('click', '.pin-item', function () {
             const button = $(this);
             const leadId = button.closest('tr').find('td:eq(1)').text().trim();
             const isCurrentlyPinned = button.hasClass('pinned');
@@ -2561,13 +2526,13 @@
         });
     }
 
-    $(document).ready(function() {
+    $(document).ready(function () {
         setupPinHandlers();
     });
 </script>
 <script>
-    $(document).ready(function() {
-        $('#modalTeamSelect').on('change', function() {
+    $(document).ready(function () {
+        $('#modalTeamSelect').on('change', function () {
             var teamId = $(this).val();
             if (teamId) {
                 loadTeamPoints(teamId);
@@ -2584,7 +2549,7 @@
                 data: {
                     team_id: teamId
                 },
-                beforeSend: function() {
+                beforeSend: function () {
                     $('#pointsContainer').html(`
                                     <div class="text-center py-4">
                                         <div class="spinner-border text-primary" role="status">
@@ -2594,7 +2559,7 @@
                                     </div>
                                 `);
                 },
-                success: function(response) {
+                success: function (response) {
                     if (response.success && response.points.length > 0) {
                         var html = `
                                         <div class="table-responsive">
@@ -2615,9 +2580,9 @@
                                                         <td>
                                                             <select name="tasks[]" class="form-select" required>
                                                                 <option value="">-- Select Task --</option>
-                                                                ${response.points.map(point => 
-                                                                    `<option value="${point}">${point}</option>`
-                                                                ).join('')}
+                                                                ${response.points.map(point =>
+                            `<option value="${point}">${point}</option>`
+                        ).join('')}
                                                             </select>
                                                         </td>
                                                         <td>
@@ -2649,7 +2614,7 @@
                                     `);
                     }
                 },
-                error: function() {
+                error: function () {
                     $('#pointsContainer').html(`
                                     <div class="alert alert-danger">
                                         <i class="fa fa-times-circle me-2"></i>
@@ -2683,7 +2648,7 @@
                 });
             }
 
-            container.addEventListener('click', function(e) {
+            container.addEventListener('click', function (e) {
                 const row = e.target.closest('.target-row');
                 if (e.target.closest('.add-row')) {
                     const clone = row.cloneNode(true);
@@ -2705,7 +2670,7 @@
                 }
             });
 
-            container.addEventListener('change', function(e) {
+            container.addEventListener('change', function (e) {
                 if (e.target.matches('select[name="tasks[]"]')) {
                     updateTaskOptions();
                 }
@@ -2714,14 +2679,14 @@
             updateTaskOptions();
         }
 
-        $('#setTargetModal').on('shown.bs.modal', function() {
+        $('#setTargetModal').on('shown.bs.modal', function () {
             var teamId = $('#modalTeamSelect').val();
             if (teamId) {
                 loadTeamPoints(teamId);
             }
         });
 
-        $('#quickEntryBtn').click(function() {
+        $('#quickEntryBtn').click(function () {
             $('#quickEntryModal').modal('show');
         });
     });
@@ -2730,13 +2695,13 @@
         let business = "whatsapp-business://send?phone=91" + phone;
         let normal = "https://wa.me/91" + phone;
         window.location.href = business;
-        setTimeout(function() {
+        setTimeout(function () {
             window.location.href = normal;
         }, 1200);
     }
 </script>
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         const csrfToken = $('meta[name="csrf-token"]').attr('content');
         flasher.options = {
             "closeButton": true,
@@ -2756,8 +2721,7 @@
             "hideMethod": "fadeOut"
         };
 
-        function setDefaultDates() 
-        {
+        function setDefaultDates() {
             const now = new Date();
             const tomorrow = new Date(now);
             tomorrow.setDate(tomorrow.getDate() + 1);
@@ -2766,8 +2730,7 @@
             $('#end_date').val(tomorrow.toISOString().slice(0, 16));
         }
 
-        function resetForm() 
-        {
+        function resetForm() {
             $('#exhibitionForm')[0].reset();
             $('#exhibition_id').val('');
             $('#_method').val('POST');
@@ -2780,14 +2743,12 @@
             setDefaultDates();
         }
 
-        $('#createExhibitionBtn').click(function() 
-        {
+        $('#createExhibitionBtn').click(function () {
             resetForm();
             $('#exhibitionModal').modal('show');
         });
 
-        $(document).on('click', '.edit-exhibition', function() 
-        {
+        $(document).on('click', '.edit-exhibition', function () {
             const id = $(this).data('id');
             const name = $(this).data('name');
             const description = $(this).data('description');
@@ -2811,8 +2772,7 @@
             $('#exhibitionModal').modal('show');
         });
 
-        $('#exhibitionForm').submit(function(e) 
-        {
+        $('#exhibitionForm').submit(function (e) {
             e.preventDefault();
 
             const formData = $(this).serialize();
@@ -2820,8 +2780,7 @@
             const method = $('#_method').val();
 
             let url = '/exhibitions';
-            if (method === 'PUT' && id) 
-            {
+            if (method === 'PUT' && id) {
                 url = '/exhibitions/' + id;
             }
             $('.form-control').removeClass('is-invalid');
@@ -2848,18 +2807,18 @@
                     'X-CSRF-TOKEN': csrfToken,
                     'X-Requested-With': 'XMLHttpRequest'
                 },
-                success: function(response) {
+                success: function (response) {
                     // console.log(response);
                     if (response.success) {
                         flasher.success(response.message ||
                             'Operation completed successfully!');
                         $('#exhibitionModal').modal('hide');
-                        setTimeout(function() {
+                        setTimeout(function () {
                             location.reload();
                         }, 1500);
                     } else {
                         if (response.errors) {
-                            $.each(response.errors, function(key, value) {
+                            $.each(response.errors, function (key, value) {
                                 $('#' + key).addClass('is-invalid');
                                 $('#' + key + '-error').text(value[0]);
                             });
@@ -2868,29 +2827,29 @@
                         }
                     }
                 },
-                error: function(xhr) {
+                error: function (xhr) {
                     if (xhr.status === 422) {
                         const errors = xhr.responseJSON.errors;
-                        $.each(errors, function(key, value) {
+                        $.each(errors, function (key, value) {
                             $('#' + key).addClass('is-invalid');
                             $('#' + key + '-error').text(value[0]);
                         });
                     } else if (xhr.status === 419) {
                         flasher.error('Session expired. Please refresh the page.');
-                        setTimeout(function() {
+                        setTimeout(function () {
                             location.reload();
                         }, 2000);
                     } else {
                         flasher.error('An error occurred. Please try again.');
                     }
                 },
-                complete: function() {
+                complete: function () {
                     saveBtn.prop('disabled', false).html(originalText);
                 }
             });
         });
 
-        $(document).on('click', '.activate-exhibition', function() {
+        $(document).on('click', '.activate-exhibition', function () {
             const id = $(this).data('id');
             const name = $(this).data('name');
 
@@ -2916,16 +2875,16 @@
                             'X-CSRF-TOKEN': csrfToken,
                             'X-Requested-With': 'XMLHttpRequest'
                         },
-                        beforeSend: function() {
+                        beforeSend: function () {
                             $('.activate-exhibition[data-id="' + id + '"]')
                                 .prop('disabled', true)
                                 .html('<i class="fas fa-spinner fa-spin"></i>');
                         },
-                        success: function(response) {
+                        success: function (response) {
                             if (response.success) {
                                 flasher.success(response.message ||
                                     'Exhibition activated successfully!');
-                                setTimeout(function() {
+                                setTimeout(function () {
                                     location.reload();
                                 }, 1500);
                             } else {
@@ -2933,11 +2892,11 @@
                                     'Failed to activate exhibition.');
                             }
                         },
-                        error: function(xhr) {
+                        error: function (xhr) {
                             if (xhr.status === 419) {
                                 flasher.error(
                                     'Session expired. Please refresh the page.');
-                                setTimeout(function() {
+                                setTimeout(function () {
                                     location.reload();
                                 }, 2000);
                             } else {
@@ -2953,7 +2912,7 @@
             });
         });
 
-        $(document).on('click', '.delete-exhibition', function() {
+        $(document).on('click', '.delete-exhibition', function () {
             const id = $(this).data('id');
             const name = $(this).data('name');
             const csrfToken = $('meta[name="csrf-token"]').attr('content');
@@ -2967,8 +2926,8 @@
                 confirmButtonText: 'Yes, delete it!',
                 cancelButtonText: 'Cancel',
                 showLoaderOnConfirm: true,
-                preConfirm: function() {
-                    return new Promise(function(resolve, reject) {
+                preConfirm: function () {
+                    return new Promise(function (resolve, reject) {
                         $.ajax({
                             url: '/exhibitions/' + id,
                             type: 'POST',
@@ -2981,10 +2940,10 @@
                                 'X-CSRF-TOKEN': csrfToken,
                                 'X-Requested-With': 'XMLHttpRequest'
                             },
-                            success: function(response) {
+                            success: function (response) {
                                 resolve(response);
                             },
-                            error: function(xhr) {
+                            error: function (xhr) {
                                 if (xhr.status === 419) {
                                     reject(
                                         'Session expired. Please refresh the page.'
@@ -2999,30 +2958,25 @@
                 },
                 allowOutsideClick: () => !Swal.isLoading()
             }).then((result) => {
-                if (result.isConfirmed) 
-                {
-                    $('#exhibition-row-' + id).fadeOut(300, function() 
-                    {
+                if (result.isConfirmed) {
+                    $('#exhibition-row-' + id).fadeOut(300, function () {
                         $(this).remove();
                     });
 
                     flasher.success('Exhibition deleted successfully!');
 
-                    setTimeout(function() 
-                    {
+                    setTimeout(function () {
                         location.reload();
                     }, 2000);
                 }
             }).catch((error) => {
-                if (error) 
-                {
+                if (error) {
                     flasher.error('Error!', error, 'error');
                 }
             });
         });
 
-        $('#exhibitionModal').on('hidden.bs.modal', function() 
-        {
+        $('#exhibitionModal').on('hidden.bs.modal', function () {
             resetForm();
         });
 
@@ -3040,28 +2994,22 @@
     });
 </script>
 <script>
-    $(document).ready(function() 
-    {
+    $(document).ready(function () {
         $('[title]').tooltip();
-        $('#selectAllLeads').on('change', function() 
-        {
+        $('#selectAllLeads').on('change', function () {
             $('.lead-checkbox').prop('checked', this.checked);
         });
 
-        $('.lead-checkbox').on('change', function() 
-        {
-            if ($('.lead-checkbox:checked').length === $('.lead-checkbox').length) 
-            {
+        $('.lead-checkbox').on('change', function () {
+            if ($('.lead-checkbox:checked').length === $('.lead-checkbox').length) {
                 $('#selectAllLeads').prop('checked', true);
-            } 
-            else 
-            {
+            }
+            else {
                 $('#selectAllLeads').prop('checked', false);
             }
         });
 
-        $(document).on('click', '.edit-lead-btn', function() 
-        {
+        $(document).on('click', '.edit-lead-btn', function () {
             const leadId = $(this).data('id');
             $('#editLeadForm').attr('action', `/exhibitions/leads/${leadId}`);
             $('#edit_lead_id').val(leadId);
@@ -3079,32 +3027,26 @@
             $('#edit_remarks').val($(this).data('remarks'));
             const operatingCountry = $(this).data('operating-country');
             const type = $(this).data('type');
-            if (operatingCountry) 
-            {
-                try 
-                {
+            if (operatingCountry) {
+                try {
                     const parsed = JSON.parse(operatingCountry);
                     $('#edit_operating_country').val(JSON.stringify(parsed, null, 2));
-                } 
-                catch (e) 
-                {
+                }
+                catch (e) {
                     $('#edit_operating_country').val(operatingCountry);
                 }
-            } 
-            else 
-            {
+            }
+            else {
                 $('#edit_operating_country').val('');
             }
 
             const reminderDate = $(this).data('reminder-date');
-            if (reminderDate && reminderDate !== 'N/A') 
-            {
+            if (reminderDate && reminderDate !== 'N/A') {
                 const date = new Date(reminderDate);
                 const formattedDate = date.toISOString().slice(0, 16);
                 $('#edit_reminder_date').val(formattedDate);
-            } 
-            else 
-            {
+            }
+            else {
                 $('#edit_reminder_date').val('');
             }
 
@@ -3112,11 +3054,9 @@
             const currentVisitCardDiv = $('#current_visit_card');
             currentVisitCardDiv.empty();
 
-            if (visitCard) 
-            {
+            if (visitCard) {
                 let imageUrl = visitCard;
-                if (!visitCard.startsWith('http')) 
-                {
+                if (!visitCard.startsWith('http')) {
                     imageUrl = `/storage/${visitCard}`;
                 }
                 currentVisitCardDiv.html(`
@@ -3128,8 +3068,7 @@
             }
         });
 
-        $(document).on('click', '.convert-lead-btn', function() 
-        {
+        $(document).on('click', '.convert-lead-btn', function () {
             const leadId = $(this).data('id');
             const leadName = $(this).data('name');
             Swal.fire({
@@ -3157,10 +3096,8 @@
                     });
                 }
             }).then((result) => {
-                if (result.isConfirmed) 
-                {
-                    if (result.value.success) 
-                    {
+                if (result.isConfirmed) {
+                    if (result.value.success) {
                         Swal.fire({
                             title: 'Success!',
                             text: result.value.message,
@@ -3169,9 +3106,8 @@
                         }).then(() => {
                             window.location.reload();
                         });
-                    } 
-                    else 
-                    {
+                    }
+                    else {
                         Swal.fire({
                             title: 'Error!',
                             text: result.value.message,
@@ -3183,16 +3119,13 @@
             });
         });
 
-        $('#confirmConvertMultiple').on('click', function() 
-        {
+        $('#confirmConvertMultiple').on('click', function () {
             const selectedLeads = [];
-            $('.lead-checkbox:checked').each(function() 
-            {
+            $('.lead-checkbox:checked').each(function () {
                 selectedLeads.push($(this).val());
             });
 
-            if (selectedLeads.length === 0) 
-            {
+            if (selectedLeads.length === 0) {
                 Swal.fire({
                     title: 'No Leads Selected',
                     text: 'Please select at least one lead to convert.',
@@ -3228,10 +3161,8 @@
                     });
                 }
             }).then((result) => {
-                if (result.isConfirmed) 
-                {
-                    if (result.value.success) 
-                    {
+                if (result.isConfirmed) {
+                    if (result.value.success) {
                         Swal.fire({
                             title: 'Success!',
                             html: result.value.message +
@@ -3241,9 +3172,8 @@
                         }).then(() => {
                             window.location.reload();
                         });
-                    } 
-                    else 
-                    {
+                    }
+                    else {
                         Swal.fire({
                             title: 'Error!',
                             text: result.value.message,
@@ -3255,8 +3185,7 @@
             });
         });
 
-        $('#editLeadForm').on('submit', function(e) 
-        {
+        $('#editLeadForm').on('submit', function (e) {
             e.preventDefault();
 
             Swal.fire({
@@ -3277,8 +3206,7 @@
                 headers: {
                     'X-HTTP-Method-Override': 'PUT'
                 },
-                success: function(response) 
-                {
+                success: function (response) {
                     Swal.close();
                     Swal.fire({
                         title: 'Success!',
@@ -3287,17 +3215,14 @@
                         confirmButtonText: 'OK'
                     }).then(() => location.reload());
                 },
-                error: function(xhr) 
-                {
+                error: function (xhr) {
                     Swal.close();
                     let errorMessage = 'Failed to update lead.';
-                    if (xhr.responseJSON && xhr.responseJSON.errors) 
-                    {
+                    if (xhr.responseJSON && xhr.responseJSON.errors) {
                         errorMessage = Object.values(xhr.responseJSON.errors).flat().join(
                             '<br>');
-                    } 
-                    else if (xhr.responseJSON && xhr.responseJSON.message) 
-                    {
+                    }
+                    else if (xhr.responseJSON && xhr.responseJSON.message) {
                         errorMessage = xhr.responseJSON.message;
                     }
                     Swal.fire({
@@ -3310,8 +3235,7 @@
             });
         });
 
-        $(document).on('click', '.share-exhibition', function() 
-        {
+        $(document).on('click', '.share-exhibition', function () {
             const exhibitionId = $(this).data('id');
             const name = $(this).data('name');
 
@@ -3320,8 +3244,7 @@
             $('#shareExhibitionModal').modal('show');
         });
 
-        $('#generateShareLinkBtn').on('click', function() 
-        {
+        $('#generateShareLinkBtn').on('click', function () {
             const exhibitionId = $('#shareExhibitionId').val();
             const csrfToken = $('meta[name="csrf-token"]').attr('content');
 
@@ -3335,71 +3258,61 @@
                     _token: csrfToken,
                 },
                 dataType: 'json',
-                success: function(response) 
-                {
-                    if (response.success) 
-                    {
+                success: function (response) {
+                    if (response.success) {
                         $('#share_link_input').val(response.data.share_link);
                         flasher.success(response.message);
-                    } 
-                    else 
-                    {
+                    }
+                    else {
                         flasher.error(response.message || 'Failed to generate link');
                     }
                 },
-                error: function(xhr) 
-                {
+                error: function (xhr) {
                     flasher.error(xhr.responseJSON?.message || 'Something went wrong');
                 },
-                complete: function() 
-                {
+                complete: function () {
                     $('#generateShareLinkBtn').prop('disabled', false).html(
                         '<i class="fas fa-link me-1"></i> Generate Share Link');
                 }
             });
         });
     });
-    $('#postSaleModal').on('shown.bs.modal', function() 
-    {
+    $('#postSaleModal').on('shown.bs.modal', function () {
         $('.selectPostSale').select2({
             placeholder: 'Select',
             width: '100%',
             dropdownParent: $('#postSaleModal')
         });
     });
-    $('#postSaleModal').on('shown.bs.modal', function() 
-    {
+    $('#postSaleModal').on('shown.bs.modal', function () {
         $('.selectSalesPerson').select2({
             placeholder: 'Select',
             width: '100%',
             dropdownParent: $('#postSaleModal')
         });
     });
-    $('#postSaleModal').on('shown.bs.modal', function() 
-    {
+    $('#postSaleModal').on('shown.bs.modal', function () {
         $('.selectProjectCat').select2({
             placeholder: 'Select',
             width: '100%',
             dropdownParent: $('#postSaleModal')
         });
     });
-    $('#postSaleModal').on('shown.bs.modal', function() 
-    {
+    $('#postSaleModal').on('shown.bs.modal', function () {
         $('.selectPostSubCat').select2({
             placeholder: 'Select',
             width: '100%',
             dropdownParent: $('#postSaleModal')
         });
     });
-    $('#postSaleModal').on('shown.bs.modal', function() 
-    {
+    $('#postSaleModal').on('shown.bs.modal', function () {
         $('.selectProject').select2({
             placeholder: 'select',
             width: '100%',
             dropdownParent: $('#postSaleModal')
         });
     });
-    $('#statusUpdateModal').on('shown.bs.modal', function() {
+    $('#statusUpdateModal').on('shown.bs.modal', function () {
         if (!$('#statusUpdateModal .select2StatusUpdate').hasClass('select2-hidden-accessible')) {
             $('#statusUpdateModal .select2StatusUpdate').select2({
                 placeholder: 'Select',
@@ -3409,26 +3322,21 @@
         }
     });
 
-    function showVisitDoneModal(leadId) 
-    {
+    function showVisitDoneModal(leadId) {
         $('#vd_leadId').val(leadId);
         $('#visitDoneModal').modal('show');
     }
 
-    $(document).ready(function() 
-    {
-        $('#vd_visitProjects').on('change', function() 
-        {
+    $(document).ready(function () {
+        $('#vd_visitProjects').on('change', function () {
             var selectedValues = $(this).val() || [];
             var hasOthers = selectedValues.includes('others');
-            
-            if (hasOthers) 
-            {
+
+            if (hasOthers) {
                 $('#vd_otherProjectField').show();
                 $('#vd_otherProjectName').prop('required', true);
-            } 
-            else 
-            {
+            }
+            else {
                 $('#vd_otherProjectField').hide();
                 $('#vd_otherProjectName').prop('required', false);
                 $('#vd_otherProjectName').val('');
@@ -3436,35 +3344,31 @@
         });
     });
 
-    function submitVisitDone() 
-    {
+    function submitVisitDone() {
         const selectedProjects = $('#vd_visitProjects').val();
         const otherProjectName = $('#vd_otherProjectName').val().trim();
         let numericProjectIds = [];
         let hasOtherProject = false;
-        
-        if (selectedProjects && selectedProjects.length > 0) 
-        {
+
+        if (selectedProjects && selectedProjects.length > 0) {
             numericProjectIds = selectedProjects.filter(id => id !== 'others');
             hasOtherProject = selectedProjects.includes('others');
         }
-        
-        if (numericProjectIds.length === 0 && !hasOtherProject) 
-        {
+
+        if (numericProjectIds.length === 0 && !hasOtherProject) {
             flasher.error('Please select at least one project.');
             return;
         }
-        
-        if (hasOtherProject && !otherProjectName) 
-        {
+
+        if (hasOtherProject && !otherProjectName) {
             flasher.error('Please enter the other project name.');
             return;
         }
-        
+
         const btn = $('#btnSubmitVisitDone');
         btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Saving...');
         const projectIdsString = numericProjectIds.join(',');
-        
+
         const formData = {
             _token: '{{ csrf_token() }}',
             leadId: $('#vd_leadId').val(),
@@ -3477,33 +3381,27 @@
             comment: $('#vd_comment').val(),
             project_ids: projectIdsString
         };
-        
+
         $.ajax({
             url: '{{ route('lead.updateStatus') }}',
             type: 'POST',
             data: formData,
-            success: function(response) 
-            {
-                if (response.success) 
-                {
+            success: function (response) {
+                if (response.success) {
                     flasher.success('Visit marked as done successfully!');
                     setTimeout(() => location.reload(), 1000);
-                } 
-                else 
-                {
+                }
+                else {
                     flasher.error(response.message);
                     btn.prop('disabled', false).html('Save');
                 }
             },
-            error: function(xhr) 
-            {
+            error: function (xhr) {
                 let errorMsg = 'An error occurred';
-                if (xhr.responseJSON && xhr.responseJSON.message) 
-                {
+                if (xhr.responseJSON && xhr.responseJSON.message) {
                     errorMsg = xhr.responseJSON.message;
-                } 
-                else if (xhr.responseJSON && xhr.responseJSON.errors) 
-                {
+                }
+                else if (xhr.responseJSON && xhr.responseJSON.errors) {
                     errorMsg = Object.values(xhr.responseJSON.errors)[0][0];
                 }
                 flasher.error(errorMsg);

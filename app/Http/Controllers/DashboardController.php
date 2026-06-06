@@ -44,12 +44,9 @@ class DashboardController extends Controller
 
     private function rememberDashboard(string $name, array $parts, int $seconds, callable $callback)
     {
-        try 
-        {
+        try {
             return Cache::remember($this->dashboardCacheKey($name, $parts), $seconds, $callback);
-        } 
-        catch (\Throwable $e) 
-        {
+        } catch (\Throwable $e) {
             return $callback();
         }
     }
@@ -64,8 +61,7 @@ class DashboardController extends Controller
 
         $dateRangeValid = !empty($dateRange) && isset($dateRange['start'], $dateRange['end']) && $dateRange['start'] && $dateRange['end'];
 
-        $baseQuery = function ($status = null, $remindDate = null, $typeLabel = null) use ($childIds, $dateRangeValid, $dateRange) 
-        {
+        $baseQuery = function ($status = null, $remindDate = null, $typeLabel = null) use ($childIds, $dateRangeValid, $dateRange) {
             return DB::table('leads as a')
                 ->join('users as b', 'b.id', '=', 'a.user_id')
                 ->leftJoin('projects as c', 'c.id', '=', 'a.project_id')
@@ -96,20 +92,15 @@ class DashboardController extends Controller
                 //         return $q->whereDate('a.remind_date', $remindDate);
                 //     }
                 // })
-                ->when($remindDate !== null, function ($q) use ($remindDate) 
-                {
-                    if (is_array($remindDate)) 
-                    {
+                ->when($remindDate !== null, function ($q) use ($remindDate) {
+                    if (is_array($remindDate)) {
                         [$operator, $value] = $remindDate;
-                        if ($operator === 'between') 
-                        {
+                        if ($operator === 'between') {
                             return $q->whereBetween('a.remind_date', $value);
                         }
 
                         return $q->where('a.remind_date', $operator, $value);
-                    } 
-                    else 
-                    {
+                    } else {
                         return $q->where('a.remind_date', $remindDate);
                     }
                 })
@@ -117,8 +108,7 @@ class DashboardController extends Controller
                 ->when(!empty($childIds), fn($q) => $q->whereIn('a.user_id', $childIds))
                 ->when($dateRangeValid, fn($q) => $q->whereBetween('a.lead_date', [$dateRange['start'], $dateRange['end']]));
         };
-        if ($tab === 'today') 
-        {
+        if ($tab === 'today') {
             $queries = [
                 $baseQuery('CALL SCHEDULED', $today, 'Call'),
                 $baseQuery('VISIT SCHEDULED', $today, 'Visit'),
@@ -128,14 +118,10 @@ class DashboardController extends Controller
             ];
 
             $unionQuery = null;
-            foreach ($queries as $index => $query) 
-            {
-                if ($index === 0) 
-                {
+            foreach ($queries as $index => $query) {
+                if ($index === 0) {
                     $unionQuery = $query;
-                } 
-                else 
-                {
+                } else {
                     $unionQuery = $unionQuery->unionAll($query);
                 }
             }
@@ -145,8 +131,7 @@ class DashboardController extends Controller
                 ->orderBy('datetime')
                 ->paginate($perPage);
         }
-        if ($tab === 'tomorrow') 
-        {
+        if ($tab === 'tomorrow') {
             $queries = [
                 $baseQuery('CALL SCHEDULED', $tomorrow, 'Call'),
                 $baseQuery('VISIT SCHEDULED', $tomorrow, 'Visit'),
@@ -156,14 +141,10 @@ class DashboardController extends Controller
             ];
 
             $unionQuery = null;
-            foreach ($queries as $index => $query) 
-            {
-                if ($index === 0) 
-                {
+            foreach ($queries as $index => $query) {
+                if ($index === 0) {
                     $unionQuery = $query;
-                } 
-                else 
-                {
+                } else {
                     $unionQuery = $unionQuery->unionAll($query);
                 }
             }
@@ -174,8 +155,7 @@ class DashboardController extends Controller
                 ->paginate($perPage);
         }
 
-        if ($tab === 'next7days') 
-        {
+        if ($tab === 'next7days') {
             $next7Days = now()->addDays(7)->format('Y-m-d');
             $queries = [
                 $baseQuery('CALL SCHEDULED', ['between', [$tomorrow, $next7Days]], 'Call'),
@@ -187,14 +167,10 @@ class DashboardController extends Controller
 
             $unionQuery = null;
 
-            foreach ($queries as $index => $query) 
-            {
-                if ($index === 0) 
-                {
+            foreach ($queries as $index => $query) {
+                if ($index === 0) {
                     $unionQuery = $query;
-                } 
-                else 
-                {
+                } else {
                     $unionQuery = $unionQuery->unionAll($query);
                 }
             }
@@ -205,8 +181,7 @@ class DashboardController extends Controller
                 ->paginate($perPage);
         }
 
-        if ($tab === 'missed') 
-        {
+        if ($tab === 'missed') {
             $missedQuery = $baseQuery(null, ['<', $today], 'Missed')
                 ->whereIn('a.status', ['CALL SCHEDULED', 'VISIT SCHEDULED', 'WHATSAPP', 'INTERESTED', 'MEETING SCHEDULED']);
 
@@ -223,8 +198,7 @@ class DashboardController extends Controller
         $user = DB::table('users')->where('id', $userId)->first();
         $userType = Session::get('user_type');
 
-        if (!$user || $user->token !== $sessionToken) 
-        {
+        if (!$user || $user->token !== $sessionToken) {
             Session::flush();
             Flasher::addError('Someone else has logged in with your account. You have been logged out');
             return redirect('/')->withErrors('Logut succesfully')->withInput();
@@ -232,8 +206,7 @@ class DashboardController extends Controller
 
         $childIds = Session::get('child_ids');
         $selectedAgentId = $request->input('agent_id');
-        if ($selectedAgentId) 
-        {
+        if ($selectedAgentId) {
             $childIds = $selectedAgentId;
         }
         $length = $request->query('length', 10);
@@ -243,8 +216,7 @@ class DashboardController extends Controller
             ->get(['id', 'name']);
 
         $allocatedLeadCount = DB::table('leads as a')
-            ->where(function ($query) 
-            {
+            ->where(function ($query) {
                 $query->where('a.status', 'allocated_lead')
                     ->orWhereNull('a.status')
                     ->orWhere('a.status', '');
@@ -281,10 +253,8 @@ class DashboardController extends Controller
             ->orderBy('id', 'desc')
             ->first();
 
-        if ($advertisement) 
-        {
-            if ($advertisement->features && is_string($advertisement->features)) 
-            {
+        if ($advertisement) {
+            if ($advertisement->features && is_string($advertisement->features)) {
                 $advertisement->features = json_decode($advertisement->features, true) ?? [];
             }
         }
@@ -348,8 +318,8 @@ class DashboardController extends Controller
         $selectedAgent = $selectedAgentId;
         $calendarEvents = $this->rememberDashboard('calendar_events', $cacheParts, 60, fn() => $this->getCalendarEvents($childIds, $dateRange));
         $lead_statuses = DB::table('lead_statuses')
-        ->whereNotIn('system_name', ['BOOKED', 'Completed', 'Cancelled'])
-        ->get();
+            ->whereNotIn('system_name', ['BOOKED', 'Completed', 'Cancelled'])
+            ->get();
         return view('index', compact(
             'taskStats',
             'categorys',
@@ -387,15 +357,12 @@ class DashboardController extends Controller
 
     private function getDateRange(Request $request)
     {
-        if ($request->filled('start_date') && $request->filled('end_date')) 
-        {
+        if ($request->filled('start_date') && $request->filled('end_date')) {
             return [
                 'start' => Carbon::parse($request->input('start_date'))->startOfDay(),
                 'end' => Carbon::parse($request->input('end_date'))->endOfDay()
             ];
-        } 
-        elseif ($request->filled('dateRange')) 
-        {
+        } elseif ($request->filled('dateRange')) {
             $dates = explode(' - ', $request->input('dateRange'));
             // echo '<pre>'; print_r($dates); exit;
             return [
@@ -451,12 +418,10 @@ class DashboardController extends Controller
     {
         return DB::table('leads')
             ->where('status', 'TRANSFER LEAD')
-            ->when(!empty($childIds), function ($query) use ($childIds) 
-            {
+            ->when(!empty($childIds), function ($query) use ($childIds) {
                 $query->whereIn('user_id', $childIds);
             })
-            ->when($this->hasDateRange($dateRange), function ($query) use ($dateRange) 
-            {
+            ->when($this->hasDateRange($dateRange), function ($query) use ($dateRange) {
                 $query->whereBetween('created_at', [$dateRange['start'], $dateRange['end']]);
             })
             ->count();
@@ -465,8 +430,7 @@ class DashboardController extends Controller
     private function getMonthlyLeadReport($year = null, $dataSearch = null, $dateRange = [], $childIds = null): array
     {
         $userId = session('user_id');
-        if ($childIds === null) 
-        {
+        if ($childIds === null) {
             $childIds = Session::get('child_ids');
             $childIds = $this->normalizeIdsService->normalize($childIds);
         }
@@ -479,28 +443,21 @@ class DashboardController extends Controller
             ->when($this->hasDateRange($dateRange), fn($q) => $q->whereBetween('lead_date', [$dateRange['start'], $dateRange['end']]));
         $userIds = is_array($childIds) ? $childIds : explode(',', $childIds);
 
-        if ($dataSearch === 'Team') 
-        {
+        if ($dataSearch === 'Team') {
             $query->whereIn('user_id', $userIds)
                 ->where('user_id', '!=', $userId);
-        } 
-        elseif ($dataSearch === 'Self') 
-        {
+        } elseif ($dataSearch === 'Self') {
             $query->where('user_id', $userId);
-        } 
-        else 
-        {
+        } else {
             $query->whereIn('user_id', $userIds);
         }
 
         $results = $query->groupBy(DB::raw('MONTH(lead_date)'))->get();
 
         $monthsReport = array_fill(0, 12, 0);
-        foreach ($results as $row) 
-        {
+        foreach ($results as $row) {
             $idx = (int)$row->month - 1;
-            if ($idx >= 0 && $idx <= 11) 
-            {
+            if ($idx >= 0 && $idx <= 11) {
                 $monthsReport[$idx] = $row->total;
             }
         }
@@ -559,8 +516,7 @@ class DashboardController extends Controller
         $yesterday = now()->subDay()->format('Y-m-d');
         $userId = Session::get('user_id');
 
-        if ($childIds === null) 
-        {
+        if ($childIds === null) {
             $childIds = Session::get('child_ids');
             $childIds = $this->normalizeIdsService->normalize($childIds);
         }
@@ -753,8 +709,7 @@ class DashboardController extends Controller
             ->merge($tomorrowLeadEvents)
             ->merge($missedLeadEvents)
             ->unique('id')
-            ->map(function ($item) 
-            {
+            ->map(function ($item) {
                 $item->date = Carbon::parse($item->date)->format('M d, Y');
                 $item->overdue_days = (int) ($item->overdue_days ?? 0);
                 $item->project_name = $item->project_name ?? 'No Project';
@@ -777,11 +732,35 @@ class DashboardController extends Controller
         $userId = Session::get('user_id');
         $childIds = Session::get('child_ids');
         $childIds = $this->normalizeIdsService->normalize($childIds);
+        $user = DB::table('users')->where('id', $userId)->first();
+        $permissions = json_decode($user->master_options ?? '[]', true);
+        $isAdmin = ($user->role === 'admin');
+        // ---------------- PERMISSIONS ----------------
+        $allowedStatuses = [];
 
+        if ($isAdmin || in_array('lead.call_scheduled', $permissions)) {
+            $allowedStatuses[] = 'CALL SCHEDULED';
+        }
+
+        if ($isAdmin || in_array('lead.visit_scheduled', $permissions)) {
+            $allowedStatuses[] = 'VISIT SCHEDULED';
+        }
+
+        if ($isAdmin || in_array('lead.meeting_scheduled', $permissions)) {
+            $allowedStatuses[] = 'MEETING SCHEDULED';
+        }
+
+        if ($isAdmin || in_array('lead.interested', $permissions)) {
+            $allowedStatuses[] = 'INTERESTED';
+        }
+
+        if ($isAdmin || in_array('lead.whatsapp', $permissions)) {
+            $allowedStatuses[] = 'WHATSAPP';
+        }
         $dateRangeValid = $this->hasDateRange($dateRange);
 
-        $baseQuery = function ($status = null, $remindDate = null, $typeLabel = null) use ($childIds, $dateRangeValid, $dateRange)
-        {
+        // $baseQuery = function ($status = null, $remindDate = null, $typeLabel = null) use ($childIds, $dateRangeValid, $dateRange)
+        $baseQuery = function ($status = null, $remindDate = null, $typeLabel = null) use ($childIds, $dateRangeValid, $dateRange, $allowedStatuses) {
             return DB::table('leads as a')
                 ->join('users as b', 'b.id', '=', 'a.user_id')
                 ->leftJoin('projects as c', 'c.id', '=', 'a.project_id')
@@ -806,28 +785,23 @@ class DashboardController extends Controller
                     'a.classification',
                     'a.last_comment'
                 )
-                ->when($remindDate !== null, function ($q) use ($remindDate)
-                {
-                    if (is_array($remindDate))
-                    {
+                ->when($remindDate !== null, function ($q) use ($remindDate) {
+                    if (is_array($remindDate)) {
                         [$operator, $value] = $remindDate;
 
-                        if ($operator === 'between')
-                        {
+                        if ($operator === 'between') {
                             return $q->whereBetween('a.remind_date', $value);
                         }
 
                         return $q->where('a.remind_date', $operator, $value);
-                    }
-                    else
-                    {
+                    } else {
                         return $q->where('a.remind_date', $remindDate);
                     }
                 })
-                ->when($status !== null, fn($q) => $q->where('a.status', $status))
+                ->when($status !== null, fn($q) => $q->where('a.status', $status))->whereIn('a.status', $allowedStatuses)
                 ->when(!empty($childIds), fn($q) => $q->whereIn('a.user_id', $childIds))
                 ->when($dateRangeValid, fn($q) =>
-                    $q->whereBetween('a.lead_date', [$dateRange['start'], $dateRange['end']]));
+                $q->whereBetween('a.lead_date', [$dateRange['start'], $dateRange['end']]));
         };
 
         return [
@@ -847,14 +821,14 @@ class DashboardController extends Controller
                 ->orderBy('a.remind_time')
                 ->limit(50)
                 ->get(),
-            'missedFollowups' => $baseQuery(null, ['<', $today], 'Missed')
-                ->whereIn('a.status', [
-                    'CALL SCHEDULED',
-                    'VISIT SCHEDULED',
-                    'WHATSAPP',
-                    'INTERESTED',
-                    'MEETING SCHEDULED'
-                ])
+            'missedFollowups' => $baseQuery(null, ['<', $today], 'Missed')->whereIn('a.status', $allowedStatuses)
+                // ->whereIn('a.status', [
+                //     'CALL SCHEDULED',
+                //     'VISIT SCHEDULED',
+                //     'WHATSAPP',
+                //     'INTERESTED',
+                //     'MEETING SCHEDULED'
+                // ])
                 ->orderBy('a.remind_date')
                 ->limit(100)
                 ->get(),
@@ -939,8 +913,7 @@ class DashboardController extends Controller
             ->when(!empty($childIds), fn($q) => $q->whereIn('user_id', $childIds))
             ->when(
                 !empty($dateRange['start']) && !empty($dateRange['end']),
-                function ($q) use ($dateRange) 
-                {
+                function ($q) use ($dateRange) {
                     $start = Carbon::parse($dateRange['start'])->startOfDay();
                     $end = Carbon::parse($dateRange['end'])->endOfDay();
                     $q->whereBetween('lead_date', [$start, $end]);
@@ -969,14 +942,12 @@ class DashboardController extends Controller
         $childIds = $this->normalizeIdsService->normalize($childIds);
         $userId = session('user_id');
 
-        if (!isset($filters['team'])) 
-        {
+        if (!isset($filters['team'])) {
             $filters['team'] = 'all';
         }
 
         $dateRange = [];
-        if (!empty($filters['dateRange'])) 
-        {
+        if (!empty($filters['dateRange'])) {
             $dates = explode(' - ', $filters['dateRange']);
             $dateRange = [
                 'start' => Carbon::parse($dates[0])->startOfDay(),
@@ -1079,8 +1050,7 @@ class DashboardController extends Controller
 
         $results = $query->get();
         $monthlyData = array_fill(1, 12, 0);
-        foreach ($results as $row) 
-        {
+        foreach ($results as $row) {
             $monthlyData[$row->month] = $row->lead_count;
         }
 
@@ -1187,8 +1157,7 @@ class DashboardController extends Controller
         $childIds = Session::get('child_ids');
         $childIds = $this->normalizeIdsService->normalize($childIds);
         $dateRange = [];
-        if (!empty($filters['dateRange'])) 
-        {
+        if (!empty($filters['dateRange'])) {
             $dates = explode(' - ', $filters['dateRange']);
             $dateRange = [
                 'start' => Carbon::parse($dates[0])->startOfDay(),
@@ -1196,8 +1165,7 @@ class DashboardController extends Controller
             ];
         }
 
-        switch ($type) 
-        {
+        switch ($type) {
             case 'source-analysis':
                 $data = $this->getSourceAnalysisData($childIds, $filters, $dateRange);
                 $filename = 'source_analysis_' . date('Ymd_His') . '.csv';
@@ -1227,8 +1195,7 @@ class DashboardController extends Controller
         $output = fopen('php://output', 'w');
         fputcsv($output, [$labelHeader, $valueHeader]);
 
-        foreach ($labels as $index => $label) 
-        {
+        foreach ($labels as $index => $label) {
             fputcsv($output, [$label, $values[$index]]);
         }
 
@@ -1244,29 +1211,24 @@ class DashboardController extends Controller
 
         $monthsReport = $this->getMonthlyLeadReport($year);
 
-        if ($type === 'csv') 
-        {
+        if ($type === 'csv') {
             $headers = [
                 'Content-Type' => 'text/csv',
                 'Content-Disposition' => 'attachment; filename="lead_conversion_' . $year . '.csv"',
             ];
 
-            $callback = function () use ($monthsReport) 
-            {
+            $callback = function () use ($monthsReport) {
                 $file = fopen('php://output', 'w');
                 fputcsv($file, ['Month', 'Leads']);
                 $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                foreach ($months as $index => $month) 
-                {
+                foreach ($months as $index => $month) {
                     fputcsv($file, [$month, $monthsReport[$index]]);
                 }
 
                 fclose($file);
             };
             return response()->stream($callback, 200, $headers);
-        } 
-        else 
-        {
+        } else {
             return response()->json(['error' => 'Export type not supported'], 400);
         }
     }
@@ -1305,8 +1267,7 @@ class DashboardController extends Controller
                 'b.role',
                 'c.project_name as project_name'
             )
-            ->where(function ($query) use ($q) 
-            {
+            ->where(function ($query) use ($q) {
                 $query->where('a.name', 'like', "%$q%")
                     ->orWhere('a.phone', 'like', "%$q%")
                     ->orWhere('a.email', 'like', "%$q%");
@@ -1323,15 +1284,13 @@ class DashboardController extends Controller
         $userId = session('user_id');
         $action = $request->input('action');
 
-        if ($action === 'start') 
-        {
+        if ($action === 'start') {
             $existing = DB::table('attendance')
                 ->where('user_id', $userId)
                 ->whereDate('start_time', Carbon::today())
                 ->exists();
 
-            if ($existing) 
-            {
+            if ($existing) {
                 return response()->json(['message' => 'Attendance already started for today.'], 409);
             }
 
@@ -1346,16 +1305,14 @@ class DashboardController extends Controller
             return response()->json(['message' => 'Attendance started.']);
         }
 
-        if ($action === 'end') 
-        {
+        if ($action === 'end') {
             $record = DB::table('attendance')
                 ->where('user_id', $userId)
                 ->whereNull('end_time')
                 ->orderByDesc('id')
                 ->first();
 
-            if (!$record) 
-            {
+            if (!$record) {
                 return response()->json(['message' => 'No active session found to end.'], 404);
             }
 
@@ -1364,8 +1321,7 @@ class DashboardController extends Controller
             $hours = round($start->diffInMinutes($end) / 60, 2);
 
             $types = DB::table('attendance_types')->get();
-            $matched = $types->first(function ($type) use ($hours) 
-            {
+            $matched = $types->first(function ($type) use ($hours) {
                 return abs($type->hours - $hours) <= 0.5;
             });
 
@@ -1380,12 +1336,9 @@ class DashboardController extends Controller
 
             session()->forget('attendance_active');
 
-            if ($status) 
-            {
+            if ($status) {
                 return response()->json(['message' => "Attendance ended. Marked as: {$status}."]);
-            } 
-            else 
-            {
+            } else {
                 return response()->json([
                     'message' => "Attendance ended, but duration doesn't match any known attendance type (duration: {$hours}h)."
                 ], 200);
@@ -1397,15 +1350,38 @@ class DashboardController extends Controller
     private function getCalendarEvents($childIds, $dateRange = [])
     {
         $events = collect();
-        try 
-        {
+        try {
             $calendarStart = $this->hasDateRange($dateRange)
                 ? Carbon::parse($dateRange['start'])->toDateString()
                 : now()->startOfMonth()->toDateString();
             $calendarEnd = $this->hasDateRange($dateRange)
                 ? Carbon::parse($dateRange['end'])->toDateString()
                 : now()->endOfMonth()->toDateString();
+            $userId = Session::get('user_id');
+            $user = DB::table('users')->where('id', $userId)->first();
+            $permissions = json_decode($user->master_options ?? '[]', true);
+            $isAdmin = ($user->role === 'admin');
 
+            $allowedStatuses = [];
+
+            if ($isAdmin || in_array('lead.call_scheduled', $permissions)) {
+                $allowedStatuses[] = 'CALL SCHEDULED';
+            }
+
+            if ($isAdmin || in_array('lead.visit_scheduled', $permissions)) {
+                $allowedStatuses[] = 'VISIT SCHEDULED';
+            }
+
+            if ($isAdmin || in_array('lead.meeting_scheduled', $permissions)) {
+                $allowedStatuses[] = 'MEETING SCHEDULED';
+            }
+
+            if ($isAdmin || in_array('lead.interested', $permissions)) {
+                $allowedStatuses[] = 'INTERESTED';
+            }
+            if ($isAdmin || in_array('lead.whatsapp', $permissions)) {
+                $allowedStatuses[] = 'WHATSAPP';
+            }
             $scheduledLeads = DB::table('leads as a')
                 ->join('users as b', 'b.id', '=', 'a.user_id')
                 ->leftJoin('projects as c', 'c.id', '=', 'a.project_id')
@@ -1432,26 +1408,23 @@ class DashboardController extends Controller
                     DB::raw("0 as is_overdue")
                 )
                 ->whereNotNull('a.remind_date')
-                ->whereIn('a.status', [
-                    'CALL SCHEDULED',
-                    'VISIT SCHEDULED',
-                    'WHATSAPP',
-                    'INTERESTED',
-                    'MEETING SCHEDULED',
-                    'PROCESSING',
-                    'NOT PICKED',
-                    'FUTURE LEAD',
-                    'PENDING',
-                ])
+                // ->whereIn('a.status', [
+                //     'CALL SCHEDULED',
+                //     'VISIT SCHEDULED',
+                //     'WHATSAPP',
+                //     'INTERESTED',
+                //     'MEETING SCHEDULED',
+                //     'PROCESSING',
+                //     'NOT PICKED',
+                //     'FUTURE LEAD',
+                //     'PENDING',
+                // ])
+                ->whereIn('a.status', $allowedStatuses)
                 ->whereBetween('a.remind_date', [$calendarStart, $calendarEnd])
-                ->when(!empty($childIds), function ($q) use ($childIds) 
-                {
-                    if (is_array($childIds)) 
-                    {
+                ->when(!empty($childIds), function ($q) use ($childIds) {
+                    if (is_array($childIds)) {
                         $q->whereIn('a.user_id', $childIds);
-                    } 
-                    else 
-                    {
+                    } else {
                         $q->whereIn('a.user_id', explode(',', $childIds));
                     }
                 })
@@ -1461,16 +1434,12 @@ class DashboardController extends Controller
                 ->get();
 
             $events = $events->concat($scheduledLeads);
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
         }
         $groupedEvents = [];
-        foreach ($events as $event) 
-        {
+        foreach ($events as $event) {
             $date = $event->start_date;
-            if (!isset($groupedEvents[$date])) 
-            {
+            if (!isset($groupedEvents[$date])) {
                 $groupedEvents[$date] = [];
             }
             $groupedEvents[$date][] = $event;
@@ -1483,8 +1452,7 @@ class DashboardController extends Controller
     {
         $type = request()->get('type', '');
 
-        if ($type === 'lead') 
-        {
+        if ($type === 'lead') {
             $lead = DB::table('leads as a')
                 ->join('users as b', 'b.id', '=', 'a.user_id')
                 ->leftJoin('projects as c', 'c.id', '=', 'a.project_id')
@@ -1496,14 +1464,11 @@ class DashboardController extends Controller
                 ->where('a.id', $id)
                 ->first();
 
-            if ($lead) 
-            {
+            if ($lead) {
                 return response()->json($lead);
             }
             return response()->json(['error' => 'Lead not found'], 404);
-        } 
-        else 
-        {
+        } else {
             $task = DB::table('tasks as t')
                 ->join('users as u', 'u.id', '=', 't.user_id')
                 ->leftJoin('task_projects as tp', 'tp.id', '=', 't.task_project_id')
@@ -1521,8 +1486,7 @@ class DashboardController extends Controller
                 ->where('t.id', $id)
                 ->first();
 
-            if ($task) 
-            {
+            if ($task) {
                 return response()->json($task);
             }
             return response()->json(['error' => 'Task not found'], 404);

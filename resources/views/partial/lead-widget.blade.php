@@ -1,30 +1,57 @@
+@php
+    // 1. Get current user
+    $user = DB::table('users')->where('id', session('user_id'))->first();
+
+    // 2. Decode permissions
+    $masterAccess = [];
+    if ($user && $user->master_options) {
+        $masterAccess = json_decode($user->master_options, true);
+    }
+    $isSpecial = $user->is_special;
+    $userType = $user->role;
+
+@endphp
 <div class="col-xl-8">
     <div class="row" id="lead-stats-container">
-        @foreach($leadCards as $index => $card)
-            @if(!isset($card['others_lead']) && $card['title'] !== 'Other Leads')
+        @foreach ($leadCards as $index => $card)
+            @if (!isset($card['others_lead']) && $card['title'] !== 'Other Leads')
+                @php
+                    $canAccess = $userType == 'admin' || ($isSpecial == 1 && in_array($card['route'], $masterAccess));
+                @endphp
+
                 <div class="col-md-4 lead-card">
                     <div class="card mini-stats-wid">
-                        @if($card['route'])
-                            <a href="{{ route($card['route']) }}">
+                        @if ($card['route'])
+                            <a @if ($card['route'] && $canAccess) href="{{ route($card['route']) }}" @else href="javascript:void(0)"
+                            style="pointer-events: none; opacity: 0.6; cursor: not-allowed;" @endif>
                         @endif
-                        <div class="card-body">
-                            <div class="d-flex">
-                                <div class="flex-grow-1">
-                                    <p class="text-muted fw-medium">{{ $card['title'] }}</p>
-                                    <h4 class="mb-0">{{ $card['value'] ?? 0 }}</h4>
-                                </div>
-                                <div class="flex-shrink-0 align-self-center">
-                                    <div class="avatar-sm rounded-circle bg-primary mini-stat-icon">
-                                        <span class="avatar-title rounded-circle bg-primary">
-                                            <i class="bx {{ $card['icon'] }} font-size-24"></i>
-                                        </span>
+                            <div class="card-body">
+                                <div class="d-flex">
+                                    <div class="flex-grow-1">
+                                        @if (!$canAccess)
+                                            <div class="position-absolute top-0 end-0 p-2">
+                                                <i class="bx bx-lock-alt text-muted fs-5"></i>
+                                            </div>
+                                        @endif
+                                        <p class="text-muted fw-medium">
+                                            {{ $card['title'] }}
+
+
+                                        </p>
+                                        <h4 class="mb-0">{{ $card['value'] ?? 0 }}</h4>
+                                    </div>
+                                    <div class="flex-shrink-0 align-self-center">
+                                        <div class="avatar-sm rounded-circle bg-primary mini-stat-icon">
+                                            <span class="avatar-title rounded-circle bg-primary">
+                                                <i class="bx {{ $card['icon'] }} font-size-24"></i>
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        @if($card['route'])
-                            </a>
-                        @endif
+                            @if ($card['route'])
+                                </a>
+                            @endif
                     </div>
                 </div>
             @endif
@@ -37,18 +64,18 @@
             <div class="d-flex justify-content-between align-items-center">
                 <h4 class="card-title mb-0">Lead Analytics</h4>
                 <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-light text-dark dropdown-toggle" type="button" 
+                    <button class="btn btn-sm btn-outline-light text-dark dropdown-toggle" type="button"
                         data-bs-toggle="dropdown">
                         <i class="bx bx-dots-vertical-rounded"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li>
                             <a class="dropdown-item" href="#" id="export-analytics-png">
-                            <i class="bx bx-image me-2"></i>Export as PNG</a>
+                                <i class="bx bx-image me-2"></i>Export as PNG</a>
                         </li>
                         <li>
                             <a class="dropdown-item" href="#" id="export-analytics-csv">
-                            <i class="bx bx-file me-2"></i>Export as CSV</a>
+                                <i class="bx bx-file me-2"></i>Export as CSV</a>
                         </li>
                     </ul>
                 </div>
@@ -77,17 +104,17 @@
                     </a>
                 </li>
 
-                  <li class="nav-item">
+                <li class="nav-item">
                     <a class="nav-link" data-bs-toggle="tab" href="#category-type" role="tab">
                         Category Type
                     </a>
                 </li>
-                  <li class="nav-item">
+                <li class="nav-item">
                     <a class="nav-link" data-bs-toggle="tab" href="#category" role="tab">
-                        Category 
+                        Category
                     </a>
                 </li>
-                  <li class="nav-item">
+                <li class="nav-item">
                     <a class="nav-link" data-bs-toggle="tab" href="#sub-category" role="tab">
                         Sub Category
                     </a>
@@ -100,7 +127,7 @@
                         <div class="ms-md-auto d-flex align-items-center">
                             <div class="me-3">
                                 <select id="year-filter" class="form-select form-select-sm">
-                                    @foreach($availableYears as $year)
+                                    @foreach ($availableYears as $year)
                                         <option value="{{ $year }}" {{ $selectedYear == $year ? 'selected' : '' }}>
                                             {{ $year }}
                                         </option>

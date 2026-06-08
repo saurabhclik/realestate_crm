@@ -23,8 +23,7 @@ class LeadStatusController extends Controller
             ->orderBy('id', 'asc')
             ->paginate($length);
         $leads = DB::table('leads')->get();
-        foreach ($statuses as $status) 
-        {
+        foreach ($statuses as $status) {
             $status->used_count = DB::table('leads')
                 ->where('status', $status->display_name)
                 ->count();
@@ -39,8 +38,7 @@ class LeadStatusController extends Controller
             ->where('id', $id)
             ->first();
 
-        if (!$status) 
-        {
+        if (!$status) {
             return redirect()->back()
                 ->with('error', 'Status not found!');
         }
@@ -69,8 +67,7 @@ class LeadStatusController extends Controller
             'display_name' => 'required|string|max:255|unique:lead_statuses,display_name,' . $id
         ]);
 
-        if ($validator->fails()) 
-        {
+        if ($validator->fails()) {
             return response()->json([
                 'error' => $validator->errors()->first()
             ], 422);
@@ -80,8 +77,7 @@ class LeadStatusController extends Controller
             ->where('id', $id)
             ->first();
 
-        if (!$status) 
-        {
+        if (!$status) {
             return response()->json([
                 'error' => 'Status not found'
             ], 404);
@@ -94,7 +90,20 @@ class LeadStatusController extends Controller
                 'display_name' => $newDisplayName,
                 'updated_date' => now()
             ]);
+        //  ADD THIS BLOCK (MASTER MENU SYNC)
+        $status = DB::table('lead_statuses')
+            ->where('id', $id)
+            ->first();
 
+        if ($status && !empty($status->route_name)) {
+
+            DB::table('master_menus')
+                ->where('route', $status->route_name)
+                ->update([
+                    'name' => $newDisplayName,
+                    'updated_at' => now()
+                ]);
+        }
         return response()->json([
             'success' => true,
             'display_name' => $newDisplayName
@@ -148,8 +157,8 @@ class LeadStatusController extends Controller
                 ->with(
                     'error',
                     'Cannot delete status because it is used in ' .
-                    $usedCount .
-                    ' leads.'
+                        $usedCount .
+                        ' leads.'
                 );
         }
 
@@ -169,10 +178,8 @@ class LeadStatusController extends Controller
             ->orderBy('id', 'asc');
 
         $statuses = $query->get();
-        if ($role) 
-        {
-            $statuses = $statuses->filter(function ($status) use ($role) 
-            {
+        if ($role) {
+            $statuses = $statuses->filter(function ($status) use ($role) {
                 if (
                     !$status->visible_role ||
                     $status->visible_role == 'NULL'

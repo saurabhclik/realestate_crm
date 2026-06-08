@@ -1382,6 +1382,7 @@ class DashboardController extends Controller
             if ($isAdmin || in_array('lead.whatsapp', $permissions)) {
                 $allowedStatuses[] = 'WHATSAPP';
             }
+            $allowedStatuses = array_merge($allowedStatuses, ['PROCESSING', 'NOT PICKED', 'FUTURE LEAD', 'PENDING']);
             $scheduledLeads = DB::table('leads as a')
                 ->join('users as b', 'b.id', '=', 'a.user_id')
                 ->leftJoin('projects as c', 'c.id', '=', 'a.project_id')

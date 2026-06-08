@@ -18,14 +18,37 @@ class MobileDashboardController extends Controller
         $childIdsArray = $childIds ? array_map('trim', explode(',', $childIds)) : [];
 
         $userIds = array_merge([$userId], $childIdsArray);
+        $user = DB::table('users')->where('id', $userId)->first();
 
+        $permissions = json_decode($user->master_options ?? '[]', true);
+        $isAdmin = ($user->role === 'admin');
+
+        $allowedStatuses = [];
+
+        if ($isAdmin || in_array('lead.call_scheduled', $permissions)) {
+            $allowedStatuses[] = 'CALL SCHEDULED';
+        }
+
+        if ($isAdmin || in_array('lead.visit_scheduled', $permissions)) {
+            $allowedStatuses[] = 'VISIT SCHEDULED';
+        }
+
+        if ($isAdmin || in_array('lead.meeting_scheduled', $permissions)) {
+            $allowedStatuses[] = 'MEETING SCHEDULED';
+        }
+
+        if ($isAdmin || in_array('lead.interested', $permissions)) {
+            $allowedStatuses[] = 'INTERESTED';
+        }
+         if ($isAdmin || in_array('lead.whatsapp', $permissions)) {
+            $allowedStatuses[] = 'WHATSAPP';
+        }
         $query = DB::table('leads')
             ->leftJoin('inv_catg', 'leads.catg_id', '=', 'inv_catg.id')
             ->leftJoin('inv_subcatg', 'leads.sub_catg_id', '=', 'inv_subcatg.id')
             ->leftJoin('users', 'leads.user_id', '=', 'users.id')
 
-            ->leftJoin('lead_statuses as ls', function ($join) 
-            {
+            ->leftJoin('lead_statuses as ls', function ($join) {
                 $join->on(
                     DB::raw('ls.system_name COLLATE utf8mb4_unicode_ci'),
                     '=',
@@ -33,8 +56,7 @@ class MobileDashboardController extends Controller
                 );
             })
 
-            ->leftJoin('lead_statuses as cls', function ($join) 
-            {
+            ->leftJoin('lead_statuses as cls', function ($join) {
                 $join->on(
                     DB::raw('cls.system_name COLLATE utf8mb4_unicode_ci'),
                     '=',
@@ -42,8 +64,7 @@ class MobileDashboardController extends Controller
                 );
             })
 
-            ->leftJoin('projects', function ($join) 
-            {
+            ->leftJoin('projects', function ($join) {
                 $join->on(DB::raw("FIND_IN_SET(projects.id, leads.project_id)"), '>', DB::raw('0'));
             })
 
@@ -69,26 +90,29 @@ class MobileDashboardController extends Controller
                 'cls.display_name as conversion_display_name'
             )
 
-            ->whereIn('leads.user_id', $userIds)
-
-            ->groupBy(
-                'leads.id',
-                'leads.name',
-                'leads.phone',
-                'leads.status',
-                'leads.conversion_type',
-                'leads.lead_date',
-                'leads.source',
-                'leads.user_id',
-                'leads.last_comment',
-                'leads.project_id',
-                'leads.type',
-                'inv_catg.name',
-                'inv_subcatg.name',
-                'users.name',
-                'ls.display_name',
-                'cls.display_name'
-            );
+            ->whereIn('leads.user_id', $userIds);
+        /*   */
+        if (!$isAdmin && !empty($allowedStatuses)) {
+            $query->whereIn('leads.status', $allowedStatuses);
+        }
+        $query->groupBy(
+            'leads.id',
+            'leads.name',
+            'leads.phone',
+            'leads.status',
+            'leads.conversion_type',
+            'leads.lead_date',
+            'leads.source',
+            'leads.user_id',
+            'leads.last_comment',
+            'leads.project_id',
+            'leads.type',
+            'inv_catg.name',
+            'inv_subcatg.name',
+            'users.name',
+            'ls.display_name',
+            'cls.display_name'
+        );
 
         if ($status === 'Completed') {
             $query->where(function ($q) {
@@ -98,7 +122,6 @@ class MobileDashboardController extends Controller
                             ->where('leads.conversion_type', 'Completed');
                     });
             });
-
         } elseif ($status === 'Booked') {
 
             $query->where(function ($q) {
@@ -108,7 +131,6 @@ class MobileDashboardController extends Controller
                             ->where('leads.conversion_type', 'Booked');
                     });
             });
-
         } elseif ($status === 'Cancelled') {
 
             $query->where(function ($q) {
@@ -118,23 +140,16 @@ class MobileDashboardController extends Controller
                             ->where('leads.conversion_type', 'Cancelled');
                     });
             });
-
-        } 
-        elseif ($status === 'MEETING SCHEDULED') {
+        } elseif ($status === 'MEETING SCHEDULED') {
 
             $query->where('leads.status', 'MEETING SCHEDULED');
-
-        } 
-        elseif ($status === 'WHATSAPP') {
+        } elseif ($status === 'WHATSAPP') {
 
             $query->where('leads.status', 'WHATSAPP');
-
         } elseif ($status === 'facebook') {
 
             $query->where('leads.source', 'Facebook');
-
         } elseif ($status === 'All lead') {
-
         } elseif (!empty($status)) {
 
             $query->where('leads.status', $status);

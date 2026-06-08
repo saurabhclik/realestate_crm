@@ -15,10 +15,8 @@ class MobileNotificationController extends Controller
         $childIds = Session::get('child_ids', '');
         $childIdsArray = $childIds ? array_map('trim', explode(',', $childIds)) : [];
         $selectedStatus = $request->get('status', 'today');
-        if (empty($childIdsArray)) 
-        {
-            if ($request->ajax()) 
-            {
+        if (empty($childIdsArray)) {
+            if ($request->ajax()) {
                 return response()->json([
                     'notifications' => [],
                     'hasMore' => false,
@@ -37,7 +35,32 @@ class MobileNotificationController extends Controller
 
         $today = Carbon::today()->toDateString();
         $tomorrow = Carbon::tomorrow()->toDateString();
+        $userId = Session::get('user_id');
+        $user = DB::table('users')->where('id', $userId)->first();
 
+        $permissions = json_decode($user->master_options ?? '[]', true);
+        $isAdmin = ($user->role === 'admin');
+
+        $allowedStatuses = [];
+        if ($isAdmin || in_array('lead.call_scheduled', $permissions)) {
+            $allowedStatuses[] = 'CALL SCHEDULED';
+        }
+
+        if ($isAdmin || in_array('lead.visit_scheduled', $permissions)) {
+            $allowedStatuses[] = 'VISIT SCHEDULED';
+        }
+
+        if ($isAdmin || in_array('lead.meeting_scheduled', $permissions)) {
+            $allowedStatuses[] = 'MEETING SCHEDULED';
+        }
+
+        if ($isAdmin || in_array('lead.interested', $permissions)) {
+            $allowedStatuses[] = 'INTERESTED';
+        }
+
+        if ($isAdmin || in_array('lead.whatsapp', $permissions)) {
+            $allowedStatuses[] = 'WHATSAPP';
+        }
         $query = DB::table('leads')
             ->select(
                 'id',
@@ -50,34 +73,27 @@ class MobileNotificationController extends Controller
                 'created_at'
             )
             ->whereIn('user_id', $childIdsArray)
+            ->whereIn('status', $allowedStatuses)
             ->orderBy('remind_date', 'asc')
             ->orderBy('remind_time', 'asc');
-        if ($selectedStatus === 'today') 
-        {
+        if ($selectedStatus === 'today') {
             $query->whereDate('remind_date', $today);
-        } 
-        elseif ($selectedStatus === 'tomorrow') 
-        {
+        } elseif ($selectedStatus === 'tomorrow') {
             $query->whereDate('remind_date', $tomorrow);
-        } 
-        elseif ($selectedStatus === 'missed') 
-        {
+        } elseif ($selectedStatus === 'missed') {
             $query->whereDate('remind_date', '<', $today)
-                  ->whereIn('status', [
-                      'CALL SCHEDULED',
-                      'VISIT SCHEDULED',
-                      'INTERESTED',
-                      'MEETING SCHEDULED'
-                  ]);
-        } 
-        elseif ($selectedStatus !== 'all') 
-        {
+                ->whereIn('status', [
+                    'CALL SCHEDULED',
+                    'VISIT SCHEDULED',
+                    'INTERESTED',
+                    'MEETING SCHEDULED'
+                ]);
+        } elseif ($selectedStatus !== 'all') {
             $query->where('status', $selectedStatus);
         }
         $perPage = $request->get('per_page', 10);
         $notifications = $query->paginate($perPage);
-        if ($request->ajax()) 
-        {
+        if ($request->ajax()) {
             return response()->json([
                 'notifications' => $notifications->items(),
                 'hasMore' => $notifications->hasMorePages(),

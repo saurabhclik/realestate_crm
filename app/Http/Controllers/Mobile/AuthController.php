@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use App\Services\LeadService;
 use App\Services\NormalizeIdsService;
 use Illuminate\Support\Facades\Validator;
+
 class AuthController extends Controller
 {
     protected $leadService;
@@ -24,8 +25,7 @@ class AuthController extends Controller
 
     public function showLoginForm()
     {
-        if (session()->has('user_id') && session()->get('platform') === 'mobile') 
-        {
+        if (session()->has('user_id') && session()->get('platform') === 'mobile') {
             return redirect()->route('mobile.dashboard')->with([
                 'status' => 200,
                 'message' => 'Mobile session already active.'
@@ -39,8 +39,7 @@ class AuthController extends Controller
 
         $firebaseConfig = null;
 
-        if ($firebase && $firebase->settings) 
-        {
+        if ($firebase && $firebase->settings) {
             $firebaseConfig = json_decode($firebase->settings, true);
         }
         // dd($firebaseConfig);
@@ -56,8 +55,7 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        if ($validator->fails()) 
-        {
+        if ($validator->fails()) {
             Flasher::addError($validator);
             return redirect()->route('mobile.login.form')->withErrors($validator)->withInput();
         }
@@ -67,28 +65,23 @@ class AuthController extends Controller
             ->where('is_active', 1)
             ->first();
 
-        if (!$user) 
-        {
+        if (!$user) {
             Flasher::addError('Invalid Credentials, please try again');
             return redirect()->route('mobile.login.form')->withErrors('Invalid Credentials, please try again')->withInput();
         }
 
-        if ($user && $user->password === $request->password) 
-        {
+        if ($user && $user->password === $request->password) {
             $token = $this->generateToken(12);
             $child_ids = [];
-            $iterable = [$user->id]; 
-            while (!empty($iterable)) 
-            {
+            $iterable = [$user->id];
+            while (!empty($iterable)) {
                 $children = DB::table('users')
                     ->whereIn('tm_id', $iterable)
                     ->pluck('id')
                     ->toArray();
 
-                foreach ($iterable as $id) 
-                {
-                    if (!in_array($id, $child_ids)) 
-                    {
+                foreach ($iterable as $id) {
+                    if (!in_array($id, $child_ids)) {
                         $child_ids[] = $id;
                     }
                 }
@@ -108,7 +101,7 @@ class AuthController extends Controller
                 'token' => $token,
                 'logo'       => $logo_path,
                 'last_login' => $user->last_login,
-                'platform' => 'mobile' 
+                'platform' => 'mobile'
             ]);
 
             DB::table('users')
@@ -126,10 +119,7 @@ class AuthController extends Controller
 
             Flasher::addSuccess('Login successful!');
             return redirect()->route('mobile.dashboard');
-
-        } 
-        else 
-        {
+        } else {
             Flasher::addError('Invalid Credentials, please try again');
             return redirect()->route('mobile.login.form')->withErrors('Invalid Credentials, please try again')->withInput();
         }
@@ -137,9 +127,8 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        if (session()->get('platform') === 'mobile') 
-        {
-            Session::flush(); 
+        if (session()->get('platform') === 'mobile') {
+            Session::flush();
         }
         return redirect()->route('mobile.login.form')->with([
             'status' => 200,
@@ -149,8 +138,7 @@ class AuthController extends Controller
 
     public function dashboard(Request $request)
     {
-        if (!session()->has('user_id') && session()->get('platform') === 'mobile') 
-        {
+        if (!session()->has('user_id') && session()->get('platform') === 'mobile') {
             return redirect()->route('login')->with([
                 'status' => 403,
                 'message' => 'Please login first.'
@@ -170,8 +158,7 @@ class AuthController extends Controller
                 DB::raw("SUM(CASE WHEN t.status = 'completed' THEN 1 ELSE 0 END) as completed_task")
             );
 
-        if (!empty($childIds)) 
-        {
+        if (!empty($childIds)) {
             $taskQuery->whereIn('tu.user_id', $childIds);
         }
 
@@ -184,10 +171,9 @@ class AuthController extends Controller
                 DB::raw("SUM(CASE WHEN t.status = 'completed' THEN 1 ELSE 0 END) as completed_task"),
                 DB::raw("SUM(CASE WHEN t.status != 'completed' AND t.end_date < NOW() THEN 1 ELSE 0 END) as overdue_task")
             )
-            ->where(function ($q) use ($userId) 
-            {
-                $q->where('t.created_by', $userId)      
-                ->orWhereIn('tu.user_id', [$userId]);
+            ->where(function ($q) use ($userId) {
+                $q->where('t.created_by', $userId)
+                    ->orWhereIn('tu.user_id', [$userId]);
             })
             ->first();
 
@@ -210,14 +196,13 @@ class AuthController extends Controller
         $transferredToUserIds = $this->leadService->getTransferredLeadIds($userId);
         $leadStats = $this->leadService->getLeadStatistics($userId, $transferredToUserIds, $dateRange, $childIds);
         $transferLeadCount = DB::table('transfer_leads')
-            ->when(!empty($childIds), function ($q) use ($childIds) 
-            {
+            ->when(!empty($childIds), function ($q) use ($childIds) {
                 $q->whereIn('from', $childIds)
-                ->orWhereIn('to', $childIds);
+                    ->orWhereIn('to', $childIds);
             })
             ->count();
 
-            // echo $userId; exit;
+        // echo $userId; exit;
         $monthsReport = $this->getMonthlyLeadReport(
             $request->input('year'),
             $request->input('datasearch')
@@ -255,11 +240,11 @@ class AuthController extends Controller
         $followups = $this->getFollowups();
 
         $availableYears = DB::table('leads')
-        ->select(DB::raw('YEAR(lead_date) as year'))
-        ->when(!empty($childIds), fn($q) => $q->whereIn('user_id', $childIds))
-        ->groupBy(DB::raw('YEAR(lead_date)'))
-        ->orderBy('year', 'desc')
-        ->pluck('year');
+            ->select(DB::raw('YEAR(lead_date) as year'))
+            ->when(!empty($childIds), fn($q) => $q->whereIn('user_id', $childIds))
+            ->groupBy(DB::raw('YEAR(lead_date)'))
+            ->orderBy('year', 'desc')
+            ->pluck('year');
 
         $totalLeads = $leadStats->total_lead ?? 0;
         // echo '<pre>'; print_r($totalLeads); exit;
@@ -267,15 +252,15 @@ class AuthController extends Controller
         $targetPercentage = $totalLeads > 0 ? round(($converted / $totalLeads) * 100) : 0;
         $selectedYear = $request->input('year', date('Y'));
         $res = [];
-        $totalSaleExecutive =[];
+        $totalSaleExecutive = [];
         $callTotal = ($leadStats->call_schedule ?? 0);
         $visitTotal = ($leadStats->visit_schedule ?? 0);
         $interestedTotal = ($leadStats->interested ?? 0);
         $whatsappTotal = ($leadStats->meeting_schedule ?? 0);
 
-        $totalCallVisitInterested = $callTotal + $visitTotal + $interestedTotal + $whatsappTotal; 
+        $totalCallVisitInterested = $callTotal + $visitTotal + $interestedTotal + $whatsappTotal;
 
-        return view('mobile.dashboard',compact(
+        return view('mobile.dashboard', compact(
             'taskStats',
             'projects',
             'cities',
@@ -296,7 +281,7 @@ class AuthController extends Controller
             'task_all_comments',
             'totalSaleExecutive',
             'targetPercentage',
-            'totalLeads' 
+            'totalLeads'
         ));
     }
 
@@ -304,23 +289,20 @@ class AuthController extends Controller
     {
         $year = $request->input('year', date('Y'));
         $childIds = $this->normalizeIds(session('child_ids'));
-        
+
         $monthsReport = $this->getMonthlyLeadReport($year);
-        
+
         return response()->json($monthsReport);
     }
 
     private function getDateRange(Request $request)
     {
-        if ($request->filled('start_date') && $request->filled('end_date')) 
-        {
+        if ($request->filled('start_date') && $request->filled('end_date')) {
             return [
                 'start' => Carbon::parse($request->input('start_date'))->startOfDay(),
                 'end' => Carbon::parse($request->input('end_date'))->endOfDay()
             ];
-        } 
-        elseif ($request->filled('dateRange')) 
-        {
+        } elseif ($request->filled('dateRange')) {
             $dates = explode(' - ', $request->input('dateRange'));
             // echo '<pre>'; print_r($dates); exit;
             return [
@@ -337,17 +319,14 @@ class AuthController extends Controller
 
     private function normalizeIds($ids): array
     {
-        if (is_null($ids)) 
-        {
+        if (is_null($ids)) {
             return [];
         }
-        if (is_string($ids)) 
-        {
+        if (is_string($ids)) {
             $idsArr = array_filter(explode(',', $ids), fn($v) => strlen($v));
             return array_map('intval', $idsArr);
         }
-        if (is_array($ids)) 
-        {
+        if (is_array($ids)) {
             return array_map('intval', $ids);
         }
         return [(int)$ids];
@@ -363,28 +342,21 @@ class AuthController extends Controller
             ->select(DB::raw('COUNT(*) as total'), DB::raw('MONTH(lead_date) as month'))
             ->whereYear('lead_date', $year);
 
-        if ($dataSearch === 'Team') 
-        {
+        if ($dataSearch === 'Team') {
             $query->whereIn('user_id', $childIds)
-            ->where('user_id', '!=', $userId);
-        } 
-        elseif ($dataSearch === 'Self') 
-        {
+                ->where('user_id', '!=', $userId);
+        } elseif ($dataSearch === 'Self') {
             $query->where('user_id', $userId);
-        } 
-        else 
-        {
+        } else {
             $query->whereIn('user_id', $childIds);
         }
 
         $results = $query->groupBy(DB::raw('MONTH(lead_date)'))->get();
 
         $monthsReport = array_fill(0, 12, 0);
-        foreach ($results as $row) 
-        {
+        foreach ($results as $row) {
             $idx = (int)$row->month - 1;
-            if ($idx >= 0 && $idx <= 11) 
-            {
+            if ($idx >= 0 && $idx <= 11) {
                 $monthsReport[$idx] = $row->total;
             }
         }
@@ -452,8 +424,7 @@ class AuthController extends Controller
             ->unionAll($missedtask)
             ->get()
             ->unique('id')
-            ->map(function ($item) 
-            {
+            ->map(function ($item) {
                 $item->date = Carbon::parse($item->date)->format('M d, Y H:i');
                 $item->overdue_days = (int) ($item->overdue_days ?? 0);
                 return $item;
@@ -469,7 +440,32 @@ class AuthController extends Controller
         $today = now()->format('Y-m-d');
         $userId = Session::get('user_id');
         $childIds = $this->normalizeIds(Session::get('child_ids'));
+        $user = DB::table('users')->where('id', $userId)->first();
 
+        $permissions = json_decode($user->master_options ?? '[]', true);
+        $isAdmin = ($user->role === 'admin');
+
+        $allowedStatuses = [];
+
+        if ($isAdmin || in_array('lead.call_scheduled', $permissions)) {
+            $allowedStatuses[] = 'CALL SCHEDULED';
+        }
+
+        if ($isAdmin || in_array('lead.visit_scheduled', $permissions)) {
+            $allowedStatuses[] = 'VISIT SCHEDULED';
+        }
+
+        // if ($isAdmin || in_array('lead.meeting_scheduled', $permissions)) {
+        //     $allowedStatuses[] = 'MEETING SCHEDULED';
+        // }
+
+        // if ($isAdmin || in_array('lead.interested', $permissions)) {
+        //     $allowedStatuses[] = 'INTERESTED';
+        // }
+
+        // if ($isAdmin || in_array('lead.whatsapp', $permissions)) {
+        //     $allowedStatuses[] = 'WHATSAPP';
+        // }
         $todayCalls = DB::table('leads')
             ->select(
                 'leads.id',
@@ -484,7 +480,8 @@ class AuthController extends Controller
             )
             ->join('users', 'leads.user_id', '=', 'users.id')
             ->whereDate('leads.remind_date', $today)
-            ->where('leads.status', 'CALL SCHEDULED')
+            // ->where('leads.status', 'CALL SCHEDULED')
+            ->whereIn('leads.status', $allowedStatuses)
             ->when(!empty($childIds), fn($q) => $q->whereIn('leads.user_id', $childIds))
             ->orderBy('leads.remind_time');
 
@@ -502,7 +499,8 @@ class AuthController extends Controller
             )
             ->join('users', 'leads.user_id', '=', 'users.id')
             ->whereDate('leads.remind_date', $today)
-            ->where('leads.status', 'VISIT SCHEDULED')
+            // ->where('leads.status', 'VISIT SCHEDULED')
+            ->whereIn('leads.status', $allowedStatuses)
             ->when(!empty($childIds), fn($q) => $q->whereIn('leads.user_id', $childIds))
             ->orderBy('leads.remind_time');
 
@@ -512,7 +510,7 @@ class AuthController extends Controller
                 'leads.name',
                 'leads.status',
                 'leads.phone',
-                DB::raw("'Missed Followup' as type"),   
+                DB::raw("'Missed Followup' as type"),
                 DB::raw("CONCAT(leads.remind_date, ' ', leads.remind_time) as datetime"),
                 'users.name as agent_name',
                 'leads.classification',
@@ -520,7 +518,13 @@ class AuthController extends Controller
             )
             ->join('users', 'leads.user_id', '=', 'users.id')
             ->whereDate('leads.remind_date', '<', $today)
-            ->whereIn('leads.status', ['CALL SCHEDULED', 'VISIT SCHEDULED'])
+            // ->whereIn('leads.status', ['CALL SCHEDULED', 'VISIT SCHEDULED'])
+            ->whereIn(
+                'leads.status',
+                $allowedStatuses
+            )
+
+
             ->when(!empty($childIds), fn($q) => $q->whereIn('leads.user_id', $childIds))
             ->orderBy('leads.remind_date');
 
@@ -538,8 +542,7 @@ class AuthController extends Controller
         $userId = session('user_id');
 
         $leads = DB::table('leads')
-            ->where(function($query) use ($q) 
-            {
+            ->where(function ($query) use ($q) {
                 $query->where('name', 'like', "%$q%")
                     ->orWhere('phone', 'like', "%$q%")
                     ->orWhere('email', 'like', "%$q%");
@@ -556,15 +559,13 @@ class AuthController extends Controller
         $userId = session('user_id');
         $action = $request->input('action');
 
-        if ($action === 'start') 
-        {
+        if ($action === 'start') {
             $existing = DB::table('attendance')
                 ->where('user_id', $userId)
                 ->whereDate('start_time', Carbon::today())
                 ->exists();
 
-            if ($existing) 
-            {
+            if ($existing) {
                 return response()->json(['message' => 'Attendance already started for today.'], 409);
             }
 
@@ -577,8 +578,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'Attendance started.']);
         }
 
-        if ($action === 'end') 
-        {
+        if ($action === 'end') {
             $updated = DB::table('attendance')
                 ->where('user_id', $userId)
                 ->whereNull('end_time')
@@ -608,8 +608,7 @@ class AuthController extends Controller
 
         $userId = session('user_id');
 
-        if (!$userId) 
-        {
+        if (!$userId) {
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
 

@@ -113,7 +113,8 @@
                                 @if (in_array('master', $currentMenuAccess) && ($userType == 'admin' || $isSpecial == 1))
                                     @if ($userType == 'admin' || ($isSpecial == 1 && in_array($masterMenus['category.list'], $masterAccess)))
                                         <li>
-                                            <a href="{{ route($masterMenus['category.list']) }}" key="t-category">{{ $softwareType === 'lead_management' ? 'Product type' : 'Property type' }}</a>
+                                            <a href="{{ route($masterMenus['category.list']) }}"
+                                                key="t-category">{{ $softwareType === 'lead_management' ? 'Product type' : 'Property type' }}</a>
                                         </li>
                                     @endif
                                 @endif
@@ -147,28 +148,33 @@
                                         </a>
                                     </li>
                                 @endif
-                                @if ($userType == 'admin' || ($isSpecial == 1 && in_array($masterMenus['channel.partner.platform'], $masterAccess)))
-                                    <li>
-                                        <a href="{{ route($masterMenus['channel.partner.platform']) }}"
-                                            key="t-channel-partner">Channel Partner Platform</a>
-                                    </li>
+                                @if($softwareType === 'real_state')
+                                    @if ($userType == 'admin' || ($isSpecial == 1 && in_array($masterMenus['channel.partner.platform'], $masterAccess)))
+                                        <li>
+                                            <a href="{{ route($masterMenus['channel.partner.platform']) }}"
+                                                key="t-channel-partner">Channel Partner Platform</a>
+                                        </li>
+                                    @endif
                                 @endif
-                                @if ($userType == 'admin' || ($isSpecial == 1 && in_array($masterMenus['property.name'], $masterAccess)))
-                                    <li>
-                                        <a href="{{ route($masterMenus['property.name']) }}" key="t-property">
-                                            Property Details
-                                        </a>
-                                    </li>
+                                @if($softwareType === 'real_state')
+                                    @if ($userType == 'admin' || ($isSpecial == 1 && in_array($masterMenus['property.name'], $masterAccess)))
+                                        <li>
+                                            <a href="{{ route($masterMenus['property.name']) }}" key="t-property">
+                                                Property Details
+                                            </a>
+                                        </li>
+                                    @endif
                                 @endif
-                                @if (
-                                        ($userType == 'admin' && in_array('post_sale', $activeFeatures) && in_array('post_sale', $currentMenuAccess)) ||
-                                        ($isSpecial == 1 && in_array($masterMenus['check.list'], $masterAccess))
-                                    )
-                                    <li>
-                                        <a href="{{ route($masterMenus['check.list']) }}" key="t-check">Check List</a>
-                                    </li>
+                                @if($softwareType === 'real_state')
+                                    @if (
+                                            ($userType == 'admin' && in_array('post_sale', $activeFeatures) && in_array('post_sale', $currentMenuAccess)) ||
+                                            ($isSpecial == 1 && in_array($masterMenus['check.list'], $masterAccess))
+                                        )
+                                        <li>
+                                            <a href="{{ route($masterMenus['check.list']) }}" key="t-check">Check List</a>
+                                        </li>
+                                    @endif
                                 @endif
-
                                 @if (
                                         (in_array('attendance', $currentMenuAccess) && $userType == 'admin') ||
                                         ($isSpecial == 1 && in_array($masterMenus['attendance'], $masterAccess))
@@ -177,16 +183,17 @@
                                         <a href="{{ route($masterMenus['attendance']) }}" key="t-shops">Attendance</a>
                                     </li>
                                 @endif
-                                @if (
-                                        (in_array('project_detail_page', $activeFeatures) && $userType == 'admin') ||
-                                        ($isSpecial == 1 && in_array($masterMenus['inquiry_question'], $masterAccess))
-                                    )
-                                    <li>
-                                        <a href="{{ route($masterMenus['inquiry_question']) }}" key="t-shops">Inquiry
-                                            Question</a>
-                                    </li>
+                                @if($softwareType === 'real_state')
+                                    @if (
+                                            (in_array('project_detail_page', $activeFeatures) && $userType == 'admin') ||
+                                            ($isSpecial == 1 && in_array($masterMenus['inquiry_question'], $masterAccess))
+                                        )
+                                        <li>
+                                            <a href="{{ route($masterMenus['inquiry_question']) }}" key="t-shops">Inquiry
+                                                Question</a>
+                                        </li>
+                                    @endif
                                 @endif
-
                                 @if (
                                         (in_array('mis_management', $activeFeatures) &&
                                             in_array('mis_management', $currentMenuAccess) &&
@@ -437,28 +444,32 @@
 
                     </li>
                 @endif
-                @if (
-                        $userType == 'admin' ||
-                        ($isSpecial == 1 && in_array($masterMenus['inventory.index'], $masterAccess))
-                    )
-                    <li>
-                        <a href="{{ route('inventory.index') }}" class="">
-                            <i class='bx bx-box'></i>
-                            <span key="t-blog">Inventory</span>
-                        </a>
-                    </li>
+                @if($softwareType === 'real_state')
+                    @if (
+                            $userType == 'admin' ||
+                            ($isSpecial == 1 && in_array($masterMenus['inventory.index'], $masterAccess))
+                        )
+                        <li>
+                            <a href="{{ route('inventory.index') }}" class="">
+                                <i class='bx bx-box'></i>
+                                <span key="t-blog">Inventory</span>
+                            </a>
+                        </li>
+                    @endif
                 @endif
+                @if($softwareType === 'real_state')
 
-                @if (
-                        $userType == 'admin' ||
-                        ($isSpecial == 1 && in_array($masterMenus['post-sale.index'], $masterAccess))
-                    )
-                    <li>
-                        <a href="{{ route('post-sale.index') }}" class="">
-                            <i class='bx bx-receipt'></i>
-                            <span key="t-blog">Post Sale</span>
-                        </a>
-                    </li>
+                    @if (
+                            $userType == 'admin' ||
+                            ($isSpecial == 1 && in_array($masterMenus['post-sale.index'], $masterAccess))
+                        )
+                        <li>
+                            <a href="{{ route('post-sale.index') }}" class="">
+                                <i class='bx bx-receipt'></i>
+                                <span key="t-blog">Post Sale</span>
+                            </a>
+                        </li>
+                    @endif
                 @endif
                 @if (
                         $userType == 'admin' ||
@@ -588,3 +599,17 @@
         </div>
     </div>
 </div>
+
+<script>
+    $(document).ready(function () {
+        $('#side-menu > li').each(function () {
+            var $subMenu = $(this).find('ul.sub-menu');
+            if ($subMenu.length && $subMenu.children('li').length === 0) {
+                $(this).remove();
+            }
+            if ($(this).text().trim() === '') {
+                $(this).remove();
+            }
+        });
+    });
+</script>

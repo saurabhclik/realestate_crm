@@ -150,7 +150,7 @@
                                         </div>
                                     </div>
 
-                                    <div id="special-user-sections">
+                                    <div id="special-user-sections" style="{{ isset($user) ? '' : 'display:none;' }}">
                                         {{-- ==================== STAFF MANAGEMENT ==================== --}}
                                         <?php
     // Define $selected ONCE so all sections can see it
@@ -278,14 +278,22 @@
                                                             );
                                                         }
                                                     @endphp
-
+                                                    @php
+                                                        $frozenOptions = ['lead.allocate', 'lead.unallocated']; 
+                                                    @endphp
                                                     @foreach ($leadOptions as $key => $label)
                                                         <div class="col-md-4">
                                                             <div class="form-check">
                                                                 <input class="form-check-input" type="checkbox"
                                                                     data-route="{{ $key }}" name="master_options[]"
                                                                     value="{{ $key }}" id="lead_{{ $loop->index }}" {{-- THIS
-                                                                    LINE CHECKS IF IT IS ALREADY SELECTED --}} {{ in_array($key, $selected) ? 'checked' : '' }}>
+                                                                    LINE CHECKS IF IT IS ALREADY SELECTED --}} {{ in_array($key, $selected) ? 'checked' : '' }} {{-- 🔥 FREEZE ONLY THESE TWO
+                                                                    --}} @if(in_array($key, $frozenOptions)) disabled @endif>
+                                                                {{-- 🔥 IMPORTANT PART (keeps value submitted even if disabled)
+                                                                --}}
+                                                                @if(in_array($key, $frozenOptions))
+                                                                    <input type="hidden" name="master_options[]" value="{{ $key }}">
+                                                                @endif
                                                                 <label class="form-check-label" for="lead_{{ $loop->index }}">
                                                                     {{ $label }}
                                                                 </label>

@@ -142,8 +142,8 @@ class StaffManagementController extends Controller
             'mobile' => 'required|digits:10',
             'password' => 'required|string|min:5',
             'role' => 'required|string',
-            'designation' => 'nullable',
-            'reporting_manager' => 'nullable',
+            'designation' => 'required',
+            'reporting_manager' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -181,7 +181,7 @@ class StaffManagementController extends Controller
                 'password' => $request->password,
                 'role' => $request->role,
                 'designation_id' => $request->designation ?? null,
-                'tm_id' => $request->reporting_manager ?? null,
+                'tm_id' => $request->reporting_manager ?? 0,
                 // 👇 NEW FIELDS
                 'is_special' => $request->has('is_special') ? 1 : 0,
                 'master_options' => json_encode($request->master_options ?? []),

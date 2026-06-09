@@ -113,8 +113,7 @@
                                 @if (in_array('master', $currentMenuAccess) && ($userType == 'admin' || $isSpecial == 1))
                                     @if ($userType == 'admin' || ($isSpecial == 1 && in_array($masterMenus['category.list'], $masterAccess)))
                                         <li>
-                                            <a href="{{ route($masterMenus['category.list']) }}" key="t-category">Property
-                                                Type</a>
+                                            <a href="{{ route($masterMenus['category.list']) }}" key="t-category">{{ $softwareType === 'lead_management' ? 'Product type' : 'Property type' }}</a>
                                         </li>
                                     @endif
                                 @endif

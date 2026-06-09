@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
      */
    public function run()
     {
-        $this->call(LeadsTableSeeder::class);
+        $this->call(MasterMenusSeeder::class);
+        $this->call(RoleRoutePermissionSeeder::class);
     }
 }

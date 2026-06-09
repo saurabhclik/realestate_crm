@@ -16,9 +16,7 @@ class RoleRoutePermissionSeeder extends Seeder
 
             'team_manager' => [
                 'designation.list',
-                'check.list',
-                'lead.completed',
-                'lead.cancelled'
+                'check.list'
             ],
 
             'salesman' => [
@@ -42,8 +40,6 @@ class RoleRoutePermissionSeeder extends Seeder
                 'mis.points',
                 'lead.allocate',
                 'lead.unallocated',
-                'lead.completed',
-                'lead.cancelled',
                 'system-configuration.index'
             ],
 
@@ -120,8 +116,6 @@ class RoleRoutePermissionSeeder extends Seeder
                 'inquiry_question',
                 'lead.allocate',
                 'lead.unallocated',
-                'lead.completed',
-                'lead.cancelled',
                 'system-configuration.index'
             ],
 
@@ -182,14 +176,59 @@ class RoleRoutePermissionSeeder extends Seeder
             ],
         ];
 
-        foreach ($rolePermissions as $roleName => $routes) {
-
-            DB::table('role_mst')
-                ->where('role_name', $roleName)
-                ->update([
+         foreach ($rolePermissions as $roleName => $routes) {
+            DB::table('role_mst')->updateOrInsert(
+                ['role_name' => $roleName],
+                [
                     'unselected_routes' => json_encode($routes),
                     'updated_date' => now(),
-                ]);
+                    'created_date' => now(),
+                ]
+            );
         }
+
+        // Reset all users
+        DB::statement("
+            UPDATE users
+            SET
+                is_special = 0,
+                master_options = JSON_ARRAY()
+        ");
+
+        // Rebuild permissions from role_mst
+        DB::statement("
+            UPDATE users u
+            JOIN (
+                SELECT
+                    u.id,
+                    CONCAT(
+                        '[',
+                        GROUP_CONCAT(
+                            DISTINCT CONCAT('\"', m.route, '\"')
+                            ORDER BY m.route
+                            SEPARATOR ','
+                        ),
+                        ']'
+                    ) AS permissions_to_save
+                FROM users u
+                JOIN role_mst r
+                    ON r.role_name = u.role
+                JOIN master_menus m
+                    ON JSON_CONTAINS(
+                        COALESCE(r.unselected_routes, '[]'),
+                        JSON_QUOTE(m.route)
+                    ) = 0
+                WHERE
+                    u.is_special = 0
+                    AND (
+                        u.master_options IS NULL
+                        OR u.master_options = '[]'
+                    )
+                GROUP BY u.id
+            ) p ON p.id = u.id
+            SET
+                u.master_options = p.permissions_to_save,
+                u.is_special = 1
+        ");
     }
 }

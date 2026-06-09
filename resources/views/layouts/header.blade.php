@@ -93,7 +93,7 @@
         </div>
 
         <div class="d-flex">
-            @if(in_array('project_detail_page', $currentAccess) && in_array('project_detail_page', $activeFeatures)  && $userType != 'reception')
+            @if(in_array('project_detail_page', $currentAccess) && in_array('project_detail_page', $activeFeatures)  && $userType != 'reception' && $softwareType === 'real_state')
             <div class="d-inline-block ms-2">
                 <a href="{{route('project-details.index')}}" class="btn header-item noti-icon waves-effect d-flex align-items-center">
                     <i class="fa-regular fa-building me-2"></i>

@@ -103,7 +103,14 @@
         </div>
     </div>
 @endif
-<div class="floating-chat-toggle {{ in_array('chat_bot', session('active_features', [])) ? 'd-none' : '' }}"
+@php
+    $chatBotFeature = \DB::table('software_features')
+        ->where('software_name', 'homeeasycrm')
+        ->whereRaw("REPLACE(feature_name, ' ', '') = ?", ['chat_bot'])
+        ->first();
+@endphp
+
+<div class="floating-chat-toggle {{ in_array('chat_bot', session('active_features', [])) ? 'd-none' : '' }} {{ !($chatBotFeature && $chatBotFeature->status == 'active') ? 'd-none' : '' }}"
     id="chatToggle" title="CHATBOT Assistant" role="button" tabindex="0" aria-label="Open CHATBOT Assistant">
     <span class="chatbot-robot" aria-hidden="true">
         <span class="chatbot-antenna"></span>

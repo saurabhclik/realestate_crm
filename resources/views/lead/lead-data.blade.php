@@ -356,6 +356,13 @@
                                     </select>
                                     entries
                                 </label>
+                                <span id="local-loader"
+                                    class="badge rounded-pill bg-primary d-none d-flex align-items-center px-3 py-2 ms-2 shadow-sm">
+                                    <div class="spinner-border spinner-border-sm text-white me-2" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <span id="local-timer" class="fw-bold text-white">0.0s</span>
+                                </span>
                             </div>
                             <table id="table" class="table-hover table-bordered dt-responsive nowrap w-100">
                                 <thead class="table-light">
@@ -423,8 +430,11 @@
                                                         value="{{ $row->id }}">
                                                 </td>
                                             @endif
-                                            <td>
+                                            {{-- <td>
                                                 {{ $loop->iteration }}
+                                            </td> --}}
+                                            <td>
+                                                {{ ($leads->currentPage() - 1) * $leads->perPage() + $loop->iteration }}
                                             </td>
                                             <td>
                                                 <div class="d-flex gap-3 align-items-center">
@@ -469,10 +479,10 @@
                                                             class="position-absolute bottom-50 start-100 translate-middle badge rounded-pill bg-warning text-dark shadow-sm cursor-pointer"
                                                             style="font-size: 0.65rem; padding: 0.25em 0.5em;"
                                                             data-bs-toggle="tooltip" data-bs-html="true" title="
-                                                                @foreach($row->duplicate_details as $dup)
-                                                                    Status: {{ $dup->status }}, Created: {{ \Carbon\Carbon::parse($dup->created_at)->format('d M Y H:i') }}<br>
-                                                                @endforeach
-                                                                    ">
+                                                                                        @foreach($row->duplicate_details as $dup)
+                                                                                            Status: {{ $dup->status }}, Created: {{ \Carbon\Carbon::parse($dup->created_at)->format('d M Y H:i') }}<br>
+                                                                                        @endforeach
+                                                                                            ">
                                                             👬🏼 {{ $row->duplicate_count }}
                                                         </span>
                                                     @endif
@@ -498,8 +508,8 @@
                                                                 <i class="fab fa-whatsapp text-success"></i>
                                                             </a>
                                                             <!-- <a href="{{ route('lead.edit', $row->id) }}" class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip" title="Edit">
-                                                                <i class="fas fa-edit text-warning"></i>
-                                                            </a> -->
+                                                                                <i class="fas fa-edit text-warning"></i>
+                                                                            </a> -->
                                                             <a href="{{ route('lead.edit', ['id' => $row->id] + request()->query()) }}"
                                                                 class="btn btn-xs btn-soft-light" data-bs-toggle="tooltip"
                                                                 title="Edit">
@@ -1343,13 +1353,13 @@
         function showVisitedHistory(leadId) {
             $('#visitedHistoryModal').modal('show');
             $('#visitedHistoryContent').html(`
-                <div class="text-center py-4">
-                    <div class="spinner-border text-info" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="mt-2">Loading visit history for lead ${leadId}...</p>
-                </div>
-            `);
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-info" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Loading visit history for lead ${leadId}...</p>
+                        </div>
+                    `);
             $.ajax({
                 url: `/lead/${leadId}/project-visits`,
                 type: 'GET',
@@ -1370,32 +1380,32 @@
                     }
 
                     $('#visitedHistoryContent').html(`
-                        <div class="alert alert-danger">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            ${errorMessage}
-                            ${xhr.responseJSON && xhr.responseJSON.received_data ?
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    ${errorMessage}
+                                    ${xhr.responseJSON && xhr.responseJSON.received_data ?
                             '<br><small>Received data: ' + JSON.stringify(xhr.responseJSON.received_data) + '</small>' : ''}
-                        </div>
-                    `);
+                                </div>
+                            `);
                 }
             });
         }
 
         function renderVisitedHistoryTable(projectVisits) {
             let tableHtml = `
-                <div class="table-responsive">
-                    <table class="table table-bordered visited-history-table">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Project Name</th>
-                                <th>Visit Status</th>
-                                <th>Visit Date</th>
-                                <th>Visit Time</th>
-                                <th>Created Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
+                        <div class="table-responsive">
+                            <table class="table table-bordered visited-history-table">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Project Name</th>
+                                        <th>Visit Status</th>
+                                        <th>Visit Date</th>
+                                        <th>Visit Time</th>
+                                        <th>Created Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
 
             projectVisits.forEach(visit => {
                 const visitDate = visit.visit_date ? formatDate(visit.visit_date) : 'N/A';
@@ -1404,43 +1414,43 @@
                 const statusBadgeClass = getStatusBadgeClass(visit.visit_status);
 
                 tableHtml += `
-                    <tr>
-                        <td>
-                            <strong>${visit.project_name || 'N/A'}</strong>
-                            ${visit.location ? `<br><small class="text-muted">${visit.location}</small>` : ''}
-                        </td>
-                        <td>
-                            <span class="badge ${statusBadgeClass} visit-status-badge">
-                                ${visit.visit_status}
-                            </span>
-                        </td>
-                        <td>${visitDate}</td>
-                        <td>${visitTime}</td>
-                        <td>${createdDate}</td>
-                    </tr>
-                `;
+                            <tr>
+                                <td>
+                                    <strong>${visit.project_name || 'N/A'}</strong>
+                                    ${visit.location ? `<br><small class="text-muted">${visit.location}</small>` : ''}
+                                </td>
+                                <td>
+                                    <span class="badge ${statusBadgeClass} visit-status-badge">
+                                        ${visit.visit_status}
+                                    </span>
+                                </td>
+                                <td>${visitDate}</td>
+                                <td>${visitTime}</td>
+                                <td>${createdDate}</td>
+                            </tr>
+                        `;
             });
 
             tableHtml += `
-                        </tbody>
-                    </table>
-                </div>
-                <div class="mt-3 text-muted small">
-                    Showing ${projectVisits.length} visit record(s)
-                </div>
-            `;
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-3 text-muted small">
+                            Showing ${projectVisits.length} visit record(s)
+                        </div>
+                    `;
 
             $('#visitedHistoryContent').html(tableHtml);
         }
 
         function showNoVisitsMessage() {
             $('#visitedHistoryContent').html(`
-                <div class="no-visits-message">
-                    <i class="fas fa-calendar-times"></i>
-                    <h5 class="mt-3">No Visit History Found</h5>
-                    <p class="text-muted">This lead doesn't have any recorded project visits yet.</p>
-                </div>
-            `);
+                        <div class="no-visits-message">
+                            <i class="fas fa-calendar-times"></i>
+                            <h5 class="mt-3">No Visit History Found</h5>
+                            <p class="text-muted">This lead doesn't have any recorded project visits yet.</p>
+                        </div>
+                    `);
         }
 
         function getStatusBadgeClass(status) {
@@ -1567,11 +1577,11 @@
             }
 
             $('#matchingProjectsContent').html(`
-                <div class="text-center py-4">
-                    <div class="spinner-border text-info" role="status"></div>
-                    <p class="mt-2">Loading matching projects...</p>
-                </div>
-            `);
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-info" role="status"></div>
+                            <p class="mt-2">Loading matching projects...</p>
+                        </div>
+                    `);
 
             const modal = new bootstrap.Modal(document.getElementById('matchingProjectsModal'));
             modal.show();
@@ -1593,62 +1603,62 @@
                                 '-';
 
                             html += `
-                            <div class="col-md-6 col-lg-4">
-                                <div class="card h-100 shadow-sm border-0" style="border-radius: 8px;">
-                                    <div class="card-body p-2"> <!-- Reduced padding -->
-                                        <div class="d-flex justify-content-between align-items-start mb-1">
-                                            <h6 class="card-title mb-0 fw-bold text-truncate" style="max-width: 140px;" title="${property.property_name}">
-                                                ${property.property_name}
-                                            </h6>
-                                            <span class="badge bg-${scoreColor} rounded-pill" style="font-size: 0.7rem;">
-                                                ${property.match_score}%
-                                            </span>
+                                    <div class="col-md-6 col-lg-4">
+                                        <div class="card h-100 shadow-sm border-0" style="border-radius: 8px;">
+                                            <div class="card-body p-2"> <!-- Reduced padding -->
+                                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                                    <h6 class="card-title mb-0 fw-bold text-truncate" style="max-width: 140px;" title="${property.property_name}">
+                                                        ${property.property_name}
+                                                    </h6>
+                                                    <span class="badge bg-${scoreColor} rounded-pill" style="font-size: 0.7rem;">
+                                                        ${property.match_score}%
+                                                    </span>
+                                                </div>
+
+                                                <div class="small">
+                                                    <div class="d-flex mb-1">
+                                                        <span class="text-muted" style="min-width: 45px;">Type:</span>
+                                                        <span class="fw-medium text-truncate" title="${property.property_type}">${property.property_type || '-'}</span>
+                                                    </div>
+
+                                                    <div class="d-flex mb-1">
+                                                        <span class="text-muted" style="min-width: 45px;">City:</span>
+                                                        <span class="fw-medium text-truncate" title="${property.city}">${property.city || '-'}</span>
+                                                    </div>
+
+                                                    <div class="d-flex mb-1">
+                                                        <span class="text-muted" style="min-width: 45px;">Budget:</span>
+                                                        <span class="fw-medium">${property.budget_price || '-'}</span>
+                                                    </div>
+
+                                                    <div class="mb-1">
+                                                        <span class="text-muted">Category:</span>
+                                                        <span class="fw-medium d-block text-truncate" title="${property.property_category} - ${property.property_sub_category}">
+                                                            ${property.property_category || ''} ${property.property_sub_category ? '/ ' + property.property_sub_category : ''}
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="mb-1">
+                                                        <span class="text-muted">Match:</span>
+                                                        <span class="fw-medium text-truncate small" title="${property.match_reasons ? property.match_reasons.join(', ') : ''}">
+                                                            ${reasons}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="d-grid gap-1 mt-2">
+                                                    <button class="btn btn-success btn-xs share-whatsapp-btn w-100 py-0" style="font-size: 0.7rem;"
+                                                        data-property-id="${property.id}"
+                                                        data-lead-id="${leadId}"
+                                                        data-lead-phone="${escapeHtml(leadPhone)}"
+                                                        data-admin-phone="${escapeHtml(adminPhone)}"
+                                                        data-property="${encodeURIComponent(JSON.stringify(property))}">
+                                                        <i class="bi bi-whatsapp"></i> Share
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
-
-                                        <div class="small">
-                                            <div class="d-flex mb-1">
-                                                <span class="text-muted" style="min-width: 45px;">Type:</span>
-                                                <span class="fw-medium text-truncate" title="${property.property_type}">${property.property_type || '-'}</span>
-                                            </div>
-
-                                            <div class="d-flex mb-1">
-                                                <span class="text-muted" style="min-width: 45px;">City:</span>
-                                                <span class="fw-medium text-truncate" title="${property.city}">${property.city || '-'}</span>
-                                            </div>
-
-                                            <div class="d-flex mb-1">
-                                                <span class="text-muted" style="min-width: 45px;">Budget:</span>
-                                                <span class="fw-medium">${property.budget_price || '-'}</span>
-                                            </div>
-
-                                            <div class="mb-1">
-                                                <span class="text-muted">Category:</span>
-                                                <span class="fw-medium d-block text-truncate" title="${property.property_category} - ${property.property_sub_category}">
-                                                    ${property.property_category || ''} ${property.property_sub_category ? '/ ' + property.property_sub_category : ''}
-                                                </span>
-                                            </div>
-
-                                            <div class="mb-1">
-                                                <span class="text-muted">Match:</span>
-                                                <span class="fw-medium text-truncate small" title="${property.match_reasons ? property.match_reasons.join(', ') : ''}">
-                                                    ${reasons}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div class="d-grid gap-1 mt-2">
-                                            <button class="btn btn-success btn-xs share-whatsapp-btn w-100 py-0" style="font-size: 0.7rem;"
-                                                data-property-id="${property.id}"
-                                                data-lead-id="${leadId}"
-                                                data-lead-phone="${escapeHtml(leadPhone)}"
-                                                data-admin-phone="${escapeHtml(adminPhone)}"
-                                                data-property="${encodeURIComponent(JSON.stringify(property))}">
-                                                <i class="bi bi-whatsapp"></i> Share
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>`;
+                                    </div>`;
                         });
 
                         html += '</div>'
@@ -1656,20 +1666,20 @@
                     }
                     else {
                         $('#matchingProjectsContent').html(`
-                            <div class="text-center py-4">
-                                <i class="fas fa-building fa-3x text-muted mb-2"></i>
-                                <p class="text-muted">No matching properties found.</p>
-                            </div>
-                        `);
+                                    <div class="text-center py-4">
+                                        <i class="fas fa-building fa-3x text-muted mb-2"></i>
+                                        <p class="text-muted">No matching properties found.</p>
+                                    </div>
+                                `);
                     }
                 },
                 error: function () {
                     $('#matchingProjectsContent').html(`
-                        <div class="text-center py-4">
-                            <i class="fas fa-exclamation-triangle fa-3x text-danger mb-2"></i>
-                            <p class="text-danger">Error fetching matching properties.</p>
-                        </div>
-                    `);
+                                <div class="text-center py-4">
+                                    <i class="fas fa-exclamation-triangle fa-3x text-danger mb-2"></i>
+                                    <p class="text-danger">Error fetching matching properties.</p>
+                                </div>
+                            `);
                 }
             });
         });
@@ -1786,13 +1796,13 @@
             const leadId = $(this).data('lead-id');
 
             $('#postSaleContent').html(`
-                <div class="text-center py-4">
-                    <div class="spinner-border text-info" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="mt-2">Loading post sale details...</p>
-                </div>
-            `);
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-info" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Loading post sale details...</p>
+                        </div>
+                    `);
 
             $.ajax({
                 url: '/post-sale/lead/' + leadId,
@@ -1802,62 +1812,62 @@
                         const data = response.data;
                         const createdAt = data.created_at ? new Date(data.created_at).toLocaleString() : '-';
                         const html = `
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <strong>Applicant Name:</strong>
-                                        <p>${escapeHtml(data.applicant_name || '-')}</p>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <strong>Applicant Name:</strong>
+                                                <p>${escapeHtml(data.applicant_name || '-')}</p>
+                                            </div>
+                                            <div class="mb-3">
+                                                <strong>Applicant Contact:</strong>
+                                                <p>${escapeHtml(data.applicant_number || '-')}</p>
+                                            </div>
+                                            <div class="mb-3">
+                                                <strong>Project Name:</strong>
+                                                <p>${escapeHtml(data.project_name || '-')}</p>
+                                            </div>
+                                            <div class="mb-3">
+                                                <strong>Unit Number:</strong>
+                                                <p>${escapeHtml(data.unit_number || '-')}</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <strong>Date of Birth:</strong>
+                                                <p>${escapeHtml(data.dob || '-')}</p>
+                                            </div>
+                                            <div class="mb-3">
+                                                <strong>Date of Anniversary:</strong>
+                                                <p>${escapeHtml(data.doa || '-')}</p>
+                                            </div>
+                                            <div class="mb-3">
+                                                <strong>Email:</strong>
+                                                <p>${escapeHtml(data.email || '-')}</p>
+                                            </div>
+                                            <div class="mb-3">
+                                                <strong>Created At:</strong>
+                                                <p>${escapeHtml(createdAt)}</p>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="mb-3">
-                                        <strong>Applicant Contact:</strong>
-                                        <p>${escapeHtml(data.applicant_number || '-')}</p>
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Project Name:</strong>
-                                        <p>${escapeHtml(data.project_name || '-')}</p>
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Unit Number:</strong>
-                                        <p>${escapeHtml(data.unit_number || '-')}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <strong>Date of Birth:</strong>
-                                        <p>${escapeHtml(data.dob || '-')}</p>
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Date of Anniversary:</strong>
-                                        <p>${escapeHtml(data.doa || '-')}</p>
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Email:</strong>
-                                        <p>${escapeHtml(data.email || '-')}</p>
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Created At:</strong>
-                                        <p>${escapeHtml(createdAt)}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
+                                `;
                         $('#postSaleContent').html(html);
                     } else {
                         $('#postSaleContent').html(`
-                            <div class="alert alert-warning">
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                No post sale record found for this lead.
-                            </div>
-                        `);
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        No post sale record found for this lead.
+                                    </div>
+                                `);
                     }
                 },
                 error: function () {
                     $('#postSaleContent').html(`
-                        <div class="alert alert-danger">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            Error loading post sale details.
-                        </div>
-                    `);
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Error loading post sale details.
+                                </div>
+                            `);
                 }
             });
         });
@@ -2006,6 +2016,39 @@
             if ($('#user').val()) {
                 checkUserTypeAndToggleCheckbox();
             }
+        });
+
+        var myTimer;
+       
+        $(document).on('click', '.pagination a', function (e) {
+            e.preventDefault();
+
+            var currentUrl = new URL(window.location.href);
+            var clickedUrl = new URL(this.href);
+            var newPage = clickedUrl.searchParams.get('page');
+
+            currentUrl.searchParams.set('page', newPage);
+
+            window.location.href = currentUrl.toString();
+        });
+        $('#lengthSelect').on('change', function () {
+           
+            if (myTimer) {
+                clearInterval(myTimer);
+            }
+
+            $('#local-timer').text('0.0s');
+
+            $('#local-loader').removeClass('d-none').fadeIn(200);
+
+            var s = Date.now();
+            myTimer = setInterval(function () {
+                $('#local-timer').text(((Date.now() - s) / 1000).toFixed(1) + 's');
+            }, 100);
+
+            var u = new URL(location.href);
+            u.searchParams.set('length', $(this).val());
+            location.href = u;
         });
     </script>
 @endsection

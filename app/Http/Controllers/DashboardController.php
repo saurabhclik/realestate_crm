@@ -1000,7 +1000,8 @@ class DashboardController extends Controller
                 DB::raw("CASE 
                     WHEN leads.project_id = 'others' THEN 'others'
                     WHEN leads.project_id LIKE '%,others%' THEN 'others'
-                    WHEN leads.custom_project_name IS NOT NULL AND leads.custom_project_name != '' THEN 'others'
+                   /* WHEN leads.custom_project_name IS NOT NULL AND leads.custom_project_name != '' THEN 'others'*/
+                    WHEN 0 THEN 'others'
                     WHEN leads.project_id IS NULL OR leads.project_id = '' THEN 'No Project'
                     ELSE (
                         SELECT projects.project_name 
@@ -1093,9 +1094,12 @@ class DashboardController extends Controller
     private function getCategoryAnalysisData($childIds, $filters, $dateRange)
     {
         $query = DB::table('leads')
-            ->join('inv_catg', 'leads.catg_id', '=', 'inv_catg.id')
+            /* ->join('inv_catg', 'leads.catg_id', '=', 'inv_catg.id')*/
+            ->leftJoin('inv_catg', 'leads.catg_id', '=', 'inv_catg.id')
             ->select(
-                'inv_catg.name as category',
+                /* 'inv_catg.name as category', */
+                DB::raw('COALESCE(inv_catg.name, "Uncategorized") as category'),
+
                 DB::raw('COUNT(leads.id) as total_leads')
             )
             ->whereNotNull('leads.catg_id')
@@ -1123,9 +1127,11 @@ class DashboardController extends Controller
     private function getSubCategoryAnalysisData($childIds, $filters, $dateRange)
     {
         $query = DB::table('leads')
-            ->join('inv_subcatg', 'leads.sub_catg_id', '=', 'inv_subcatg.id')
+            /* ->join('inv_subcatg', 'leads.sub_catg_id', '=', 'inv_subcatg.id') */
+            ->leftJoin('inv_subcatg', 'leads.sub_catg_id', '=', 'inv_subcatg.id')
             ->select(
-                'inv_subcatg.name as sub_category',
+                /* 'inv_subcatg.name as sub_category', */
+                DB::raw('COALESCE(inv_subcatg.name, "Uncategorized") as sub_category'),
                 DB::raw('COUNT(leads.id) as total_leads')
             )
             ->whereNotNull('leads.sub_catg_id')

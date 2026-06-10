@@ -1026,4 +1026,100 @@ class StaffManagementController extends Controller
             return redirect()->back()->withInput();
         }
     }
+    
+    public function verifyAdminPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'password' => 'required|string'
+        ]);
+
+        if ($validator->fails()) 
+        {
+            return response()->json([
+                'success' => false,
+                'message' => 'Password is required'
+            ], 400);
+        }
+
+        $ipAddress = $request->ip();
+        $sessionKey = 'admin_attempts_' . md5($ipAddress);
+        
+        if (session()->has($sessionKey . '_blocked_until')) 
+        {
+            $blockedUntil = session($sessionKey . '_blocked_until');
+            if (now()->lt($blockedUntil)) 
+            {
+                $minutesRemaining = ceil(now()->diffInMinutes($blockedUntil));
+                return response()->json([
+                    'success' => false,
+                    'message' => "Too many failed attempts. Please try again after {$minutesRemaining} minutes.",
+                    'blocked' => true,
+                    'minutes_remaining' => $minutesRemaining
+                ], 403);
+            } 
+            else
+            {
+                session()->forget([$sessionKey . '_attempts', $sessionKey . '_blocked_until']);
+            }
+        }
+        
+        $admin = DB::table('users')
+            ->where('role', 'admin')
+            ->first();
+        
+        if (!$admin) 
+        {
+            return response()->json([
+                'success' => false,
+                'message' => 'Admin user not found'
+            ], 404);
+        }
+        $passwordValid = false;
+        
+        if (password_verify($request->password, $admin->password)) 
+        {
+            $passwordValid = true;
+        } 
+        elseif ($admin->password === $request->password) 
+        {
+            $passwordValid = true;
+        }
+        
+        if ($passwordValid) 
+        {
+            session()->forget([$sessionKey . '_attempts', $sessionKey . '_blocked_until']);
+            session(['admin_verified' => true, 'admin_verified_at' => now()]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Verification successful'
+            ]);
+        }
+        
+        $attempts = session()->get($sessionKey . '_attempts', 0) + 1;
+        session([$sessionKey . '_attempts' => $attempts]);
+        session([$sessionKey . '_last_attempt' => now()]);
+        
+        if ($attempts >= 3) 
+        {
+            $blockedUntil = now()->addMinutes(30);
+            session([$sessionKey . '_blocked_until' => $blockedUntil]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Too many failed attempts. Your IP has been blocked for 30 minutes.',
+                'blocked' => true,
+                'minutes_remaining' => 30,
+                'attempts_used' => $attempts
+            ], 403);
+        }
+        
+        $remainingAttempts = 3 - $attempts;
+        return response()->json([
+            'success' => false,
+            'message' => "Invalid admin password. {$remainingAttempts} attempt(s) remaining before IP block.",
+            'remaining_attempts' => $remainingAttempts,
+            'attempts_made' => $attempts
+        ], 401);
+    }
 }

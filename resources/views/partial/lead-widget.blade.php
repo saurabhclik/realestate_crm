@@ -1,10 +1,8 @@
 @php
-    // 1. Get current user
     $user = DB::table('users')->where('id', session('user_id'))->first();
-
-    // 2. Decode permissions
     $masterAccess = [];
-    if ($user && $user->master_options) {
+    if ($user && $user->master_options) 
+    {
         $masterAccess = json_decode($user->master_options, true);
     }
     $isSpecial = $user->is_special;
@@ -22,7 +20,7 @@
                 <div class="col-md-4 lead-card">
                     <div class="card mini-stats-wid">
                         @if ($card['route'])
-                            <a @if ($card['route'] && $canAccess) href="{{ route($card['route']) }}" @else href="javascript:void(0)"
+                            <a @if ($card['route'] && $canAccess) href="{{ route($card['route']) . ($agentId ? '?user=' . $agentId : '') }}" @else href="javascript:void(0)"
                             style="pointer-events: none; opacity: 0.6; cursor: not-allowed;" @endif>
                         @endif
                             <div class="card-body">
@@ -35,8 +33,6 @@
                                         @endif
                                         <p class="text-muted fw-medium">
                                             {{ $card['title'] }}
-
-
                                         </p>
                                         <h4 class="mb-0">{{ $card['value'] ?? 0 }}</h4>
                                     </div>

@@ -350,14 +350,14 @@
                                         <option value="50" {{ $length == 50 ? 'selected' : '' }}>50</option>
                                         <option value="100" {{ $length == 100 ? 'selected' : '' }}>100</option>
                                         <option value="500" {{ $length == 500 ? 'selected' : '' }}>500</option>
-                                        @if ($lead_name === 'all_lead')
+                                        {{-- @if ($lead_name === 'all_lead')
                                             <option value="all" {{ $requestedLength == 'all' ? 'selected' : '' }}>All</option>
-                                        @endif
+                                        @endif --}}
                                     </select>
                                     entries
                                 </label>
                                 <span id="local-loader"
-                                    class="badge rounded-pill bg-primary d-none d-flex align-items-center px-3 py-2 ms-2 shadow-sm">
+                                    class="badge rounded-pill bg-primary d-none ms-2 py-2 px-3 text-white">
                                     <div class="spinner-border spinner-border-sm text-white me-2" role="status">
                                         <span class="visually-hidden">Loading...</span>
                                     </div>

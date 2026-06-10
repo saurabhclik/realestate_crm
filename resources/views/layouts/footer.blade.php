@@ -46,7 +46,7 @@
                         @php
                             $queryParams = request()->query();
                             $queryParams['classification'] = $classification;
-                            $url = route('leads.filter.leads') . '?' . http_build_query($queryParams);
+                            $url = route('lead.all_lead') . '?' . http_build_query($queryParams);
                         @endphp
                         <a href="{{ $url }}"
                             class="filter-option option-classification {{ request('classification') == $classification ? 'active' : '' }}">

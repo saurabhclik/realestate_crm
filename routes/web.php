@@ -140,6 +140,9 @@ Route::middleware(['check.login', 'reception.only'])->group(function () {
         Route::get('/category/list', [StaffManagementController::class, 'category_list'])->name('category.list');
         Route::put('/category/update/{id}', [StaffManagementController::class, 'update_category'])->name('update.category');
         Route::post('/category/store', [StaffManagementController::class, 'store_category'])->name('category.store');
+        Route::post('/staff/verify-admin-password', [StaffManagementController::class, 'verifyAdminPassword'])
+        ->name('staff.verify-admin-password');
+        
     });
 
     Route::middleware(['check.software.type:all_modules,real_state_only'])->group(function () {

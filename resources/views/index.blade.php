@@ -109,17 +109,14 @@
         ];
 
         $totalOthersLead = collect($othersLeadData)->sum('value');
-
-        // 1. Get current user
         $user = DB::table('users')->where('id', session('user_id'))->first();
-
-        // 2. Decode permissions
         $masterAccess = [];
         if ($user && $user->master_options) {
             $masterAccess = json_decode($user->master_options, true);
         }
         $isSpecial = $user->is_special;
         $userType = $user->role;
+        $agentId = request('agent_id');
     @endphp
 
     <style>
@@ -699,7 +696,7 @@
                                                 </div>
                                                 <div class="col-6">
                                                     @if ($userType == 'admin' || ($isSpecial == 1 && in_array('transfer_list.lead', $masterAccess)))
-                                                        <a href="{{ route('lead.transfer_lead') }}"
+                                                        <a href="{{ route('lead.transfer_lead') . ($agentId ? '?user=' . $agentId : '') }}"
                                                             class="text-decoration-none" style="cursor:pointer;">
                                                         @else
                                                             <a href="javascript:void(0)" class="text-decoration-none"
@@ -744,9 +741,9 @@
                                     <div class="col-md-6 col-sm-6 col-12">
                                         <div class="card mini-stats-wid border-light shadow-sm mb-1">
                                             @if (!empty($other['route']))
-                                                <a @if ($other['route'] && $canAccess) href="{{ route($other['route']) }}"  @else
-                href="javascript:void(0)"
-                style="pointer-events: none; opacity: 0.6; cursor: not-allowed;" @endif
+                                                <a @if ($other['route'] && $canAccess)href="{{ route($other['route']) . ($agentId ? '?user=' . $agentId : '') }}"  @else
+                                                    href="javascript:void(0)"
+                                                    style="pointer-events: none; opacity: 0.6; cursor: not-allowed;" @endif
                                                     class="text-decoration-none text-dark">
                                             @endif
                                             <div class="card-body py-2 px-3">

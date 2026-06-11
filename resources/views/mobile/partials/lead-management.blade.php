@@ -143,7 +143,7 @@
     .point-achieved {
         font-size: 13px;
         font-weight: 700;
-        color: #28a745;
+        color: #3661b7;
     }
 
     .point-separator {
@@ -226,7 +226,7 @@
                             right: 20px;
                             width: 55px;
                             height: 55px;
-                            background: #28a745;
+                            background: #3661b7;
                             border-radius: 50%;
                             display: flex;
                             align-items: center;
@@ -251,15 +251,15 @@
     @endif
 @endif
 @if($userType != 'admin')
-    <div style="display:flex;gap:10px;margin:10px 0;">
+    <div style="display:flex;justify-content:center;align-items:center;gap:10px;margin:10px 0;">
 
         <button onclick="showDashboard('lead')" id="btnLead"
-            style="padding:8px 15px;border-radius:20px;background:#28a745;color:#fff;border:none;">
+            style="padding:8px 15px;border-radius:20px;background:#3661b7;color:#fff;border:none;">
             Lead Dashboard
         </button>
 
         <button onclick="showDashboard('mis')" id="btnMis"
-            style="padding:8px 15px;border-radius:20px;background:#be2a2a;color:#000;border:none;">
+            style="padding:8px 15px;border-radius:20px;background:#fff;color:#000;border:none;">
             MIS Dashboard
         </button>
 
@@ -430,7 +430,7 @@
             document.getElementById('statPerformance').style.display = 'block';
 
             if (btnMis && btnLead) {
-                btnMis.style.background = '#28a745';
+                btnMis.style.background = '#3661b7';
                 btnMis.style.color = '#fff';
                 btnLead.style.background = '#e9ecef';
                 btnLead.style.color = '#333';
@@ -444,7 +444,7 @@
             document.getElementById('statPerformance').style.display = 'none';
 
             if (btnMis && btnLead) {
-                btnLead.style.background = '#28a745';
+                btnLead.style.background = '#3661b7';
                 btnLead.style.color = '#fff';
                 btnMis.style.background = '#e9ecef';
                 btnMis.style.color = '#333';

@@ -1173,7 +1173,13 @@ class LeadController extends Controller
 
     public function transfer_user(Request $request)
     {
-        // dd($request->all());
+         $leadIds = $request->filled('all_lead_ids')
+            ? $request->all_lead_ids
+            : $request->checked;
+
+        if (empty($leadIds)) {
+            return back()->with('error', 'Please select at least one lead to transfer.');
+        }
         $request->validate([
             'from_user' => 'required|exists:users,id',
             'from_status' => 'required|string|max:50',
@@ -1183,10 +1189,6 @@ class LeadController extends Controller
             'all_lead_ids' => 'required_without:checked|array',
             'all_lead_ids.*' => 'exists:leads,id',
         ]);
-
-        $leadIds = $request->filled('all_lead_ids')
-            ? $request->all_lead_ids
-            : $request->checked;
 
         $fromUserId = $request->from_user;
         $fromStatus = $request->from_status;

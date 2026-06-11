@@ -112,6 +112,11 @@ Route::prefix('mobile')->group(function () {
     });
 });
 
+Route::get('/mobile/mis-form', [MobileMisController::class, 'index'])
+    ->name('mobile.mis-form');
+
+Route::post('/mobile/mis-form-store', [MobileMisController::class, 'store'])
+    ->name('mobile.mis-form-store');
 Route::middleware(['check.login', 'reception.only'])->group(function () {
     Route::prefix('setting')->controller(SettingsController::class)->group(function () {
         Route::get('/profile', 'profile')->name('setting.profile');
@@ -141,8 +146,7 @@ Route::middleware(['check.login', 'reception.only'])->group(function () {
         Route::put('/category/update/{id}', [StaffManagementController::class, 'update_category'])->name('update.category');
         Route::post('/category/store', [StaffManagementController::class, 'store_category'])->name('category.store');
         Route::post('/staff/verify-admin-password', [StaffManagementController::class, 'verifyAdminPassword'])
-        ->name('staff.verify-admin-password');
-        
+            ->name('staff.verify-admin-password');
     });
 
     Route::middleware(['check.software.type:all_modules,real_state_only'])->group(function () {
@@ -426,8 +430,7 @@ Route::middleware(['check.login', 'reception.only'])->group(function () {
         });
     });
 
-    Route::middleware(['check.software.type:real_state_only'])->group(function () 
-    {
+    Route::middleware(['check.software.type:real_state_only'])->group(function () {
         Route::prefix('inventory')->group(function () {
             Route::get('/', [InventoryController::class, 'index'])->name('inventory.index');
             Route::post('/store', [InventoryController::class, 'store'])->name('inventory.store');
@@ -536,8 +539,7 @@ Route::middleware(['check.login', 'reception.only'])->group(function () {
     Route::post('/property/share-whatsapp', [LeadController::class, 'sharePropertyOnWhatsApp'])->name('property.share-whatsapp');
     Route::get('/property/{id}/details', [LeadController::class, 'getPropertyDetails'])->name('property.details');
     Route::get('/lead/{id}/details', [LeadController::class, 'getDetails'])->name('lead.details');
-    Route::prefix('properties')->group(function () 
-    {
+    Route::prefix('properties')->group(function () {
         Route::get('/', [MasterController::class, 'property_name'])->name('property.name');
         Route::post('/store', [MasterController::class, 'store_property'])->name('property.store');
         Route::post('/update', [MasterController::class, 'update_property'])->name('property.update');
@@ -547,7 +549,6 @@ Route::middleware(['check.login', 'reception.only'])->group(function () {
         Route::post('/add-comment', [MasterController::class, 'add_property_comment']);
         Route::get('/get-comments/{propertyId}', [MasterController::class, 'get_property_comments']);
     });
-    
 });
 
 Route::get('/firebase-sw-config', function () {

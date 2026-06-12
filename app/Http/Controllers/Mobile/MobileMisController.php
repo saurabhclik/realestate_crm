@@ -107,15 +107,19 @@ class MobileMisController extends Controller
                     $misDataToday[$pointName] = (int) ($value ?? 0);
                 }
             }
-            DB::table('mis_daily_entries')->insert([
-                'user_id'    => $userId,
-                'team_id'    => $request->team,
-                'week'       => $weekKey,
-                'entry_date' => $today,
-                'mis_data'   => json_encode([$today => $misDataToday], JSON_UNESCAPED_UNICODE),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            DB::table('mis_daily_entries')->updateOrInsert(
+                [
+                    'user_id'    => $userId,
+                    'entry_date' => $today,
+                ],
+                [
+                    'team_id'    => $request->team,
+                    'week'       => $weekKey,
+                    'mis_data'   => json_encode([$today => $misDataToday], JSON_UNESCAPED_UNICODE),
+                    'updated_at' => now(),
+                    'created_at' => now(), 
+                ]
+            );
 
             DB::commit();
             return redirect()->back()->with('success', 'Daily MIS Report submitted successfully!');

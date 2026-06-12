@@ -1022,53 +1022,77 @@
             }
 
             function initProjectAnalysisChart() {
-                const options = {
-                    chart: {
-                        type: 'donut',
-                        height: 350
-                    },
-                    series: [],
-                    labels: [],
-                    colors: ['#3b76e1', '#63ad6f', '#f7cc53', '#f34e4e', '#564ab1', '#5fd0f3', '#ff7c00',
-                        '#b300ff', '#00ffaa', '#ff66b3'
-                    ],
-                    legend: {
-                        position: 'bottom'
-                    },
-                    plotOptions: {
-                        pie: {
-                            donut: {
-                                labels: {
-                                    show: true,
-                                    total: {
-                                        show: true,
-                                        label: 'Total Leads',
-                                        formatter: function(w) {
-                                            return w.globals.seriesTotals.reduce((a, b) => a + b, 0);
-                                        }
-                                    }
+                 const options = {
+                        chart: {
+                            type: 'bar',
+                            height: 400,
+                            toolbar: { show: false },
+                            fontFamily: 'Segoe UI, sans-serif'
+                        },
+
+                        series: [{
+                            name: 'Leads',
+                            data: []
+                        }],
+
+                        colors: ['#3b76e1'],
+
+                        plotOptions: {
+                            bar: {
+                                horizontal: false,
+                                columnWidth: '50%',   
+                                borderRadius: 6
+                            }
+                        },
+
+                        dataLabels: {
+                            enabled: true,
+                            style: {
+                                fontSize: '11px'
+                            },
+                            offsetY: -5
+                        },
+
+                        xaxis: {
+                            categories: [],
+                            labels: {
+                                rotate: 0,         
+                                style: {
+                                    fontSize: '11px'
+                                }
+                            }
+                        },
+
+                        yaxis: {
+                            labels: {
+                                style: {
+                                    fontSize: '11px'
+                                }
+                            }
+                        },
+
+                        grid: {
+                            borderColor: '#f1f1f1',
+                            strokeDashArray: 4
+                        },
+
+                        tooltip: {
+                            y: {
+                                formatter: function(value) {
+                                    return value + " leads";
                                 }
                             }
                         }
-                    },
-                    tooltip: {
-                        enabled: true,
-                        y: {
-                            formatter: function(value) {
-                                return value + " leads";
-                            }
-                        }
-                    }
-                };
+                     };
 
-                const chart = new ApexCharts(
-                    document.querySelector("#project-analytics-chart"),
-                    options
-                );
-                chart.render();
-                window.projectAnalysisChart = chart;
-            }
+                    const chart = new ApexCharts(
+                        document.querySelector("#project-analytics-chart"),
+                        options
+                    );
 
+                    chart.render();
+                    window.projectAnalysisChart = chart;
+                }
             function initCampaignAnalysisChart() {
                 const options = {
                     chart: {
@@ -1279,9 +1303,18 @@
                             });
                         }
                         if (response.projectData) {
+
+                            const labels = response.projectData.labels || [];
+                            const values = response.projectData.values || [];
+
                             window.projectAnalysisChart.updateOptions({
-                                series: response.projectData.values,
-                                labels: response.projectData.labels
+                                series: [{
+                                    name: 'Leads',
+                                    data: values
+                                }],
+                                xaxis: {
+                                    categories: labels
+                                }
                             });
                         }
                         if (response.campaignData) {

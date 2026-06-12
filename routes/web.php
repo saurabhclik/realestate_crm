@@ -359,6 +359,7 @@ Route::middleware(['check.login', 'reception.only'])->group(function () {
             Route::get('/toggle/{id}', [LeadStatusController::class, 'toggleActive'])->name('toggle');
             Route::delete('/{id}', [LeadStatusController::class, 'destroy'])->name('destroy');
         });
+        Route::post('/lead-statuses/reorder', [LeadStatusController::class, 'reorder'])->name('lead-status.reorder');
 
         Route::prefix('system-configuration')
             ->name('system-configuration.')

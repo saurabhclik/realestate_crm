@@ -993,23 +993,26 @@ class DashboardController extends Controller
         ];
     }
 
+   
     private function getProjectAnalysisData($childIds, $filters, $dateRange)
     {
         $query = DB::table('leads')
             ->select(
                 DB::raw("CASE 
-                    WHEN leads.project_id = 'others' THEN 'others'
-                    WHEN leads.project_id LIKE '%,others%' THEN 'others'
-                   /* WHEN leads.custom_project_name IS NOT NULL AND leads.custom_project_name != '' THEN 'others'*/
-                    WHEN 0 THEN 'others'
-                    WHEN leads.project_id IS NULL OR leads.project_id = '' THEN 'No Project'
-                    ELSE (
-                        SELECT projects.project_name 
-                        FROM projects 
-                        WHERE FIND_IN_SET(projects.id, REPLACE(leads.project_id, ' ', ''))
-                        LIMIT 1
-                    )
-                END as project"),
+    WHEN leads.project_id IS NULL OR leads.project_id = '' THEN 'No Project'
+    WHEN leads.project_id = '0' THEN 'No Project'
+    WHEN leads.project_id = 'others' THEN 'others'
+    WHEN leads.project_id LIKE '%,others%' THEN 'others'
+    ELSE COALESCE(
+        (
+            SELECT projects.project_name 
+            FROM projects 
+            WHERE FIND_IN_SET(projects.id, REPLACE(leads.project_id, ' ', ''))
+            LIMIT 1
+        ),
+        'Unknown Project'
+    )
+END as project"),
                 DB::raw('COUNT(leads.id) as lead_count')
             )
             ->when(!empty($childIds), fn($q) => $q->whereIn('leads.user_id', $childIds))
@@ -1023,13 +1026,12 @@ class DashboardController extends Controller
             ->limit(10);
 
         $results = $query->get();
-
+        
         return [
             'labels' => $results->pluck('project')->toArray(),
             'values' => $results->pluck('lead_count')->toArray()
         ];
     }
-
     private function getMonthlyTrendData($childIds, $filters, $dateRange)
     {
         $year = $filters['year'] ?? date('Y');

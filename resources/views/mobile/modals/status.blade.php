@@ -341,12 +341,12 @@
             </div>
             <div id="reminderFields">
                 <div class="form-grsoup">
-                    <label for="remindDate">Reminder Date:</label>
+                    <label for="remindDate">Reminder Date  <span class="text-danger">*</span></label>
                     <input type="date" name="remindDate" id="remindDate" class="form-control">
                     <!-- <input type="date" name="remindDate" id="remindDate" class="form-control" max="{{ date('Y-m-d') }}"> -->
                 </div>
                 <div class="form-group">
-                    <label for="remindTime">Reminder Time:</label>
+                    <label for="remindTime">Reminder Time  <span class="text-danger">*</span></label>
                     <input type="time" name="remindTime" id="remindTime" class="form-control">
                 </div>
             </div>

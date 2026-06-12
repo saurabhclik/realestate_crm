@@ -147,6 +147,12 @@ class AuthController extends Controller
         $childIds = session::get('child_ids');
         $childIds = $this->normalizeIdsService->normalize($childIds);
         $userId = Session::get('user_id');
+        $userType = session::get('user_type');
+        $misStats = null;
+        if (!in_array($userType, ['admin'])) {
+            $misStats = $this->getMisStatsForUser($userId);
+        }
+
         // echo '<pre>'; print_r($childIds); exit;
         $projects = DB::table('projects')->get();
         $cities = DB::table('state_district')->orderBy('District', 'asc')->get();
@@ -281,10 +287,135 @@ class AuthController extends Controller
             'task_all_comments',
             'totalSaleExecutive',
             'targetPercentage',
-            'totalLeads'
+            'totalLeads',
+            'misStats'
         ));
     }
+    protected function getMisStatsForUser($userId)
+    {
+        $currentDate = Carbon::now();
+        $currentYear = $currentDate->year;
+        $currentWeek = $currentDate->weekOfYear;
 
+        $points = DB::table('mis_points')
+            ->whereNull('user_id')
+            ->orWhere('user_id', $userId)
+            ->orderBy('id')
+            ->pluck('point_name')
+            ->toArray();
+        $targets = DB::table('mis_weekly_targets')
+            ->where('team_id', $userId)
+            ->where('year', $currentYear)
+            ->orderBy('id')
+            ->get();
+
+        $dailyEntries = DB::table('mis_daily_entries')
+            ->where('team_id', $userId)
+            ->whereYear('entry_date', $currentYear)
+            ->get();
+
+        $weekWiseData = [];
+        $totalTarget = 0;
+        $totalAchieved = 0;
+        $allWeeksDailyData = [];
+        $weeklyTargetsByPoint = [];
+
+        foreach ($targets as $target) {
+            $weeklyData = json_decode($target->weekly_targets, true) ?: [];
+            foreach ($weeklyData as $weekKey => $weekInfo) {
+                $weekNumber = (int) str_replace('week', '', $weekKey);
+                foreach ($points as $point) {
+                    $weeklyTargetsByPoint[$weekNumber][$point] = $weekInfo['data'][$point] ?? 0;
+                }
+            }
+        }
+
+        foreach ($dailyEntries as $entry) {
+            $weekNumber = $entry->week;
+            $misData = json_decode($entry->mis_data, true) ?: [];
+            foreach ($misData as $date => $tasks) {
+                if (!isset($allWeeksDailyData[$weekNumber][$date])) {
+                    $allWeeksDailyData[$weekNumber][$date] = array_fill_keys($points, 0);
+                }
+                foreach ($tasks as $task => $value) {
+                    if (in_array($task, $points)) {
+                        $allWeeksDailyData[$weekNumber][$date][$task] += (int)$value;
+                    }
+                }
+            }
+        }
+
+        foreach ($allWeeksDailyData as $week => $dailyData) {
+            ksort($allWeeksDailyData[$week]);
+        }
+
+        foreach ($targets as $target) {
+            $weeklyData = json_decode($target->weekly_targets, true) ?: [];
+            foreach ($weeklyData as $weekKey => $weekInfo) {
+                $weekNumber = (int) str_replace('week', '', $weekKey);
+                $weekStart = $weekInfo['start_date'] ?? Carbon::now()->setISODate($currentYear, $weekNumber)
+                    ->startOfWeek(Carbon::MONDAY)
+                    ->format('Y-m-d');
+                $weekEnd = $weekInfo['end_date'] ?? Carbon::now()->setISODate($currentYear, $weekNumber)
+                    ->endOfWeek(Carbon::SUNDAY)
+                    ->format('Y-m-d');
+
+                $weekTarget = 0;
+                $weekAchieved = 0;
+                $pointWiseData = [];
+
+                foreach ($points as $point) {
+                    $pointTarget = $weeklyTargetsByPoint[$weekNumber][$point] ?? 0;
+                    $pointAchieved = 0;
+
+                    if (isset($allWeeksDailyData[$weekNumber])) {
+                        foreach ($allWeeksDailyData[$weekNumber] as $dailyTasks) {
+                            $pointAchieved += $dailyTasks[$point] ?? 0;
+                        }
+                    }
+
+                    $pointWiseData[$point] = [
+                        'target' => $pointTarget,
+                        'achieved' => $pointAchieved,
+                        'percentage' => $pointTarget > 0 ? round(($pointAchieved / $pointTarget) * 100, 2) : 0
+                    ];
+
+                    $weekTarget += $pointTarget;
+                    $weekAchieved += $pointAchieved;
+                }
+
+                $weekWiseData[$weekNumber] = [
+                    'week' => $weekNumber,
+                    'start_date' => $weekStart,
+                    'end_date' => $weekEnd,
+                    'target' => $weekTarget,
+                    'achieved' => $weekAchieved,
+                    'percentage' => $weekTarget > 0 ? round(($weekAchieved / $weekTarget) * 100, 2) : 0,
+                    'point_wise_data' => $pointWiseData
+                ];
+
+                $totalTarget += $weekTarget;
+                $totalAchieved += $weekAchieved;
+            }
+        }
+
+        uksort($weekWiseData, function ($a, $b) use ($currentWeek) {
+            if ($a == $currentWeek) return -1;
+            if ($b == $currentWeek) return 1;
+            return $b <=> $a;
+        });
+
+        $overallPercentage = $totalTarget > 0 ? round(($totalAchieved / $totalTarget) * 100, 2) : 0;
+
+        return [
+            'week_wise' => $weekWiseData,
+            'total_target' => $totalTarget,
+            'total_achieved' => $totalAchieved,
+            'overall_percentage' => $overallPercentage,
+            'points' => $points,
+            'current_week' => $currentWeek
+        ];
+    }
     public function getChartData(Request $request)
     {
         $year = $request->input('year', date('Y'));

@@ -222,11 +222,11 @@
     @if($userType == 'admin')
         <div class="fab-mis-daily-form" role="button" style="
                             position: fixed;
-                            bottom: 20px;
+                            bottom: 160px;
                             right: 20px;
                             width: 55px;
                             height: 55px;
-                            background: #3661b7;
+                            background: #26be33;
                             border-radius: 50%;
                             display: flex;
                             align-items: center;

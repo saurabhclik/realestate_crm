@@ -21,7 +21,7 @@
                             <div class="card-body d-flex flex-column">
                                 <p class="text-muted">Download the CSV template for bulk data import.</p>
                                 <div class="mt-auto">
-                                    <a href="{{ asset('sample.csv') }}" download class="btn btn-outline-primary w-100">
+                                    <a href="{{ asset('sample.csv') }}" download="sample.csv" class="btn btn-outline-primary w-100">
                                         <i class="bi bi-download me-2"></i> Download Sample CSV
                                     </a>
                                 </div>

@@ -3,7 +3,7 @@
 @section('title', 'Lead Status | Pro-leadexpertz')
 
 @section('content')
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 <div class="page-content">
     <div class="container-fluid">
         <div class="row mb-3">
@@ -66,7 +66,7 @@
                                         <th width="260">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="statusTableBody">
                                     @php
                                         $leadStatusCount = 0;
                                     @endphp
@@ -78,7 +78,7 @@
                                                 $lead->conversion_type == $status->system_name;
                                         })->count();
                                     @endphp
-                                        <tr class="{{ !$status->is_active ? 'table-secondary opacity-75' : '' }}">
+                                        <tr data-id="{{ $status->id }}" style="cursor: move;" class="{{ !$status->is_active ? 'table-secondary opacity-75' : '' }}">
                                             <td>{{ $status->id }}</td>
                                             <td>
                                                 {{ $status->display_name }}
@@ -116,13 +116,13 @@
                                                         <i class="fas fa-i-cursor"></i>
                                                         Rename
                                                     </button>
-                                                    <button class="btn btn-sm btn-outline-secondary seq-btn"
+                                                    {{-- <button class="btn btn-sm btn-outline-secondary seq-btn"
                                                         data-id="{{ $status->id }}"
                                                         data-seq="{{ $status->seq }}"
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#sequenceModal">
                                                         <i class="fas fa-sort-numeric-down"></i>
-                                                    </button>
+                                                    </button> --}}
                                                     <button class="btn btn-sm btn-outline-danger toggle-active"
                                                         data-id="{{ $status->id }}">
                                                         <i class="fas fa-ban"></i>
@@ -412,5 +412,26 @@
 
         });
     }
+
+        var el = document.getElementById('statusTableBody');
+    var sortable = new Sortable(el, {
+        animation: 150,
+        onEnd: function (evt) {
+            var order = [];
+            $('#statusTableBody tr').each(function() {
+                order.push($(this).data('id'));
+            });
+            
+            $.ajax({
+                url: '{{ route('lead-status.reorder') }}',
+                type: 'POST',
+                data: { _token: '{{ csrf_token() }}', order: order },
+                success: function(res) {
+                    flasher.success('Updated');
+                    setTimeout(() => location.reload(), 500);
+                }
+            });
+        }
+    });
 </script>
 @endsection

@@ -104,7 +104,7 @@
                                 <div class="card-body d-flex flex-column">
                                     <p class="text-muted">Download our pre-formatted CSV template to ensure proper formatting.</p>
                                     <div class="mt-auto">
-                                        <a href="{{ asset('sample.csv') }}" download class="btn btn-outline-primary w-100">
+                                        <a href="{{ asset('sample.csv') }}" download="sample.csv" class="btn btn-outline-primary w-100">
                                             <i class="bi bi-download me-2"></i> Download Sample CSV
                                         </a>
                                     </div>

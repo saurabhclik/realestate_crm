@@ -102,18 +102,20 @@
                         </div>
                     </div>
                 </div>
-
-                <div id="reminderFields">
+                <button type="button" id="btnRemindMe" class="btn btn-info btn-sm w-100 mb-2" style="display: none;">
+                    <i class="fa fa-clock-o me-1"></i> Remind Me
+                </button>
+                <div id="reminderFields" style="display: none;">
                     <div class="mb-2">
                         <span class="bg-success badge text-light p-2"><i class="fa fa-info me-2"></i><span class="followUp">Follow Up Date</span></span>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="remindDate" class="form-label">Reminder Date <span class="text-danger">*</span></label>
+                            <label for="remindDate" class="form-label">Reminder Date <span id="reqStarDate" class="text-danger" style="display:none;">*</span></label>
                             <input type="date" class="form-control" id="remindDate">
                         </div>
                         <div class="col-md-6">
-                            <label for="remindTime" class="form-label">Reminder Time <span class="text-danger">*</span></label>
+                            <label for="remindTime" class="form-label">Reminder Time <span id="reqStarTime" class="text-danger" style="display:none;">*</span></label>
                             <input type="time" class="form-control" id="remindTime">
                         </div>
                     </div>
@@ -132,27 +134,55 @@
     </div>
 </div>
 <script>
-    $(document).ready(function() 
-    {
-        $('#newStatus').on('change', function() 
-        {
+    $(document).ready(function() {
+        const mandatoryStatuses = [
+            'MEETING SCHEDULED', 
+            'WHATSAPP', 
+            'CALL SCHEDULED', 
+            'VISIT SCHEDULED'
+        ];
+
+        $(document).on('change', '#newStatus', function() {
             let status = $(this).val();
             let dateInput = document.getElementById("remindDate");
-
             let today = new Date().toISOString().split("T")[0];
-            dateInput.value = "";
 
-            if (status === "VISIT DONE") 
-            {
-                dateInput.setAttribute("max", today);
-                dateInput.removeAttribute("min");
-            } 
-            else 
-            {
-                dateInput.setAttribute("min", today);
-                dateInput.removeAttribute("max");
+            $('#reminderFields').stop(true, true);
+
+            dateInput.value = "";
+            $('#remindTime').val('');
+            dateInput.removeAttribute("min");
+            dateInput.removeAttribute("max");
+
+            if (mandatoryStatuses.includes(status)) {
+                
+                $('#reminderFields').show();
+                $('#reqStarDate, #reqStarTime').show();
+                $('#btnRemindMe').hide();
+                $('#remindDate, #remindTime').prop('required', true);
+
+                if (status === "VISIT DONE") {
+                    dateInput.setAttribute("max", today);
+                }
+
+            } else {
+                
+                $('#reminderFields').hide();
+                $('#reqStarDate, #reqStarTime').hide();
+                $('#btnRemindMe').show();
+                $('#remindDate, #remindTime').prop('required', false);
             }
         });
 
+        $('#btnRemindMe').on('click', function() {
+            $('#reminderFields').stop(true, true).slideToggle(); 
+            
+            if ($('#reminderFields').is(':visible')) {
+                $('#remindDate, #remindTime').prop('required', true);
+                
+            } else {
+                $('#remindDate, #remindTime').prop('required', false).val('');
+            }
+        });
     });
 </script>

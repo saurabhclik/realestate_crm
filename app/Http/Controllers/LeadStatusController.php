@@ -13,14 +13,28 @@ class LeadStatusController extends Controller
         $this->middleware('check.login');
         $this->middleware('reception.only');
     }
+    public function reorder(Request $request)
+    {
+        DB::transaction(function () use ($request) {
+            foreach ($request->order as $index => $id) {
+                DB::table('lead_statuses')
+                    ->where('id', $id)
+                    ->update([
+                        'seq' => $index + 1,
+                        'updated_date' => now()
+                    ]);
+            }
+        });
 
+        return response()->json(['success' => true]);
+    }
     public function index(Request $request)
     {
         $length = $request->get('length', 25);
 
         $statuses = DB::table('lead_statuses')
             ->orderBy('seq', 'asc')
-            ->orderBy('id', 'asc')
+            // ->orderBy('id', 'asc')
             ->paginate($length);
         $leads = DB::table('leads')->get();
         foreach ($statuses as $status) {
@@ -28,6 +42,7 @@ class LeadStatusController extends Controller
                 ->where('status', $status->display_name)
                 ->count();
         }
+
 
         return view('master.lead-status', compact('statuses', 'length', 'leads'));
     }

@@ -109,11 +109,11 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="remindDate" class="form-label">Reminder Date</label>
+                            <label for="remindDate" class="form-label">Reminder Date <span class="text-danger">*</span></label>
                             <input type="date" class="form-control" id="remindDate">
                         </div>
                         <div class="col-md-6">
-                            <label for="remindTime" class="form-label">Reminder Time</label>
+                            <label for="remindTime" class="form-label">Reminder Time <span class="text-danger">*</span></label>
                             <input type="time" class="form-control" id="remindTime">
                         </div>
                     </div>

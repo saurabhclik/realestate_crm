@@ -447,8 +447,12 @@ class LeadService
             ],
             'conversionType' => 'required_if:newStatus,CONVERTED|nullable|in:Completed,Cancelled,Booked',
             'comment' => 'nullable|string|max:500',
-            'remindDate' => 'required_if:newStatus,CALL SCHEDULED,VISIT SCHEDULED,MEETING SCHEDULED,INTERESTED|nullable|date',
-            'remindTime' => 'required_if:newStatus,CALL SCHEDULED,VISIT SCHEDULED,MEETING SCHEDULED,INTERESTED|nullable',
+            // 'remindDate' => 'required_if:newStatus,CALL SCHEDULED,VISIT SCHEDULED,MEETING SCHEDULED,INTERESTED|nullable|date',
+            // 'remindTime' => 'required_if:newStatus,CALL SCHEDULED,VISIT SCHEDULED,MEETING SCHEDULED,INTERESTED|nullable',
+              // UPDATED RULES: Only required for these 4 specific statuses
+            'remindDate' => 'required_if:newStatus,CALL SCHEDULED,VISIT SCHEDULED,MEETING SCHEDULED,WHATSAPP|nullable|date',
+            'remindTime' => 'required_if:newStatus,CALL SCHEDULED,VISIT SCHEDULED,MEETING SCHEDULED,WHATSAPP|nullable',
+    
             'hasOtherProject' => 'nullable|in:true,false,1,0',
             'otherProjectName' => 'required_if:hasOtherProject,true|nullable|string|max:255',
         ];

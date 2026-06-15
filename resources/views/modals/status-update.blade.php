@@ -102,7 +102,7 @@
                         </div>
                     </div>
                 </div>
-                <button type="button" id="btnRemindMe" class="btn btn-info btn-sm w-100 mb-2" style="display: none;">
+                <button type="button" id="btnRemindMe" class="btn btn-info btn-sm mb-2" style="display: none;">
                     <i class="fa fa-clock-o me-1"></i> Remind Me
                 </button>
                 <div id="reminderFields" style="display: none;">

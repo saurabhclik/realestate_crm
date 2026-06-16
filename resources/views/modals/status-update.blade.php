@@ -22,7 +22,7 @@
                             Select new status
                         </option>
                         @foreach($lead_statuses as $status)
-                            @if($status->system_name !== 'BOOKED' && $status->system_name !== 'Cancelled' && $status->system_name !== 'Completed' && $status->system_name !== 'VISIT DONE')
+                            @if($status->system_name !== 'BOOKED' && $status->system_name !== 'Cancelled' && $status->system_name !== 'Completed' && $status->system_name !== 'VISIT DONE' && $status->system_name !== 'NEW LEAD' && $status->system_name !== 'TRANSFER LEAD' && trim($status->system_name) !== 'PENDING')
                                 <option value="{{ $status->system_name }}"
                                     data-system="{{ $status->system_name }}">
                                     {{ $status->display_name }}

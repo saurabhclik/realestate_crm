@@ -474,15 +474,18 @@
                                                 $phone = substr($phone, 2);
                                             }
                                             
+                                        $status = trim($row->status);
+
                                         $tatDisplay = '-';
                                         $tatClass = 'text-muted'; 
 
-                                        if (trim($row->status) === 'Pending' || trim($row->status) === 'PENDING') {
+                                        if ($status === 'Pending' || $status === 'PENDING') {
                                             
-                                            $created = \Carbon\Carbon::parse($row->created_at);
-                                            $updated = \Carbon\Carbon::parse($row->updated_at);
+                                            $updatedAt = \Carbon\Carbon::parse($row->updated_date);
                                             
-                                            $diffInHours = $created->diffInHours($updated);
+                                            $now = \Carbon\Carbon::now();
+                                            
+                                            $diffInHours = $updatedAt->diffInHours($now);
                                             
                                             $tatDisplay = $diffInHours . ' Hrs';
                                             
@@ -491,6 +494,10 @@
                                             } else {
                                                 $tatClass = 'badge bg-success'; 
                                             }
+                                        } 
+                                       
+                                        else {
+                                            $tatDisplay = '-'; 
                                         }
                                         @endphp
                                         <tr>

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Session;
 use Flasher\Laravel\Facade\Flasher;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 class MasterController extends Controller
 {
     public function form_field()

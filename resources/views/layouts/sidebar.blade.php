@@ -502,7 +502,7 @@
                 @endif
                 @if($softwareType === 'real_state')
                     @if (
-                            in_array('inventory', $activeFeatures) &&
+                            in_array('inventory_management', $activeFeatures) &&
                             (
                                 $userType == 'admin' ||
                                 (

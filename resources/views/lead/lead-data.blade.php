@@ -438,6 +438,7 @@
                                             <th>Conversion</th>
                                         @endif
                                         <th>Status</th>
+                                        <th class="text-center">TAT</th> 
                                         <th>Budget</th>
                                         <th>{{ $isLeadManagement ? 'Product' : 'Project' }}</th>
                                         <th>Email</th>
@@ -472,6 +473,25 @@
                                             if (substr($phone, 0, 2) == '91') {
                                                 $phone = substr($phone, 2);
                                             }
+                                            
+                                        $tatDisplay = '-';
+                                        $tatClass = 'text-muted'; 
+
+                                        if (trim($row->status) === 'Pending' || trim($row->status) === 'PENDING') {
+                                            
+                                            $created = \Carbon\Carbon::parse($row->created_at);
+                                            $updated = \Carbon\Carbon::parse($row->updated_at);
+                                            
+                                            $diffInHours = $created->diffInHours($updated);
+                                            
+                                            $tatDisplay = $diffInHours . ' Hrs';
+                                            
+                                            if ($diffInHours > 24) {
+                                                $tatClass = 'badge bg-danger'; 
+                                            } else {
+                                                $tatClass = 'badge bg-success'; 
+                                            }
+                                        }
                                         @endphp
                                         <tr>
                                             @if($lead_name == 'allocate' || $lead_name == 'transfer')
@@ -713,6 +733,12 @@
                                             <td>
                                                 <span class="cust-badge text-dark">
                                                     {{ $row->status_display_name ?? ucfirst(str_replace('_', ' ', $row->status)) }}
+                                                </span>
+                                            </td>
+                                            
+                                            <td class="text-center">
+                                                <span class="{{ $tatClass }}">
+                                                    {{ $tatDisplay }}
                                                 </span>
                                             </td>
                                             <td>

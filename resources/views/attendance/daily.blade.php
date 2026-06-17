@@ -118,7 +118,7 @@
                                                         </a>
                                                     @endif
                                                     
-                                                    @if($endCoords && $endCoords !== $startCoords)
+                                                    @if($endCoords)
                                                         <a class="btn btn-success btn-sm" target="_blank" 
                                                            href="https://www.google.com/maps?q={{ $endCoords }}"
                                                            title="End Location: {{ $endCoords }}">
@@ -143,7 +143,7 @@
                                                     @else
                                                         <small class="text-muted">
                                                             @if($startCoords)Start: {{ $startCoords }}@endif
-                                                            @if($endCoords && $endCoords !== $startCoords)<br>End: {{ $endCoords }}@endif
+                                                            @if($endCoords)<br>End: {{ $endCoords }}@endif
                                                         </small>
                                                     @endif
                                                 </div>

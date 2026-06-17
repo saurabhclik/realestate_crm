@@ -536,7 +536,7 @@
                             <div class="form-text">Columns: name, email, phone, password, role</div>
                         </div>
                         <div class="mb-3">
-                            <a href="{{ asset('sample_users.csv') }}" class="btn btn-sm btn-outline-primary">
+                            <a href="{{ asset('sample_users.csv') }}" download="sample_users.csv" class="btn btn-sm btn-outline-primary">
                                 <i class="ri-download-line align-bottom me-1"></i> Download Sample CSV
                             </a>
                         </div>

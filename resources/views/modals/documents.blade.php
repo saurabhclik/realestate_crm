@@ -11,11 +11,11 @@
                     <input type="hidden" id="post_sale_id" name="post_sale_id">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label>Document Name</label>
+                            <label>Document Name <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="document_name" required>
                         </div>
                         <div class="col-md-6">
-                            <label>File (Max 10MB)</label>
+                            <label>File (Max 10MB) <span class="text-danger">*</span></label>
                             <input type="file" class="form-control" name="document" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required>
                         </div>
                     </div>

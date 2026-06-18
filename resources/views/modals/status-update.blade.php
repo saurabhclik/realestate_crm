@@ -13,7 +13,7 @@
                 <input type="hidden" id="leadId">
                 <div class="mb-3">
                     <label for="newStatus" class="form-label">
-                        New Status
+                        New Status <span class="text-danger">*</span>
                     </label>
                     <select class="form-select select2StatusUpdate"
                         id="newStatus"

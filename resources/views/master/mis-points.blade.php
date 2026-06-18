@@ -122,7 +122,7 @@
                 <div class="modal-body">
                     <input type="hidden" id="id" name="id">
                     <div class="mb-3">
-                        <label for="user" class="form-label">Associated User</label>
+                        <label for="user" class="form-label">Associated User <span class="text-danger">*</span></label>
                         <select name="associated_user[]" id="associated-user" class="form-select select2" required multiple>
                             <option value="">Select User</option>
                             @foreach($users as $user)
@@ -133,7 +133,7 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="name" class="form-label">Point Name</label>
+                        <label for="name" class="form-label">Point Name <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="name" name="point_name" required>
                     </div>
                     <div class="mb-3">

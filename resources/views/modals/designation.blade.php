@@ -9,7 +9,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="designationInput" class="form-label">Designation</label>
+                        <label for="designationInput" class="form-label">Designation <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="designationInput" name="designation" required maxlength="255">
                     </div>
                 </div>

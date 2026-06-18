@@ -16,7 +16,7 @@
                         </select>
                     </div>
                     <div class="mb-3 cat-type d-none">
-                        <label for="cat_type" class="form-label">Type</label>
+                        <label for="cat_type" class="form-label">Type <span class="text-danger">*</span></label>
                         <select class="form-control select2" name="cat_type" id="cat_type">
                             <option value="">-- Select Type --</option>
                             @foreach($categoryList as $cat)
@@ -25,7 +25,7 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="project_name" class="form-label" id="modal-name"></label>
+                        <label for="project_name" class="form-label" id="modal-name"></label> <span class="text-danger">*</span>
                         <input type="text" class="form-control" name="name" id="name" required>
                     </div>
                 </div>

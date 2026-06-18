@@ -39,7 +39,7 @@
                                 <form method="POST" action="{{ route('data-center.import.upload') }}" enctype="multipart/form-data" id="dataCenterImportForm">
                                     @csrf
                                     <div class="mb-3">
-                                        <label for="dataCenterCsvFile" class="form-label fw-semibold">Select CSV File</label>
+                                        <label for="dataCenterCsvFile" class="form-label fw-semibold">Select CSV File <span class="text-danger">*</span></label>
                                         <input type="file" name="file" id="dataCenterCsvFile" accept=".csv" class="form-control" required onchange="previewDataCenterFile(this)">
                                         <div class="invalid-feedback">Please select a valid CSV file.</div>
                                     </div>

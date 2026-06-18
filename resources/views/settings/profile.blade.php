@@ -22,11 +22,11 @@
                         <div class="form-group px-3">
                             <div class="row">
                                 <div class="col-6">
-                                    <label for="name" class="text-left pl-0">Name</label>
+                                    <label for="name" class="text-left pl-0">Name <span class="text-danger">*</span></label>
                                     <input type="text" name="name" class="form-control" value="{{ $user->name }}" required>
                                 </div>
                                 <div class="col-6">
-                                    <label for="email" class="text-left pl-0">Email</label>
+                                    <label for="email" class="text-left pl-0">Email <span class="text-danger">*</span></label>
                                     <input type="email" name="email" class="form-control" value="{{ $user->email }}" required>
                                 </div>
                                 <div class="col-12 mt-4">
@@ -58,10 +58,10 @@
                             <label for="current_password" class="col-12 text-left pl-0">Current Password</label>
                             <input type="text" name="current_password" class="col-md-8 form-control" value="{{ $user->password }}" readonly>
 
-                            <label for="password" class="pt-3 col-12 text-left pl-0">New Password</label>
+                            <label for="password" class="pt-3 col-12 text-left pl-0">New Password <span class="text-danger">*</span></label>
                             <input type="text" name="password" class="col-md-8 form-control" required>
 
-                            <label for="password_confirmation" class="pt-3 col-12 text-left pl-0">Confirm Password</label>
+                            <label for="password_confirmation" class="pt-3 col-12 text-left pl-0">Confirm Password <span class="text-danger">*</span></label>
                             <input type="text" name="password_confirmation" class="col-md-8 form-control" required>
                         </div>
                         <div class="form-group row mb-0 mr-4 mt-4">

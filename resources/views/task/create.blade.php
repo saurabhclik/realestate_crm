@@ -98,7 +98,7 @@
 
                             @if($user_type == 'admin' || $user_type == 'team_manager')
                             <div class="form-group row mb-4">
-                                <label class="col-form-label col-lg-2">Team Members</label>
+                                <label class="col-form-label col-lg-2">Team Members <span class="text-danger">*</span></label>
                                 <div class="col-lg-10" id="teamMembersContainer">
                                     @php
                                         $oldMembers = old('team_members', []);

@@ -399,7 +399,9 @@ class LeadController extends Controller
                 'display_name',
                 'visible_role',
                 'seq',
-                'is_active'
+                'is_active',
+                'route_name'   
+
             ]);
         $hasFilters = $request->anyFilled([
             'source',
@@ -602,7 +604,8 @@ class LeadController extends Controller
                 'display_name',
                 'visible_role',
                 'seq',
-                'is_active'
+                'is_active',
+                'route_name'
             ]);
         $hasFilters = $request->anyFilled([
             'source',
@@ -819,6 +822,7 @@ class LeadController extends Controller
         {
             $child_ids = array_map('trim', explode(',', $child_ids));
         }
+        $userType = Session::get('user_type');
 
         $user_ids = array_merge([$current_user_id], $child_ids);
         $query = DB::table('leads as a')
@@ -830,7 +834,14 @@ class LeadController extends Controller
             ->orderBy('a.id', 'desc');
 
         if (!$request->filled('user')) {
-            $query->whereIn('a.user_id', $user_ids);
+            if ($userType == 'reception') {
+                $query->where(function ($q) use ($current_user_id) {
+                    $q->where('a.lead_shared_with', 'LIKE', '%' . $current_user_id . '%')
+                      ->orWhereRaw("FIND_IN_SET(?, a.lead_shared_with)", [$current_user_id]);
+                });
+            } else {
+                $query->whereIn('a.user_id', $user_ids);
+            }
         }
 
         $this->applyLeadFilters($query, $request);
@@ -1151,7 +1162,8 @@ class LeadController extends Controller
                 'display_name',
                 'visible_role',
                 'seq',
-                'is_active'
+                'is_active',
+                'route_name'
             ]);
         return view('lead.transfer-lead', compact(
             'lead_name',
@@ -1307,7 +1319,8 @@ class LeadController extends Controller
             'display_name',
             'visible_role',
             'seq',
-            'is_active'
+            'is_active',
+            'route_name'
         ]);
         return view('lead.transfer-lead-history', compact('leads', 'users', 'lead_statuses'));
     }
@@ -1383,7 +1396,8 @@ class LeadController extends Controller
             'display_name',
             'visible_role',
             'seq',
-            'is_active'
+            'is_active',
+            'route_name'
         ]);
         return view('lead.transfer-lead-history', compact(
             'lead_name',
@@ -2266,7 +2280,8 @@ class LeadController extends Controller
                 'display_name',
                 'visible_role',
                 'seq',
-                'is_active'
+                'is_active',
+                'route_name'
             ]);
         $hasFilters = $request->anyFilled([
             'source',

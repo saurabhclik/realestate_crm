@@ -9,7 +9,7 @@
                 @csrf
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="inventory_id" class="form-label">Project</label>
+                        <label for="inventory_id" class="form-label">Project <span class="text-danger">*</span></label>
                         <select class="form-control select2" id="inventory_id" name="inventory_id" required>
                             <option value="">Select Project</option>
                             @foreach($projects as $project)
@@ -21,11 +21,11 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="unit_no" class="form-label">Unit Number</label>
+                        <label for="unit_no" class="form-label">Unit Number <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="unit_no" name="unit_no" required>
                     </div>
                     <div class="mb-3">
-                        <label for="size" class="form-label">Size</label>
+                        <label for="size" class="form-label">Size <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="size" name="size" required>
                     </div>
                 </div>

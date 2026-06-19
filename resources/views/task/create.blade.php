@@ -66,7 +66,7 @@
                             </div>
                             
                             <div class="form-group row mb-4">
-                                <label class="col-form-label col-lg-2">Priority</label>
+                                <label class="col-form-label col-lg-2">Priority <span class=" fw-normal">(Optional)</span></label>
                                 <div class="col-lg-10">
                                     <select class="select2" name="priority">
                                         @foreach($priorities as $priority)
@@ -80,7 +80,7 @@
                             </div>
                             @if($user_type == 'admin' || $user_type == 'team_manager')
                             <div class="form-group row mb-4">
-                                <label class="col-form-label col-lg-2">Project</label>
+                                <label class="col-form-label col-lg-2">Project <span class=" fw-normal">(Optional)</span></label>
                                 <div class="col-lg-10">
                                     <select class="select2" name="task_project_id" id="projectSelect">
                                         <option value="">Individual Task (No Project)</option>
@@ -98,7 +98,7 @@
 
                             @if($user_type == 'admin' || $user_type == 'team_manager')
                             <div class="form-group row mb-4">
-                                <label class="col-form-label col-lg-2">Team Members</label>
+                                <label class="col-form-label col-lg-2">Team Members <span class="text-danger">*</span></label>
                                 <div class="col-lg-10" id="teamMembersContainer">
                                     @php
                                         $oldMembers = old('team_members', []);
@@ -197,7 +197,7 @@
                             </div>
                             <div class="form-group row mb-4">
                                 <label for="repeatInterval" class="col-form-label col-lg-2">
-                                    Repeat Settings
+                                    Repeat Settings <span class=" fw-normal">(Optional)</span>
                                     <i class="fas fa-info-circle text-primary" style="cursor:pointer;" data-bs-toggle="modal" data-bs-target="#repeatInfoModal"></i>
                                 </label>
                                 <div class="col-lg-10">

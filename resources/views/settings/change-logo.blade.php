@@ -39,7 +39,7 @@
                                     <div class="col-md-6 m-auto">
                                         <p>Upload JPG or PNG image only. Size- Width: 354 Height: 75</p>
                                         <div class="form-group">
-                                            <label for="">Logo File</label>
+                                            <label for="">Logo File <span class="text-danger">*</span></label>
                                             <input type="file" name="file" class="form-control form-control-gm" required>
                                         </div>
                                     </div>

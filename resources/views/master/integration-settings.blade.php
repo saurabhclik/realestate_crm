@@ -153,7 +153,7 @@
                 <div id="methodField"></div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="integration_type" class="form-label">Integration Type</label>
+                        <label for="integration_type" class="form-label">Integration Type <span class="text-danger ms-1">*</span></label>
                         <select class="form-select" id="integration_type" name="integration_type" required>
                             <option value="">Select Integration Type</option>
                             @foreach($integrationTypes as $key => $type)
@@ -162,7 +162,7 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="status" class="form-label">Status</label>
+                        <label for="status" class="form-label">Status <span class="text-danger ms-1">*</span></label>
                         <select class="form-control" id="integration_status" name="status" required>
                             <option value="active">Active</option>
                             <option value="inactive">Inactive</option>
@@ -459,7 +459,15 @@
                 fieldTemplates[type].forEach(field => {
                     settingsFields.append(`
                         <div class="mb-2">
-                            <label for="settings_${field.name}" class="form-label">${field.label}</label>
+                            <label for="settings_${field.name}" class="form-label">
+                                ${field.label}
+                                ${
+                                    field.required
+                                        ? '<span class="text-danger ms-1">*</span>'
+                                        : '<small class="text-muted ms-1">(Optional)</small>'
+                                }
+                            </label>
+
                             <input type="${field.type}" 
                                 class="form-control"
                                 id="settings_${field.name}"

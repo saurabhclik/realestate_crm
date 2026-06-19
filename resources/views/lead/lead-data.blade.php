@@ -307,42 +307,53 @@
                                 Reset
                             </button>
                         </div>
-
+                        @php
+                            use Illuminate\Support\Facades\DB;
+                            $user = DB::table('users')->find(session('user_id'));
+                            $masterAccess = json_decode($user?->master_options ?? '[]', true);
+                        @endphp
                         <!-- Horizontal Scrollable Row of Pills -->
                         <div
                             style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; scroll-behavior: smooth; -ms-overflow-style: thin; scrollbar-width: thin;">
 
                             <!-- === STATIC BUTTONS === -->
+                         @if(in_array('lead.allocate', $masterAccess))
 
                             <!-- Allocate Lead -->
                             <button class="status-pill" data-route="{{ route('lead.allocate') }}"
                                 style="background-color: #e3f2fd; color: #0d6efd; border: 1px solid #bbdefb; white-space: nowrap; border-radius: 50px; font-size: 0.85rem; padding: 6px 16px; cursor: pointer; transition: all 0.2s; border: none;">
                                 Allocate Lead
                             </button>
+                        @endif 
+                         @if(in_array('lead.unallocated', $masterAccess))
 
                             <!-- Unallocated Lead -->
                             <button class="status-pill" data-route="{{ route('lead.unallocated') }}"
                                 style="background-color: #e3f2fd; color: #0d6efd; border: 1px solid #bbdefb; white-space: nowrap; border-radius: 50px; font-size: 0.85rem; padding: 6px 16px; cursor: pointer; transition: all 0.2s; border: none;">
                                 Unallocated Lead
                             </button>
+                        @endif
+                        @if(in_array('transfer_list.lead', $masterAccess))
 
                             <!-- Transfer Leads -->
                             <button class="status-pill" data-route="{{ route('transfer_list.lead') }}"
                                 style="background-color: #e3f2fd; color: #0d6efd; border: 1px solid #bbdefb; white-space: nowrap; border-radius: 50px; font-size: 0.85rem; padding: 6px 16px; cursor: pointer; transition: all 0.2s; border: none;">
                                 Transfer Leads
                             </button>
-
+                        @endif
                             <!-- Divider (Visual separation between static and dynamic) -->
                             <div style="width: 1px; background-color: #dee2e6; margin: 0 4px;"></div>
 
                             <!-- === DYNAMIC BUTTONS (From DB) === -->
                             @if(isset($lead_statuses) && count($lead_statuses) > 0)
                                 @foreach($lead_statuses as $status)
+                                 @if(in_array($status->route_name, $masterAccess))
                                     <button class="status-pill" data-value="{{ $status->system_name }}"
                                         title="{{ $status->display_name }}"
                                         style="background-color: #e3f2fd; color: #0d6efd; border: 1px solid #bbdefb; white-space: nowrap; border-radius: 50px; font-size: 0.85rem; padding: 6px 16px; cursor: pointer; transition: all 0.2s; border: none;">
                                         {{ $status->display_name }}
                                     </button>
+                                    @endif
                                 @endforeach
                             @endif
                         </div>
@@ -474,15 +485,18 @@
                                                 $phone = substr($phone, 2);
                                             }
                                             
+                                        $status = trim($row->status);
+
                                         $tatDisplay = '-';
                                         $tatClass = 'text-muted'; 
 
-                                        if (trim($row->status) === 'Pending' || trim($row->status) === 'PENDING') {
+                                        if ($status === 'Pending' || $status === 'PENDING') {
                                             
-                                            $created = \Carbon\Carbon::parse($row->created_at);
-                                            $updated = \Carbon\Carbon::parse($row->updated_at);
+                                            $updatedAt = \Carbon\Carbon::parse($row->updated_date);
                                             
-                                            $diffInHours = $created->diffInHours($updated);
+                                            $now = \Carbon\Carbon::now();
+                                            
+                                            $diffInHours = $updatedAt->diffInHours($now);
                                             
                                             $tatDisplay = $diffInHours . ' Hrs';
                                             
@@ -491,6 +505,10 @@
                                             } else {
                                                 $tatClass = 'badge bg-success'; 
                                             }
+                                        } 
+                                       
+                                        else {
+                                            $tatDisplay = '-'; 
                                         }
                                         @endphp
                                         <tr>

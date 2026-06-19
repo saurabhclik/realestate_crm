@@ -10,7 +10,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="category" class="form-label">Select Category</label>
+                        <label for="category" class="form-label">Select Category <span class="text-danger">*</span></label>
                         <select name="category" id="category" class="form-control select2" required>
                             <option value="">-- Select Category --</option>
                             @foreach($categories as $categorie)
@@ -19,7 +19,7 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="name" class="form-label">Sub Category Name</label>
+                        <label for="name" class="form-label">Sub Category Name <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="name" id="name" required>
                     </div>
                 </div>

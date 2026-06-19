@@ -63,7 +63,8 @@
                                 <div class="row g-3">
                                     <div class="col-md-12">
                                         <div class="mb-3">
-                                            <label for="name" class="form-label">Name</label>
+                                            <label for="name" class="form-label">Name
+                                            <span class="text-danger">*</span></label>
                                             <input type="text" class="form-control" id="name" name="name"
                                                 value="{{ old('name', $user->name ?? '') }}" required>
                                             <div class="invalid-feedback">Please enter Name</div>
@@ -72,7 +73,8 @@
 
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label for="email" class="form-label">Email</label>
+                                            <label for="email" class="form-label">Email
+                                            <span class="text-danger">*</span></label>
                                             <input type="email" class="form-control" id="email" name="email"
                                                 value="{{ old('email', $user->email ?? '') }}" required>
                                             <div class="invalid-feedback">Please enter a valid email</div>
@@ -81,7 +83,8 @@
 
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label for="mobile" class="form-label">Mobile</label>
+                                            <label for="mobile" class="form-label">Mobile
+                                            <span class="text-danger">*</span></label>
                                             <div class="input-group">
                                                 <span class="input-group-text">+91</span>
                                                 <input type="tel" class="form-control" id="mobile" name="mobile"
@@ -94,7 +97,7 @@
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label for="password" class="form-label">
-                                                Password @if (isset($user))
+                                                Password <span class="text-danger">*</span>@if (isset($user))
                                                     <small class="text-muted">(Leave blank to keep current)</small>
                                                 @endif
                                             </label>
@@ -109,7 +112,7 @@
 
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label for="role" class="form-label">Role</label>
+                                            <label for="role" class="form-label">Role <span class="text-danger">*</span></label>
                                             <select class="form-select" id="role" name="role" required>
                                                 <option value="" selected disabled>Select Role</option>
                                                 @foreach ($roles ?? [] as $role)
@@ -123,7 +126,7 @@
                                     
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label for="designation" class="form-label">Designation</label>
+                                            <label for="designation" class="form-label">Designation <span class="text-danger">*</span></label>
                                             <select class="form-select" id="designation" name="designation" required>
                                                 <option value="" selected disabled>Select designation</option>
                                                 @foreach ($designation ?? [] as $item)
@@ -137,7 +140,7 @@
 
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label for="manager" class="form-label">Reporting Manager</label>
+                                            <label for="manager" class="form-label">Reporting Manager <span class="text-danger">*</span></label>
                                             <select class="form-select" id="manager" name="reporting_manager" required>
                                                 <option value="" selected disabled>Select manager</option>
                                                 @foreach ($reporting_manager ?? [] as $manager)
@@ -531,7 +534,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="csv_file" class="form-label">CSV File</label>
+                            <label for="csv_file" class="form-label">CSV File <span class="text-danger">*</span></label>
                             <input class="form-control" type="file" id="csv_file" name="csv_file" accept=".csv" required>
                             <div class="form-text">Columns: name, email, phone, password, role</div>
                         </div>

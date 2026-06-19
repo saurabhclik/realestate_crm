@@ -13,7 +13,7 @@
                 <input type="hidden" id="leadId">
                 <div class="mb-3">
                     <label for="newStatus" class="form-label">
-                        New Status
+                        New Status <span class="text-danger">*</span>
                     </label>
                     <select class="form-select select2StatusUpdate"
                         id="newStatus"
@@ -111,18 +111,22 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="remindDate" class="form-label">Reminder Date <span id="reqStarDate" class="text-danger" style="display:none;">*</span></label>
+                            <label for="remindDate" class="form-label">Reminder Date <span id="reqStarDate" class="text-danger" style="display:none;">*</span>    
+                            <span id="optTextDate" class="fw-normal text-muted" style="display:none;">(Optional)</span>
+                           </label>
                             <input type="date" class="form-control" id="remindDate">
                         </div>
                         <div class="col-md-6">
-                            <label for="remindTime" class="form-label">Reminder Time <span id="reqStarTime" class="text-danger" style="display:none;">*</span></label>
+                            <label for="remindTime" class="form-label">Reminder Time <span id="reqStarTime" class="text-danger" style="display:none;">*</span>
+                            <span id="optTextTime" class="fw-normal text-muted" style="display:none;">(Optional)</span>
+                            </label>
                             <input type="time" class="form-control" id="remindTime">
                         </div>
                     </div>
                 </div>
 
                 <div class="mb-3">
-                    <label for="statusComment" class="form-label">Remark</label>
+                    <label for="statusComment" class="form-label">Remark <span class=" fw-normal">(Optional)</span></label>
                     <textarea class="form-control" id="comment" rows="3" placeholder="Add any additional comments..."></textarea>
                 </div>
             </div>
@@ -158,6 +162,7 @@
                 
                 $('#reminderFields').show();
                 $('#reqStarDate, #reqStarTime').show();
+                $('#optTextDate, #optTextTime').hide();  
                 $('#btnRemindMe').hide();
                 $('#remindDate, #remindTime').prop('required', true);
 
@@ -169,6 +174,7 @@
                 
                 $('#reminderFields').hide();
                 $('#reqStarDate, #reqStarTime').hide();
+                $('#optTextDate, #optTextTime').show();
                 $('#btnRemindMe').show();
                 $('#remindDate, #remindTime').prop('required', false);
             }

@@ -198,6 +198,9 @@ class DashboardController extends Controller
         $user = DB::table('users')->where('id', $userId)->first();
         $userType = Session::get('user_type');
 
+        if ($userType == 'post_sale') {
+            return redirect()->route('task.list');
+        }
         if (!$user || $user->token !== $sessionToken) {
             Session::flush();
             Flasher::addError('Someone else has logged in with your account. You have been logged out');

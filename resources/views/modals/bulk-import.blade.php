@@ -123,7 +123,7 @@
                                     <form id="uploadForm" enctype="multipart/form-data">
                                         @csrf
                                         <div class="mb-3">
-                                            <label for="csv_file" class="form-label fw-semibold">Select CSV File</label>
+                                            <label for="csv_file" class="form-label fw-semibold">Select CSV File <span class="text-danger">*</span></label>
                                             <div class="file-upload-wrapper">
                                                 <input type="file" name="file" id="csv_file" accept=".csv" class="form-control" required>
                                                 <div class="invalid-feedback">Please select a valid CSV file.</div>

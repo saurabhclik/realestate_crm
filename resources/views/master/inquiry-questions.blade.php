@@ -108,7 +108,7 @@
                         </div>
                         <div class="modal-body">
                             <div class="mb-3">
-                                <label for="question_text" class="form-label">Question Text</label>
+                                <label for="question_text" class="form-label">Question Text <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="question_text" name="question_text" placeholder="Enter inquiry question" required>
                             </div>
                             <div class="form-check mb-3">

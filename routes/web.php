@@ -38,6 +38,7 @@ use App\Http\Controllers\UnifiedMessagingController;
 use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\LeadStatusController;
 use App\Http\Controllers\SystemConfigurationController;
+use Illuminate\Support\Facades\Response;
 
 Route::get('/', [AuthenticateController::class, 'show_login']);
 Route::post('/login', [AuthenticateController::class, 'login'])->name('login');
@@ -582,3 +583,17 @@ Route::get('/refresh-storage', function () {
     \File::copyDirectory($src, $dst);
     return 'Storage refreshed!';
 });
+
+Route::get('/storage/{path}', function ($path) {
+
+    $path = preg_replace('#^/?public/#', '', $path);
+
+    $filePath = storage_path('app/public/' . $path);
+
+    if (!File::exists($filePath)) {
+        abort(404);
+    }
+
+    return Response::file($filePath);
+
+})->where('path', '.*');

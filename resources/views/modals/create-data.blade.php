@@ -39,7 +39,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label for="email">Email</label>
+                                    <label for="email">Email <span class=" fw-normal">(Optional)</span></label>
                                     <input type="email" class="form-control" name="email" id="email"
                                         value="{{ old('email') }}">
                                 </div>
@@ -56,12 +56,12 @@
                                     </div>
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label for="alternative phone">Alternative Number</label>
+                                    <label for="alternative phone">Alternative Number <span class=" fw-normal">(Optional)</span></label>
                                     <input type="text" class="form-control" name="alternative_number"
                                         id="alternative_number" value="{{ old('alternative_number') }}">
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label for="state">State</label>
+                                    <label for="state">State <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2 dropdown-in-modal" name="state" id="state">
                                         <option value="">-- Select State --</option>
                                         @foreach($states as $state)
@@ -72,7 +72,7 @@
                                     </select>
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label for="city">City</label>
+                                    <label for="city">City <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2 dropdown-in-modal" name="city" id="city">
                                         <option value="">-- Select City --</option>
                                         @foreach($cities as $city)
@@ -96,7 +96,7 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-4 mb-3">
-                                    <label for="property_type">Property Type</label>
+                                    <label for="property_type">Property Type <span class=" fw-normal">(Optional)</span></label>
                                     <select class="form-select select2 dropdown-in-modal" name="property_type" id="property_type">
                                         <option value="">-- Select Property Type --</option>
                                         @foreach($propertyTypes as $type)
@@ -107,7 +107,7 @@
                                     </select>
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label for="property_category">Property Category</label>
+                                    <label for="property_category">Property Category <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2 dropdown-in-modal" name="property_category" id="property_category">
                                         <option value="">-- Select Property Category --</option>
                                         @foreach($propertyCategories as $item)
@@ -118,7 +118,7 @@
                                     </select>
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label for="property_sub_category">Property Sub Category</label>
+                                    <label for="property_sub_category">Property Sub Category <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2 dropdown-in-modal" name="property_sub_category" id="property_sub_category">
                                         <option value="">-- Select Property Sub Category --</option>
                                         @foreach($subCategories as $sub)
@@ -129,7 +129,7 @@
                                     </select>
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label for="projects">Projects</label>
+                                    <label for="projects">Projects <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2 dropdown-in-modal" name="project_name[]" id="projects" multiple>
                                         <option value="">-- Select Project --</option>
                                         @foreach($projects as $project)
@@ -140,7 +140,7 @@
                                     </select>
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label for="budget">Budget</label>
+                                    <label for="budget">Budget <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2 dropdown-in-modal" name="budget" id="budget">
                                         <option value="">Select Budget</option>
                                         <option value="10L-20L" {{ old('budget') == '10L-20L' ? 'selected' : '' }}>
@@ -191,7 +191,7 @@
                                     </select>
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label for="source">Source</label>
+                                    <label for="source">Source <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2 dropdown-in-modal" name="source" id="source">
                                         <option value="">-- Select Source --</option>
                                         @foreach($sources as $source)
@@ -202,7 +202,7 @@
                                     </select>
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label for="campaign">Campaign</label>
+                                    <label for="campaign">Campaign <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2 dropdown-in-modal" name="campaign" id="campaign">
                                         <option value="">-- Select Campaign --</option>
                                         @foreach($campaigns as $campaign)
@@ -213,7 +213,7 @@
                                     </select>
                                 </div>
                                 <div class="col-md-12 mb-3">
-                                    <label for="comment">Comment:</label>
+                                    <label for="comment">Comment: <span class=" fw-normal">(Optional)</span></label>
                                     <textarea id="comment" name="comment" rows="3" placeholder="Type your comment here..."
                                         class="form-control"></textarea>
                                 </div>

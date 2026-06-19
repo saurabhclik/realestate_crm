@@ -191,7 +191,7 @@ $users = DB::table('users')
                                 </div>
 
                                 <div class="col-md-4 mb-3">
-                                    <label for="email">Email</label>
+                                    <label for="email">Email <span class=" fw-normal">(Optional)</span></label>
                                     <input type="email" class="form-control" name="email" id="email"
                                         value="{{ isset($lead) ? $lead->email : old('email') }}">
                                 </div>
@@ -204,13 +204,13 @@ $users = DB::table('users')
                                 </div>
 
                                 <div class="col-md-4 mb-3">
-                                    <label for="whatsapp">Alternative Number</label>
+                                    <label for="whatsapp">Alternative Number <span class=" fw-normal">(Optional)</span></label>
                                     <input type="text" class="form-control" name="whatsapp" id="whatsapp"
                                         value="{{ isset($lead) ? $lead->whatsapp_no : old('whatsapp') }}">
                                 </div>
 
                                 <div class="col-md-4 mb-3">
-                                    <label for="state">State</label>
+                                    <label for="state">State <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2" name="field1" id="state">
                                         <option value="">-- Select State --</option>
                                         @php
@@ -226,7 +226,7 @@ $users = DB::table('users')
                                 </div>
 
                                 <div class="col-md-4 mb-3">
-                                    <label for="city">City</label>
+                                    <label for="city">City <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2" name="field2" id="city">
                                         <option value="">-- Select City --</option>
                                         @if(isset($lead) && $lead->field1)
@@ -247,12 +247,12 @@ $users = DB::table('users')
                                 </div>
 
                                 <div class="col-md-12 mb-3">
-                                    <label for="address">Address</label>
+                                    <label for="address">Address <span class=" fw-normal">(Optional)</span></label>
                                     <textarea class="form-control" name="field3" id="address" rows="2">{{ isset($lead) ? $lead->field3 : old('address') }}</textarea>
                                 </div>
 
                                 <div class="col-md-4 mb-3">
-                                    <label for="source">Source</label>
+                                    <label for="source">Source <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2" name="source" id="source">
                                         <option value="">-- Select Source --</option>
                                         @foreach($sources as $source)
@@ -265,7 +265,7 @@ $users = DB::table('users')
                                 </div>
 
                                 <div class="col-md-4 mb-3">
-                                    <label for="campaign">Campaign</label>
+                                    <label for="campaign">Campaign <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2" name="campaign" id="campaign">
                                         <option value="">-- Select Campaign --</option>
                                         @foreach($campaigns as $campaign)
@@ -278,7 +278,7 @@ $users = DB::table('users')
                                 </div>
 
                                 <div class="col-md-4 mb-3">
-                                    <label for="classification">Classification</label>
+                                    <label for="classification">Classification <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2" name="classification" id="classification">
                                         <option value="">-- Select Classification --</option>
                                         <option value="hot" {{ (isset($lead) && $lead->classification == 'hot') ? 'selected' : '' }}>Hot</option>
@@ -292,7 +292,7 @@ $users = DB::table('users')
                             </div>
                             <div class="row">
                                 <div class="col-md-4 mb-3">
-                                    <label for="type">Property Type</label>
+                                    <label for="type">Property Type <span class=" fw-normal">(Optional)</span></label>
                                     <select class="form-select select2" name="type" id="type">
                                         <option value="">-- Select Property Type --</option>
                                         @foreach($categoryList as $type)
@@ -304,13 +304,13 @@ $users = DB::table('users')
                                     </select>
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label for="category">Property Category</label>
+                                    <label for="category">Property Category <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2" name="category" id="category">
                                         <option value="">-- Select Property Category --</option>
                                     </select>
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label for="sub_category">Property Sub Category</label>
+                                    <label for="sub_category">Property Sub Category <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2" name="sub_category" id="sub_category">
                                         <option value="">-- Select Property Sub Category --</option>
                                         @if(isset($currentSubCategory))
@@ -321,7 +321,7 @@ $users = DB::table('users')
                                     </select>
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label for="projects">{{ $isLeadManagement ? 'Products' : 'Project' }}</label>
+                                    <label for="projects">{{ $isLeadManagement ? 'Products' : 'Project' }} <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2" name="projects[]" id="projects" multiple>
                                         <option value="">-- Select {{ $isLeadManagement ? 'Product(s)' : 'Project(s)' }} --</option>
                                         @foreach($projects as $project)
@@ -334,7 +334,7 @@ $users = DB::table('users')
                                 </div>
 
                                 <div class="col-md-4 mb-3">
-                                    <label for="req_state">State</label>
+                                    <label for="req_state">State <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2" name="property_state" id="property_state">
                                         <option value="">-- Select State --</option>
                                         @foreach($states as $state)
@@ -347,20 +347,20 @@ $users = DB::table('users')
                                 </div>
 
                                 <div class="col-md-4 mb-3">
-                                    <label for="req_city">City</label>
+                                    <label for="req_city">City <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2" name="property_city" id="property_city">
                                         <option value="">-- Select City --</option>
                                     </select>
                                 </div>
 
                                 <div class="col-md-4 mb-3">
-                                    <label for="req_location">Location</label>
+                                    <label for="req_location">Location <span class=" fw-normal">(Optional)</span></label>
                                     <input type="text" class="form-control" name="property_location" id="property_location"
                                         value="{{ isset($lead) ? $lead->req_location : old('req_location') }}">
                                 </div>
 
                                 <div class="col-md-4 mb-3">
-                                    <label for="budget">Budget</label>
+                                    <label for="budget">Budget <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2" name="budget" id="budget">
                                         <option value="">Select Budget</option>
 
@@ -469,7 +469,7 @@ $users = DB::table('users')
                                 </div>
 
                                 <div class="col-md-12 mb-3">
-                                    <label for="comment">Comment:</label>
+                                    <label for="comment">Comment: <span class=" fw-normal">(Optional)</span></label>
                                     <textarea id="comment" name="comment" rows="3" placeholder="Type your comment here..." class="form-control">{{ isset($lead) ? $lead->last_comment : old('comment') }}</textarea>
                                 </div>
                                 @if($canAssignLead && !$isEdit)

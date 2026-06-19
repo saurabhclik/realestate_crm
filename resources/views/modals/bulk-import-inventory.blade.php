@@ -11,7 +11,7 @@
                 @csrf
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="import_inventory_id" class="form-label">Project</label>
+                        <label for="import_inventory_id" class="form-label">Project <span class="text-danger">*</span></label>
                         <select class="form-control select2" id="import_inventory_id" name="inventory_id" required>
                             <option value="">Select Project</option>
                             @foreach($projects as $project)
@@ -24,7 +24,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="inventory_file" class="form-label">CSV File</label>
+                        <label for="inventory_file" class="form-label">CSV File <span class="text-danger">*</span></label>
                         <input type="file" class="form-control" id="inventory_file" name="inventory_file"
                             accept=".csv,.txt" required>
                         <div class="form-text">

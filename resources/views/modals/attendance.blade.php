@@ -12,11 +12,11 @@
 
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="type" class="form-label">Attendance Type</label>
+                        <label for="type" class="form-label">Attendance Type <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="type" required readonly>
                     </div>
                     <div class="mb-3">
-                        <label for="hours" class="form-label">Hours</label>
+                        <label for="hours" class="form-label">Hours <span class="text-danger">*</span></label>
                         <input type="number" class="form-control" name="hours" step="0.1" required>
                     </div>
                 </div>

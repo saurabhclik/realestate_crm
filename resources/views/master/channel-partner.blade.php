@@ -219,49 +219,49 @@
 
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">
-                                    Email
+                                    Email <span class=" fw-normal">(Optional)</span>
                                 </label>
                                 <input type="email" name="email" class="form-control" placeholder="Enter Email">
                             </div>
 
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">
-                                    Phone
+                                    Phone <span class=" fw-normal">(Optional)</span>
                                 </label>
                                 <input type="text" name="phone" class="form-control" placeholder="Enter Phone">
                             </div>
 
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">
-                                    Company Name
+                                    Company Name <span class=" fw-normal">(Optional)</span>
                                 </label>
                                 <input type="text" name="company_name" class="form-control" placeholder="Enter Company Name">
                             </div>
 
                             <div class="col-md-12 mb-3">
                                 <label class="form-label">
-                                    Address
+                                    Address <span class=" fw-normal">(Optional)</span>
                                 </label>
                                 <textarea name="address" class="form-control" rows="3" placeholder="Enter Address"></textarea>
                             </div>
 
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">
-                                    GST Number
+                                    GST Number <span class=" fw-normal">(Optional)</span>
                                 </label>
                                 <input type="text" name="gst_number" class="form-control" placeholder="Enter GST Number">
                             </div>
 
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">
-                                    PAN Number
+                                    PAN Number <span class=" fw-normal">(Optional)</span>
                                 </label>
                                 <input type="text" name="pan_number" class="form-control" placeholder="Enter PAN Number">
                             </div>
 
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">
-                                    Status
+                                    Status <span class=" fw-normal">(Optional)</span>
                                 </label>
                                 <select name="status" class="form-control">
                                     <option value="active">Active</option>

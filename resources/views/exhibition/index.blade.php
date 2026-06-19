@@ -278,7 +278,7 @@
 
                     <div class="row">
                         <div class="col-md-12 mb-3">
-                            <label for="description" class="form-label">Description</label>
+                            <label for="description" class="form-label">Description <span class=" fw-normal">(Optional)</span></label>
                             <textarea class="form-control" id="description" name="description" rows="3"></textarea>
                             <div class="invalid-feedback" id="description-error"></div>
                         </div>

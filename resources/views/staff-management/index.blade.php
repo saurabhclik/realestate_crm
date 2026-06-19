@@ -534,7 +534,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="csv_file" class="form-label">CSV File</label>
+                            <label for="csv_file" class="form-label">CSV File <span class="text-danger">*</span></label>
                             <input class="form-control" type="file" id="csv_file" name="csv_file" accept=".csv" required>
                             <div class="form-text">Columns: name, email, phone, password, role</div>
                         </div>

@@ -347,12 +347,12 @@
                             @if(session('software_type') !== 'lead_management')
                             <div class="row g-4">
                                 <div class="col-md-4">
-                                    <label for="house_number" class="form-label fw-semibold">House/Flat Number</label>
+                                    <label for="house_number" class="form-label fw-semibold">House/Flat Number <span class=" fw-normal">(Optional)</span></label>
                                     <input type="text" class="form-control" name="house_number" id="house_number"
                                         placeholder="Enter house/flat number">
                                 </div>
                                 <div class="col-md-4">
-                                    <label for="property_type" class="form-label fw-semibold">Type</label>
+                                    <label for="property_type" class="form-label fw-semibold">Type <span class=" fw-normal">(Optional)</span></label>
                                     <select class="form-select" name="property_type" id="property_type">
                                         <option value="">Select Type</option>
                                         @foreach($categoryList as $cat)
@@ -361,7 +361,7 @@
                                     </select>
                                 </div>
                                 <div class="col-md-4">
-                                    <label for="property_category" class="form-label fw-semibold">Category</label>
+                                    <label for="property_category" class="form-label fw-semibold">Category <span class=" fw-normal">(Optional)</span></label>
                                     <select class="form-select" name="property_category" id="property_category">
                                         <option value="">Select Category</option>
                                         @foreach($invCatg as $cat)
@@ -370,13 +370,13 @@
                                     </select>
                                 </div>
                                 <div class="col-md-4">
-                                    <label for="property_sub_category" class="form-label fw-semibold">Sub Category</label>
+                                    <label for="property_sub_category" class="form-label fw-semibold">Sub Category <span class=" fw-normal">(Optional)</span></label>
                                     <select class="form-select" name="property_sub_category" id="property_sub_category">
                                         <option value="">Select Sub Category</option>
                                     </select>
                                 </div>
                                 <div class="col-md-4">
-                                    <label for="property_size" class="form-label fw-semibold">Property Size</label>
+                                    <label for="property_size" class="form-label fw-semibold">Property Size <span class=" fw-normal">(Optional)</span></label>
                                     <select class="form-select" name="property_size" id="property_size">
                                         <option value="">Select Size</option>
                                         <option value="3 Marla">3 Marla</option>
@@ -390,7 +390,7 @@
                                     </select>
                                 </div>
                                 <div class="col-md-4">
-                                    <label for="state" class="form-label fw-semibold">State</label>
+                                    <label for="state" class="form-label fw-semibold">State <span class=" fw-normal">(Optional)</span></label>
                                     <select class="form-select" name="state" id="state">
                                         <option value="">Select State</option>
                                         @php
@@ -402,21 +402,21 @@
                                     </select>
                                 </div>
                                 <div class="col-md-4">
-                                    <label for="city" class="form-label fw-semibold">City</label>
+                                    <label for="city" class="form-label fw-semibold">City <span class=" fw-normal">(Optional)</span></label>
                                     <select class="form-select" name="city" id="city">
                                         <option value="">Select City</option>
                                     </select>
                                 </div>
                                 <div class="col-12">
-                                    <label for="address" class="form-label fw-semibold">Address</label>
+                                    <label for="address" class="form-label fw-semibold">Address <span class=" fw-normal">(Optional)</span></label>
                                     <textarea class="form-control" name="address" id="address" rows="2" placeholder="Enter complete address"></textarea>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="budget_price" class="form-label fw-semibold">Budget/Price (₹)</label>
+                                    <label for="budget_price" class="form-label fw-semibold">Budget/Price (₹) <span class=" fw-normal">(Optional)</span></label>
                                     <input type="number" class="form-control" name="budget_price" id="budget_price">
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="property_status" class="form-label fw-semibold">Status</label>
+                                    <label for="property_status" class="form-label fw-semibold">Status <span class=" fw-normal">(Optional)</span></label>
                                     <select class="form-select" name="property_status" id="property_status">
                                         <option value="Available">Available</option>
                                         <option value="Hold">Hold</option>
@@ -425,11 +425,11 @@
                                     </select>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="initial_date" class="form-label fw-semibold">Initial Date</label>
+                                    <label for="initial_date" class="form-label fw-semibold">Initial Date <span class=" fw-normal">(Optional)</span></label>
                                     <input type="date" class="form-control" name="initial_date" id="initial_date">
                                 </div>
                                 <div class="col-12">
-                                    <label for="gallery_images" class="form-label fw-semibold">Gallery Images</label>
+                                    <label for="gallery_images" class="form-label fw-semibold">Gallery Images <span class=" fw-normal">(Optional)</span></label>
                                     <input type="file" class="form-control" name="gallery_images[]" id="gallery_images" multiple accept="image/*">
                                     <div class="form-text text-muted">
                                         <i class="fas fa-info-circle me-1"></i>
@@ -477,7 +477,7 @@
                                     <input type="hidden" name="property_id" id="assign_property_id">
                                     <div class="row">
                                         <div class="col-md-8">
-                                            <label class="form-label">Select Channel Partner</label>
+                                            <label class="form-label">Select Channel Partner <span class="text-danger">*</span></label>
                                             <select name="channel_partner_id" id="channel_partner_id" class="form-select" required>
                                                 <option value="">Select Channel Partner</option>
                                                 @foreach($channelPartners as $cp)
@@ -516,7 +516,7 @@
                             <input type="hidden" name="property_id" id="comment_property_id">
                             <div class="row">
                                 <div class="col-md-4">
-                                    <label class="form-label">Channel Partner</label>
+                                    <label class="form-label">Channel Partner <span class="text-danger">*</span></label>
                                     <select name="channel_partner_id" id="comment_channel_partner_id" class="form-select" required>
                                         <option value="">Select Channel Partner</option>
                                         @foreach($channelPartners as $cp)
@@ -525,7 +525,7 @@
                                     </select>
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label">Platform</label>
+                                    <label class="form-label">Platform <span class="text-danger">*</span></label>
                                     <select name="platform" id="platform" class="form-select" required>
                                         <option value="">Select Platform</option>
                                         <option value="Facebook">Facebook</option>
@@ -538,7 +538,7 @@
                                     </select>
                                 </div>
                                 <div class="col-md-5">
-                                    <label class="form-label">Comment/Review</label>
+                                    <label class="form-label">Comment/Review <span class="text-danger">*</span></label>
                                     <textarea name="comment" id="comment" class="form-control" rows="1" placeholder="Enter promoted comment" required></textarea>
                                 </div>
                                 <div class="col-md-12 mt-2">
@@ -548,7 +548,7 @@
                         </form>
                         <div class="row mb-3">
                             <div class="col-md-4">
-                                <label class="form-label">Filter by Platform</label>
+                                <label class="form-label">Filter by Platform <span class=" fw-normal">(Optional)</span></label>
                                 <select id="filter_platform" class="form-select">
                                     <option value="">All Platforms</option>
                                     <option value="Facebook">Facebook</option>
@@ -559,7 +559,7 @@
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label">Filter by CP</label>
+                                <label class="form-label">Filter by CP <span class=" fw-normal">(Optional)</span></label>
                                 <select id="filter_cp" class="form-select">
                                     <option value="">All Channel Partners</option>
                                     @foreach($channelPartners as $cp)

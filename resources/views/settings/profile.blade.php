@@ -30,7 +30,7 @@
                                     <input type="email" name="email" class="form-control" value="{{ $user->email }}" required>
                                 </div>
                                 <div class="col-12 mt-4">
-                                    <label for="phone" class="text-left pl-0">Phone Number</label>
+                                    <label for="phone" class="text-left pl-0">Phone Number <span class=" fw-normal">(Optional)</span></label>
                                     <input type="text" name="phone" class="form-control" value="{{ $user->mobile ?? '' }}">
                                 </div>
                             </div>

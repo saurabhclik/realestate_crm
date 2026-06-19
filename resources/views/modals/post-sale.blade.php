@@ -112,7 +112,7 @@
                                     </div>
                                     
                                     <div class="mb-3">
-                                        <label class="form-label">Email</label>
+                                        <label class="form-label">Email <span class=" fw-normal">(Optional)</span></label>
                                         <input type="email" class="form-control" name="email" id="email">
                                     </div>
                                 </div>

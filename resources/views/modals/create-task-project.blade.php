@@ -16,13 +16,13 @@
                         <input type="text" class="form-control" id="edit-project-name" name="name" required>
                     </div>
                     <div class="mb-3">
-                        <label for="edit_project_description" class="form-label">Description</label>
+                        <label for="edit_project_description" class="form-label">Description <span class=" fw-normal">(Optional)</span></label>
                         <textarea class="form-control" id="edit-project_-escription" name="description" rows="3"></textarea>
                     </div>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="edit_project_status" class="form-label">Status</label>
+                                <label for="edit_project_status" class="form-label">Status <span class=" fw-normal">(Optional)</span></label>
                                 <select class="form-select" id="edit-project-status" name="status">
                                     <option value="planning">Planning</option>
                                     <option value="active">Active</option>
@@ -33,7 +33,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="edit_project_priority" class="form-label">Priority</label>
+                                <label for="edit_project_priority" class="form-label">Priority <span class=" fw-normal">(Optional)</span></label>
                                 <select class="form-select" id="edit-project-priority" name="priority">
                                     <option value="low">Low</option>
                                     <option value="medium">Medium</option>

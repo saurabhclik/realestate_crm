@@ -163,7 +163,7 @@
                                         <div class="col-md-4">
                                             <div class="form-floating">
                                                 <input type="text" class="form-control" name="pin_code" id="pin_code" placeholder="PIN Code">
-                                                <label for="pin_code">PIN Code</label>
+                                                <label for="pin_code">PIN Code <span class=" fw-normal">(Optional)</span></label>
                                             </div>
                                         </div>   
                                         <div class="col-md-4">
@@ -186,7 +186,7 @@
                                         </div>   
                                         <div class="col-12">
                                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                                <h6 class="mb-0">Nearby Locations</h6>
+                                                <h6 class="mb-0">Nearby Locations <span class="badge bg-secondary">Optional</span> </h6>
                                                 <button type="button" class="btn btn-sm btn-outline-primary" id="add_nearby_location">
                                                     <i class="fas fa-plus me-1"></i> Add Location
                                                 </button>
@@ -212,13 +212,13 @@
                                 </div>
                                 <div class="tab-pane fade" id="media-assets" role="tabpanel">
                                     <h5 class="mb-4 text-primary d-flex align-items-center">
-                                        <i class="fas fa-images me-2"></i> Media Assets
+                                        <i class="fas fa-images me-2"></i> Media Assets  &nbsp;   <span class="badge bg-secondary">Optional</span>
                                     </h5>                                    
                                     <div class="row g-3">
                                         <div class="col-md-6">
                                             <label class="form-label d-flex align-items-center">
                                                 <span>Project Logo</span>
-                                                <span class="text-danger ms-1">*</span>
+                                                {{-- <span class="text-danger ms-1">*</span> --}}
                                             </label>
                                             <div class="file-upload-card">
                                                 <input type="file" class="form-control d-none" name="logo" id="logo" accept="image/*">
@@ -236,7 +236,7 @@
                                         <div class="col-md-6">
                                             <label class="form-label d-flex align-items-center">
                                                 <span>Cover Image</span>
-                                                <span class="text-danger ms-1">*</span>
+                                                {{-- <span class="text-danger ms-1">*</span> --}}
                                             </label>
                                             <div class="file-upload-card">
                                                 <input type="file" class="form-control d-none" name="cover_image" id="cover_image" accept="image/*">
@@ -417,6 +417,7 @@
                                         <div class="col-md-6">
                                             <div class="form-floating">
                                                 <div class="input-group">
+                                                     <span class="input-group-text text-danger">*</span>
                                                     <input type="number" class="form-control" name="price" id="price" placeholder="Price" >
                                                     <select class="form-select" name="price_unit" id="price_unit" style="max-width: 120px;">
                                                         <option value="sqft" selected>Sq Ft</option>
@@ -430,39 +431,39 @@
                                         <div class="col-md-6">
                                             <div class="form-floating">
                                                 <input type="text" class="form-control" name="price_display" id="price_display" placeholder="Eg: Starting from 50L">
-                                                <label for="price_display">Price Display Text</label>
+                                                <label for="price_display">Price Display Text <span class="text-muted fw-normal">(Optional)</span></label>
                                             </div>
                                             <div class="form-text">Example: "Starting from ₹50L" or "Call for pricing"</div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-floating">
                                                 <input type="text" class="form-control" name="size" id="size" placeholder="Size">
-                                                <label for="size">Size (with unit)</label>
+                                                <label for="size">Size (with unit) <span class=" fw-normal">(Optional)</span></label>
                                             </div>
                                             <div class="form-text">Example: "1200 sqft" or "2.5 acres"</div>
                                         </div>
                                         <div class="col-md-3">
                                             <div class="form-floating">
                                                 <input type="number" class="form-control" name="beds" id="beds" placeholder="Beds">
-                                                <label for="beds">Bedrooms</label>
+                                                <label for="beds">Bedrooms <span class=" fw-normal">(Optional)</span></label>
                                             </div>
                                         </div>
                                         <div class="col-md-3">
                                             <div class="form-floating">
                                                 <input type="number" class="form-control" name="baths" id="baths" placeholder="Baths">
-                                                <label for="baths">Bathrooms</label>
+                                                <label for="baths">Bathrooms <span class=" fw-normal">(Optional)</span></label>
                                             </div>
                                         </div>
                                         <div class="col-md-3">
                                             <div class="form-floating">
                                                 <input type="text" class="form-control" name="balcony" id="balcony" placeholder="Balcony">
-                                                <label for="balcony">Balcony</label>
+                                                <label for="balcony">Balcony <span class=" fw-normal">(Optional)</span></label>
                                             </div>
                                         </div>
                                         <div class="col-md-3">
                                             <div class="form-floating">
                                                 <input type="text" class="form-control" name="terrace" id="terrace" placeholder="Terrace">
-                                                <label for="terrace">Terrace</label>
+                                                <label for="terrace">Terrace <span class=" fw-normal">(Optional)</span></label>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -472,7 +473,7 @@
                                                     <option value="Yes">Yes</option>
                                                     <option value="No">No</option>
                                                 </select>
-                                                <label for="super_carpet">Super Carpet Area</label>
+                                                <label for="super_carpet">Super Carpet Area <span class=" fw-normal">(Optional)</span></label>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -482,14 +483,15 @@
                                                     <option value="Yes">Yes</option>
                                                     <option value="No">No</option>
                                                 </select>
-                                                <label for="carpet_lobby">Carpet Lobby</label>
+                                                <label for="carpet_lobby">Carpet Lobby <span class=" fw-normal">(Optional)</span></label>
                                             </div>
                                         </div>
                                     </div>
                                 </div>                      
                                 <div class="tab-pane fade" id="amenities" role="tabpanel">
                                     <h5 class="mb-4 text-primary d-flex align-items-center">
-                                        <i class="fas fa-list-check me-2"></i> Amenities & Features
+                                        <i class="fas fa-list-check me-2"></i> Amenities & Features &nbsp;<span class="badge bg-secondary">Optional</span>
+
                                     </h5>
                                     <div class="row">
                                         <div class="col-md-6">
@@ -557,7 +559,7 @@
                                     <div class="row g-3">
                                         <div class="col-md-6">
                                             <div class="form-floating">
-                                                <input type="tel" class="form-control" name="contact_number_1" id="contact_number_1" placeholder="Primary Phone" >
+                                                <input type="tel" class="form-control" name="contact_number_1" id="contact_number_1" placeholder="Primary Phone" required>
                                                 <label for="contact_number_1" class="d-flex align-items-center">
                                                     <span>Primary Phone</span>
                                                     <span class="text-danger ms-1">*</span>
@@ -567,48 +569,48 @@
                                         <div class="col-md-6">
                                             <div class="form-floating">
                                                 <input type="tel" class="form-control" name="contact_number_2" id="contact_number_2" placeholder="Secondary Phone">
-                                                <label for="contact_number_2">Secondary Phone</label>
+                                                <label for="contact_number_2">Secondary Phone <span class=" fw-normal">(Optional)</span></label>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-floating">
                                                 <input type="tel" class="form-control" name="whatsapp_number" id="whatsapp_number" placeholder="WhatsApp Number">
-                                                <label for="whatsapp_number">WhatsApp Number</label>
+                                                <label for="whatsapp_number">WhatsApp Number <span class=" fw-normal">(Optional)</span></label>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-floating">
                                                 <input type="email" class="form-control" name="email" id="email" placeholder="Email Address">
-                                                <label for="email">Email Address</label>
+                                                <label for="email">Email Address <span class=" fw-normal">(Optional)</span></label>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-floating">
                                                 <input type="url" class="form-control" name="instagram_link" id="instagram_link" placeholder="Instagram URL">
-                                                <label for="instagram_link">Instagram URL</label>
+                                                <label for="instagram_link">Instagram URL <span class=" fw-normal">(Optional)</span></label>
                                             </div>
-                                            <div class="form-text">Paste the Instagram profile URL (optional)</div>
+                                            <div class="form-text">Paste the Instagram profile URL</div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-floating">
                                                 <input type="url" class="form-control" name="facebook_link" id="facebook_link" placeholder="Facebook URL">
-                                                <label for="facebook_link">Facebook URL</label>
+                                                <label for="facebook_link">Facebook URL <span class=" fw-normal">(Optional)</span></label>
                                             </div>
-                                            <div class="form-text">Paste the Facebook page URL (optional)</div>
+                                            <div class="form-text">Paste the Facebook page URL </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-floating">
                                                 <input type="url" class="form-control" name="twitter_link" id="twitter_link" placeholder="Twitter URL">
-                                                <label for="twitter_link">Twitter URL</label>
+                                                <label for="twitter_link">Twitter URL <span class=" fw-normal">(Optional)</span></label>
                                             </div>
-                                            <div class="form-text">Paste the Twitter profile URL (optional)</div>
+                                            <div class="form-text">Paste the Twitter profile URL</div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-floating">
                                                 <input type="url" class="form-control" name="linkedin_link" id="linkedin_link" placeholder="LinkedIn URL">
-                                                <label for="linkedin_link">LinkedIn URL</label>
+                                                <label for="linkedin_link">LinkedIn URL <span class=" fw-normal">(Optional)</span></label>
                                             </div>
-                                            <div class="form-text">Paste the LinkedIn profile URL (optional)</div>
+                                            <div class="form-text">Paste the LinkedIn profile URL</div>
                                         </div>
                                         <!-- <div class="col-12">
                                             <div class="form-floating">
@@ -621,7 +623,7 @@
                                 </div>
                                 <div class="tab-pane fade" id="lead-fields" role="tabpanel">
                                     <h5 class="mb-4 text-primary d-flex align-items-center">
-                                        <i class="fas fa-user-check me-2"></i> Form Fields Visibility
+                                        <i class="fas fa-user-check me-2"></i> Form Fields Visibility &nbsp;<span class="badge bg-secondary">Optional</span>
                                     </h5>
                                     <div class="row g-3">
                                         <div class="col-12">
@@ -638,7 +640,7 @@
                                             </div>
                                             <div class="form-check form-switch mb-3">
                                                 <input class="form-check-input" type="checkbox" name="form_fields[]" value="email" id="lead_field_email" {{ isset($project->form_fields) && in_array('email', $project->form_fields) ? 'checked' : '' }}>
-                                                <label class="form-check-label ms-2" for="lead_field_email">Email</label>
+                                                <label class="form-check-label ms-2" for="lead_field_email">Email <span class=" fw-normal">(Optional)</span></label>
                                             </div>
                                             <div class="form-check form-switch mb-3">
                                                 <input class="form-check-input" type="checkbox" name="form_fields[]" value="phone" id="lead_field_phone" {{ isset($project->form_fields) && in_array('phone', $project->form_fields) ? 'checked' : '' }}>
@@ -663,7 +665,7 @@
                                 </div>
                                 <div class="tab-pane fade" id="styling-options" role="tabpanel">
                                     <h5 class="mb-4 text-primary d-flex align-items-center">
-                                        <i class="fas fa-paint-brush me-2"></i> Advanced Styling
+                                        <i class="fas fa-paint-brush me-2"></i> Advanced Styling &nbsp;<span class="badge bg-secondary">Optional</span>
                                     </h5>   
                                     <div class="col-12 mt-4">
                                         <h6 class="mb-3"><i class="fas fa-palette me-2"></i> Predefined Themes</h6>

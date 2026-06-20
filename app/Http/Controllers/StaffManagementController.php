@@ -123,6 +123,13 @@ class StaffManagementController extends Controller
         $designation = DB::select("SELECT * FROM `designation`");
         $userLimit = DB::table('software_details')->select('user_limit')->first();
         $users = DB::table('users')->paginate(10);
+        $userLimitInt = $userLimit->user_limit === 'all'
+            ? null
+            : (int) $userLimit->user_limit;
+
+        $remaining = $userLimitInt
+            ? max(0, $userLimitInt - $users->total())
+            : 0;
         return view('staff-management.index', [
             'user' => null,
             'roles' => $roles,
@@ -131,6 +138,8 @@ class StaffManagementController extends Controller
             'data' => $roles,
             'userLimit' => $userLimit,
             'users' => $users,
+             'remaining' => $remaining,
+             'userLimitInt' => $userLimitInt,
         ]);
     }
 
@@ -239,7 +248,15 @@ class StaffManagementController extends Controller
             $designation = DB::table('designation')->get();
             $userLimit = DB::table('software_details')->select('user_limit')->first();
             $users = DB::table('users')->paginate(10);
-            return view('staff-management.index', compact('user', 'roles', 'reporting_manager', 'designation', 'userLimit', 'users'));
+            $userLimitInt = $userLimit->user_limit === 'all'
+                ? null
+                : (int) $userLimit->user_limit;
+
+            $remaining = $userLimitInt
+                ? max(0, $userLimitInt - $users->total())
+                : 0;
+            return view('staff-management.index', compact('user', 'roles', 'reporting_manager', 'designation', 'userLimit', 'users','remaining',
+           'userLimitInt'));
         } catch (Exception $error) {
             Flasher::addError($error->getMessage());
             return redirect()->route('users.index');

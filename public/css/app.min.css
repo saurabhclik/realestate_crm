@@ -37,7 +37,7 @@
 }
 
 .logo {
-    line-height: 70px
+    line-height: 10px
 }
 
 .logo .logo-sm {
@@ -260,7 +260,7 @@ body[data-layout=horizontal] .page-content {
 }
 
 .page-title-box {
-    padding-bottom: 24px
+    padding-bottom: 0px
 }
 
 .page-title-box .breadcrumb {

@@ -175,12 +175,28 @@ class DataCenterController extends Controller
     private function getDataByStatusType(Request $request, $status, $page_name)
     {
         $length = $request->query('length', 10);
+        $tabMap = [
+            'pending' => 'new',
+            'processing' => 'new',
+            'interested' => 'new',
+            'call_scheduled' => 'followup',
+            'meeting_scheduled' => 'followup',
+            'visit_scheduled' => 'followup',
+            'visit_done' => 'followup',
+        ];
+        $currentTabType = $tabMap[$status] ?? 'new';
+
+        $dataCenterActions = DB::table('data_center_actions')
+            ->where('is_active', 1)
+            ->where('type', $currentTabType)
+            ->orderBy('seq', 'asc')
+            ->get();
+        $dataCenterStatuses = \App\Http\Controllers\DataCenterActionController::getActiveStatuses();
 
         $query = DB::table('data_center')
             ->where('status', $status)
             ->orderBy('id', 'desc');
 
-        // SEARCH FILTER
         if ($request->filled('search')) {
             $search = $request->search;
 
@@ -209,7 +225,9 @@ class DataCenterController extends Controller
         return view('data-center.index', compact(
             'dataCenters',
             'projects',
-            'page_name'
+            'page_name',
+            'dataCenterActions',
+            'dataCenterStatuses'
         ));
     }
 
@@ -222,11 +240,31 @@ class DataCenterController extends Controller
 
         $projects = DB::table('projects')->get();
         $createData = $this->dataCenterService->create();
+        $dataCenterStatuses = \App\Http\Controllers\DataCenterActionController::getActiveStatuses();
 
-        // Start query (NO get() here)
+        $baseQuery = DB::table('data_center');
+
+        $allCount = (clone $baseQuery)->count();
+
+        $newCount = (clone $baseQuery)->where('status', 'PENDING')
+            ->where(function ($sub) {
+                $sub->whereNull('is_converted')->orWhere('is_converted', '!=', 1);
+            })->count();
+
+        $followupCount = (clone $baseQuery)->whereIn('status', ['CALL SCHEDULED', 'MEETING SCHEDULED', 'VISIT SCHEDULED', 'VISIT DONE'])
+            ->where(function ($sub) {
+                $sub->whereNull('is_converted')->orWhere('is_converted', '!=', 1);
+            })->count();
+
+        $convertedCount = (clone $baseQuery)->where('is_converted', 1)->count();
+
+        $rejectedCount = (clone $baseQuery)->where('status', 'REJECTED')
+            ->where(function ($sub) {
+                $sub->whereNull('is_converted')->orWhere('is_converted', '!=', 1);
+            })->count();
+
         $query = DB::table('data_center');
 
-        //SEARCH FILTER
         if ($request->filled('search')) {
             $search = $request->search;
 
@@ -256,33 +294,57 @@ class DataCenterController extends Controller
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-        // TAB FILTERING
+       
         $activeTab = $request->get('tab', 'all');
 
-        if ($activeTab === 'rejected') {
-            $query->where('status', 'REJECTED')
-                  ->where(function ($sub) {
-                      $sub->whereNull('is_converted')
-                          ->orWhere('is_converted', '!=', 1);
-                  });
-        } elseif ($activeTab === 'schedule') {
-            $query->whereIn('status', ['CALL SCHEDULED', 'MEETING SCHEDULED', 'VISIT SCHEDULED', 'VISIT DONE'])
-                  ->where(function ($sub) {
-                      $sub->whereNull('is_converted')
-                          ->orWhere('is_converted', '!=', 1);
-                  });
-        } elseif ($activeTab === 'converted') {
-            $query->where('is_converted', 1);
+        // MAP URL TAB NAMES TO DATABASE TYPES
+        $tabTypeMap = [
+            'new' => 'new',
+            'schedule' => 'followup',
+            'rejected' => 'rejected',
+            'all' => 'all',          // ✅ CHANGED
+            'converted' => 'new'
+        ];
+
+        $dbType = $tabTypeMap[$activeTab] ?? 'new';
+
+        
+        if ($activeTab === 'all') {
+            $dataCenterActions = DB::table('data_center_actions')
+                ->where('is_active', 1)
+                ->whereIn('type', ['new', 'followup', 'rejected'])
+                ->orderBy('type', 'asc')
+                ->orderBy('seq', 'asc')
+                ->get();
         } else {
-            // 'all' tab -> NOT rejected, NOT scheduled, NOT converted
-            $query->where(function ($q) {
-                $q->where(function ($sub) {
+            $dataCenterActions = DB::table('data_center_actions')
+                ->where('is_active', 1)
+                ->where('type', $dbType)
+                ->orderBy('seq', 'asc')
+                ->get();
+        }
+        if ($activeTab === 'new') {
+            $query->where('status', 'PENDING')
+                ->where(function ($sub) {
                     $sub->whereNull('is_converted')
                         ->orWhere('is_converted', '!=', 1);
-                })
-                ->whereNotIn('status', ['REJECTED', 'CALL SCHEDULED', 'MEETING SCHEDULED', 'VISIT SCHEDULED', 'VISIT DONE']);
-            });
+                });
+        } elseif ($activeTab === 'rejected') {
+            $query->where('status', 'REJECTED')
+                ->where(function ($sub) {
+                    $sub->whereNull('is_converted')
+                        ->orWhere('is_converted', '!=', 1);
+                });
+        } elseif ($activeTab === 'schedule') {
+            $query->whereIn('status', ['CALL SCHEDULED', 'MEETING SCHEDULED', 'VISIT SCHEDULED', 'VISIT DONE'])
+                ->where(function ($sub) {
+                    $sub->whereNull('is_converted')
+                        ->orWhere('is_converted', '!=', 1);
+                });
+        } elseif ($activeTab === 'converted') {
+            $query->where('is_converted', 1);
         }
+       
 
         // PAGINATION LENGTH
         $length = $request->get('length', 10);
@@ -316,7 +378,7 @@ class DataCenterController extends Controller
             return $row;
         });
 
-        return view('data-center.index', array_merge(compact('dataCenters', 'projects', 'activeTab'), $createData));
+        return view('data-center.index', array_merge(compact('dataCenters', 'projects', 'activeTab', 'allCount', 'newCount', 'followupCount', 'convertedCount', 'rejectedCount', 'dataCenterActions', 'dataCenterStatuses'), $createData));
     }
 
     public function create()
@@ -373,12 +435,11 @@ class DataCenterController extends Controller
             'user_id' => session('user_id'),
             'remark' => $request->comment,
             'remind_date' => $request->remind_date,
-            'status' => 'pending',
+            'status' => 'PENDING',
             'remind_time' => $request->remind_time,
         ]);
 
         return redirect()->back()->with('success', 'Data created successfully.');
-
     }
 
     public function edit($id)
@@ -780,12 +841,10 @@ class DataCenterController extends Controller
                 $userId = $currentUserId;
                 $leadSharedWith = null;
 
-                if (session('user_type') === 'reception')
-                {
+                if (session('user_type') === 'reception') {
                     $managerId = DB::table('users')->where('id', $currentUserId)->value('tm_id')
                         ?? DB::table('users')->where('role', 'admin')->value('id');
-                    if ($managerId)
-                    {
+                    if ($managerId) {
                         $userId = $managerId;
                         $leadSharedWith = (string) $currentUserId;
                     }

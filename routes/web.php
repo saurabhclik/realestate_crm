@@ -39,6 +39,7 @@ use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\LeadStatusController;
 use App\Http\Controllers\SystemConfigurationController;
 use Illuminate\Support\Facades\Response;
+use App\Http\Controllers\DataCenterActionController;
 
 Route::get('/', [AuthenticateController::class, 'show_login']);
 Route::post('/login', [AuthenticateController::class, 'login'])->name('login');
@@ -360,6 +361,14 @@ Route::middleware(['check.login', 'reception.only'])->group(function () {
             Route::get('/toggle/{id}', [LeadStatusController::class, 'toggleActive'])->name('toggle');
             Route::delete('/{id}', [LeadStatusController::class, 'destroy'])->name('destroy');
         });
+        Route::prefix('data-center-actions')->name('data-center-actions.')->group(function () {
+    Route::get('/', [DataCenterActionController::class, 'index'])->name('index');
+    Route::post('/', [DataCenterActionController::class, 'store'])->name('store');
+    Route::post('/rename/{id}', [DataCenterActionController::class, 'rename'])->name('rename');
+    Route::get('/toggle/{id}', [DataCenterActionController::class, 'toggleActive'])->name('toggle');
+    Route::delete('/{id}', [DataCenterActionController::class, 'destroy'])->name('destroy');
+    Route::post('/reorder', [DataCenterActionController::class, 'reorder'])->name('reorder');
+});
         Route::post('/lead-statuses/reorder', [LeadStatusController::class, 'reorder'])->name('lead-status.reorder');
 
         Route::prefix('system-configuration')

@@ -63,7 +63,7 @@
                                 <div class="col-md-4 mb-3">
                                     <label for="state">State <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2 dropdown-in-modal" name="state" id="state">
-                                        <option value="">-- Select State --</option>
+                                        <option value=""></option>
                                         @foreach($states as $state)
                                         <option value="{{ $state->state }}">
                                             {{ $state->state }}
@@ -74,7 +74,7 @@
                                 <div class="col-md-4 mb-3">
                                     <label for="city">City <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2 dropdown-in-modal" name="city" id="city">
-                                        <option value="">-- Select City --</option>
+                                        <option value=""></option>
                                         @foreach($cities as $city)
                                         <option value="{{ $city->city }}">
                                             {{ $city->city }}
@@ -98,7 +98,7 @@
                                 <div class="col-md-4 mb-3">
                                     <label for="property_type">Property Type <span class=" fw-normal">(Optional)</span></label>
                                     <select class="form-select select2 dropdown-in-modal" name="property_type" id="property_type">
-                                        <option value="">-- Select Property Type --</option>
+                                        <option value=""></option>
                                         @foreach($propertyTypes as $type)
                                         <option value="{{ $type->type }}" {{ old('property_type') === $type->type ? 'selected' : '' }}>
                                             {{ $type->type }}
@@ -109,7 +109,7 @@
                                 <div class="col-md-4 mb-3">
                                     <label for="property_category">Property Category <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2 dropdown-in-modal" name="property_category" id="property_category">
-                                        <option value="">-- Select Property Category --</option>
+                                        <option value=""></option>
                                         @foreach($propertyCategories as $item)
                                         <option value="{{ $item->id }}" {{ old('property_category') == $item->id ? 'selected' : '' }}>
                                             {{ $item->name }}
@@ -120,7 +120,7 @@
                                 <div class="col-md-4 mb-3">
                                     <label for="property_sub_category">Property Sub Category <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2 dropdown-in-modal" name="property_sub_category" id="property_sub_category">
-                                        <option value="">-- Select Property Sub Category --</option>
+                                        <option value=""></option>
                                         @foreach($subCategories as $sub)
                                         <option value="{{ $sub->id }}" {{ old('property_sub_category') == $sub->id ? 'selected' : '' }}>
                                             {{ $sub->name }}
@@ -131,7 +131,7 @@
                                 <div class="col-md-4 mb-3">
                                     <label for="projects">Projects <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2 dropdown-in-modal" name="project_name[]" id="projects" multiple>
-                                        <option value="">-- Select Project --</option>
+                                        <option value=""></option>
                                         @foreach($projects as $project)
                                         <option value="{{ $project->id }}">
                                             {{ $project->project_name }}
@@ -142,7 +142,7 @@
                                 <div class="col-md-4 mb-3">
                                     <label for="budget">Budget <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2 dropdown-in-modal" name="budget" id="budget">
-                                        <option value="">Select Budget</option>
+                                        <option value=""></option>
                                         <option value="10L-20L" {{ old('budget') == '10L-20L' ? 'selected' : '' }}>
                                             ₹10 Lakh - ₹20 Lakh</option>
                                         <option value="20L-30L" {{ old('budget') == '20L-30L' ? 'selected' : '' }}>
@@ -193,7 +193,7 @@
                                 <div class="col-md-4 mb-3">
                                     <label for="source">Source <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2 dropdown-in-modal" name="source" id="source">
-                                        <option value="">-- Select Source --</option>
+                                        <option value=""></option>
                                         @foreach($sources as $source)
                                         <option value="{{ $source->id }}">
                                             {{ $source->name }}
@@ -204,7 +204,7 @@
                                 <div class="col-md-4 mb-3">
                                     <label for="campaign">Campaign <span class=" fw-normal">(Optional)</span></label>
                                     <select class="select2 dropdown-in-modal" name="campaign" id="campaign">
-                                        <option value="">-- Select Campaign --</option>
+                                        <option value=""></option>
                                         @foreach($campaigns as $campaign)
                                         <option value="{{ $campaign->name }}">
                                             {{ $campaign->name }}
@@ -234,7 +234,33 @@
         </div>
     </div>
 </div>
-
+<style>
+/* Our completely custom clear button - Clean & Centered */
+.my-custom-clear {
+    position: absolute !important;
+    right: 32px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    display: block !important;
+    width: 20px !important;
+    height: 20px !important;
+    line-height: 18px !important;
+    text-align: center !important;
+    font-size: 18px !important;
+    color: #999 !important;
+    cursor: pointer !important;
+    font-weight: normal !important;
+    z-index: 10 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    transition: all 0.2s ease !important;
+}
+.my-custom-clear:hover {
+    color: #dc3545 !important;
+    background-color: #f8f9fa !important;
+}
+</style>
 <script>
     var propertyCategoryMap = <?php echo json_encode($propertyCategoryMap ?? []); ?>;
     var propertySubCategoryMap = <?php echo json_encode($propertySubCategoryMap ?? []); ?>;
@@ -244,7 +270,7 @@
 
     function updatePropertyCategoryOptions(selectedType) 
     {
-        var options = '<option value="">-- Select Property Category --</option>';
+        var options = '<option value=""></option>';
         var categories = selectedType ? propertyCategoryMap[selectedType] || [] : allPropertyCategories;
 
         categories.forEach(function(category) 
@@ -268,7 +294,7 @@
 
     function updatePropertySubCategoryOptions(categoryId) 
     {
-        var options = '<option value="">-- Select Property Sub Category --</option>';
+        var options = '<option value=""></option>';
         var subCategories = categoryId ? propertySubCategoryMap[categoryId] || [] : [];
 
         if (subCategories.length > 0) 
@@ -292,13 +318,9 @@
     {
         $('.dropdown-in-modal').select2({
             dropdownParent: $('#addDataModal'),
-            placeholder: function() 
-            {
-                return $(this).data('placeholder') || 'Select an option';
-            },
-            allowClear: true
+            allowClear: true,
+            placeholder: 'Select an option'
         });
-
         $('#property_type').on('change', function() 
         {
             updatePropertyCategoryOptions($(this).val());
@@ -317,7 +339,7 @@
         var selectedState = $(this).val();
         if (selectedState) 
         {
-            $('#city').html('<option value="">-- Select City --</option>').trigger('change');
+            $('#city').html('<option value=""></option>').trigger('change');
             $.ajax({
                 url: '/lead/get-cities/' + encodeURIComponent(selectedState),
                 type: 'GET',
@@ -325,7 +347,7 @@
                 {
                     if (response && response.length > 0) 
                     {
-                        var options = '<option value="">-- Select City --</option>';
+                        var options = '<option value=""></option>';
                         response.forEach(function(city) 
                         {
                             options += '<option value="' + city.District + '">' + city.District + '</option>';
@@ -346,7 +368,7 @@
         } 
         else 
         {
-            $('#city').html('<option value="">-- Select City --</option>').trigger('change');
+            $('#city').html('<option value=""></option>').trigger('change');
         }
     });
 
@@ -366,4 +388,35 @@
             }, false);
         });
     }, false);
+    
+    function addCustomClear($select) {
+        if ($select.prop('multiple')) return; 
+        if (!$select.val()) return; 
+        
+        var $container = $select.next('.select2-container');
+        var $wrapper = $container.find('.select2-selection');
+        
+        $container.find('.select2-selection__clear').remove();
+        
+        if ($wrapper.find('.my-custom-clear').length === 0) {
+            $wrapper.append('<span class="my-custom-clear" title="Clear selection">&times;</span>');
+        }
+    }
+
+    $(document).on('select2:select', '.dropdown-in-modal', function() {
+        addCustomClear($(this));
+    });
+
+    $(document).on('change', '.dropdown-in-modal', function() {
+        addCustomClear($(this));
+    });
+
+    $(document).on('click', '.my-custom-clear', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        var $select = $(this).closest('.select2-container').prev('select');
+        $select.val(null).trigger('change'); 
+        $(this).remove(); 
+    });
 </script>
